@@ -1,0 +1,26 @@
+{
+  "overview": "Ezy1 is a next-generation super app platform for India that seamlessly connects hyperlocal and national services for both urban and rural users. It unifies daily services, transportation, healthcare, commerce, and local discovery into one AI-powered ecosystem — accessible from cities to villages.",
+  "features": [
+    "Landing page with service discovery, hyperlocal preview, and partner CTA",
+    "User dashboard with location-aware recommendations and smart assistant chatbot",
+    "Healthcare booking: clinic and home visit appointments, doctor search and filters",
+    "Transport hub: cab booking, bus schedules, ride pooling, and ride history",
+    "Vendor onboarding portal: shop owners, drivers, and service providers",
+    "Vendor dashboards: manage listings, orders, and vehicle registrations",
+    "Admin approval panel: approve/reject vendors and drivers",
+    "Wallet with balance and transaction history",
+    "Role-based access control for users, vendors, drivers, and admins"
+  ],
+  "category": "productivity",
+  "tags": [
+    "super-app",
+    "hyperlocal",
+    "india",
+    "healthcare",
+    "transport",
+    "vendor-portal",
+    "dashboard",
+    "ecommerce"
+  ],
+  "last_updated": "2026-04-14T19:31:31.597Z"
+}

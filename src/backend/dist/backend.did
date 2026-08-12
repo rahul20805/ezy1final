@@ -1,0 +1,218 @@
+type WalletPublic = 
+ record {
+   balance: nat;
+   transactions: vec Transaction;
+   userId: UserId;
+ };
+type VisitType = 
+ variant {
+   clinic;
+   home;
+ };
+type VendorType = 
+ variant {
+   driver;
+   "service";
+   shop;
+ };
+type VendorPublic = 
+ record {
+   approvalStatus: ApprovalStatus;
+   contactInfo: text;
+   earnings: nat;
+   id: nat;
+   name: text;
+   offerings: vec Listing;
+   ownerId: UserId;
+   rating: float64;
+   registeredAt: Timestamp;
+   vendorType: VendorType;
+ };
+type UserPublic = 
+ record {
+   createdAt: Timestamp;
+   email: text;
+   id: UserId;
+   name: text;
+   phone: text;
+   preferredLanguage: text;
+   role: Role;
+   savedAddresses: vec text;
+ };
+type UserId = principal;
+type TransactionType = 
+ variant {
+   credit;
+   debit;
+ };
+type Transaction = 
+ record {
+   amount: nat;
+   date: Timestamp;
+   description: text;
+   id: nat;
+   txType: TransactionType;
+ };
+type Timestamp = int;
+type Role = 
+ variant {
+   admin;
+   driver;
+   user;
+   vendor;
+ };
+type RideStatus = 
+ variant {
+   assigned;
+   cancelled;
+   completed;
+   inProgress;
+   pending;
+ };
+type RideRequest = 
+ record {
+   assignedDriverId: opt UserId;
+   createdAt: Timestamp;
+   datetime: text;
+   dropoffLocation: text;
+   fare: nat;
+   id: nat;
+   passengerCount: nat;
+   pickupLocation: text;
+   rideType: text;
+   status: RideStatus;
+   userId: UserId;
+ };
+type RequestRideInput = 
+ record {
+   datetime: text;
+   dropoffLocation: text;
+   passengerCount: nat;
+   pickupLocation: text;
+   rideType: text;
+ };
+type RegisterVendorInput = 
+ record {
+   contactInfo: text;
+   name: text;
+   vendorType: VendorType;
+ };
+type RegisterUserInput = 
+ record {
+   email: text;
+   name: text;
+   phone: text;
+   preferredLanguage: text;
+ };
+type ListingInput = 
+ record {
+   category: text;
+   description: text;
+   price: nat;
+   title: text;
+ };
+type Listing = 
+ record {
+   category: text;
+   description: text;
+   id: nat;
+   price: nat;
+   title: text;
+ };
+type Doctor = 
+ record {
+   availabilitySlots: vec AvailabilitySlot;
+   hourlyPrice: nat;
+   id: nat;
+   name: text;
+   qualifications: vec text;
+   rating: float64;
+   specialization: text;
+   visitTypes: vec VisitType;
+ };
+type BusStop = 
+ record {
+   arrivalTime: text;
+   name: text;
+ };
+type BusRoute = 
+ record {
+   arrivalTime: text;
+   availability: nat;
+   departureTime: text;
+   id: nat;
+   price: nat;
+   routeName: text;
+   stops: vec BusStop;
+ };
+type BookAppointmentInput = 
+ record {
+   dateTime: text;
+   doctorId: nat;
+   notes: text;
+   visitType: VisitType;
+ };
+type AvailabilitySlot = 
+ record {
+   date: text;
+   endTime: text;
+   isBooked: bool;
+   startTime: text;
+ };
+type ApprovalStatus = 
+ variant {
+   approved;
+   pending;
+   rejected;
+ };
+type AppointmentStatus = 
+ variant {
+   cancelled;
+   completed;
+   scheduled;
+ };
+type Appointment = 
+ record {
+   createdAt: Timestamp;
+   dateTime: text;
+   doctorId: nat;
+   id: nat;
+   notes: text;
+   status: AppointmentStatus;
+   userId: UserId;
+   visitType: VisitType;
+ };
+type AdminApprovalPublic = 
+ record {
+   decision: ApprovalStatus;
+   rejectionReason: opt text;
+   reviewedBy: opt UserId;
+   reviewedDate: opt Timestamp;
+   submissionDate: Timestamp;
+   vendorId: nat;
+ };
+service : {
+  addListing: (input: ListingInput) -> (opt Listing);
+  approveVendor: (vendorId: nat) -> ();
+  bookAppointment: (input: BookAppointmentInput) -> (Appointment);
+  cancelAppointment: (appointmentId: nat) -> (bool);
+  cancelRide: (rideId: nat) -> (bool);
+  getDoctor: (doctorId: nat) -> (opt Doctor) query;
+  getMyAppointments: () -> (vec Appointment) query;
+  getMyProfile: () -> (opt UserPublic) query;
+  getMyRides: () -> (vec RideRequest) query;
+  getMyTransactions: () -> (vec Transaction) query;
+  getMyVendorProfile: () -> (opt VendorPublic) query;
+  getMyWallet: () -> (opt WalletPublic) query;
+  getPendingApprovals: () -> (vec AdminApprovalPublic) query;
+  listApprovedVendors: () -> (vec VendorPublic) query;
+  listBusRoutes: () -> (vec BusRoute) query;
+  listDoctors: () -> (vec Doctor) query;
+  registerUser: (input: RegisterUserInput) -> (UserPublic);
+  registerVendor: (input: RegisterVendorInput) -> (VendorPublic);
+  rejectVendor: (vendorId: nat, reason: text) -> ();
+  removeListing: (listingId: nat) -> (bool);
+  requestRide: (input: RequestRideInput) -> (RideRequest);
+  updateListing: (listingId: nat, input: ListingInput) -> (bool);
+  updateProfile: (input: RegisterUserInput) -> (opt UserPublic);
+}

@@ -1,0 +1,62 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  role      String   @default("CUSTOMER") // "CUSTOMER", "VENDOR", "SERVICE_PARTNER", "ADMIN"
+  phone     String?
+  walletBal Float    @default(0.0)
+  createdAt DateTime @default(now())
+
+  vendors   Vendor[]
+  orders    Order[]
+}
+
+model Vendor {
+  id             Int       @id @default(autoincrement())
+  userId         Int
+  businessName   String
+  category       String    // "Grocery", "Transport", "Healthcare", "Service"
+  status         String    @default("pending") // "pending", "approved", "rejected"
+  city           String
+  address        String
+  phone          String
+  rating         Float     @default(0.0)
+  createdAt      DateTime  @default(now())
+
+  user           User      @relation(fields: [userId], references: [id])
+  products       Product[]
+  orders         Order[]
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  vendorId    Int
+  name        String
+  description String
+  price       Float
+  available   Boolean  @default(true)
+  category    String
+
+  vendor      Vendor   @relation(fields: [vendorId], references: [id])
+}
+
+model Order {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  vendorId    Int
+  status      String   @default("pending") // "pending", "completed", "rejected"
+  totalAmount Float
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id])
+  vendor      Vendor   @relation(fields: [vendorId], references: [id])
+}

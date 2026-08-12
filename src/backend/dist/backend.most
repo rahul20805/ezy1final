@@ -1,0 +1,166 @@
+// Version: 1.0.0
+type AdminApproval__1016586759 =
+  {
+    var decision : ApprovalStatus__586423785;
+    var rejectionReason : ?Text;
+    var reviewedBy : ?UserId__158757552;
+    var reviewedDate : ?Timestamp__301639476;
+    submissionDate : Timestamp__301639476;
+    vendorId : Nat
+  };
+type AppointmentStatus__679172861 = {#cancelled; #completed; #scheduled};
+type Appointment__59903482 =
+  {
+    createdAt : Timestamp__301639476;
+    dateTime : Text;
+    doctorId : Nat;
+    id : Nat;
+    notes : Text;
+    status : AppointmentStatus__679172861;
+    userId : UserId__158757552;
+    visitType : VisitType__523074525
+  };
+type ApprovalStatus__586423785 = {#approved; #pending; #rejected};
+type AvailabilitySlot__25233712 =
+  {date : Text; endTime : Text; isBooked : Bool; startTime : Text};
+type BusRoute__641185467 =
+  {
+    arrivalTime : Text;
+    availability : Nat;
+    departureTime : Text;
+    id : Nat;
+    price : Nat;
+    routeName : Text;
+    stops : [BusStop__786972794]
+  };
+type BusStop__786972794 = {arrivalTime : Text; name : Text};
+type Doctor__447146838 =
+  {
+    availabilitySlots : [AvailabilitySlot__25233712];
+    hourlyPrice : Nat;
+    id : Nat;
+    name : Text;
+    qualifications : [Text];
+    rating : Float;
+    specialization : Text;
+    visitTypes : [VisitType__523074525]
+  };
+type Listing__469323460 =
+  {category : Text; description : Text; id : Nat; price : Nat; title : Text};
+type Nat__490723111 = Nat__920180692;
+type Nat__920180692 = Nat;
+type RideRequest__958501850 =
+  {
+    assignedDriverId : ?UserId__158757552;
+    createdAt : Timestamp__301639476;
+    datetime : Text;
+    dropoffLocation : Text;
+    fare : Nat;
+    id : Nat;
+    passengerCount : Nat;
+    pickupLocation : Text;
+    rideType : Text;
+    status : RideStatus__433751273;
+    userId : UserId__158757552
+  };
+type RideStatus__433751273 =
+  {#assigned; #cancelled; #completed; #inProgress; #pending};
+type Role__300349085 = {#admin; #driver; #user; #vendor};
+type Timestamp__301639476 = Int;
+type TransactionType__430720328 = {#credit; #debit};
+type Transaction__15087323 =
+  {
+    amount : Nat;
+    date : Timestamp__301639476;
+    description : Text;
+    id : Nat;
+    txType : TransactionType__430720328
+  };
+type UserId__158757552 = Principal;
+type User__98118558 =
+  {
+    createdAt : Timestamp__301639476;
+    var email : Text;
+    id : UserId__158757552;
+    var name : Text;
+    var phone : Text;
+    var preferredLanguage : Text;
+    var role : Role__300349085;
+    var savedAddresses : [Text]
+  };
+type VendorType__852760544 = {#driver; #service; #shop};
+type Vendor__457245463 =
+  {
+    var approvalStatus : ApprovalStatus__586423785;
+    contactInfo : Text;
+    var earnings : Nat;
+    id : Nat;
+    name : Text;
+    var offerings : [Listing__469323460];
+    ownerId : UserId__158757552;
+    var rating : Float;
+    registeredAt : Timestamp__301639476;
+    vendorType : VendorType__852760544
+  };
+type VisitType__523074525 = {#clinic; #home};
+type Wallet__955312146 =
+  {
+    var balance : Nat;
+    var transactions : [Transaction__15087323];
+    userId : UserId__158757552
+  };
+actor {
+  stable appointments :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?Appointment__59903482]];
+      var elementIndex : Nat__490723111
+    };
+  stable approvals :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?AdminApproval__1016586759]];
+      var elementIndex : Nat__490723111
+    };
+  stable bootstrapAdmin : {var val : ?UserId__158757552};
+  stable busRoutes :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?BusRoute__641185467]];
+      var elementIndex : Nat__490723111
+    };
+  stable doctors :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?Doctor__447146838]];
+      var elementIndex : Nat__490723111
+    };
+  stable nextAppointmentId : {var val : Nat};
+  stable nextListingId : {var val : Nat};
+  stable nextRideId : {var val : Nat};
+  stable nextVendorId : {var val : Nat};
+  stable rideRequests :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?RideRequest__958501850]];
+      var elementIndex : Nat__490723111
+    };
+  stable users :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?User__98118558]];
+      var elementIndex : Nat__490723111
+    };
+  stable vendors :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?Vendor__457245463]];
+      var elementIndex : Nat__490723111
+    };
+  stable wallets :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?Wallet__955312146]];
+      var elementIndex : Nat__490723111
+    }
+};

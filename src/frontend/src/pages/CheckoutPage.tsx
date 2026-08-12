@@ -1,0 +1,201 @@
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { MapPin, ShoppingBag, CreditCard, ChevronRight, CheckCircle2 } from "lucide-react";
+import { useState } from "react";
+import Layout from "../components/Layout";
+import { useAuth } from "../lib/AuthContext";
+import { Badge } from "@/components/ui/badge";
+import { Link } from "@tanstack/react-router";
+
+import { useCartStore } from "../lib/cartStore";
+
+export default function CheckoutPage() {
+  const { isAuthenticated, user } = useAuth();
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [selectedAddress, setSelectedAddress] = useState<string>("Home - 123 Main St, Bengaluru");
+  const [paymentMethod, setPaymentMethod] = useState<string>("UPI");
+  const [isProcessing, setIsProcessing] = useState(false);
+  
+  const { items, totalItems, totalAmount, clearCart } = useCartStore();
+  
+  const deliveryFee = totalItems > 0 ? 30 : 0;
+  const toPay = totalAmount + deliveryFee;
+
+  const handlePayment = async () => {
+    setIsProcessing(true);
+    // Simulate Mock Payment Gateway & API request
+    try {
+      await fetch("http://localhost:3000/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user?.id || 1,
+          vendorId: Object.values(items)[0]?.product?.vendorId || 1, // simplified assumption
+          totalAmount: toPay
+        })
+      });
+      // Simulate network delay
+      setTimeout(() => {
+        clearCart();
+        setStep(3);
+        setIsProcessing(false);
+      }, 1500);
+    } catch (err) {
+      alert("Payment failed");
+      setIsProcessing(false);
+    }
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <Layout>
+        <div className="container py-20 text-center">
+          <h2 className="text-2xl font-bold mb-4">Please login to checkout</h2>
+          <Link to="/login">
+            <Button>Login</Button>
+          </Link>
+        </div>
+      </Layout>
+    );
+  }
+
+  return (
+    <Layout>
+      <div className="container py-8 max-w-4xl">
+        <h1 className="text-2xl font-display font-bold mb-6">Secure Checkout</h1>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-2 space-y-6">
+            
+            {/* Step 1: Address */}
+            <Card className={`border-border ${step === 1 ? 'ring-2 ring-primary ring-offset-2' : 'opacity-70'}`}>
+              <CardContent className="p-5">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 1 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                    1
+                  </div>
+                  <h2 className="text-lg font-bold">Delivery Address</h2>
+                </div>
+                
+                {step === 1 ? (
+                  <div className="space-y-3">
+                    <div className="p-3 border rounded-xl border-primary bg-primary/5 flex items-start gap-3 cursor-pointer">
+                      <input type="radio" checked className="mt-1" readOnly />
+                      <div>
+                        <p className="font-semibold text-sm">Home <Badge className="ml-2 text-[10px] bg-primary/20 text-primary hover:bg-primary/30">Default</Badge></p>
+                        <p className="text-xs text-muted-foreground mt-1">123 Main St, Indiranagar, Bengaluru, KA 560038</p>
+                      </div>
+                    </div>
+                    <div className="p-3 border rounded-xl border-border hover:border-primary/50 flex items-start gap-3 cursor-pointer">
+                      <input type="radio" className="mt-1" readOnly />
+                      <div>
+                        <p className="font-semibold text-sm">Office</p>
+                        <p className="text-xs text-muted-foreground mt-1">Tech Park, Whitefield, Bengaluru, KA 560066</p>
+                      </div>
+                    </div>
+                    <Button className="mt-4 w-full sm:w-auto" onClick={() => setStep(2)}>Deliver Here</Button>
+                  </div>
+                ) : (
+                  <div className="pl-11 flex justify-between items-center">
+                    <div>
+                      <p className="text-sm font-semibold">Home</p>
+                      <p className="text-xs text-muted-foreground">123 Main St, Indiranagar...</p>
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={() => setStep(1)}>Change</Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Step 2: Payment */}
+            <Card className={`border-border ${step === 2 ? 'ring-2 ring-primary ring-offset-2' : 'opacity-70'}`}>
+              <CardContent className="p-5">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 2 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                    2
+                  </div>
+                  <h2 className="text-lg font-bold">Payment Method</h2>
+                </div>
+
+                {step === 2 && (
+                  <div className="space-y-3">
+                    <div className="p-3 border rounded-xl border-border hover:border-primary/50 flex items-center gap-3 cursor-pointer" onClick={() => setPaymentMethod("UPI")}>
+                      <input type="radio" name="payment" className="mt-0.5" checked={paymentMethod === "UPI"} readOnly />
+                      <div className="flex-1">
+                        <p className="font-semibold text-sm">UPI (GPay, PhonePe, Paytm)</p>
+                      </div>
+                      <Badge variant="outline" className="text-[10px] text-green-600 border-green-600 bg-green-50">Recommended</Badge>
+                    </div>
+                    <div className="p-3 border rounded-xl border-border hover:border-primary/50 flex items-center gap-3 cursor-pointer" onClick={() => setPaymentMethod("Wallet")}>
+                      <input type="radio" name="payment" className="mt-0.5" checked={paymentMethod === "Wallet"} readOnly />
+                      <div>
+                        <p className="font-semibold text-sm">Ezy1 Wallet</p>
+                        <p className="text-xs text-muted-foreground">Balance: ₹{user?.walletBal ?? 1935}</p>
+                      </div>
+                    </div>
+                    <div className="p-3 border rounded-xl border-border hover:border-primary/50 flex items-center gap-3 cursor-pointer" onClick={() => setPaymentMethod("COD")}>
+                      <input type="radio" name="payment" className="mt-0.5" checked={paymentMethod === "COD"} readOnly />
+                      <div>
+                        <p className="font-semibold text-sm">Cash on Delivery</p>
+                      </div>
+                    </div>
+                    <Button 
+                      className="mt-4 w-full" 
+                      onClick={handlePayment} 
+                      disabled={isProcessing || totalItems === 0}
+                    >
+                      {isProcessing ? "Processing..." : `Pay ₹${toPay}`}
+                    </Button>
+                  </div>
+                )}
+                {step === 3 && (
+                  <div className="pl-11">
+                    <p className="text-sm font-semibold flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-primary" /> Paid via {paymentMethod}
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {step === 3 && (
+              <Card className="border-green-500 bg-green-50">
+                <CardContent className="p-8 text-center space-y-4">
+                  <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-2">
+                    <CheckCircle2 className="w-8 h-8 text-green-600" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-green-800">Order Placed Successfully!</h2>
+                  <p className="text-sm text-green-700">Your order has been sent to the vendor. You can track it in your dashboard.</p>
+                  <Link to="/dashboard">
+                    <Button className="mt-4 bg-green-600 hover:bg-green-700">Go to Dashboard</Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            )}
+
+          </div>
+
+          <div className="md:col-span-1">
+            <Card className="sticky top-20 border-border">
+              <CardContent className="p-5 space-y-4">
+                <h3 className="font-bold text-lg border-b pb-2">Order Summary</h3>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground">Items Total ({totalItems})</span>
+                  <span className="font-medium">₹{totalAmount}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground">Delivery Fee</span>
+                  <span className="font-medium">₹{deliveryFee}</span>
+                </div>
+                <div className="border-t pt-2 flex justify-between items-center font-bold text-lg">
+                  <span>To Pay</span>
+                  <span className="text-primary">₹{toPay}</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
+}
