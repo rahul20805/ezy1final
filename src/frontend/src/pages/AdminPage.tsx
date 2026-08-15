@@ -258,9 +258,9 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-row overflow-hidden antialiased selection:bg-primary/20">
+    <div className="h-screen max-h-screen bg-background flex flex-row overflow-hidden antialiased selection:bg-primary/20">
       {/* Desktop Persistent 10-Group Sidebar */}
-      <div className="hidden md:block flex-shrink-0">
+      <div className="hidden md:block flex-shrink-0 h-screen overflow-hidden">
         <AdminSidebar
           currentSection={currentSection}
           onSelectSection={setCurrentSection}

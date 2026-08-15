@@ -355,7 +355,7 @@ export function AdminSidebar({
 
   return (
     <aside
-      className={`h-screen bg-card border-r border-border flex flex-col transition-all duration-300 select-none z-30 shadow-sm ${
+      className={`h-screen max-h-screen bg-card border-r border-border flex flex-col transition-all duration-300 select-none z-30 shadow-sm overflow-hidden ${
         collapsed ? "w-16" : "w-72"
       }`}
     >
@@ -406,84 +406,82 @@ export function AdminSidebar({
         </div>
       )}
 
-      {/* Navigation Groups List */}
-      <ScrollArea className="flex-1 px-2 py-3">
-        <div className="space-y-4">
-          {filteredGroups.map((group) => {
-            const isExpanded = expandedGroups[group.name] ?? true;
+      {/* Navigation Groups List - 100% Smooth Up-to-Down Scrollable */}
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-2 py-3 custom-scrollbar space-y-4 overscroll-contain">
+        {filteredGroups.map((group) => {
+          const isExpanded = expandedGroups[group.name] ?? true;
 
-            return (
-              <div key={group.name} className="space-y-1">
-                {!collapsed ? (
-                  <button
-                    type="button"
-                    onClick={() => toggleGroup(group.name)}
-                    className="w-full flex items-center justify-between px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80 hover:text-foreground transition-colors"
-                  >
-                    <span className="flex items-center gap-1.5">
-                      <group.icon className="w-3 h-3 text-primary/70" />
-                      <span>{group.name}</span>
-                    </span>
-                    <ChevronDown
-                      className={`w-3 h-3 transition-transform ${isExpanded ? "" : "-rotate-90 text-muted-foreground/50"}`}
-                    />
-                  </button>
-                ) : (
-                  <div className="h-px bg-border/60 my-2 mx-1" />
-                )}
+          return (
+            <div key={group.name} className="space-y-1">
+              {!collapsed ? (
+                <button
+                  type="button"
+                  onClick={() => toggleGroup(group.name)}
+                  className="w-full flex items-center justify-between px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80 hover:text-foreground transition-colors"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <group.icon className="w-3 h-3 text-primary/70" />
+                    <span>{group.name}</span>
+                  </span>
+                  <ChevronDown
+                    className={`w-3 h-3 transition-transform ${isExpanded ? "" : "-rotate-90 text-muted-foreground/50"}`}
+                  />
+                </button>
+              ) : (
+                <div className="h-px bg-border/60 my-2 mx-1" />
+              )}
 
-                {(isExpanded || collapsed) && (
-                  <div className="space-y-0.5">
-                    {group.items.map((item) => {
-                      const isActive = currentSection === item.id;
-                      const badgeVal = item.getBadge ? item.getBadge(store) : null;
-                      const Icon = item.icon;
+              {(isExpanded || collapsed) && (
+                <div className="space-y-0.5">
+                  {group.items.map((item) => {
+                    const isActive = currentSection === item.id;
+                    const badgeVal = item.getBadge ? item.getBadge(store) : null;
+                    const Icon = item.icon;
 
-                      return (
-                        <button
-                          key={item.id}
-                          onClick={() => {
-                            onSelectSection(item.id);
-                            if (onCloseMobile) onCloseMobile();
-                          }}
-                          className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-all group ${
-                            isActive
-                              ? "bg-primary text-primary-foreground shadow-xs font-semibold"
-                              : "text-foreground/80 hover:bg-muted hover:text-foreground"
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          onSelectSection(item.id);
+                          if (onCloseMobile) onCloseMobile();
+                        }}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-all group ${
+                          isActive
+                            ? "bg-primary text-primary-foreground shadow-xs font-semibold"
+                            : "text-foreground/80 hover:bg-muted hover:text-foreground"
+                        }`}
+                        title={collapsed ? item.label : undefined}
+                      >
+                        <Icon
+                          className={`w-4 h-4 flex-shrink-0 ${
+                            isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-primary"
                           }`}
-                          title={collapsed ? item.label : undefined}
-                        >
-                          <Icon
-                            className={`w-4 h-4 flex-shrink-0 ${
-                              isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-primary"
-                            }`}
-                          />
+                        />
 
-                          {!collapsed && (
-                            <div className="flex-1 flex items-center justify-between min-w-0">
-                              <span className="truncate">{item.label}</span>
-                              {badgeVal !== null && badgeVal !== undefined && (
-                                <Badge
-                                  variant={item.badgeVariant || (isActive ? "secondary" : "outline")}
-                                  className={`text-[9px] px-1.5 py-0 h-4 font-bold rounded-md ${
-                                    isActive ? "bg-white/20 text-white border-0" : ""
-                                  }`}
-                                >
-                                  {badgeVal}
-                                </Badge>
-                              )}
-                            </div>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </ScrollArea>
+                        {!collapsed && (
+                          <div className="flex-1 flex items-center justify-between min-w-0">
+                            <span className="truncate">{item.label}</span>
+                            {badgeVal !== null && badgeVal !== undefined && (
+                              <Badge
+                                variant={item.badgeVariant || (isActive ? "secondary" : "outline")}
+                                className={`text-[9px] px-1.5 py-0 h-4 font-bold rounded-md ${
+                                  isActive ? "bg-white/20 text-white border-0" : ""
+                                }`}
+                              >
+                                {badgeVal}
+                              </Badge>
+                            )}
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
 
       {/* Admin User Footer Profile */}
       <div className="p-3 border-t border-border flex-shrink-0 bg-muted/20">
