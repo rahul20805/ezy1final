@@ -52,7 +52,7 @@ export const DEFAULT_PARTNER_ACCOUNTS: PartnerAccount[] = [
     id: "admin",
     password: "admin123",
     businessName: "EZY1 Platform Headquarters",
-    ownerName: "Navya & Alka Yadav",
+    ownerName: "Alka & Rahul Yadav",
     category: "All",
     role: "super_owner",
     phone: "+91 98765 43210",

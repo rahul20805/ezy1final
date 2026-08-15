@@ -1509,7 +1509,7 @@ const initialFaqs: StoredFaq[] = [
 const initialOwnerSettings: OwnerSettings = {
   brandName: "ezy1",
   tagline: "Everything You Need, One Platform",
-  ownerName: "Navya / Alka & Rahul Yadav",
+  ownerName: "Alka & Rahul Yadav",
   legalBusinessName: "Ezy1 Hyperlocal Ventures Pvt. Ltd.",
   gstNumber: "29AAAAA0000A1Z5",
   logoUrl: "/favicon.ico",
