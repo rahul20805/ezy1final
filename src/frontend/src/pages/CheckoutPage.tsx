@@ -10,7 +10,7 @@ import { Link } from "@tanstack/react-router";
 import { useCartStore } from "../lib/cartStore";
 
 export default function CheckoutPage() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, identity } = useAuth();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [selectedAddress, setSelectedAddress] = useState<string>("Home - 123 Main St, Bengaluru");
   const [paymentMethod, setPaymentMethod] = useState<string>("UPI");
@@ -29,7 +29,7 @@ export default function CheckoutPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: user?.id || 1,
+          userId: identity ? identity.getPrincipal().toText() : "guest-user",
           vendorId: Object.values(items)[0]?.product?.vendorId || 1, // simplified assumption
           totalAmount: toPay
         })
@@ -130,7 +130,7 @@ export default function CheckoutPage() {
                       <input type="radio" name="payment" className="mt-0.5" checked={paymentMethod === "Wallet"} readOnly />
                       <div>
                         <p className="font-semibold text-sm">Ezy1 Wallet</p>
-                        <p className="text-xs text-muted-foreground">Balance: ₹{user?.walletBal ?? 1935}</p>
+                        <p className="text-xs text-muted-foreground">Balance: ₹1,935</p>
                       </div>
                     </div>
                     <div className="p-3 border rounded-xl border-border hover:border-primary/50 flex items-center gap-3 cursor-pointer" onClick={() => setPaymentMethod("COD")}>
