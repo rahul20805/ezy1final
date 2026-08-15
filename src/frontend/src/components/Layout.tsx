@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "../lib/AuthContext";
+import { useStoreData } from "../lib/storeData";
 import { Link } from "@tanstack/react-router";
 import {
   ChevronDown,
@@ -13,6 +14,7 @@ import {
   X,
   Search,
   Bot,
+  ShieldCheck,
 } from "lucide-react";
 import { useState } from "react";
 import { useIsMobile } from "../hooks/use-mobile";
@@ -20,10 +22,11 @@ import { setCurrentRole } from "../lib/auth";
 import { MOCK_WALLET_BALANCE } from "../mock-data";
 
 const navLinks = [
-  { label: "Services", href: "/#services" },
+  { label: "Shop", href: "/shop" },
+  { label: "Services", href: "/services" },
   { label: "Healthcare", href: "/#healthcare" },
   { label: "Transport", href: "/#transport" },
-  { label: "Partner", href: "/partner-login" },
+  { label: "Partner Portal", href: "/partner-login" },
 ];
 
 interface LayoutProps {
@@ -31,6 +34,7 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
+  const store = useStoreData();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [locationDropdown, setLocationDropdown] = useState(false);
   const [waMessages, setWaMessages] = useState<{from: 'bot' | 'user', text: string}[]>([
@@ -53,6 +57,13 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      {/* Top Announcement Ticker */}
+      {store.settings.enableAnnouncementBar && store.settings.announcementBarText && (
+        <div className="bg-primary text-primary-foreground py-1.5 px-4 text-xs font-semibold text-center flex items-center justify-center gap-2">
+          <span>{store.settings.announcementBarText}</span>
+        </div>
+      )}
+
       {/* Saffron accent bar */}
       <div className="h-1 bg-primary w-full" />
 

@@ -31,6 +31,7 @@ const PartnerOnboardingPage = lazy(
   () => import("./pages/PartnerOnboardingPage"),
 );
 const AdminPage = lazy(() => import("./pages/AdminPage"));
+const OwnerPortalPage = lazy(() => import("./pages/OwnerPortalPage"));
 const MyDashboardPage = lazy(() => import("./pages/MyDashboardPage"));
 const CommercePage = lazy(() => import("./pages/CommercePage"));
 const CartPage = lazy(() => import("./pages/CartPage"));
@@ -161,34 +162,28 @@ const cartRoute = createRoute({
   ),
 });
 
+const ownerRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/owner",
+  component: () => <OwnerPortalPage />,
+});
+
 const vendorDashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/vendor-dashboard",
-  component: () => (
-    <VendorRoute>
-      <VendorDashboardPage />
-    </VendorRoute>
-  ),
+  component: () => <OwnerPortalPage />,
 });
 
 const driverDashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/driver-dashboard",
-  component: () => (
-    <VendorRoute>
-      <DriverDashboardPage />
-    </VendorRoute>
-  ),
+  component: () => <OwnerPortalPage />,
 });
 
 const serviceProviderDashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/service-provider-dashboard",
-  component: () => (
-    <VendorRoute>
-      <ServiceProviderDashboardPage />
-    </VendorRoute>
-  ),
+  component: () => <OwnerPortalPage />,
 });
 
 const partnerOnboardingRoute = createRoute({
@@ -204,11 +199,7 @@ const partnerOnboardingRoute = createRoute({
 const adminRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/admin",
-  component: () => (
-    <AdminRoute>
-      <AdminPage />
-    </AdminRoute>
-  ),
+  component: () => <OwnerPortalPage />,
 });
 
 const checkoutRoute = createRoute({
@@ -257,6 +248,7 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
   partnerLoginRoute,
+  ownerRoute,
   dashboardRoute,
   healthcareRoute,
   transportRoute,

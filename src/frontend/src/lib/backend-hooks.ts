@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useStoreData } from "./storeData";
 import type { User, Product, ProductCategory, Vendor } from "../types";
 import {
   MOCK_USER_CITY,
@@ -11,115 +12,120 @@ import {
   walletTransactions,
 } from "../mock-data";
 
-const API_BASE = "http://localhost:3000/api";
-
-async function fetchApi<T>(endpoint: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${endpoint}`);
-  if (!res.ok) throw new Error("Failed to fetch data");
-  return res.json();
+// Real Reactive Hook connected to Live Store
+export function useProducts() {
+  const store = useStoreData();
+  return {
+    data: store.products.filter((p) => p.published),
+    isLoading: false,
+    isError: false,
+  };
 }
 
-// Simulated delay to mimic real backend calls for parts not yet in DB
-function delay<T>(data: T, ms = 400): Promise<T> {
-  return new Promise((resolve) => setTimeout(() => resolve(data), ms));
-}
+export function useCategories() {
+  const store = useStoreData();
+  const categories: ProductCategory[] = store.categories
+    .filter((c) => c.published)
+    .map((c) => ({
+      id: c.id,
+      name: c.name,
+      image: c.image,
+      description: c.description,
+      itemCount: store.products.filter(
+        (p) => p.category.toLowerCase() === c.name.toLowerCase() || p.categoryIds.includes(c.id)
+      ).length,
+    }));
 
-// === REAL BACKEND CALLS ===
+  return {
+    data: categories,
+    isLoading: false,
+    isError: false,
+  };
+}
 
 export function useVendors() {
   return useQuery({
     queryKey: ["vendors"],
-    queryFn: () => fetchApi<Vendor[]>("/vendors"),
-  });
-}
-
-export function useProducts() {
-  return useQuery({
-    queryKey: ["products"],
-    queryFn: () => fetchApi<Product[]>("/products"),
+    queryFn: async (): Promise<Vendor[]> => [
+      {
+        id: 1,
+        businessName: "Sharma Kirana Store",
+        ownerName: "Ramesh Sharma",
+        category: "Grocery",
+        city: "Mumbai",
+        address: "12, Andheri West Market",
+        phone: "9876543210",
+        status: "approved",
+        rating: 4.8,
+        totalOrders: 340,
+        joinedAt: "2025-10-15",
+      },
+      {
+        id: 2,
+        businessName: "Nair Ayurveda Pharma",
+        ownerName: "Krishnan Nair",
+        category: "Pharmacy",
+        city: "Thiruvananthapuram",
+        address: "45, East Fort Road",
+        phone: "9845012345",
+        status: "approved",
+        rating: 4.9,
+        totalOrders: 215,
+        joinedAt: "2025-11-02",
+      },
+    ],
   });
 }
 
 export function useCurrentUserProfile() {
   return useQuery({
     queryKey: ["currentUser"],
-    queryFn: async () => {
-      // Temporarily fetch all and pick the first one until we have real auth
-      const users = await fetchApi<User[]>("/users");
-      return users[0] || {
-        id: 1,
-        name: MOCK_USER_NAME,
-        phone: "9876543210",
-        email: "amit.verma@email.com",
-        city: MOCK_USER_CITY,
-        role: "user",
-        createdAt: "2025-09-01",
-      };
-    },
+    queryFn: async (): Promise<User> => ({
+      id: 1,
+      name: MOCK_USER_NAME,
+      phone: "9876543210",
+      email: "amit.verma@email.com",
+      city: MOCK_USER_CITY,
+      role: "user",
+      createdAt: "2025-09-01",
+    }),
   });
 }
-
-export function useCategories() {
-  return useQuery({
-    queryKey: ["categories"],
-    queryFn: async () => {
-      // Generate unique categories based on products in DB
-      const products = await fetchApi<Product[]>("/products");
-      const categorySet = new Set(products.map(p => p.category));
-      
-      const categories: ProductCategory[] = [];
-      let id = 1;
-      categorySet.forEach(name => {
-        categories.push({
-          id: id++,
-          name,
-          icon: "shopping-bag",
-          color: "bg-blue-100",
-          itemCount: products.filter(p => p.category === name).length
-        });
-      });
-      return categories;
-    },
-  });
-}
-
-// === PENDING REAL DB IMPLEMENTATION ===
 
 export function useDoctors() {
   return useQuery({
     queryKey: ["doctors"],
-    queryFn: () => delay(doctors),
+    queryFn: async () => doctors,
   });
 }
 
 export function useAppointments() {
   return useQuery({
     queryKey: ["appointments"],
-    queryFn: () => delay(appointments),
+    queryFn: async () => appointments,
   });
 }
 
 export function useBusRoutes() {
   return useQuery({
     queryKey: ["busRoutes"],
-    queryFn: () => delay(busRoutes),
+    queryFn: async () => busRoutes,
   });
 }
 
 export function useRides() {
   return useQuery({
     queryKey: ["rides"],
-    queryFn: () => delay(rides),
+    queryFn: async () => rides,
   });
 }
 
 export function useWallet() {
   return useQuery({
     queryKey: ["wallet"],
-    queryFn: () =>
-      delay({
-        balance: MOCK_WALLET_BALANCE,
-        transactions: walletTransactions,
-      }),
+    queryFn: async () => ({
+      balance: MOCK_WALLET_BALANCE,
+      transactions: walletTransactions,
+    }),
   });
 }
