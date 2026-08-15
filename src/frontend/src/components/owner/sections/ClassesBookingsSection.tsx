@@ -56,7 +56,7 @@ export function ClassesBookingsSection() {
   const [duration, setDuration] = useState("2 Hours");
   const [capacity, setCapacity] = useState<number>(15);
   const [enrolledCount, setEnrolledCount] = useState<number>(0);
-  const [status, setStatus] = useState<StoredBooking["status"]>("open");
+  const [status, setStatus] = useState<StoredBooking["status"]>("CONFIRMED");
   const [published, setPublished] = useState(true);
   const [image, setImage] = useState("");
   const [location, setLocation] = useState("");
@@ -75,7 +75,7 @@ export function ClassesBookingsSection() {
     setDuration("2 Hours");
     setCapacity(15);
     setEnrolledCount(0);
-    setStatus("open");
+    setStatus("CONFIRMED");
     setPublished(true);
     setImage("https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=500&q=80");
     setLocation("Studio 4B, Indiranagar, Bengaluru");
@@ -245,10 +245,8 @@ export function ClassesBookingsSection() {
                 <div className="absolute top-2.5 right-2.5">
                   <Badge
                     className={`text-[10px] uppercase font-bold ${
-                      item.status === "open"
+                      item.status === "CONFIRMED" || item.status === "PENDING"
                         ? "bg-emerald-500 text-white"
-                        : item.status === "full"
-                        ? "bg-amber-500 text-white"
                         : "bg-muted text-muted-foreground"
                     }`}
                   >

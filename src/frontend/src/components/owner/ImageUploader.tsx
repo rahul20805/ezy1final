@@ -6,8 +6,10 @@ import React, { useState } from "react";
 import { toast } from "sonner";
 
 interface ImageUploaderProps {
-  value: string;
-  onChange: (url: string) => void;
+  value?: string;
+  onChange?: (url: string) => void;
+  currentImage?: string;
+  onImageChange?: (url: string) => void;
   label?: string;
   helperText?: string;
   previewHeight?: string;
@@ -16,10 +18,14 @@ interface ImageUploaderProps {
 export function ImageUploader({
   value,
   onChange,
+  currentImage,
+  onImageChange,
   label = "Item Image",
   helperText = "Upload from device (PNG, JPG, WebP) or paste an image URL",
   previewHeight = "h-40",
 }: ImageUploaderProps) {
+  const actualValue = value !== undefined ? value : currentImage || "";
+  const actualOnChange = onChange || onImageChange || (() => {});
   const [isDragOver, setIsDragOver] = useState(false);
   const [urlInputMode, setUrlInputMode] = useState(false);
   const [rawUrl, setRawUrl] = useState("");
@@ -37,7 +43,7 @@ export function ImageUploader({
     const reader = new FileReader();
     reader.onload = () => {
       const base64 = reader.result as string;
-      onChange(base64);
+      actualOnChange(base64);
       toast.success("Image uploaded successfully!");
     };
     reader.onerror = () => {
@@ -56,7 +62,7 @@ export function ImageUploader({
 
   const handleUrlSubmit = () => {
     if (!rawUrl.trim()) return;
-    onChange(rawUrl.trim());
+    actualOnChange(rawUrl.trim());
     setRawUrl("");
     setUrlInputMode(false);
     toast.success("Image URL applied!");
@@ -66,12 +72,12 @@ export function ImageUploader({
     <div className="space-y-2">
       {label && <Label className="text-xs font-semibold text-foreground">{label}</Label>}
 
-      {value ? (
-        <div className={`relative ${previewHeight} w-full rounded-xl overflow-hidden border border-border bg-muted/40 group`}>
+      {actualValue ? (
+        <div className="relative rounded-2xl overflow-hidden border border-border group bg-muted/20">
           <img
-            src={value}
-            alt="Preview"
-            className="w-full h-full object-cover transition-transform group-hover:scale-105"
+            src={actualValue}
+            alt="Uploaded Preview"
+            className={`w-full ${previewHeight} object-cover transition-transform duration-300 group-hover:scale-105`}
             onError={(e) => {
               (e.target as HTMLImageElement).src = "https://placehold.co/600x400?text=Invalid+Image+URL";
             }}
@@ -79,12 +85,12 @@ export function ImageUploader({
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
             <Button
               type="button"
-              size="sm"
               variant="destructive"
-              className="h-8 gap-1.5 text-xs shadow-md"
-              onClick={() => onChange("")}
+              size="sm"
+              onClick={() => actualOnChange("")}
+              className="h-8 px-2.5 text-xs rounded-xl shadow-lg"
             >
-              <Trash2 className="w-3.5 h-3.5" /> Remove Image
+              <Trash2 className="w-3.5 h-3.5 mr-1" /> Remove
             </Button>
           </div>
         </div>

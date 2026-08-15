@@ -100,6 +100,7 @@ export function CustomersSection() {
         address: address.trim(),
         totalOrders: 0,
         totalSpent: 0,
+        walletBalance: 0,
         status,
       });
       toast.success(`Customer "${name}" added to directory!`);

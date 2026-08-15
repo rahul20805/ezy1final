@@ -70,14 +70,14 @@ export const OWNER_SIDEBAR_ITEMS: SidebarItem[] = [
     label: "Classes / Bookings",
     icon: GraduationCap,
     permissionKey: "canManageBookings",
-    getBadge: (s) => s.bookings.filter((b) => b.status === "open").length,
+    getBadge: (s) => s.bookings.filter((b) => b.status === "CONFIRMED" || b.status === "PENDING").length,
   },
   {
     id: "orders",
     label: "Orders",
     icon: ShoppingCart,
     permissionKey: "canManageOrders",
-    getBadge: (s) => s.orders.filter((o) => o.status === "pending" || o.status === "confirmed").length || null,
+    getBadge: (s) => s.orders.filter((o) => o.status === "NEW" || o.status === "ACCEPTED").length || null,
   },
   {
     id: "enquiries",

@@ -34,8 +34,8 @@ export function DashboardSection({ onNavigateSection }: DashboardSectionProps) {
   const totalOrdersCount = store.orders.length;
   const totalProductsCount = store.products.length;
   const totalCustomersCount = store.customers.length;
-  const activeBookingsCount = store.bookings.filter((b) => b.status === "open").length;
-  const pendingOrdersCount = store.orders.filter((o) => o.status === "pending" || o.status === "confirmed").length;
+  const activeBookingsCount = store.bookings.filter((b) => b.status === "CONFIRMED" || b.status === "PENDING").length;
+  const pendingOrdersCount = store.orders.filter((o) => o.status === "NEW" || o.status === "ACCEPTED").length;
   const newEnquiriesCount = store.enquiries.filter((e) => e.status === "new").length;
 
   const kpis = [
@@ -173,11 +173,11 @@ export function DashboardSection({ onNavigateSection }: DashboardSectionProps) {
                     <Badge
                       variant="outline"
                       className={`text-[10px] uppercase font-bold px-2 py-0 rounded-md ${
-                        order.status === "delivered"
+                        order.status === "DELIVERED"
                           ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                          : order.status === "out_for_delivery"
+                          : order.status === "OUT_FOR_DELIVERY"
                           ? "bg-blue-500/10 text-blue-600 border-blue-500/20"
-                          : order.status === "confirmed"
+                          : order.status === "ACCEPTED" || order.status === "READY"
                           ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
                           : "bg-purple-500/10 text-purple-600 border-purple-500/20"
                       }`}

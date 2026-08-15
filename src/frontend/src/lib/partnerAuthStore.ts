@@ -1,40 +1,59 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+export type AdminRole =
+  | "super_owner"
+  | "SUPER_ADMIN"
+  | "ADMIN"
+  | "CONTENT_MANAGER"
+  | "ORDER_MANAGER"
+  | "SUPPORT_AGENT"
+  | "FINANCE_MANAGER"
+  | "PARTNER_MANAGER"
+  | "partner";
+
+export interface PartnerPermissions {
+  canManageShop: boolean;
+  canManageServices: boolean;
+  canManageBookings: boolean;
+  canManageOrders: boolean;
+  canManageEnquiries: boolean;
+  canManageCustomers: boolean;
+  canManageGallery: boolean;
+  canManageReviews: boolean;
+  canManageWebsiteContent: boolean;
+  canManageCategories: boolean;
+  canManageOwnerSettings: boolean;
+  canManageHealthcare?: boolean;
+  canManageTransport?: boolean;
+  canManageDelivery?: boolean;
+  canManageFinance?: boolean;
+  canManageAuditLogs?: boolean;
+  canManageAdmins?: boolean;
+}
+
 export interface PartnerAccount {
-  id: string; // login username/admin ID
-  password: string; // password
+  id: string; // Unique login ID e.g. "admin", "sharma_grocery"
+  password: string;
   businessName: string;
   ownerName: string;
-  category: "all" | "Grocery" | "Pharmacy" | "Healthcare" | "Services" | "Transport" | "Workshops";
-  role: "super_owner" | "partner" | "doctor" | "driver" | "service_provider";
+  category: "All" | "Grocery" | "Pharmacy" | "Services" | "Transport" | "Workshops" | "Healthcare" | "System";
+  role: AdminRole;
   phone: string;
   email: string;
   city: string;
-  vendorId: number;
+  vendorId?: number;
+  permissions: PartnerPermissions;
   status: "active" | "suspended" | "pending";
-  permissions: {
-    canManageShop: boolean;
-    canManageServices: boolean;
-    canManageBookings: boolean;
-    canManageOrders: boolean;
-    canManageEnquiries: boolean;
-    canManageCustomers: boolean;
-    canManageGallery: boolean;
-    canManageReviews: boolean;
-    canManageWebsiteContent: boolean;
-    canManageCategories: boolean;
-    canManageOwnerSettings: boolean;
-  };
 }
 
-const DEFAULT_PARTNERS: PartnerAccount[] = [
+export const DEFAULT_PARTNER_ACCOUNTS: PartnerAccount[] = [
   {
     id: "admin",
     password: "admin123",
-    businessName: "ezy1 Super Headquarters",
-    ownerName: "Alka & Rahul Yadav (Super Admin)",
-    category: "all",
+    businessName: "EZY1 Platform Headquarters",
+    ownerName: "Navya & Alka Yadav",
+    category: "All",
     role: "super_owner",
     phone: "+91 98765 43210",
     email: "admin@ezy1.in",
@@ -53,6 +72,12 @@ const DEFAULT_PARTNERS: PartnerAccount[] = [
       canManageWebsiteContent: true,
       canManageCategories: true,
       canManageOwnerSettings: true,
+      canManageHealthcare: true,
+      canManageTransport: true,
+      canManageDelivery: true,
+      canManageFinance: true,
+      canManageAuditLogs: true,
+      canManageAdmins: true,
     },
   },
   {
@@ -63,7 +88,7 @@ const DEFAULT_PARTNERS: PartnerAccount[] = [
     category: "Grocery",
     role: "partner",
     phone: "9876543210",
-    email: "sharma.kirana@example.com",
+    email: "sharma.kirana@partner.ezy1.in",
     city: "Mumbai",
     vendorId: 1,
     status: "active",
@@ -89,7 +114,7 @@ const DEFAULT_PARTNERS: PartnerAccount[] = [
     category: "Pharmacy",
     role: "partner",
     phone: "9845012345",
-    email: "nair.pharma@example.com",
+    email: "nair.pharma@partner.ezy1.in",
     city: "Thiruvananthapuram",
     vendorId: 2,
     status: "active",
@@ -110,12 +135,12 @@ const DEFAULT_PARTNERS: PartnerAccount[] = [
   {
     id: "suresh_services",
     password: "partner123",
-    businessName: "Suresh Electricals & Home Services",
+    businessName: "Suresh Electricals & Fixes",
     ownerName: "Suresh Sharma",
     category: "Services",
-    role: "service_provider",
+    role: "partner",
     phone: "9812345670",
-    email: "suresh.services@example.com",
+    email: "suresh.services@partner.ezy1.in",
     city: "Bengaluru",
     vendorId: 4,
     status: "active",
@@ -136,12 +161,12 @@ const DEFAULT_PARTNERS: PartnerAccount[] = [
   {
     id: "rajesh_transport",
     password: "partner123",
-    businessName: "Rajesh Express Logistics & Cabs",
+    businessName: "Rajesh Fleet & Logistics",
     ownerName: "Rajesh Kumar",
     category: "Transport",
-    role: "driver",
-    phone: "9822334455",
-    email: "rajesh.transport@example.com",
+    role: "partner",
+    phone: "9900112233",
+    email: "rajesh.transport@partner.ezy1.in",
     city: "Bengaluru",
     vendorId: 5,
     status: "active",
@@ -151,7 +176,7 @@ const DEFAULT_PARTNERS: PartnerAccount[] = [
       canManageBookings: true,
       canManageOrders: true,
       canManageEnquiries: true,
-      canManageCustomers: true,
+      canManageCustomers: false,
       canManageGallery: false,
       canManageReviews: true,
       canManageWebsiteContent: false,
@@ -162,11 +187,9 @@ const DEFAULT_PARTNERS: PartnerAccount[] = [
 ];
 
 interface PartnerAuthState {
-  partners: PartnerAccount[];
   currentPartner: PartnerAccount | null;
+  partners: PartnerAccount[];
   isAuthenticated: boolean;
-  
-  // Actions
   login: (id: string, password: string) => { success: boolean; error?: string };
   logout: () => void;
   addPartner: (partner: PartnerAccount) => void;
@@ -178,25 +201,24 @@ interface PartnerAuthState {
 export const usePartnerAuth = create<PartnerAuthState>()(
   persist(
     (set, get) => ({
-      partners: DEFAULT_PARTNERS,
-      currentPartner: DEFAULT_PARTNERS[0], // Default pre-authenticated as super admin for instant smooth demoing
+      currentPartner: DEFAULT_PARTNER_ACCOUNTS[0], // Default logged in as Super Admin
+      partners: DEFAULT_PARTNER_ACCOUNTS,
       isAuthenticated: true,
 
       login: (id, password) => {
-        const cleanId = id.trim().toLowerCase();
-        const partner = get().partners.find(
-          (p) => p.id.toLowerCase() === cleanId && p.password === password.trim()
+        const found = get().partners.find(
+          (p) => p.id.toLowerCase() === id.trim().toLowerCase() && p.password === password.trim()
         );
 
-        if (!partner) {
-          return { success: false, error: "Invalid Admin/Partner ID or Password." };
+        if (!found) {
+          return { success: false, error: "Invalid Admin / Partner ID or Password." };
         }
 
-        if (partner.status === "suspended") {
-          return { success: false, error: "This partner account has been suspended by Admin." };
+        if (found.status === "suspended") {
+          return { success: false, error: "This partner account has been suspended by administration." };
         }
 
-        set({ currentPartner: partner, isAuthenticated: true });
+        set({ currentPartner: found, isAuthenticated: true });
         return { success: true };
       },
 
@@ -205,7 +227,7 @@ export const usePartnerAuth = create<PartnerAuthState>()(
       },
 
       addPartner: (partner) => {
-        set({ partners: [...get().partners, partner] });
+        set({ partners: [...get().partners.filter((p) => p.id !== partner.id), partner] });
       },
 
       updatePartner: (id, updates) => {
@@ -228,14 +250,14 @@ export const usePartnerAuth = create<PartnerAuthState>()(
 
       resetPartnersToDefault: () => {
         set({
-          partners: DEFAULT_PARTNERS,
-          currentPartner: DEFAULT_PARTNERS[0],
+          partners: DEFAULT_PARTNER_ACCOUNTS,
+          currentPartner: DEFAULT_PARTNER_ACCOUNTS[0],
           isAuthenticated: true,
         });
       },
     }),
     {
-      name: "ezy1_partner_auth_v2",
+      name: "ezy1_partner_auth_v3",
     }
   )
 );

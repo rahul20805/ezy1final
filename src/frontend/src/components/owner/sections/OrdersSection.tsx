@@ -145,13 +145,13 @@ export function OrdersSection() {
               </div>
               <Badge
                 className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-md ${
-                  order.status === "delivered"
+                  order.status === "DELIVERED"
                     ? "bg-emerald-500 text-white"
-                    : order.status === "out_for_delivery"
+                    : order.status === "OUT_FOR_DELIVERY"
                     ? "bg-blue-500 text-white"
-                    : order.status === "confirmed" || order.status === "preparing"
+                    : order.status === "ACCEPTED" || order.status === "PREPARING" || order.status === "READY"
                     ? "bg-amber-500 text-white"
-                    : order.status === "cancelled"
+                    : order.status === "CANCELLED"
                     ? "bg-destructive text-white"
                     : "bg-purple-500 text-white"
                 }`}
@@ -270,7 +270,7 @@ export function OrdersSection() {
                 </div>
                 <Badge
                   className={`text-xs uppercase font-bold ${
-                    selectedOrder.status === "delivered"
+                    selectedOrder.status === "DELIVERED"
                       ? "bg-emerald-500 text-white"
                       : "bg-primary text-primary-foreground"
                   }`}
