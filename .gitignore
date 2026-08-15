@@ -115,3 +115,5 @@ src/frontend/dist
 # DFX
 .dfx
 .mops
+
+.vercel
