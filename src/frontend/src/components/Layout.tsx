@@ -541,47 +541,70 @@ export default function Layout({ children }: LayoutProps) {
                 Quick Links
               </h4>
               <ul className="space-y-2">
-                {[
-                  "About",
-                  "Services",
-                  "Partner With Us",
-                  "Careers",
-                  "Press",
-                ].map((item) => (
-                  <li key={item}>
-                    <a
-                      href="/#"
-                      className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      {item}
-                    </a>
-                  </li>
-                ))}
+                <li>
+                  <Link to="/shop" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    Browse Marketplace
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/services" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    On-Demand Services
+                  </Link>
+                </li>
+                <li>
+                  <a href="/#healthcare" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    Healthcare & Doctors
+                  </a>
+                </li>
+                <li>
+                  <a href="/#transport" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    Transport & Fleet
+                  </a>
+                </li>
+                <li>
+                  <Link to="/partner-login" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    Partner & Merchant Portal
+                  </Link>
+                </li>
               </ul>
             </div>
 
             {/* Support */}
             <div>
               <h4 className="font-display font-semibold text-foreground mb-3 text-sm">
-                Support
+                Support & Admin
               </h4>
               <ul className="space-y-2">
-                {[
-                  "Help Centre",
-                  "Safety",
-                  "Privacy Policy",
-                  "Terms of Service",
-                  "Grievance",
-                ].map((item) => (
-                  <li key={item}>
-                    <a
-                      href="/#"
-                      className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      {item}
-                    </a>
-                  </li>
-                ))}
+                <li>
+                  <Link to="/dashboard/wallet" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    Digital Wallet & Balance
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/partner-login" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    Merchant Login
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/owner" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    Owner Control Center
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/admin" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    Super Admin Console
+                  </Link>
+                </li>
+                <li>
+                  <a
+                    href={`https://wa.me/${(store.settings.whatsappNumber || "919876543210").replace(/[^0-9]/g, "")}?text=Hello%20EZY1%20Support`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sm text-muted-foreground hover:text-emerald-600 transition-colors"
+                  >
+                    WhatsApp Helpline
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
