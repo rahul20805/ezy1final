@@ -21,7 +21,7 @@ export function ApiIntegrations() {
     {
       name: "Meta Cloud WhatsApp Webhook",
       type: "Webhook / Bot",
-      endpoint: "https://ezy1final.vercel.app/api/whatsapp/webhook",
+      endpoint: "https://ezy1.site/api/whatsapp/webhook",
       status: "Operational",
       latency: "45ms",
     },
@@ -53,17 +53,21 @@ export function ApiIntegrations() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-display font-bold text-foreground flex items-center gap-2">
-            <FileCode className="w-5 h-5 text-primary" /> API, Webhooks & Third-Party Integrations
+            <FileCode className="w-5 h-5 text-primary" /> API, Webhooks &
+            Third-Party Integrations
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-            Real-time status indicators, webhook health, and secure gateway connections.
+            Real-time status indicators, webhook health, and secure gateway
+            connections.
           </p>
         </div>
 
         <Button
           variant="outline"
           size="sm"
-          onClick={() => toast.success("All upstream endpoints pinged: 100% operational.")}
+          onClick={() =>
+            toast.success("All upstream endpoints pinged: 100% operational.")
+          }
           className="h-8 rounded-xl text-xs gap-1.5 self-start sm:self-auto"
         >
           <RefreshCw className="w-3.5 h-3.5" /> Ping All Endpoints
@@ -72,10 +76,15 @@ export function ApiIntegrations() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {integrations.map((item, idx) => (
-          <Card key={idx} className="rounded-3xl border-border bg-card p-5 shadow-xs space-y-3">
+          <Card
+            key={idx}
+            className="rounded-3xl border-border bg-card p-5 shadow-xs space-y-3"
+          >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h3 className="font-display font-bold text-base text-foreground">{item.name}</h3>
+                <h3 className="font-display font-bold text-base text-foreground">
+                  {item.name}
+                </h3>
                 <Badge variant="outline" className="text-[10px] mt-1">
                   {item.type}
                 </Badge>
@@ -87,13 +96,22 @@ export function ApiIntegrations() {
             </div>
 
             <div className="p-3 rounded-2xl bg-muted/40 border border-border/60 text-xs font-mono break-all space-y-1">
-              <span className="text-[10px] text-muted-foreground uppercase font-sans">Endpoint:</span>
+              <span className="text-[10px] text-muted-foreground uppercase font-sans">
+                Endpoint:
+              </span>
               <p className="text-foreground">{item.endpoint}</p>
             </div>
 
             <div className="flex items-center justify-between pt-2 border-t border-border/60 text-xs text-muted-foreground">
-              <span>Avg Latency: <span className="font-mono font-bold text-foreground">{item.latency}</span></span>
-              <span className="text-emerald-600 font-semibold">SSL 256-Bit Encrypted</span>
+              <span>
+                Avg Latency:{" "}
+                <span className="font-mono font-bold text-foreground">
+                  {item.latency}
+                </span>
+              </span>
+              <span className="text-emerald-600 font-semibold">
+                SSL 256-Bit Encrypted
+              </span>
             </div>
           </Card>
         ))}
