@@ -34,18 +34,26 @@ function setCorsHeaders(req, res) {
 
 // Helper to parse JSON body across standard Node and Vercel Serverless
 async function parseBody(req) {
-  if (req.body !== undefined && req.body !== null) {
-    if (typeof req.body === "object") return req.body;
-    if (typeof req.body === "string") {
+  let raw = null;
+  try {
+    raw = req.body;
+  } catch (err) {
+    console.warn("Vercel req.body getter caught invalid JSON:", err.message);
+    return {};
+  }
+
+  if (raw !== undefined && raw !== null) {
+    if (typeof raw === "object") return raw;
+    if (typeof raw === "string") {
       try {
-        return JSON.parse(req.body);
+        return JSON.parse(raw);
       } catch {
         return {};
       }
     }
-    if (Buffer.isBuffer(req.body)) {
+    if (Buffer.isBuffer(raw)) {
       try {
-        return JSON.parse(req.body.toString("utf-8"));
+        return JSON.parse(raw.toString("utf-8"));
       } catch {
         return {};
       }
