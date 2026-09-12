@@ -1,5 +1,6 @@
 import { getAuthUser, hashPassword, signJwt, verifyPassword } from "./auth.js";
 import {
+  bulkUpdateVendors,
   createOrder,
   createPartnerApplication,
   createProduct,
@@ -11,6 +12,7 @@ import {
   findUserByEmail,
   findUserById,
   findUserByUsername,
+  getAdminStats,
   getCategories,
   getChangeLogs,
   getChangeLogsByVendorId,
@@ -260,6 +262,35 @@ export default async function handler(req, res) {
       return sendJson(res, 200, { success: true, changes: logs });
     }
 
+    // Lightweight Dashboard Aggregate Stats (Requirement 10: precomputed, no heavy table dumps)
+    if (pathname === "/admin/stats" && method === "GET") {
+      const authUser = getAuthUser(req);
+      if (!authUser || (authUser.role !== "super_owner" && authUser.role !== "SUPER_ADMIN" && authUser.role !== "ADMIN")) {
+        return sendJson(res, 403, { success: false, error: "Forbidden: Admin access required.", code: "FORBIDDEN" });
+      }
+      const stats = getAdminStats();
+      return sendJson(res, 200, { success: true, ...stats });
+    }
+
+    // Server-Side Bulk Operations (Requirement 7: batch limit 100, partial failure reporting, audit trail)
+    if (pathname === "/admin/vendors/bulk-action" && method === "POST") {
+      const authUser = getAuthUser(req);
+      if (!authUser || (authUser.role !== "super_owner" && authUser.role !== "SUPER_ADMIN" && authUser.role !== "ADMIN")) {
+        return sendJson(res, 403, { success: false, error: "Forbidden: Admin access required.", code: "FORBIDDEN" });
+      }
+      const body = await parseBody(req);
+      const { vendorIds, action } = body;
+      if (!vendorIds || !Array.isArray(vendorIds) || !action) {
+        return sendJson(res, 400, {
+          success: false,
+          error: "vendorIds array and action string are required.",
+          code: "INVALID_INPUT",
+        });
+      }
+      const result = bulkUpdateVendors(vendorIds, action, authUser);
+      return sendJson(res, 200, { success: true, ...result });
+    }
+
     const vendorMatch = pathname.match(/^\/vendors\/(\d+)$/);
     if (vendorMatch) {
       const vendorId = Number(vendorMatch[1]);
@@ -449,16 +480,16 @@ export default async function handler(req, res) {
       }
     }
 
-    // Public Directory Endpoints
+    // Public Directory Endpoints (Searchable, Filterable, Paginated)
     if (pathname === "/hospitals" && method === "GET") {
-      const allHospitals = getVendors({ category: "Healthcare" });
+      const allHospitals = getVendors({ ...query, category: "Healthcare" });
       return sendJson(res, 200, allHospitals);
     }
 
     if (pathname === "/doctors" && method === "GET") {
-      const healthcare = getVendors({ category: "Healthcare" });
-      // Map vendors with doctor properties or return doctor profiles
-      const doctorsList = healthcare.map((v) => ({
+      const healthcare = getVendors({ ...query, category: "Healthcare" });
+      const items = Array.isArray(healthcare) ? healthcare : (healthcare.items || []);
+      const doctorsList = items.map((v) => ({
         id: v.id,
         name: v.doctorName || v.ownerName,
         specialty: v.specialization || (v.departments ? v.departments.split(",")[0].trim() : "General Physician"),
@@ -476,11 +507,14 @@ export default async function handler(req, res) {
         emergencyPhone: v.emergencyPhone,
         hasEmergency24x7: v.hasEmergency24x7,
       }));
+      if (!Array.isArray(healthcare) && healthcare.pagination) {
+        return sendJson(res, 200, { items: doctorsList, pagination: healthcare.pagination });
+      }
       return sendJson(res, 200, doctorsList);
     }
 
     if (pathname === "/transport" && method === "GET") {
-      const transport = getVendors({ category: "Transport" });
+      const transport = getVendors({ ...query, category: "Transport" });
       return sendJson(res, 200, transport);
     }
 

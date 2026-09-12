@@ -11,97 +11,93 @@ import {
   RefreshCw,
   ShieldAlert,
 } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 import { toast } from "sonner";
-import {
-  type StoredHospitalBed,
-  useStoreData,
-} from "../../../../lib/storeData";
-import { DataTable } from "../../../owner/DataTable";
+import { ServerDataTable } from "../../ServerDataTable";
+
+interface HospitalBedRecord {
+  id: number;
+  businessName?: string;
+  name?: string;
+  city?: string;
+  totalBeds?: number;
+  availableBeds?: number;
+  icuBedsAvailable?: number;
+  departments?: string | string[];
+}
 
 export function HospitalBedsManager() {
-  const store = useStoreData();
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const handleBedAdjust = (bed: StoredHospitalBed, delta: number) => {
-    const nextAvailable = Math.max(
-      0,
-      Math.min(bed.totalBeds, bed.availableBeds + delta),
-    );
-    const nextOccupied = bed.totalBeds - nextAvailable;
+  const handleBedAdjust = async (hosp: HospitalBedRecord, delta: number) => {
+    const total = hosp.totalBeds || 100;
+    const current = hosp.availableBeds || 0;
+    const nextAvailable = Math.max(0, Math.min(total, current + delta));
 
-    store.updateHospitalBedCount(bed.id, nextAvailable, nextOccupied);
-    toast.success(
-      `Updated ${bed.hospitalName} (${bed.department}) available beds to ${nextAvailable}`,
-    );
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("ezy1_token") || localStorage.getItem("token")
+        : null;
+
+    try {
+      const res = await fetch(`/api/vendors/${hosp.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ availableBeds: nextAvailable }),
+      });
+
+      if (!res.ok) throw new Error("Failed to update bed count in database.");
+
+      toast.success(
+        `Updated ${hosp.businessName || hosp.name} available beds to ${nextAvailable}`
+      );
+      setRefreshTrigger((prev) => prev + 1);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update bed count.");
+    }
   };
 
   return (
     <div className="space-y-6">
-      <DataTable<StoredHospitalBed>
+      <ServerDataTable<HospitalBedRecord>
         title="Live Hospital Beds Administration Tracker"
         description="Real-time availability of ICU ventilators, General Wards, and Emergency Trauma beds across verified hospitals."
-        data={store.hospitalBeds}
-        searchPlaceholder="Search hospital, department, bed type..."
-        searchFilter={(item, query) =>
-          item.hospitalName.toLowerCase().includes(query) ||
-          item.department.toLowerCase().includes(query) ||
-          item.bedType.toLowerCase().includes(query)
-        }
-        filterOptions={[
-          {
-            key: "bedType",
-            label: "Bed Category",
-            options: [
-              { label: "ICU / Ventilator", value: "ICU / Ventilator" },
-              { label: "Emergency", value: "Emergency" },
-              { label: "General Ward", value: "General Ward" },
-            ],
-          },
-        ]}
+        fetchUrl="/api/hospitals"
+        refreshTrigger={refreshTrigger}
+        searchPlaceholder="Search hospital, city, department..."
         sortOptions={[
-          { label: "Available Beds", value: "avail_desc" },
-          { label: "Hospital Name", value: "name_asc" },
+          { label: "Available Beds", value: "availableBeds_desc", sortBy: "availableBeds", sortOrder: "desc" },
+          { label: "Hospital Name", value: "businessName_asc", sortBy: "businessName", sortOrder: "asc" },
         ]}
-        defaultSort="avail_desc"
-        onSort={(items, sortVal) => {
-          const list = [...items];
-          if (sortVal === "avail_desc")
-            return list.sort((a, b) => b.availableBeds - a.availableBeds);
-          return list.sort((a, b) =>
-            a.hospitalName.localeCompare(b.hospitalName),
-          );
-        }}
-        pageSize={6}
-        renderItem={(bed) => {
-          const percentOccupied = Math.round(
-            (bed.occupiedBeds / bed.totalBeds) * 100,
-          );
+        defaultSort="availableBeds_desc"
+        defaultPageSize={25}
+        renderItem={(hosp) => {
+          const hospName = hosp.businessName || hosp.name || "Hospital";
+          const total = hosp.totalBeds || 100;
+          const available = hosp.availableBeds || 0;
+          const occupied = Math.max(0, total - available);
+          const percentOccupied = Math.round((occupied / total) * 100);
 
           return (
             <Card
-              key={bed.id}
+              key={hosp.id}
               className="rounded-3xl border-border bg-card p-5 shadow-xs"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h3 className="font-display font-bold text-base text-foreground">
-                    {bed.hospitalName}
+                    {hospName}
                   </h3>
                   <p className="text-xs text-primary font-medium mt-0.5">
-                    {bed.department}
+                    {hosp.city || "Bengaluru"}
                   </p>
                 </div>
 
-                <Badge
-                  className={`text-[10px] uppercase font-bold ${
-                    bed.bedType === "ICU / Ventilator"
-                      ? "bg-purple-500/10 text-purple-600"
-                      : bed.bedType === "Emergency"
-                        ? "bg-rose-500/10 text-rose-600"
-                        : "bg-muted text-foreground"
-                  }`}
-                >
-                  {bed.bedType}
+                <Badge className="bg-purple-500/10 text-purple-600 text-[10px] uppercase font-bold">
+                  {hosp.icuBedsAvailable || 0} ICU Beds
                 </Badge>
               </div>
 
@@ -111,9 +107,7 @@ export function HospitalBedsManager() {
                   <span className="text-muted-foreground">
                     Occupancy: {percentOccupied}%
                   </span>
-                  <span className="font-mono text-muted-foreground">
-                    Updated: {bed.lastUpdated}
-                  </span>
+                  <span className="font-mono text-muted-foreground">Live DB</span>
                 </div>
                 <div className="w-full h-2.5 rounded-full bg-muted overflow-hidden">
                   <div
@@ -135,7 +129,7 @@ export function HospitalBedsManager() {
                     Total
                   </span>
                   <span className="font-mono font-bold text-foreground">
-                    {bed.totalBeds}
+                    {total}
                   </span>
                 </div>
                 <div>
@@ -143,7 +137,7 @@ export function HospitalBedsManager() {
                     Occupied
                   </span>
                   <span className="font-mono font-bold text-amber-500">
-                    {bed.occupiedBeds}
+                    {occupied}
                   </span>
                 </div>
                 <div>
@@ -151,7 +145,7 @@ export function HospitalBedsManager() {
                     Available
                   </span>
                   <span className="font-mono font-black text-emerald-600 text-sm">
-                    {bed.availableBeds}
+                    {available}
                   </span>
                 </div>
               </div>
@@ -165,20 +159,20 @@ export function HospitalBedsManager() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleBedAdjust(bed, -1)}
-                    disabled={bed.availableBeds <= 0}
+                    onClick={() => handleBedAdjust(hosp, -1)}
+                    disabled={available <= 0}
                     className="h-8 w-8 p-0 rounded-xl"
                   >
                     <Minus className="w-3.5 h-3.5" />
                   </Button>
                   <span className="font-mono font-bold text-xs w-6 text-center">
-                    {bed.availableBeds}
+                    {available}
                   </span>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleBedAdjust(bed, 1)}
-                    disabled={bed.availableBeds >= bed.totalBeds}
+                    onClick={() => handleBedAdjust(hosp, 1)}
+                    disabled={available >= total}
                     className="h-8 w-8 p-0 rounded-xl"
                   >
                     <Plus className="w-3.5 h-3.5" />

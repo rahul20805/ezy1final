@@ -26,21 +26,32 @@ import {
   User,
   Wrench,
 } from "lucide-react";
-import type React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { toast } from "sonner";
-import { type StoredService, useStoreData } from "../../../../lib/storeData";
 import { ConfirmModal } from "../../../owner/ConfirmModal";
-import { DataTable } from "../../../owner/DataTable";
 import { ImageUploader } from "../../../owner/ImageUploader";
+import { ServerDataTable } from "../../ServerDataTable";
+
+interface ServiceRecord {
+  id: number;
+  name: string;
+  description: string;
+  category: string;
+  price?: number;
+  pricePerHour?: number;
+  providerName?: string;
+  vendorId?: number;
+  isAvailable?: boolean;
+  published?: boolean;
+  rating?: number;
+  duration?: string;
+  image?: string;
+}
 
 export function ServicesManager() {
-  const store = useStoreData();
-
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingService, setEditingService] = useState<StoredService | null>(
-    null,
-  );
+  const [editingService, setEditingService] = useState<ServiceRecord | null>(null);
 
   // Form State
   const [name, setName] = useState("");
@@ -48,11 +59,9 @@ export function ServicesManager() {
   const [category, setCategory] = useState("Electrical");
   const [pricePerHour, setPricePerHour] = useState<number>(299);
   const [providerName, setProviderName] = useState("Suresh Sharma");
-  const [duration, setDuration] = useState("1-2 Hours");
   const [isAvailable, setIsAvailable] = useState(true);
   const [published, setPublished] = useState(true);
   const [image, setImage] = useState("");
-  const [tagsInput, setTagsInput] = useState("");
 
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
 
@@ -63,331 +72,329 @@ export function ServicesManager() {
     setCategory("Electrical");
     setPricePerHour(299);
     setProviderName("Suresh Sharma");
-    setDuration("1-2 Hours");
     setIsAvailable(true);
     setPublished(true);
     setImage("");
-    setTagsInput("Wiring, Repair, Inspection");
     setIsDialogOpen(true);
   };
 
-  const openEditDialog = (svc: StoredService) => {
+  const openEditDialog = (svc: ServiceRecord) => {
     setEditingService(svc);
     setName(svc.name);
-    setDescription(svc.description);
-    setCategory(svc.category);
-    setPricePerHour(svc.pricePerHour);
-    setProviderName(svc.providerName);
-    setDuration(svc.duration || "1-2 Hours");
-    setIsAvailable(svc.isAvailable);
-    setPublished(svc.published);
+    setDescription(svc.description || "");
+    setCategory(svc.category || "Electrical");
+    setPricePerHour(svc.price ?? svc.pricePerHour ?? 299);
+    setProviderName(svc.providerName || "");
+    setIsAvailable(svc.isAvailable !== false);
+    setPublished(svc.published !== false);
     setImage(svc.image || "");
-    setTagsInput((svc.tags || []).join(", "));
     setIsDialogOpen(true);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
       toast.error("Service Name is required.");
       return;
     }
 
-    const tags = tagsInput
-      .split(",")
-      .map((t) => t.trim())
-      .filter(Boolean);
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("ezy1_token") || localStorage.getItem("token")
+        : null;
 
-    if (editingService) {
-      store.updateService(editingService.id, {
-        name: name.trim(),
-        description: description.trim(),
-        category,
-        pricePerHour: Number(pricePerHour),
-        providerName: providerName.trim(),
-        duration,
-        isAvailable,
-        published,
-        image:
-          image ||
-          "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80",
-        tags,
-      });
-      toast.success(`Service "${name}" updated!`);
-    } else {
-      store.addService({
-        name: name.trim(),
-        description: description.trim(),
-        category,
-        pricePerHour: Number(pricePerHour),
-        providerName: providerName.trim(),
-        vendorId: 4,
-        isAvailable,
-        published,
-        rating: 5.0,
-        totalReviews: 0,
-        duration,
-        image:
-          image ||
-          "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80",
-        tags,
-      });
-      toast.success(`New on-demand service "${name}" registered!`);
+    try {
+      if (editingService) {
+        const res = await fetch(`/api/services/${editingService.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({
+            name: name.trim(),
+            description: description.trim(),
+            category,
+            price: Number(pricePerHour),
+            pricePerHour: Number(pricePerHour),
+            providerName: providerName.trim(),
+            isAvailable,
+            published,
+            image: image || "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80",
+          }),
+        });
+
+        if (!res.ok) throw new Error("Failed to update service on server.");
+        toast.success(`Service "${name}" updated!`);
+      } else {
+        const res = await fetch("/api/services", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({
+            name: name.trim(),
+            description: description.trim(),
+            category,
+            price: Number(pricePerHour),
+            pricePerHour: Number(pricePerHour),
+            providerName: providerName.trim(),
+            vendorId: 3,
+            isAvailable,
+            published,
+            image: image || "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80",
+          }),
+        });
+
+        if (!res.ok) throw new Error("Failed to create new service on server.");
+        toast.success(`New on-demand service "${name}" registered!`);
+      }
+
+      setIsDialogOpen(false);
+      setRefreshTrigger((prev) => prev + 1);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save service.");
     }
-
-    setIsDialogOpen(false);
   };
 
-  const handleDelete = () => {
-    if (deleteConfirmId !== null) {
-      store.deleteService(deleteConfirmId);
-      toast.success("Service removed.");
+  const handleDelete = async () => {
+    if (deleteConfirmId === null) return;
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("ezy1_token") || localStorage.getItem("token")
+        : null;
+
+    try {
+      const res = await fetch(`/api/services/${deleteConfirmId}`, {
+        method: "DELETE",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      if (!res.ok) throw new Error("Could not delete service from database.");
+      toast.success("Service removed successfully.");
       setDeleteConfirmId(null);
+      setRefreshTrigger((prev) => prev + 1);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete service.");
+    }
+  };
+
+  const toggleServiceAvailability = async (svc: ServiceRecord) => {
+    const nextAvail = svc.isAvailable === false ? true : false;
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("ezy1_token") || localStorage.getItem("token")
+        : null;
+
+    try {
+      const res = await fetch(`/api/services/${svc.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ isAvailable: nextAvail }),
+      });
+
+      if (!res.ok) throw new Error("Failed to update availability.");
+      toast.success(`Service is now ${nextAvail ? "AVAILABLE" : "UNAVAILABLE"}`);
+      setRefreshTrigger((prev) => prev + 1);
+    } catch (err: any) {
+      toast.error(err.message || "Could not toggle availability.");
     }
   };
 
   return (
     <div className="space-y-6">
-      <DataTable<StoredService>
+      <ServerDataTable<ServiceRecord>
         title="On-Demand Local Services"
         description="Manage electricians, certified plumbers, cleaning specialists, technicians and home maintenance services."
-        data={store.services}
+        fetchUrl="/api/services"
+        refreshTrigger={refreshTrigger}
+        onAddNew={openAddDialog}
+        addNewLabel="Add New Service"
         searchPlaceholder="Search service name, category, specialist..."
-        searchFilter={(item, query) =>
-          item.name.toLowerCase().includes(query) ||
-          item.category.toLowerCase().includes(query) ||
-          item.providerName.toLowerCase().includes(query) ||
-          (item.tags || []).some((t) => t.toLowerCase().includes(query))
-        }
         filterOptions={[
           {
             key: "category",
-            label: "Trade Category",
+            label: "Category",
             options: [
               { label: "Electrical", value: "Electrical" },
               { label: "Plumbing", value: "Plumbing" },
-              { label: "Cleaning", value: "Cleaning" },
               { label: "Carpentry", value: "Carpentry" },
+              { label: "Cleaning", value: "Cleaning" },
+              { label: "Appliances", value: "Appliances" },
             ],
           },
         ]}
         sortOptions={[
-          { label: "Rate (High to Low)", value: "rate_desc" },
-          { label: "Rate (Low to High)", value: "rate_asc" },
-          { label: "Name (A-Z)", value: "name_asc" },
+          { label: "Service Name (A-Z)", value: "name_asc", sortBy: "name", sortOrder: "asc" },
+          { label: "Price (Low to High)", value: "price_asc", sortBy: "price", sortOrder: "asc" },
+          { label: "Price (High to Low)", value: "price_desc", sortBy: "price", sortOrder: "desc" },
+          { label: "Newest Added", value: "id_desc", sortBy: "id", sortOrder: "desc" },
         ]}
-        defaultSort="name_asc"
-        onSort={(items, sortVal) => {
-          const list = [...items];
-          if (sortVal === "rate_desc")
-            return list.sort((a, b) => b.pricePerHour - a.pricePerHour);
-          if (sortVal === "rate_asc")
-            return list.sort((a, b) => a.pricePerHour - b.pricePerHour);
-          return list.sort((a, b) => a.name.localeCompare(b.name));
-        }}
-        onAddNew={openAddDialog}
-        addNewLabel="Register Service"
-        pageSize={6}
-        renderItem={(svc) => (
-          <Card
-            key={svc.id}
-            className={`rounded-3xl border transition-all hover:shadow-md ${
-              svc.published
-                ? "border-border/80 bg-card"
-                : "border-border/50 bg-muted/20 opacity-70"
-            }`}
-          >
-            <CardContent className="p-5 space-y-3">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <img
-                    src={
-                      svc.image || "https://placehold.co/100x100?text=Service"
-                    }
-                    alt={svc.name}
-                    className="w-14 h-14 rounded-2xl object-cover border border-border/80 flex-shrink-0 shadow-xs"
-                  />
+        defaultSort="id_asc"
+        defaultPageSize={25}
+        renderItem={(svc) => {
+          const isAvail = svc.isAvailable !== false;
+          const displayPrice = svc.price ?? svc.pricePerHour ?? 299;
+          return (
+            <Card
+              key={svc.id}
+              className={`rounded-3xl border transition-all hover:shadow-md flex flex-col justify-between ${
+                isAvail ? "border-border/80 bg-card" : "border-muted bg-muted/20 opacity-75"
+              }`}
+            >
+              <CardContent className="p-5 space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold text-lg flex-shrink-0">
+                      <Wrench className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-display font-bold text-base text-foreground line-clamp-1">
+                          {svc.name}
+                        </h3>
+                      </div>
+                      <Badge variant="outline" className="text-[10px] mt-0.5">
+                        {svc.category}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <Badge
+                    className={`text-[10px] font-bold ${
+                      isAvail ? "bg-emerald-500 text-white" : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {isAvail ? "Available" : "Offline"}
+                  </Badge>
+                </div>
+
+                <p className="text-xs text-muted-foreground line-clamp-2">
+                  {svc.description}
+                </p>
+
+                <div className="flex items-center justify-between p-3 rounded-2xl bg-muted/40 border border-border/60 text-xs">
                   <div>
-                    <h3 className="font-display font-bold text-sm text-foreground line-clamp-1">
-                      {svc.name}
-                    </h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Specialist:{" "}
-                      <span className="font-medium text-foreground">
-                        {svc.providerName}
-                      </span>
-                    </p>
+                    <span className="text-muted-foreground block">Base Rate:</span>
+                    <span className="font-display font-bold text-base text-primary">
+                      ₹{displayPrice}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground"> / visit</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-muted-foreground block">Specialist:</span>
+                    <span className="font-semibold text-foreground">
+                      {svc.providerName || "Master Tech"}
+                    </span>
                   </div>
                 </div>
 
-                <Badge
-                  variant="outline"
-                  className="text-[10px] uppercase font-bold"
-                >
-                  {svc.category}
-                </Badge>
-              </div>
+                <div className="flex items-center justify-between pt-2 border-t border-border/60">
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => openEditDialog(svc)}
+                      className="h-8 px-2 text-xs rounded-xl text-muted-foreground hover:text-foreground"
+                    >
+                      <Edit2 className="w-3.5 h-3.5 mr-1" /> Edit
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setDeleteConfirmId(svc.id)}
+                      className="h-8 px-2 text-xs rounded-xl text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete
+                    </Button>
+                  </div>
 
-              <p className="text-xs text-muted-foreground line-clamp-2">
-                {svc.description}
-              </p>
-
-              <div className="flex flex-wrap gap-1.5 pt-1">
-                {(svc.tags || []).map((tag, i) => (
-                  <Badge
-                    key={i}
-                    variant="secondary"
-                    className="text-[10px] px-2 py-0.5 rounded-lg"
-                  >
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-
-              <div className="flex items-center justify-between pt-2 border-t border-border/60">
-                <div>
-                  <span className="font-display font-black text-base text-foreground">
-                    ₹{svc.pricePerHour}
-                  </span>
-                  <span className="text-[10px] text-muted-foreground">
-                    {" "}
-                    / hour
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-1.5">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => {
-                      store.toggleServicePublish(svc.id);
-                      toast.success(
-                        svc.published
-                          ? `"${svc.name}" hidden.`
-                          : `"${svc.name}" published live!`,
-                      );
-                    }}
-                    className="h-8 px-2 text-xs rounded-xl"
+                    onClick={() => toggleServiceAvailability(svc)}
+                    className={`h-8 px-2.5 text-xs rounded-xl font-semibold ${
+                      isAvail ? "hover:text-destructive" : "text-emerald-600"
+                    }`}
                   >
-                    {svc.published ? (
-                      <EyeOff className="w-3.5 h-3.5" />
-                    ) : (
-                      <Eye className="w-3.5 h-3.5 text-emerald-500" />
-                    )}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => openEditDialog(svc)}
-                    className="h-8 px-2 text-xs rounded-xl"
-                  >
-                    <Edit2 className="w-3.5 h-3.5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setDeleteConfirmId(svc.id)}
-                    className="h-8 px-2 text-destructive hover:bg-destructive/10 rounded-xl"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Power className="w-3.5 h-3.5 mr-1" />
+                    {isAvail ? "Deactivate" : "Activate"}
                   </Button>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+              </CardContent>
+            </Card>
+          );
+        }}
       />
 
-      {/* Add / Edit Dialog */}
+      {/* Edit / Add Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-xl bg-card border-border shadow-2xl rounded-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-md bg-card border-border shadow-2xl rounded-3xl">
           <form onSubmit={handleSave}>
             <DialogHeader>
-              <DialogTitle className="text-xl font-display font-bold">
+              <DialogTitle className="text-lg font-display font-bold">
                 {editingService ? "Edit Service" : "Register On-Demand Service"}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                Set trade category, hourly rate, specialist assignment, and
-                tags.
+                Configured rates and availability will immediately update on customer apps.
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-3.5 py-3">
+            <div className="space-y-3 py-3">
               <div className="space-y-1">
                 <Label className="text-xs font-semibold">Service Name *</Label>
                 <Input
                   required
-                  placeholder="e.g. Complete Home Electrical Repair & Inspection"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="rounded-xl text-sm font-semibold"
+                  placeholder="e.g. Full House Electrical Inspection"
+                  className="rounded-xl text-xs"
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs font-semibold">Category</Label>
                   <Input
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
+                    placeholder="Electrical"
                     className="rounded-xl text-xs"
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">
-                    Rate Per Hour (₹) *
-                  </Label>
+                  <Label className="text-xs font-semibold">Price (₹)</Label>
                   <Input
                     type="number"
-                    required
                     value={pricePerHour}
                     onChange={(e) => setPricePerHour(Number(e.target.value))}
-                    className="rounded-xl font-bold"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs font-semibold">
-                    Specialist Provider
-                  </Label>
-                  <Input
-                    value={providerName}
-                    onChange={(e) => setProviderName(e.target.value)}
                     className="rounded-xl text-xs"
                   />
                 </div>
+              </div>
+
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold">Specialist / Provider Name</Label>
+                <Input
+                  value={providerName}
+                  onChange={(e) => setProviderName(e.target.value)}
+                  placeholder="e.g. Suresh Sharma"
+                  className="rounded-xl text-xs"
+                />
               </div>
 
               <div className="space-y-1">
                 <Label className="text-xs font-semibold">Description</Label>
                 <Textarea
-                  rows={2}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Detailed breakdown of work included..."
+                  placeholder="Detailed scope of service..."
                   className="rounded-xl text-xs"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <Label className="text-xs font-semibold">
-                  Search Tags (Comma-separated)
-                </Label>
-                <Input
-                  value={tagsInput}
-                  onChange={(e) => setTagsInput(e.target.value)}
-                  placeholder="Wiring, Leakage, Deep Clean, Painting"
-                  className="rounded-xl text-xs"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <Label className="text-xs font-semibold">
-                  Service Cover Photo
-                </Label>
-                <ImageUploader
-                  currentImage={image}
-                  onImageChange={setImage}
-                  label="Service Photo"
+                  rows={3}
                 />
               </div>
             </div>
@@ -405,7 +412,7 @@ export function ServicesManager() {
                 type="submit"
                 className="rounded-xl bg-primary text-primary-foreground font-semibold"
               >
-                {editingService ? "Save Changes" : "Register Service"}
+                {editingService ? "Update Service" : "Add Service"}
               </Button>
             </DialogFooter>
           </form>
@@ -413,11 +420,13 @@ export function ServicesManager() {
       </Dialog>
 
       <ConfirmModal
-        isOpen={deleteConfirmId !== null}
-        onClose={() => setDeleteConfirmId(null)}
+        open={deleteConfirmId !== null}
+        onOpenChange={(open) => !open && setDeleteConfirmId(null)}
+        title="Delete Service"
+        description="Are you sure you want to permanently remove this service listing?"
+        confirmLabel="Delete"
+        variant="destructive"
         onConfirm={handleDelete}
-        title="Delete Service?"
-        description="Are you sure you want to remove this service? Existing active requests will not be cancelled."
       />
     </div>
   );

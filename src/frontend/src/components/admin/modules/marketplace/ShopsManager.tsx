@@ -18,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import {
   Building2,
   CheckCircle,
@@ -34,31 +33,45 @@ import {
   Store,
   Trash2,
 } from "lucide-react";
-import type React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { toast } from "sonner";
-import { type StoredShop, useStoreData } from "../../../../lib/storeData";
 import { ConfirmModal } from "../../../owner/ConfirmModal";
-import { DataTable } from "../../../owner/DataTable";
 import { ImageUploader } from "../../../owner/ImageUploader";
+import { ServerDataTable } from "../../ServerDataTable";
+
+interface ShopVendor {
+  id: number;
+  businessName: string;
+  ownerName: string;
+  category: string;
+  city: string;
+  address?: string;
+  phone: string;
+  email: string;
+  status: "approved" | "suspended" | "pending" | "active";
+  rating?: number;
+  totalOrders?: number;
+  totalRevenue?: number;
+  openingHours?: string;
+  deliveryRadiusKm?: number;
+  verified?: boolean;
+  image?: string;
+}
 
 export function ShopsManager() {
-  const store = useStoreData();
-
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingShop, setEditingShop] = useState<StoredShop | null>(null);
+  const [editingShop, setEditingShop] = useState<ShopVendor | null>(null);
 
   // Form State
   const [businessName, setBusinessName] = useState("");
   const [ownerName, setOwnerName] = useState("");
-  const [category, setCategory] = useState("Grocery & Staples");
+  const [category, setCategory] = useState("Grocery");
   const [city, setCity] = useState("Bengaluru");
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"active" | "suspended" | "pending">(
-    "active",
-  );
+  const [status, setStatus] = useState<"approved" | "suspended" | "pending">("approved");
   const [openingHours, setOpeningHours] = useState("07:00 AM - 10:00 PM");
   const [deliveryRadiusKm, setDeliveryRadiusKm] = useState(8);
   const [image, setImage] = useState("");
@@ -69,385 +82,429 @@ export function ShopsManager() {
     setEditingShop(null);
     setBusinessName("");
     setOwnerName("");
-    setCategory("Grocery & Staples");
+    setCategory("Grocery");
     setCity("Bengaluru");
     setAddress("");
     setPhone("");
     setEmail("");
-    setStatus("active");
+    setStatus("approved");
     setOpeningHours("07:00 AM - 10:00 PM");
     setDeliveryRadiusKm(8);
     setImage("");
     setIsDialogOpen(true);
   };
 
-  const openEditDialog = (shop: StoredShop) => {
+  const openEditDialog = (shop: ShopVendor) => {
     setEditingShop(shop);
     setBusinessName(shop.businessName);
-    setOwnerName(shop.ownerName);
+    setOwnerName(shop.ownerName || "");
     setCategory(shop.category);
-    setCity(shop.city);
-    setAddress(shop.address);
-    setPhone(shop.phone);
-    setEmail(shop.email);
-    setStatus(shop.status);
-    setOpeningHours(shop.openingHours);
-    setDeliveryRadiusKm(shop.deliveryRadiusKm);
+    setCity(shop.city || "Bengaluru");
+    setAddress(shop.address || "");
+    setPhone(shop.phone || "");
+    setEmail(shop.email || "");
+    setStatus(shop.status === "suspended" ? "suspended" : "approved");
+    setOpeningHours(shop.openingHours || "07:00 AM - 10:00 PM");
+    setDeliveryRadiusKm(shop.deliveryRadiusKm || 8);
     setImage(shop.image || "");
     setIsDialogOpen(true);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!businessName.trim()) {
       toast.error("Business Name is required.");
       return;
     }
 
-    if (editingShop) {
-      store.updateShop(editingShop.id, {
-        businessName: businessName.trim(),
-        ownerName: ownerName.trim(),
-        category,
-        city,
-        address: address.trim(),
-        phone: phone.trim(),
-        email: email.trim(),
-        status,
-        openingHours,
-        deliveryRadiusKm,
-        image: image || "https://placehold.co/500x500?text=Shop",
-      });
-      toast.success(`Store "${businessName}" updated!`);
-    } else {
-      store.addShop({
-        businessName: businessName.trim(),
-        ownerName: ownerName.trim(),
-        category,
-        city,
-        address: address.trim(),
-        phone: phone.trim(),
-        email: email.trim(),
-        status,
-        rating: 5.0,
-        totalOrders: 0,
-        totalRevenue: 0,
-        openingHours,
-        deliveryRadiusKm,
-        verified: true,
-        image: image || "https://placehold.co/500x500?text=Shop",
-      });
-      toast.success(`New Store "${businessName}" created and registered!`);
-    }
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("ezy1_token") || localStorage.getItem("token")
+        : null;
 
-    setIsDialogOpen(false);
+    try {
+      if (editingShop) {
+        const res = await fetch(`/api/vendors/${editingShop.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({
+            businessName: businessName.trim(),
+            ownerName: ownerName.trim(),
+            category,
+            city,
+            address: address.trim(),
+            phone: phone.trim(),
+            email: email.trim(),
+            status,
+            openingHours,
+            deliveryRadiusKm,
+            image: image || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80",
+          }),
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to update store in database.");
+        }
+        toast.success(`Store "${businessName}" updated successfully!`);
+      } else {
+        const res = await fetch("/api/partner-applications", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            businessName: businessName.trim(),
+            ownerName: ownerName.trim() || "Store Manager",
+            category,
+            partnerType: "shop_owner",
+            email: email.trim() || `${businessName.toLowerCase().replace(/\s+/g, "")}@partner.ezy1.in`,
+            phone: phone.trim() || "9800000000",
+            address: address.trim(),
+            city,
+            operatingHours: openingHours,
+            deliveryRadius: deliveryRadiusKm,
+          }),
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to register new store.");
+        }
+        toast.success(`Store registration submitted for "${businessName}"!`);
+      }
+
+      setIsDialogOpen(false);
+      setRefreshTrigger((prev) => prev + 1);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save store.");
+    }
   };
 
-  const handleDelete = () => {
-    if (deleteConfirmId !== null) {
-      store.deleteShop(deleteConfirmId);
-      toast.success("Shop deleted from platform.");
-      setDeleteConfirmId(null);
+  const toggleShopStatus = async (shop: ShopVendor) => {
+    const nextStatus = shop.status === "suspended" ? "approved" : "suspended";
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("ezy1_token") || localStorage.getItem("token")
+        : null;
+
+    try {
+      const res = await fetch(`/api/vendors/${shop.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+
+      if (!res.ok) throw new Error("Could not update store status.");
+
+      toast.success(`Store #${shop.id} is now ${nextStatus.toUpperCase()}`);
+      setRefreshTrigger((prev) => prev + 1);
+    } catch (err: any) {
+      toast.error(err.message);
     }
   };
 
-  const toggleShopStatus = (shop: StoredShop) => {
-    const nextStatus = shop.status === "active" ? "suspended" : "active";
-    store.updateShop(shop.id, { status: nextStatus });
-    toast.success(`Store status changed to: ${nextStatus.toUpperCase()}`);
+  const handleBulkAction = async (selectedIds: (string | number)[], action: string) => {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("ezy1_token") || localStorage.getItem("token")
+        : null;
+
+    const res = await fetch("/api/admin/vendors/bulk-action", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({
+        vendorIds: selectedIds.map(Number),
+        action,
+      }),
+    });
+
+    const json = await res.json();
+    if (!res.ok || !json.success) {
+      throw new Error(json.error || "Bulk action failed on server.");
+    }
+
+    toast.success(`Bulk updated ${json.successful} shops.`);
+    setRefreshTrigger((prev) => prev + 1);
   };
 
   return (
     <div className="space-y-6">
-      <DataTable<StoredShop>
-        title="Registered Shops & Merchants Directory"
-        description="Search, filter, edit operational hours, radius, suspension and verification for all merchant partners."
-        data={store.shops}
+      <ServerDataTable<ShopVendor>
+        title="Store & Merchant Listings"
+        description="Manage verified physical retail stores, supermarkets, pharmacies, and outlets across all operational cities."
+        fetchUrl="/api/vendors"
+        refreshTrigger={refreshTrigger}
+        onAddNew={openAddDialog}
+        addNewLabel="Register New Store"
         searchPlaceholder="Search store name, owner, city, category..."
-        searchFilter={(item, query) =>
-          item.businessName.toLowerCase().includes(query) ||
-          item.ownerName.toLowerCase().includes(query) ||
-          item.city.toLowerCase().includes(query) ||
-          item.category.toLowerCase().includes(query)
-        }
         filterOptions={[
           {
-            key: "status",
-            label: "Store Status",
+            key: "category",
+            label: "Store Category",
             options: [
-              { label: "Active & Open", value: "active" },
+              { label: "Grocery & Staples", value: "Grocery" },
+              { label: "Pharmacy & Health", value: "Pharmacy" },
+              { label: "Home Services", value: "Services" },
+              { label: "Healthcare Clinic", value: "Healthcare" },
+              { label: "Transport", value: "Transport" },
+            ],
+          },
+          {
+            key: "status",
+            label: "Operating Status",
+            options: [
+              { label: "Active / Approved", value: "approved" },
               { label: "Suspended", value: "suspended" },
-              { label: "Pending Verification", value: "pending" },
+              { label: "Pending Review", value: "pending" },
             ],
           },
         ]}
         sortOptions={[
-          { label: "Orders (High to Low)", value: "orders_desc" },
-          { label: "Revenue (High to Low)", value: "revenue_desc" },
-          { label: "Rating (High to Low)", value: "rating_desc" },
-          { label: "Store Name (A-Z)", value: "name_asc" },
+          { label: "Store Name (A-Z)", value: "businessName_asc", sortBy: "businessName", sortOrder: "asc" },
+          { label: "Store Name (Z-A)", value: "businessName_desc", sortBy: "businessName", sortOrder: "desc" },
+          { label: "Rating (High to Low)", value: "rating_desc", sortBy: "rating", sortOrder: "desc" },
+          { label: "Newest Registered", value: "id_desc", sortBy: "id", sortOrder: "desc" },
         ]}
-        defaultSort="orders_desc"
-        onSort={(items, sortVal) => {
-          const list = [...items];
-          if (sortVal === "revenue_desc")
-            return list.sort((a, b) => b.totalRevenue - a.totalRevenue);
-          if (sortVal === "rating_desc")
-            return list.sort((a, b) => b.rating - a.rating);
-          if (sortVal === "name_asc")
-            return list.sort((a, b) =>
-              a.businessName.localeCompare(b.businessName),
-            );
-          return list.sort((a, b) => b.totalOrders - a.totalOrders);
-        }}
-        onAddNew={openAddDialog}
-        addNewLabel="Register New Store"
-        pageSize={6}
-        renderItem={(shop) => (
-          <Card
-            key={shop.id}
-            className={`rounded-3xl border transition-all hover:shadow-md ${
-              shop.status === "active"
-                ? "border-border/80 bg-card"
-                : "border-destructive/30 bg-destructive/5 opacity-80"
-            }`}
-          >
-            <CardContent className="p-5 space-y-4">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <img
-                    src={shop.image || "https://placehold.co/100x100?text=Shop"}
-                    alt={shop.businessName}
-                    className="w-14 h-14 rounded-2xl object-cover border border-border/80 flex-shrink-0 shadow-xs"
-                  />
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <h3 className="font-display font-bold text-base text-foreground line-clamp-1">
-                        {shop.businessName}
-                      </h3>
-                      {shop.verified && (
-                        <ShieldCheck className="w-4 h-4 text-primary flex-shrink-0" />
-                      )}
+        defaultSort="id_asc"
+        defaultPageSize={25}
+        bulkActions={[
+          { label: "Approve Selected", action: "approve" },
+          { label: "Suspend Selected", action: "suspend", variant: "destructive" },
+          { label: "Verify Selected", action: "verify" },
+        ]}
+        onBulkAction={handleBulkAction}
+        renderItem={(shop, _idx, isSelected, onToggleSelect) => {
+          const isActive = shop.status === "approved" || shop.status === "active";
+          return (
+            <Card
+              key={shop.id}
+              className={`rounded-3xl border transition-all hover:shadow-md overflow-hidden flex flex-col ${
+                isSelected ? "ring-2 ring-primary border-primary" : ""
+              } ${
+                isActive
+                  ? "border-border/80 bg-card"
+                  : "border-destructive/30 bg-destructive/5 opacity-80"
+              }`}
+            >
+              <div className="relative h-36 w-full bg-muted overflow-hidden">
+                <img
+                  src={
+                    shop.image ||
+                    "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80"
+                  }
+                  alt={shop.businessName}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+                <div className="absolute top-3 left-3">
+                  <Badge className="bg-background/90 text-foreground backdrop-blur-md font-mono text-[10px] font-bold">
+                    #{shop.id}
+                  </Badge>
+                </div>
+
+                <div className="absolute top-3 right-3 flex items-center gap-1.5">
+                  <Badge
+                    className={`text-[10px] font-bold uppercase ${
+                      isActive
+                        ? "bg-emerald-500 text-white"
+                        : "bg-destructive text-white"
+                    }`}
+                  >
+                    {shop.status}
+                  </Badge>
+                </div>
+
+                <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
+                  <div className="text-white">
+                    <p className="text-xs font-semibold opacity-90">{shop.category}</p>
+                    <h3 className="font-display font-bold text-base leading-tight drop-shadow-sm line-clamp-1">
+                      {shop.businessName}
+                    </h3>
+                  </div>
+                  {shop.rating && (
+                    <div className="flex items-center gap-1 bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-xs">
+                      <Star className="w-3 h-3 fill-current" />
+                      {shop.rating}
                     </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Owner:{" "}
-                      <span className="font-medium text-foreground">
-                        {shop.ownerName}
-                      </span>{" "}
-                      • ID: #{shop.id}
-                    </p>
+                  )}
+                </div>
+              </div>
+
+              <CardContent className="p-4 flex-1 flex flex-col justify-between space-y-3">
+                <div className="space-y-1.5 text-xs">
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <MapPin className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                    <span className="truncate">{shop.address || shop.city || "Bengaluru"}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <Phone className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                    <span className="truncate">{shop.phone || "N/A"}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <Clock className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                    <span className="truncate">{shop.openingHours || "07:00 AM - 10:00 PM"}</span>
                   </div>
                 </div>
 
-                <Badge
-                  className={`text-[10px] uppercase font-bold ${
-                    shop.status === "active"
-                      ? "bg-emerald-500/10 text-emerald-600"
-                      : "bg-destructive/10 text-destructive"
-                  }`}
-                >
-                  {shop.status}
-                </Badge>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <Store className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                  <span className="truncate">{shop.category}</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <MapPin className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                  <span className="truncate">
-                    {shop.city} ({shop.deliveryRadiusKm}km)
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <Clock className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                  <span className="truncate">{shop.openingHours}</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <Phone className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                  <span className="truncate">{shop.phone}</span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between p-2.5 rounded-2xl bg-muted/40 border border-border/60 text-xs">
-                <div>
-                  <span className="text-[10px] text-muted-foreground block">
-                    Total Revenue
-                  </span>
-                  <span className="font-display font-bold text-foreground">
-                    ₹{shop.totalRevenue.toLocaleString()}
-                  </span>
-                </div>
-                <div className="text-right">
-                  <span className="text-[10px] text-muted-foreground block">
-                    Orders Processed
-                  </span>
-                  <span className="font-display font-bold text-primary">
-                    {shop.totalOrders}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-2 border-t border-border/60">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => toggleShopStatus(shop)}
-                  className={`h-8 px-2.5 text-xs rounded-xl gap-1 font-semibold ${
-                    shop.status === "active"
-                      ? "hover:text-destructive"
-                      : "text-emerald-600"
-                  }`}
-                >
-                  <Power className="w-3.5 h-3.5" />
-                  {shop.status === "active" ? "Suspend Store" : "Reactivate"}
-                </Button>
-
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center justify-between pt-2 border-t border-border/60">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => openEditDialog(shop)}
-                    className="h-8 px-2.5 text-xs rounded-xl"
+                    className="h-8 px-2.5 text-xs rounded-xl gap-1"
                   >
-                    <Edit2 className="w-3.5 h-3.5" />
+                    <Edit2 className="w-3.5 h-3.5" /> Edit
                   </Button>
+
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
-                    onClick={() => setDeleteConfirmId(shop.id)}
-                    className="h-8 px-2.5 text-destructive hover:bg-destructive/10 rounded-xl"
+                    onClick={() => toggleShopStatus(shop)}
+                    className={`h-8 px-2.5 text-xs rounded-xl font-semibold ${
+                      isActive ? "hover:text-destructive" : "text-emerald-600"
+                    }`}
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Power className="w-3.5 h-3.5" />
+                    {isActive ? "Suspend" : "Activate"}
                   </Button>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+              </CardContent>
+            </Card>
+          );
+        }}
       />
 
-      {/* Add / Edit Shop Dialog */}
+      {/* Edit / Add Store Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-xl bg-card border-border shadow-2xl rounded-3xl max-h-[90vh] overflow-y-auto">
           <form onSubmit={handleSave}>
             <DialogHeader>
               <DialogTitle className="text-xl font-display font-bold">
-                {editingShop
-                  ? "Edit Merchant Store Profile"
-                  : "Register New Merchant Store"}
+                {editingShop ? "Edit Store Listing" : "Register New Physical Store"}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                Define the merchant's business details, category, operational
-                hours and delivery coverage.
+                Ensure details are verified. Updates will persist directly to the database.
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-4 py-3">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label className="text-xs font-semibold">
-                    Store / Business Name *
-                  </Label>
-                  <Input
-                    required
-                    placeholder="e.g. Sharma Kirana Store"
-                    value={businessName}
-                    onChange={(e) => setBusinessName(e.target.value)}
-                    className="rounded-xl text-sm font-semibold"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs font-semibold">
-                    Owner Full Name *
-                  </Label>
-                  <Input
-                    required
-                    placeholder="e.g. Ramesh Sharma"
-                    value={ownerName}
-                    onChange={(e) => setOwnerName(e.target.value)}
-                    className="rounded-xl text-sm"
-                  />
-                </div>
+            <div className="space-y-4 py-4">
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold">Store Image URL</Label>
+                <Input
+                  value={image}
+                  onChange={(e) => setImage(e.target.value)}
+                  placeholder="https://images.unsplash.com/photo-..."
+                  className="rounded-xl text-xs"
+                />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Category</Label>
+                  <Label className="text-xs font-semibold">Business Name *</Label>
                   <Input
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="rounded-xl text-xs"
-                    placeholder="Grocery, Pharmacy, etc."
+                    required
+                    value={businessName}
+                    onChange={(e) => setBusinessName(e.target.value)}
+                    placeholder="e.g. Modern Bazaar"
+                    className="rounded-xl"
                   />
                 </div>
+
+                <div className="space-y-1">
+                  <Label className="text-xs font-semibold">Owner / Manager Name</Label>
+                  <Input
+                    value={ownerName}
+                    onChange={(e) => setOwnerName(e.target.value)}
+                    placeholder="e.g. Ramesh Kumar"
+                    className="rounded-xl"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-xs font-semibold">Category</Label>
+                  <Select value={category} onValueChange={setCategory}>
+                    <SelectTrigger className="rounded-xl">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-border">
+                      <SelectItem value="Grocery">Grocery & Staples</SelectItem>
+                      <SelectItem value="Pharmacy">Pharmacy & Health</SelectItem>
+                      <SelectItem value="Services">Services</SelectItem>
+                      <SelectItem value="Healthcare">Healthcare Clinic</SelectItem>
+                      <SelectItem value="Transport">Transport</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div className="space-y-1">
                   <Label className="text-xs font-semibold">City</Label>
                   <Input
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    className="rounded-xl text-xs"
-                    placeholder="Bengaluru"
+                    placeholder="e.g. Bengaluru"
+                    className="rounded-xl"
                   />
                 </div>
-                <div className="space-y-1">
-                  <Label className="text-xs font-semibold">
-                    Delivery Radius (km)
-                  </Label>
-                  <Input
-                    type="number"
-                    value={deliveryRadiusKm}
-                    onChange={(e) =>
-                      setDeliveryRadiusKm(Number(e.target.value))
-                    }
-                    className="rounded-xl text-xs font-bold"
-                  />
-                </div>
-              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1 sm:col-span-2">
+                  <Label className="text-xs font-semibold">Full Address</Label>
+                  <Input
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    placeholder="e.g. 12, MG Road, Ward 4"
+                    className="rounded-xl"
+                  />
+                </div>
+
                 <div className="space-y-1">
                   <Label className="text-xs font-semibold">Contact Phone</Label>
                   <Input
-                    placeholder="9876543210"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="rounded-xl text-xs font-mono"
+                    placeholder="9876543210"
+                    className="rounded-xl"
                   />
                 </div>
+
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Email Address</Label>
+                  <Label className="text-xs font-semibold">Contact Email</Label>
                   <Input
                     type="email"
-                    placeholder="store@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="rounded-xl text-xs"
+                    placeholder="store@partner.ezy1.in"
+                    className="rounded-xl"
                   />
                 </div>
-              </div>
 
-              <div className="space-y-1">
-                <Label className="text-xs font-semibold">
-                  Store Address & Landmark
-                </Label>
-                <Input
-                  placeholder="Full physical street address..."
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className="rounded-xl text-xs"
-                />
-              </div>
+                <div className="space-y-1">
+                  <Label className="text-xs font-semibold">Operating Hours</Label>
+                  <Input
+                    value={openingHours}
+                    onChange={(e) => setOpeningHours(e.target.value)}
+                    placeholder="07:00 AM - 10:00 PM"
+                    className="rounded-xl"
+                  />
+                </div>
 
-              <div className="space-y-1">
-                <Label className="text-xs font-semibold">Store Image</Label>
-                <ImageUploader
-                  currentImage={image}
-                  onImageChange={setImage}
-                  label="Storefront Banner Photo"
-                />
+                <div className="space-y-1">
+                  <Label className="text-xs font-semibold">Delivery Radius (km)</Label>
+                  <Input
+                    type="number"
+                    value={deliveryRadiusKm}
+                    onChange={(e) => setDeliveryRadiusKm(Number(e.target.value))}
+                    className="rounded-xl"
+                  />
+                </div>
               </div>
             </div>
 
@@ -464,20 +521,12 @@ export function ShopsManager() {
                 type="submit"
                 className="rounded-xl bg-primary text-primary-foreground font-semibold"
               >
-                {editingShop ? "Save Changes" : "Register Store"}
+                {editingShop ? "Update Store" : "Register Store"}
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
-
-      <ConfirmModal
-        isOpen={deleteConfirmId !== null}
-        onClose={() => setDeleteConfirmId(null)}
-        onConfirm={handleDelete}
-        title="Delete Store Profile?"
-        description="Are you sure you want to remove this shop? Its existing order history will remain preserved in the ledger."
-      />
     </div>
   );
 }

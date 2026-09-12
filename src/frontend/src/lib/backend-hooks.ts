@@ -182,7 +182,20 @@ export function useCurrentUserProfile() {
 export function useDoctors() {
   return useQuery({
     queryKey: ["doctors"],
-    queryFn: async () => doctors,
+    queryFn: async () => {
+      try {
+        const res = await fetch("/api/doctors");
+        if (res.ok) {
+          const data = await res.json();
+          const list = Array.isArray(data) ? data : (data.items || []);
+          if (list.length > 0) return list;
+        }
+      } catch (err) {
+        console.warn("Failed to fetch /api/doctors:", err);
+      }
+      return doctors;
+    },
+    initialData: doctors,
   });
 }
 
@@ -196,14 +209,69 @@ export function useAppointments() {
 export function useBusRoutes() {
   return useQuery({
     queryKey: ["busRoutes"],
-    queryFn: async () => busRoutes,
+    queryFn: async () => {
+      try {
+        const res = await fetch("/api/transport");
+        if (res.ok) {
+          const data = await res.json();
+          const list = Array.isArray(data) ? data : (data.items || []);
+          if (list.length > 0) {
+            return list.map((t: any) => ({
+              id: String(t.id),
+              routeNumber: `R-${t.id}`,
+              from: t.city || "Bengaluru",
+              to: "City Hub",
+              frequency: t.openingHours || "Every 15 mins",
+              departureTime: "07:00 AM",
+              arrivalTime: "08:30 AM",
+              fare: 50,
+              operator: t.businessName,
+              busType: "AC Express",
+              stops: 6,
+              availableSeats: 24,
+            }));
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to fetch /api/transport for bus routes:", err);
+      }
+      return busRoutes;
+    },
+    initialData: busRoutes,
   });
 }
 
 export function useRides() {
   return useQuery({
     queryKey: ["rides"],
-    queryFn: async () => rides,
+    queryFn: async () => {
+      try {
+        const res = await fetch("/api/transport");
+        if (res.ok) {
+          const data = await res.json();
+          const list = Array.isArray(data) ? data : (data.items || []);
+          if (list.length > 0) {
+            return list.map((t: any) => ({
+              id: String(t.id),
+              driverName: t.ownerName || "Ezy1 Driver",
+              vehicleType: "Cab / Sedan",
+              vehicleModel: t.businessName,
+              plateNumber: `DL-${t.id}-EZ`,
+              rating: t.rating || 4.8,
+              totalRides: t.totalOrders || 120,
+              etaMinutes: 4,
+              priceEstimate: 120,
+              currentLocation: t.city || "Connaught Place",
+              available: t.status === "approved" || t.status === "active",
+            }));
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to fetch /api/transport for rides:", err);
+      }
+      return rides;
+    },
+    initialData: rides,
   });
 }
 

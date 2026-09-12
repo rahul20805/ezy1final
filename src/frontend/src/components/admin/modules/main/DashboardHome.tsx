@@ -47,16 +47,48 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
   const [dateFilter, setDateFilter] = useState<
     "today" | "yesterday" | "week" | "month" | "all"
   >("today");
+  const [serverStats, setServerStats] = useState<any>(null);
+  const [statsLoading, setStatsLoading] = useState(false);
 
-  // Dynamic calculations from database
-  const totalRevenue = store.orders.reduce(
+  useEffect(() => {
+    let isMounted = true;
+    async function loadStats() {
+      setStatsLoading(true);
+      try {
+        const token =
+          typeof window !== "undefined"
+            ? localStorage.getItem("ezy1_token") || localStorage.getItem("token")
+            : null;
+        const res = await fetch("/api/admin/stats", {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted && data.success) {
+            setServerStats(data);
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to fetch /api/admin/stats, falling back to local:", err);
+      } finally {
+        if (isMounted) setStatsLoading(false);
+      }
+    }
+    loadStats();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Server-Side Precomputed Aggregates with local fallbacks
+  const totalRevenue = serverStats?.overview?.totalRevenue ?? store.orders.reduce(
     (acc, o) => acc + (o.paymentStatus === "paid" ? o.totalAmount : 0),
     0,
   );
-  const platformCommission = Math.round(totalRevenue * 0.05);
-  const partnerPayoutsTotal = totalRevenue - platformCommission;
+  const platformCommission = serverStats?.overview?.platformCommission ?? Math.round(totalRevenue * 0.05);
+  const partnerPayoutsTotal = serverStats?.overview?.partnerPayouts ?? (totalRevenue - platformCommission);
 
-  const totalOrders = store.orders.length;
+  const totalOrders = serverStats?.overview?.totalOrders ?? store.orders.length;
   const pendingOrders = store.orders.filter(
     (o) =>
       o.status === "NEW" || o.status === "ACCEPTED" || o.status === "PREPARING",
@@ -64,7 +96,7 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
   const outForDelivery = store.orders.filter(
     (o) => o.status === "OUT_FOR_DELIVERY",
   ).length;
-  const deliveredOrders = store.orders.filter(
+  const deliveredOrders = serverStats?.overview?.deliveredOrders ?? store.orders.filter(
     (o) => o.status === "DELIVERED",
   ).length;
   const cancelledOrders = store.orders.filter(
@@ -72,14 +104,14 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
   ).length;
 
   const totalCustomers = store.customers.length;
-  const activePartners = store.shops.filter(
+  const activePartners = serverStats?.overview?.activeVendors ?? store.shops.filter(
     (s) => s.status === "active",
   ).length;
-  const pendingApplications = store.partnerApplications.filter(
+  const pendingApplications = serverStats?.overview?.pendingApplications ?? store.partnerApplications.filter(
     (a) => a.status === "PENDING" || a.status === "UNDER_REVIEW",
   ).length;
 
-  const totalProducts = store.products.length;
+  const totalProducts = serverStats?.overview?.totalProducts ?? store.products.length;
   const activeProducts = store.products.filter(
     (p) => p.published && p.inStock,
   ).length;
@@ -88,11 +120,11 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
   ).length;
 
   const totalBookings = store.bookings.length;
-  const activeServices = store.services.filter(
+  const activeServices = serverStats?.overview?.activeServices ?? store.services.filter(
     (s) => s.published && s.isAvailable,
   ).length;
 
-  const availableBeds = store.hospitalBeds.reduce(
+  const availableBeds = serverStats?.overview?.totalAvailableBeds ?? store.hospitalBeds.reduce(
     (acc, b) => acc + b.availableBeds,
     0,
   );

@@ -255,6 +255,177 @@ function getInitialSeedData() {
         image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=500&q=80",
         joinedAt: "2026-01-15T00:00:00.000Z",
       },
+      {
+        id: 7,
+        userId: 1,
+        businessName: "Apollo Lifecare Multi-Specialty Hospital",
+        ownerName: "Dr. Sandeep Goel",
+        category: "Healthcare",
+        city: "Delhi",
+        address: "Sarita Vihar, Mathura Road, New Delhi",
+        phone: "011-26925858",
+        email: "emergency@apollodelhi.health",
+        description: "Premier tertiary care hospital featuring NABH & JCI accredited trauma and critical care units.",
+        departments: "Cardiology, Oncology, Orthopedics, Nephrology, Emergency & Critical Care",
+        totalBeds: 450,
+        availableBeds: 68,
+        icuBedsAvailable: 15,
+        hasEmergency24x7: true,
+        emergencyPhone: "011-26925858",
+        facilities: "24x7 Blood Bank, Advanced Cath Lab, Organ Transplant, 3T MRI, Ambulance Fleet",
+        status: "approved",
+        rating: 4.9,
+        totalOrders: 1420,
+        totalRevenue: 890000,
+        openingHours: "24x7 Emergency",
+        deliveryRadiusKm: 30,
+        verified: true,
+        image: "https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?w=500&q=80",
+        joinedAt: "2025-07-10T00:00:00.000Z",
+      },
+      {
+        id: 8,
+        userId: 1,
+        businessName: "Dr. Rajesh Kumar Heart & Cardio Clinic",
+        ownerName: "Dr. Rajesh Kumar",
+        category: "Healthcare",
+        city: "Delhi",
+        address: "C-48, Hauz Khas Enclave, New Delhi",
+        phone: "9811223344",
+        email: "dr.rajesh@partner.ezy1.in",
+        description: "Senior Interventional Cardiologist specializing in preventive cardiology and hypertension management.",
+        doctorName: "Dr. Rajesh Kumar",
+        specialization: "Cardiologist & Heart Specialist",
+        qualifications: "MBBS, MD, DM (Cardiology)",
+        experienceYears: 18,
+        consultationFee: 800,
+        timings: "10:00 AM - 02:00 PM, 05:30 PM - 08:30 PM",
+        available: true,
+        departments: "Cardiology, Heart Care",
+        totalBeds: 8,
+        availableBeds: 3,
+        icuBedsAvailable: 1,
+        hasEmergency24x7: false,
+        emergencyPhone: "9811223344",
+        facilities: "Echocardiogram, TMT, Holter Monitoring, ECG",
+        status: "approved",
+        rating: 4.9,
+        totalOrders: 310,
+        totalRevenue: 248000,
+        openingHours: "10:00 AM - 08:30 PM",
+        deliveryRadiusKm: 15,
+        verified: true,
+        image: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=500&q=80",
+        joinedAt: "2025-09-18T00:00:00.000Z",
+      },
+      {
+        id: 9,
+        userId: 1,
+        businessName: "Ramesh Verma Certified Plumbing",
+        ownerName: "Ramesh Verma",
+        category: "Services",
+        city: "Bengaluru",
+        address: "7th Cross, Koramangala 4th Block, Bengaluru",
+        phone: "9845001122",
+        email: "ramesh.plumb@partner.ezy1.in",
+        description: "Master plumber for residential leak detection, pipe replacement, bathroom fixtures, and drainage clearance.",
+        serviceType: "Certified Plumbing & Pipe Repair",
+        pricePerHour: 249,
+        experienceYears: 9,
+        serviceArea: "Bengaluru South & Central",
+        available: true,
+        status: "approved",
+        rating: 4.8,
+        totalOrders: 188,
+        totalRevenue: 46800,
+        openingHours: "08:00 AM - 08:00 PM",
+        deliveryRadiusKm: 18,
+        verified: true,
+        image: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500&q=80",
+        joinedAt: "2025-11-20T00:00:00.000Z",
+      },
+      {
+        id: 10,
+        userId: 1,
+        businessName: "Manoj Woodcraft & Modular Furniture",
+        ownerName: "Manoj Sharma",
+        category: "Services",
+        city: "Mumbai",
+        address: "Shop 4, Linking Road, Bandra West, Mumbai",
+        phone: "9712334455",
+        email: "manoj.carpentry@partner.ezy1.in",
+        description: "Custom carpentry, wardrobe repairs, door hinges, lock installations, and modular fittings.",
+        serviceType: "Woodwork & Carpentry Specialist",
+        pricePerHour: 349,
+        experienceYears: 14,
+        serviceArea: "Western Suburbs & South Mumbai",
+        available: true,
+        status: "approved",
+        rating: 4.7,
+        totalOrders: 112,
+        totalRevenue: 39100,
+        openingHours: "09:00 AM - 08:00 PM",
+        deliveryRadiusKm: 15,
+        verified: true,
+        image: "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=500&q=80",
+        joinedAt: "2025-12-01T00:00:00.000Z",
+      },
+      {
+        id: 11,
+        userId: 1,
+        businessName: "Express Intercity Bus & Travel Fleet",
+        ownerName: "Sunil Hegde",
+        category: "Transport",
+        city: "Bengaluru",
+        address: "Satellite Bus Station, Mysore Road, Bengaluru",
+        phone: "9988776655",
+        email: "express.bus@partner.ezy1.in",
+        description: "Multi-axle Volvo AC Sleeper coaches connecting major cities with guaranteed reserved seating and GPS tracking.",
+        vehicleType: "Volvo Multi-Axle AC Sleeper",
+        routeName: "Bengaluru - Mysore - Mangaluru Corridor",
+        fare: 850,
+        availableSeats: 32,
+        timings: "Scheduled Daily Departures",
+        licenseNumber: "KA-05-2023-EX",
+        available: true,
+        status: "approved",
+        rating: 4.8,
+        totalOrders: 650,
+        totalRevenue: 552500,
+        openingHours: "06:00 AM - 11:30 PM",
+        deliveryRadiusKm: 250,
+        verified: true,
+        image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=500&q=80",
+        joinedAt: "2025-08-14T00:00:00.000Z",
+      },
+      {
+        id: 12,
+        userId: 1,
+        businessName: "Mumbai Electric Green Cabs",
+        ownerName: "Vikas Patil",
+        category: "Transport",
+        city: "Mumbai",
+        address: "Airport Road, Vile Parle East, Mumbai",
+        phone: "9820011223",
+        email: "green.cabs@partner.ezy1.in",
+        description: "Zero-emission electric cabs for city commutes, airport transfers, and corporate rentals.",
+        vehicleType: "Electric Sedan (EV)",
+        routeName: "Chhatrapati Shivaji Maharaj Airport Express",
+        fare: 599,
+        availableSeats: 4,
+        timings: "24x7 Active",
+        licenseNumber: "MH-02-2024-EV",
+        available: true,
+        status: "approved",
+        rating: 4.9,
+        totalOrders: 580,
+        totalRevenue: 347420,
+        openingHours: "24x7 Active",
+        deliveryRadiusKm: 40,
+        verified: true,
+        image: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=500&q=80",
+        joinedAt: "2025-10-05T00:00:00.000Z",
+      },
     ],
     products: [
       {
@@ -367,6 +538,62 @@ function getInitialSeedData() {
         image: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500&q=80",
         createdAt: "2026-01-06T00:00:00.000Z",
       },
+      {
+        id: 3,
+        vendorId: 9,
+        name: "Bathroom Leak Detection & Pipe Replacement",
+        description: "Advanced ultrasonic pipe leak diagnosis, valve replacement, and drainage restoration.",
+        category: "Services",
+        price: 249,
+        isAvailable: true,
+        published: true,
+        rating: 4.9,
+        providerName: "Ramesh Verma",
+        image: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500&q=80",
+        createdAt: "2026-01-08T00:00:00.000Z",
+      },
+      {
+        id: 4,
+        vendorId: 10,
+        name: "Modular Kitchen Cabinet & Hinge Repair",
+        description: "Soft-close hydraulic hinge installation, drawer alignment, and waterproof shelf fixes.",
+        category: "Services",
+        price: 349,
+        isAvailable: true,
+        published: true,
+        rating: 4.7,
+        providerName: "Manoj Sharma",
+        image: "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=500&q=80",
+        createdAt: "2026-01-12T00:00:00.000Z",
+      },
+      {
+        id: 5,
+        vendorId: 6,
+        name: "General Health & Preventive Family Consultation",
+        description: "In-depth health assessment, blood pressure & vitals check, lifestyle and prescription guidance.",
+        category: "Healthcare",
+        price: 300,
+        isAvailable: true,
+        published: true,
+        rating: 4.8,
+        providerName: "Dr. Priya Sharma",
+        image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=500&q=80",
+        createdAt: "2026-01-15T00:00:00.000Z",
+      },
+      {
+        id: 6,
+        vendorId: 8,
+        name: "Comprehensive Cardio Checkup & Consultation",
+        description: "Heart health screening, resting ECG review, cardiovascular risk assessment and consultation.",
+        category: "Healthcare",
+        price: 800,
+        isAvailable: true,
+        published: true,
+        rating: 4.9,
+        providerName: "Dr. Rajesh Kumar",
+        image: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=500&q=80",
+        createdAt: "2026-01-18T00:00:00.000Z",
+      },
     ],
     categories: [
       { id: 1, name: "Grocery", slug: "grocery", description: "Daily essentials, grains, spices & home provisions", orderIndex: 1 },
@@ -476,14 +703,27 @@ export function getDb() {
 
   if (!memDb.changeLogs) memDb.changeLogs = [];
   if (!memDb.services) memDb.services = [];
-  if (!memDb.vendors.find((v) => Number(v.id) === 6)) {
-    const seed = getInitialSeedData();
-    const docVendor = seed.vendors.find((v) => Number(v.id) === 6);
-    if (docVendor) memDb.vendors.push(docVendor);
-    const docUser = seed.users.find((u) => Number(u.id) === 6);
-    if (docUser && !memDb.users.find((u) => Number(u.id) === 6)) memDb.users.push(docUser);
-    saveDb();
-  }
+  const seed = getInitialSeedData();
+  let dbChanged = false;
+  seed.vendors.forEach((sv) => {
+    if (!memDb.vendors.find((v) => Number(v.id) === Number(sv.id))) {
+      memDb.vendors.push(sv);
+      dbChanged = true;
+    }
+  });
+  seed.services.forEach((ss) => {
+    if (!memDb.services.find((s) => Number(s.id) === Number(ss.id))) {
+      memDb.services.push(ss);
+      dbChanged = true;
+    }
+  });
+  seed.users.forEach((su) => {
+    if (!memDb.users.find((u) => Number(u.id) === Number(su.id))) {
+      memDb.users.push(su);
+      dbChanged = true;
+    }
+  });
+  if (dbChanged) saveDb();
 
   return memDb;
 }
@@ -537,15 +777,179 @@ export function createUser(userData) {
   return newUser;
 }
 
-// Vendors / Partners
+// Generic High-Scale Query & Pagination Engine (Requirements 1, 2, 3, 5, 6, 7, 14)
+export function paginateCollection(items, options = {}) {
+  let result = [...items];
+
+  // 1. Multi-field search (server-side, Requirement 5)
+  if (options.search && String(options.search).trim()) {
+    const q = String(options.search).toLowerCase().trim();
+    const searchFields = options.searchFields || [
+      "businessName",
+      "name",
+      "ownerName",
+      "category",
+      "city",
+      "phone",
+      "email",
+      "description",
+      "serviceType",
+      "departments",
+      "doctorName",
+      "specialization",
+      "sku",
+      "orderNumber",
+      "customerName",
+    ];
+    result = result.filter((item) => {
+      return searchFields.some((field) => {
+        const val = item[field];
+        if (val === undefined || val === null) return false;
+        return String(val).toLowerCase().includes(q);
+      });
+    });
+  }
+
+  // 2. Exact Filters (server-side, Requirement 6)
+  if (options.filters && typeof options.filters === "object") {
+    Object.entries(options.filters).forEach(([key, val]) => {
+      if (val === undefined || val === null || val === "" || val === "all") return;
+      result = result.filter((item) => {
+        const itemVal = item[key];
+        if (itemVal === undefined || itemVal === null) return false;
+        if (typeof itemVal === "boolean") {
+          return String(itemVal) === String(val);
+        }
+        if (typeof itemVal === "number") {
+          return Number(itemVal) === Number(val);
+        }
+        return String(itemVal).toLowerCase() === String(val).toLowerCase();
+      });
+    });
+  }
+
+  // 3. Sorting (server-side, Requirement 7)
+  if (options.sortBy) {
+    const sortField = options.sortBy;
+    const isDesc = options.sortOrder === "desc" || options.sortOrder === "DESC";
+    result.sort((a, b) => {
+      const valA = a[sortField];
+      const valB = b[sortField];
+      if (valA === undefined || valA === null) return 1;
+      if (valB === undefined || valB === null) return -1;
+
+      if (typeof valA === "number" && typeof valB === "number") {
+        return isDesc ? valB - valA : valA - valB;
+      }
+      return isDesc
+        ? String(valB).localeCompare(String(valA))
+        : String(valA).localeCompare(String(valB));
+    });
+  }
+
+  // 4. Total count before pagination
+  const total = result.length;
+
+  // 5. Pagination limits (Requirement 14: cap limit <= 100, default 25)
+  const page = Math.max(1, parseInt(options.page, 10) || 1);
+  const requestedLimit = parseInt(options.limit, 10) || 25;
+  const limit = Math.min(100, Math.max(1, requestedLimit));
+  const totalPages = Math.ceil(total / limit) || 1;
+  const startIndex = (page - 1) * limit;
+  const paginatedItems = result.slice(startIndex, startIndex + limit);
+
+  // 6. Selective Field Projection (Requirement 3: List endpoint summary)
+  let projectedItems = paginatedItems;
+  if (options.fields && Array.isArray(options.fields) && options.fields.length > 0) {
+    projectedItems = paginatedItems.map((item) => {
+      const subset = {};
+      options.fields.forEach((f) => {
+        if (item[f] !== undefined) subset[f] = item[f];
+      });
+      return subset;
+    });
+  }
+
+  return {
+    items: projectedItems,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages,
+      hasNext: page < totalPages,
+      hasPrev: page > 1,
+    },
+  };
+}
+
+// Vendors / Partners (Server-Side Paginated, Searchable, Filterable)
 export function getVendors(filter = {}) {
   const db = getDb();
-  return db.vendors.filter((v) => {
-    if (filter.category && v.category.toLowerCase() !== filter.category.toLowerCase()) return false;
-    if (filter.city && v.city.toLowerCase() !== filter.city.toLowerCase()) return false;
-    if (filter.status && v.status !== filter.status) return false;
-    return true;
+  const { page, limit, search, sortBy, sortOrder, summary, paginate, ...exactFilters } = filter;
+
+  const searchFields = [
+    "businessName",
+    "ownerName",
+    "category",
+    "city",
+    "phone",
+    "email",
+    "description",
+    "serviceType",
+    "departments",
+    "doctorName",
+    "specialization",
+  ];
+
+  const summaryFields =
+    summary === "true" || summary === true
+      ? [
+          "id",
+          "businessName",
+          "ownerName",
+          "category",
+          "city",
+          "phone",
+          "email",
+          "status",
+          "rating",
+          "verified",
+          "totalOrders",
+          "totalRevenue",
+          "image",
+          "openingHours",
+          "deliveryRadiusKm",
+          "availableBeds",
+          "totalBeds",
+          "icuBedsAvailable",
+          "consultationFee",
+          "pricePerHour",
+          "fare",
+          "updatedAt",
+          "joinedAt",
+        ]
+      : null;
+
+  const result = paginateCollection(db.vendors, {
+    search,
+    searchFields,
+    filters: exactFilters,
+    sortBy: sortBy || "id",
+    sortOrder: sortOrder || "asc",
+    page,
+    limit,
+    fields: summaryFields,
   });
+
+  if (page !== undefined || limit !== undefined || paginate === "true" || paginate === true) {
+    return result;
+  }
+
+  // Preserve backwards-compatibility: array with pagination metadata attached
+  const items = result.items;
+  items.pagination = result.pagination;
+  return items;
 }
 
 export function getVendorById(id) {
@@ -628,15 +1032,152 @@ export function recordChangeLog(entry) {
 export function getChangeLogs(filter = {}) {
   const db = getDb();
   if (!db.changeLogs) db.changeLogs = [];
-  return db.changeLogs.filter((log) => {
-    if (filter.vendorId && Number(log.vendorId) !== Number(filter.vendorId)) return false;
-    if (filter.userId && Number(log.userId) !== Number(filter.userId)) return false;
-    return true;
+  const { page, limit, search, sortBy, sortOrder, paginate, ...exactFilters } = filter;
+
+  const result = paginateCollection(db.changeLogs, {
+    search,
+    searchFields: ["partnerName", "fieldChanged", "previousValue", "newValue"],
+    filters: exactFilters,
+    sortBy: sortBy || "id",
+    sortOrder: sortOrder || "desc",
+    page,
+    limit,
   });
+
+  if (page !== undefined || limit !== undefined || paginate === "true" || paginate === true) {
+    return result;
+  }
+  const items = result.items;
+  items.pagination = result.pagination;
+  return items;
 }
 
-export function getChangeLogsByVendorId(vendorId) {
-  return getChangeLogs({ vendorId: Number(vendorId) });
+export function getChangeLogsByVendorId(vendorId, options = {}) {
+  return getChangeLogs({ vendorId: Number(vendorId), ...options });
+}
+
+// Bulk Actions on Vendors (Requirements 17 & 18: controlled, capped, with audit logs)
+export function bulkUpdateVendors(vendorIds, action, authUser = null) {
+  const db = getDb();
+  if (!Array.isArray(vendorIds)) {
+    return { successful: 0, failed: 0, errors: ["vendorIds must be an array."] };
+  }
+
+  // Enforce max batch limit of 100 items
+  const safeIds = vendorIds.slice(0, 100);
+  let successful = 0;
+  let failed = 0;
+  const errors = [];
+
+  safeIds.forEach((rawId) => {
+    const id = Number(rawId);
+    const vendor = db.vendors.find((v) => Number(v.id) === id);
+    if (!vendor) {
+      failed++;
+      errors.push(`Vendor #${id} not found.`);
+      return;
+    }
+
+    let statusVal = vendor.status;
+    if (action === "approve" || action === "activate") {
+      statusVal = "approved";
+    } else if (action === "suspend") {
+      statusVal = "suspended";
+    } else if (action === "pending") {
+      statusVal = "pending";
+    }
+
+    if (action === "delete") {
+      const idx = db.vendors.findIndex((v) => Number(v.id) === id);
+      if (idx !== -1) {
+        db.vendors.splice(idx, 1);
+        recordChangeLog({
+          vendorId: id,
+          userId: authUser ? authUser.id : 1,
+          partnerName: vendor.businessName,
+          fieldChanged: "status",
+          previousValue: vendor.status,
+          newValue: "DELETED",
+          operation: "DELETE",
+          status: "Applied",
+        });
+        successful++;
+      }
+      return;
+    }
+
+    if (vendor.status !== statusVal) {
+      const prev = vendor.status;
+      vendor.status = statusVal;
+      vendor.updatedAt = new Date().toISOString();
+      recordChangeLog({
+        vendorId: id,
+        userId: authUser ? authUser.id : 1,
+        partnerName: vendor.businessName,
+        fieldChanged: "status",
+        previousValue: prev,
+        newValue: statusVal,
+        operation: "BULK_UPDATE",
+        status: "Applied",
+      });
+    }
+    successful++;
+  });
+
+  saveDb();
+  return { successful, failed, errors };
+}
+
+// Lightweight Dashboard Aggregate Stats (Requirement 10: precomputed / aggregate without table dumps)
+export function getAdminStats() {
+  const db = getDb();
+  const totalRevenue = db.orders.reduce(
+    (acc, o) => acc + (o.paymentStatus === "paid" ? Number(o.totalAmount || 0) : 0),
+    0
+  );
+  const platformCommission = Math.round(totalRevenue * 0.05);
+
+  const activeVendors = db.vendors.filter((v) => v.status === "approved" || v.status === "active").length;
+  const totalHospitals = db.vendors.filter((v) => v.category === "Healthcare").length;
+  const totalAvailableBeds = db.vendors
+    .filter((v) => v.category === "Healthcare")
+    .reduce((acc, v) => acc + Number(v.availableBeds || 0), 0);
+  const totalIcuBeds = db.vendors
+    .filter((v) => v.category === "Healthcare")
+    .reduce((acc, v) => acc + Number(v.icuBedsAvailable || 0), 0);
+  const activeServices = db.services.filter((s) => s.isAvailable !== false).length;
+  const pendingApplications = db.partnerApplications.filter(
+    (a) => a.status === "PENDING" || a.status === "UNDER_REVIEW"
+  ).length;
+  const totalOrders = db.orders.length;
+  const deliveredOrders = db.orders.filter((o) => o.status === "DELIVERED").length;
+
+  return {
+    overview: {
+      totalVendors: db.vendors.length,
+      activeVendors,
+      totalProducts: db.products.length,
+      totalServices: db.services.length,
+      activeServices,
+      totalOrders,
+      deliveredOrders,
+      totalRevenue,
+      platformCommission,
+      partnerPayouts: totalRevenue - platformCommission,
+      pendingApplications,
+      totalHospitals,
+      totalAvailableBeds,
+      totalIcuBeds,
+    },
+    categoryBreakdown: {
+      grocery: db.vendors.filter((v) => v.category === "Grocery").length,
+      pharmacy: db.vendors.filter((v) => v.category === "Pharmacy").length,
+      healthcare: db.vendors.filter((v) => v.category === "Healthcare").length,
+      services: db.vendors.filter((v) => v.category === "Services").length,
+      transport: db.vendors.filter((v) => v.category === "Transport").length,
+    },
+    lastUpdated: new Date().toISOString(),
+  };
 }
 
 export function createVendor(data) {
@@ -668,18 +1209,48 @@ export function createVendor(data) {
   return newVendor;
 }
 
-// Products
+// Products (Server-Side Paginated, Searchable, Filterable)
 export function getProducts(filter = {}) {
   const db = getDb();
-  return db.products.filter((p) => {
-    if (filter.vendorId && Number(p.vendorId) !== Number(filter.vendorId)) return false;
-    if (filter.category && p.category.toLowerCase() !== filter.category.toLowerCase()) return false;
-    if (filter.search) {
-      const q = filter.search.toLowerCase();
-      return p.name.toLowerCase().includes(q) || (p.description && p.description.toLowerCase().includes(q));
-    }
-    return true;
+  const { page, limit, search, sortBy, sortOrder, summary, paginate, ...exactFilters } = filter;
+
+  const searchFields = ["name", "sku", "description", "category"];
+  const summaryFields =
+    summary === "true" || summary === true
+      ? [
+          "id",
+          "vendorId",
+          "name",
+          "sku",
+          "price",
+          "mrp",
+          "category",
+          "stockCount",
+          "inStock",
+          "isAvailable",
+          "published",
+          "images",
+          "createdAt",
+        ]
+      : null;
+
+  const result = paginateCollection(db.products, {
+    search,
+    searchFields,
+    filters: exactFilters,
+    sortBy: sortBy || "id",
+    sortOrder: sortOrder || "asc",
+    page,
+    limit,
+    fields: summaryFields,
   });
+
+  if (page !== undefined || limit !== undefined || paginate === "true" || paginate === true) {
+    return result;
+  }
+  const items = result.items;
+  items.pagination = result.pagination;
+  return items;
 }
 
 export function getProductById(id) {
@@ -738,11 +1309,24 @@ export function deleteProduct(id) {
 
 export function getServices(filter = {}) {
   const db = getDb();
-  return db.services.filter((s) => {
-    if (filter.vendorId && Number(s.vendorId) !== Number(filter.vendorId)) return false;
-    if (filter.category && s.category.toLowerCase() !== filter.category.toLowerCase()) return false;
-    return true;
+  const { page, limit, search, sortBy, sortOrder, paginate, ...exactFilters } = filter;
+
+  const result = paginateCollection(db.services, {
+    search,
+    searchFields: ["name", "description", "category", "providerName"],
+    filters: exactFilters,
+    sortBy: sortBy || "id",
+    sortOrder: sortOrder || "asc",
+    page,
+    limit,
   });
+
+  if (page !== undefined || limit !== undefined || paginate === "true" || paginate === true) {
+    return result;
+  }
+  const items = result.items;
+  items.pagination = result.pagination;
+  return items;
 }
 
 export function getServiceById(id) {
@@ -803,14 +1387,27 @@ export function getCategories() {
   return db.categories || [];
 }
 
-// Orders
+// Orders (Server-Side Paginated, Searchable, Filterable)
 export function getOrders(filter = {}) {
   const db = getDb();
-  return db.orders.filter((o) => {
-    if (filter.userId && Number(o.userId) !== Number(filter.userId)) return false;
-    if (filter.vendorId && Number(o.vendorId) !== Number(filter.vendorId)) return false;
-    return true;
+  const { page, limit, search, sortBy, sortOrder, paginate, ...exactFilters } = filter;
+
+  const result = paginateCollection(db.orders, {
+    search,
+    searchFields: ["orderNumber", "customerName", "customerPhone", "vendorName", "deliveryAddress"],
+    filters: exactFilters,
+    sortBy: sortBy || "id",
+    sortOrder: sortOrder || "desc",
+    page,
+    limit,
   });
+
+  if (page !== undefined || limit !== undefined || paginate === "true" || paginate === true) {
+    return result;
+  }
+  const items = result.items;
+  items.pagination = result.pagination;
+  return items;
 }
 
 export function createOrder(data) {
@@ -848,13 +1445,27 @@ export function updateOrderStatus(id, status) {
   return order;
 }
 
-// Partner Applications
+// Partner Applications (Server-Side Paginated, Searchable, Filterable)
 export function getPartnerApplications(filter = {}) {
   const db = getDb();
-  return db.partnerApplications.filter((app) => {
-    if (filter.status && app.status.toUpperCase() !== filter.status.toUpperCase()) return false;
-    return true;
+  const { page, limit, search, sortBy, sortOrder, paginate, ...exactFilters } = filter;
+
+  const result = paginateCollection(db.partnerApplications, {
+    search,
+    searchFields: ["businessName", "ownerName", "category", "email", "phone", "city"],
+    filters: exactFilters,
+    sortBy: sortBy || "id",
+    sortOrder: sortOrder || "desc",
+    page,
+    limit,
   });
+
+  if (page !== undefined || limit !== undefined || paginate === "true" || paginate === true) {
+    return result;
+  }
+  const items = result.items;
+  items.pagination = result.pagination;
+  return items;
 }
 
 export function createPartnerApplication(data) {
