@@ -32,11 +32,30 @@ function setCorsHeaders(req, res) {
   res.setHeader("Access-Control-Allow-Credentials", "true");
 }
 
-// Helper to parse JSON body
+// Helper to parse JSON body across standard Node and Vercel Serverless
 async function parseBody(req) {
-  if (req.body && typeof req.body === "object") {
-    return req.body;
+  if (req.body !== undefined && req.body !== null) {
+    if (typeof req.body === "object") return req.body;
+    if (typeof req.body === "string") {
+      try {
+        return JSON.parse(req.body);
+      } catch {
+        return {};
+      }
+    }
+    if (Buffer.isBuffer(req.body)) {
+      try {
+        return JSON.parse(req.body.toString("utf-8"));
+      } catch {
+        return {};
+      }
+    }
   }
+
+  if (req.readableEnded) {
+    return {};
+  }
+
   return new Promise((resolve) => {
     let data = "";
     req.on("data", (chunk) => {
@@ -49,6 +68,7 @@ async function parseBody(req) {
         resolve({});
       }
     });
+    req.on("error", () => resolve({}));
   });
 }
 

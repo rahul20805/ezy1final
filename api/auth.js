@@ -23,6 +23,7 @@ export function verifyPassword(password, storedHash) {
     const [salt, key] = storedHash.split(":");
     const keyBuffer = Buffer.from(key, "hex");
     const derivedKey = crypto.scryptSync(password, salt, 64);
+    if (keyBuffer.length !== derivedKey.length) return false;
     return crypto.timingSafeEqual(keyBuffer, derivedKey);
   }
 
@@ -64,7 +65,10 @@ export function verifyJwt(token) {
     .update(`${encodedHeader}.${encodedPayload}`)
     .digest("base64url");
 
-  if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))) {
+  const sigBuffer = Buffer.from(signature);
+  const expBuffer = Buffer.from(expectedSignature);
+  if (sigBuffer.length !== expBuffer.length) return null;
+  if (!crypto.timingSafeEqual(sigBuffer, expBuffer)) {
     return null;
   }
 
