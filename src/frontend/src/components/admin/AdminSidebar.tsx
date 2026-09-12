@@ -67,6 +67,7 @@ import { useStoreData } from "../../lib/storeData";
 export type AdminSectionId =
   // 1. Main
   | "dashboard"
+  | "my_information"
   | "analytics"
   | "live_activity"
   // 2. Marketplace
@@ -148,6 +149,7 @@ export const ADMIN_NAV_GROUPS: NavGroup[] = [
     icon: LayoutDashboard,
     items: [
       { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { id: "my_information", label: "My Information", icon: UserCheck },
       { id: "analytics", label: "Analytics", icon: BarChart3 },
       {
         id: "live_activity",

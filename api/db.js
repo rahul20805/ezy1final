@@ -81,6 +81,19 @@ function getInitialSeedData() {
         status: "active",
         createdAt: "2026-01-10T00:00:00.000Z",
       },
+      {
+        id: 6,
+        username: "dr_priya",
+        passwordHash: hashPassword("partner123"),
+        name: "Dr. Priya Sharma",
+        email: "dr.priya@partner.ezy1.in",
+        phone: "9823456789",
+        city: "Mumbai",
+        role: "partner",
+        vendorId: 6,
+        status: "active",
+        createdAt: "2026-01-15T00:00:00.000Z",
+      },
     ],
     vendors: [
       {
@@ -136,6 +149,11 @@ function getInitialSeedData() {
         phone: "9812345670",
         email: "suresh.services@partner.ezy1.in",
         description: "Professional residential electrical installation, switchboard repair, appliance maintenance.",
+        serviceType: "Electrical & Home Maintenance",
+        pricePerHour: 299,
+        experienceYears: 8,
+        serviceArea: "Bengaluru Central & East",
+        available: true,
         status: "approved",
         rating: 4.9,
         totalOrders: 145,
@@ -157,6 +175,13 @@ function getInitialSeedData() {
         phone: "9900112233",
         email: "rajesh.transport@partner.ezy1.in",
         description: "Reliable airport cabs, city rides, and intracity parcel transport.",
+        vehicleType: "Sedan & Express Van",
+        routeName: "Bengaluru City & Airport Express",
+        fare: 499,
+        availableSeats: 4,
+        timings: "24x7 Active",
+        licenseNumber: "KA-01-2024-TR",
+        available: true,
         status: "approved",
         rating: 4.7,
         totalOrders: 420,
@@ -178,6 +203,13 @@ function getInitialSeedData() {
         phone: "080-25024444",
         email: "emergency@manipal.health",
         description: "24x7 Trauma care, ICU beds, general physician appointments, and diagnostic laboratories.",
+        departments: "Emergency, Cardiology, Neurology, Orthopedics, Critical Care",
+        totalBeds: 350,
+        availableBeds: 42,
+        icuBedsAvailable: 8,
+        hasEmergency24x7: true,
+        emergencyPhone: "080-25024444",
+        facilities: "24x7 Emergency, ICU, Pharmacy, Ambulance, Blood Bank",
         status: "approved",
         rating: 4.9,
         totalOrders: 980,
@@ -187,6 +219,41 @@ function getInitialSeedData() {
         verified: true,
         image: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=500&q=80",
         joinedAt: "2025-08-20T00:00:00.000Z",
+      },
+      {
+        id: 6,
+        userId: 6,
+        businessName: "Dr. Priya Sharma Clinic",
+        ownerName: "Dr. Priya Sharma",
+        category: "Healthcare",
+        city: "Mumbai",
+        address: "Flat 101, Om Sai Chambers, Dadar West, Mumbai",
+        phone: "9823456789",
+        email: "dr.priya@partner.ezy1.in",
+        description: "Experienced General Physician & Internal Medicine Specialist providing comprehensive family health consultations.",
+        doctorName: "Dr. Priya Sharma",
+        specialization: "General Physician & Internal Medicine",
+        qualifications: "MBBS, MD (General Medicine)",
+        experienceYears: 12,
+        consultationFee: 300,
+        timings: "09:00 AM - 01:00 PM, 05:00 PM - 08:30 PM",
+        available: true,
+        departments: "General Medicine, Preventive Healthcare",
+        totalBeds: 5,
+        availableBeds: 2,
+        icuBedsAvailable: 0,
+        hasEmergency24x7: false,
+        emergencyPhone: "9823456789",
+        facilities: "Consultation, ECG, Basic Lab Tests, Vaccination",
+        status: "approved",
+        rating: 4.8,
+        totalOrders: 85,
+        totalRevenue: 25500,
+        openingHours: "09:00 AM - 08:30 PM",
+        deliveryRadiusKm: 10,
+        verified: true,
+        image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=500&q=80",
+        joinedAt: "2026-01-15T00:00:00.000Z",
       },
     ],
     products: [
@@ -346,6 +413,32 @@ function getInitialSeedData() {
         createdAt: "2026-08-15T08:30:00.000Z",
       },
     ],
+    changeLogs: [
+      {
+        id: 1,
+        vendorId: 1,
+        userId: 2,
+        partnerName: "Sharma Kirana Store",
+        fieldChanged: "openingHours",
+        previousValue: "08:00 AM - 09:00 PM",
+        newValue: "07:00 AM - 10:00 PM",
+        timestamp: "2026-09-10T09:15:00.000Z",
+        operation: "UPDATE",
+        status: "Applied",
+      },
+      {
+        id: 2,
+        vendorId: 5,
+        userId: 1,
+        partnerName: "Manipal Multi-Specialty Hospital",
+        fieldChanged: "availableBeds",
+        previousValue: "38",
+        newValue: "42",
+        timestamp: "2026-09-12T11:30:00.000Z",
+        operation: "UPDATE",
+        status: "Applied",
+      },
+    ],
     systemSettings: {
       brandName: "Ezy1",
       tagline: "Everything You Need, One Platform",
@@ -361,7 +454,11 @@ function getInitialSeedData() {
 let memDb = null;
 
 export function getDb() {
-  if (memDb) return memDb;
+  if (memDb) {
+    if (!memDb.changeLogs) memDb.changeLogs = [];
+    if (!memDb.services) memDb.services = [];
+    return memDb;
+  }
 
   try {
     if (fs.existsSync(STORAGE_FILE)) {
@@ -374,6 +471,17 @@ export function getDb() {
 
   if (!memDb) {
     memDb = getInitialSeedData();
+    saveDb();
+  }
+
+  if (!memDb.changeLogs) memDb.changeLogs = [];
+  if (!memDb.services) memDb.services = [];
+  if (!memDb.vendors.find((v) => Number(v.id) === 6)) {
+    const seed = getInitialSeedData();
+    const docVendor = seed.vendors.find((v) => Number(v.id) === 6);
+    if (docVendor) memDb.vendors.push(docVendor);
+    const docUser = seed.users.find((u) => Number(u.id) === 6);
+    if (docUser && !memDb.users.find((u) => Number(u.id) === 6)) memDb.users.push(docUser);
     saveDb();
   }
 
@@ -450,20 +558,85 @@ export function getVendorByUserId(userId) {
   return db.vendors.find((v) => Number(v.userId) === Number(userId)) || null;
 }
 
-export function updateVendor(id, updates) {
+const IMMUTABLE_FIELDS = ["id", "userId"];
+const ADMIN_ONLY_FIELDS = ["rating", "totalOrders", "totalRevenue", "verified", "status"];
+
+export function updateVendor(id, updates, authUser = null) {
   const db = getDb();
   const index = db.vendors.findIndex((v) => Number(v.id) === Number(id));
   if (index === -1) return null;
 
-  // Prevent modifying immutable ID
-  const { id: _, userId: __, ...safeUpdates } = updates;
+  const existingVendor = db.vendors[index];
+  const safeUpdates = { ...updates };
+
+  // Strip immutable fields
+  IMMUTABLE_FIELDS.forEach((f) => delete safeUpdates[f]);
+
+  // Strip admin-only fields if user is not super_owner/admin
+  const isAdmin = authUser && (authUser.role === "super_owner" || authUser.role === "SUPER_ADMIN" || authUser.role === "ADMIN");
+  if (!isAdmin) {
+    ADMIN_ONLY_FIELDS.forEach((f) => delete safeUpdates[f]);
+  }
+
+  // Audit change tracking: record diff in changeLogs
+  if (!db.changeLogs) db.changeLogs = [];
+  Object.keys(safeUpdates).forEach((key) => {
+    const oldVal = existingVendor[key];
+    const newVal = safeUpdates[key];
+    if (oldVal !== undefined && newVal !== undefined && JSON.stringify(oldVal) !== JSON.stringify(newVal)) {
+      const nextLogId = db.changeLogs.length ? Math.max(...db.changeLogs.map((c) => c.id)) + 1 : 1;
+      db.changeLogs.unshift({
+        id: nextLogId,
+        vendorId: Number(id),
+        userId: authUser ? Number(authUser.id) : existingVendor.userId,
+        partnerName: existingVendor.businessName,
+        fieldChanged: key,
+        previousValue: typeof oldVal === "object" ? JSON.stringify(oldVal) : String(oldVal ?? ""),
+        newValue: typeof newVal === "object" ? JSON.stringify(newVal) : String(newVal ?? ""),
+        timestamp: new Date().toISOString(),
+        operation: "UPDATE",
+        status: "Applied",
+      });
+    }
+  });
+
   db.vendors[index] = {
-    ...db.vendors[index],
+    ...existingVendor,
     ...safeUpdates,
     updatedAt: new Date().toISOString(),
   };
   saveDb();
   return db.vendors[index];
+}
+
+export function recordChangeLog(entry) {
+  const db = getDb();
+  if (!db.changeLogs) db.changeLogs = [];
+  const nextId = db.changeLogs.length ? Math.max(...db.changeLogs.map((c) => c.id)) + 1 : 1;
+  const newLog = {
+    id: nextId,
+    timestamp: new Date().toISOString(),
+    status: "Applied",
+    operation: "UPDATE",
+    ...entry,
+  };
+  db.changeLogs.unshift(newLog);
+  saveDb();
+  return newLog;
+}
+
+export function getChangeLogs(filter = {}) {
+  const db = getDb();
+  if (!db.changeLogs) db.changeLogs = [];
+  return db.changeLogs.filter((log) => {
+    if (filter.vendorId && Number(log.vendorId) !== Number(filter.vendorId)) return false;
+    if (filter.userId && Number(log.userId) !== Number(filter.userId)) return false;
+    return true;
+  });
+}
+
+export function getChangeLogsByVendorId(vendorId) {
+  return getChangeLogs({ vendorId: Number(vendorId) });
 }
 
 export function createVendor(data) {
@@ -563,7 +736,6 @@ export function deleteProduct(id) {
   return true;
 }
 
-// Services
 export function getServices(filter = {}) {
   const db = getDb();
   return db.services.filter((s) => {
@@ -571,6 +743,58 @@ export function getServices(filter = {}) {
     if (filter.category && s.category.toLowerCase() !== filter.category.toLowerCase()) return false;
     return true;
   });
+}
+
+export function getServiceById(id) {
+  const db = getDb();
+  return db.services.find((s) => Number(s.id) === Number(id)) || null;
+}
+
+export function createService(data) {
+  const db = getDb();
+  const nextId = db.services.length ? Math.max(...db.services.map((s) => s.id)) + 1 : 1;
+  const newService = {
+    id: nextId,
+    vendorId: Number(data.vendorId),
+    name: data.name,
+    description: data.description || "",
+    category: data.category || "Services",
+    price: Number(data.price) || 0,
+    isAvailable: data.isAvailable !== false,
+    published: data.published !== false,
+    rating: 5.0,
+    providerName: data.providerName || "",
+    image: data.image || "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80",
+    createdAt: new Date().toISOString(),
+  };
+  db.services.push(newService);
+  saveDb();
+  return newService;
+}
+
+export function updateService(id, updates) {
+  const db = getDb();
+  const index = db.services.findIndex((s) => Number(s.id) === Number(id));
+  if (index === -1) return null;
+
+  const { id: _, vendorId: __, ...safeUpdates } = updates;
+  db.services[index] = {
+    ...db.services[index],
+    ...safeUpdates,
+    updatedAt: new Date().toISOString(),
+  };
+  saveDb();
+  return db.services[index];
+}
+
+export function deleteService(id) {
+  const db = getDb();
+  const index = db.services.findIndex((s) => Number(s.id) === Number(id));
+  if (index === -1) return false;
+
+  db.services.splice(index, 1);
+  saveDb();
+  return true;
 }
 
 // Categories

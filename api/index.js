@@ -3,23 +3,30 @@ import {
   createOrder,
   createPartnerApplication,
   createProduct,
+  createService,
   createUser,
   createVendor,
   deleteProduct,
+  deleteService,
   findUserByEmail,
   findUserById,
   findUserByUsername,
   getCategories,
+  getChangeLogs,
+  getChangeLogsByVendorId,
   getOrders,
   getPartnerApplications,
   getProductById,
   getProducts,
+  getServiceById,
   getServices,
   getVendorById,
   getVendors,
+  recordChangeLog,
   updateOrderStatus,
   updatePartnerApplicationStatus,
   updateProduct,
+  updateService,
   updateVendor,
 } from "./db.js";
 
@@ -225,6 +232,34 @@ export default async function handler(req, res) {
       return sendJson(res, 200, vendors);
     }
 
+    // Partner Audit / Change History
+    const vendorChangesMatch = pathname.match(/^\/vendors\/(\d+)\/changes$/);
+    if (vendorChangesMatch && method === "GET") {
+      const vendorId = Number(vendorChangesMatch[1]);
+      const authUser = getAuthUser(req);
+      if (!authUser) {
+        return sendJson(res, 401, { success: false, error: "Authentication required to view change history.", code: "UNAUTHORIZED" });
+      }
+
+      const isOwner = Number(authUser.vendorId) === vendorId;
+      const isAdmin = authUser.role === "super_owner" || authUser.role === "SUPER_ADMIN" || authUser.role === "ADMIN";
+      if (!isOwner && !isAdmin) {
+        return sendJson(res, 403, { success: false, error: "Forbidden: You can only view your own partner change history.", code: "FORBIDDEN" });
+      }
+
+      const logs = getChangeLogsByVendorId(vendorId);
+      return sendJson(res, 200, { success: true, changes: logs });
+    }
+
+    if (pathname === "/admin/changes" && method === "GET") {
+      const authUser = getAuthUser(req);
+      if (!authUser || (authUser.role !== "super_owner" && authUser.role !== "SUPER_ADMIN" && authUser.role !== "ADMIN")) {
+        return sendJson(res, 403, { success: false, error: "Forbidden: Admin access required.", code: "FORBIDDEN" });
+      }
+      const logs = getChangeLogs(query);
+      return sendJson(res, 200, { success: true, changes: logs });
+    }
+
     const vendorMatch = pathname.match(/^\/vendors\/(\d+)$/);
     if (vendorMatch) {
       const vendorId = Number(vendorMatch[1]);
@@ -249,7 +284,7 @@ export default async function handler(req, res) {
 
         // Authorization check (Anti-IDOR): must be the vendor owner or super admin
         const isOwner = Number(authUser.vendorId) === vendorId;
-        const isAdmin = authUser.role === "super_owner" || authUser.role === "ADMIN";
+        const isAdmin = authUser.role === "super_owner" || authUser.role === "SUPER_ADMIN" || authUser.role === "ADMIN";
 
         if (!isOwner && !isAdmin) {
           return sendJson(res, 403, {
@@ -260,14 +295,14 @@ export default async function handler(req, res) {
         }
 
         const body = await parseBody(req);
-        const updated = updateVendor(vendorId, body);
+        const updated = updateVendor(vendorId, body, authUser);
         if (!updated) {
           return sendJson(res, 404, { success: false, error: "Vendor not found." });
         }
 
         return sendJson(res, 200, {
           success: true,
-          message: "Partner profile updated successfully.",
+          message: "Changes saved successfully.",
           vendor: updated,
         });
       }
@@ -347,6 +382,106 @@ export default async function handler(req, res) {
     if (pathname === "/services" && method === "GET") {
       const services = getServices(query);
       return sendJson(res, 200, services);
+    }
+
+    if (pathname === "/services" && method === "POST") {
+      const authUser = getAuthUser(req);
+      if (!authUser) return sendJson(res, 401, { success: false, error: "Authentication required.", code: "UNAUTHORIZED" });
+
+      const body = await parseBody(req);
+      const targetVendorId = Number(body.vendorId || authUser.vendorId);
+      const isOwner = Number(authUser.vendorId) === targetVendorId;
+      const isAdmin = authUser.role === "super_owner" || authUser.role === "SUPER_ADMIN" || authUser.role === "ADMIN";
+
+      if (!isOwner && !isAdmin) {
+        return sendJson(res, 403, { success: false, error: "Unauthorized to add services for this vendor." });
+      }
+
+      const service = createService({ ...body, vendorId: targetVendorId });
+      return sendJson(res, 201, { success: true, service });
+    }
+
+    const serviceMatch = pathname.match(/^\/services\/(\d+)$/);
+    if (serviceMatch) {
+      const serviceId = Number(serviceMatch[1]);
+
+      if (method === "GET") {
+        const service = getServiceById(serviceId);
+        if (!service) return sendJson(res, 404, { success: false, error: "Service not found." });
+        return sendJson(res, 200, service);
+      }
+
+      if (method === "PUT") {
+        const authUser = getAuthUser(req);
+        if (!authUser) return sendJson(res, 401, { success: false, error: "Authentication required." });
+
+        const existing = getServiceById(serviceId);
+        if (!existing) return sendJson(res, 404, { success: false, error: "Service not found." });
+
+        const isOwner = Number(authUser.vendorId) === Number(existing.vendorId);
+        const isAdmin = authUser.role === "super_owner" || authUser.role === "SUPER_ADMIN" || authUser.role === "ADMIN";
+
+        if (!isOwner && !isAdmin) {
+          return sendJson(res, 403, { success: false, error: "Unauthorized to edit this service." });
+        }
+
+        const body = await parseBody(req);
+        const updated = updateService(serviceId, body);
+        return sendJson(res, 200, { success: true, service: updated });
+      }
+
+      if (method === "DELETE") {
+        const authUser = getAuthUser(req);
+        if (!authUser) return sendJson(res, 401, { success: false, error: "Authentication required." });
+
+        const existing = getServiceById(serviceId);
+        if (!existing) return sendJson(res, 404, { success: false, error: "Service not found." });
+
+        const isOwner = Number(authUser.vendorId) === Number(existing.vendorId);
+        const isAdmin = authUser.role === "super_owner" || authUser.role === "SUPER_ADMIN" || authUser.role === "ADMIN";
+
+        if (!isOwner && !isAdmin) {
+          return sendJson(res, 403, { success: false, error: "Unauthorized to delete this service." });
+        }
+
+        deleteService(serviceId);
+        return sendJson(res, 200, { success: true, message: "Service removed successfully." });
+      }
+    }
+
+    // Public Directory Endpoints
+    if (pathname === "/hospitals" && method === "GET") {
+      const allHospitals = getVendors({ category: "Healthcare" });
+      return sendJson(res, 200, allHospitals);
+    }
+
+    if (pathname === "/doctors" && method === "GET") {
+      const healthcare = getVendors({ category: "Healthcare" });
+      // Map vendors with doctor properties or return doctor profiles
+      const doctorsList = healthcare.map((v) => ({
+        id: v.id,
+        name: v.doctorName || v.ownerName,
+        specialty: v.specialization || (v.departments ? v.departments.split(",")[0].trim() : "General Physician"),
+        hospital: v.businessName,
+        city: v.city,
+        rating: v.rating,
+        experience: v.experienceYears || 10,
+        fee: v.consultationFee || 400,
+        available: v.available !== false,
+        phone: v.phone,
+        timings: v.timings || v.openingHours,
+        totalBeds: v.totalBeds,
+        availableBeds: v.availableBeds,
+        icuBedsAvailable: v.icuBedsAvailable,
+        emergencyPhone: v.emergencyPhone,
+        hasEmergency24x7: v.hasEmergency24x7,
+      }));
+      return sendJson(res, 200, doctorsList);
+    }
+
+    if (pathname === "/transport" && method === "GET") {
+      const transport = getVendors({ category: "Transport" });
+      return sendJson(res, 200, transport);
     }
 
     if (pathname === "/categories" && method === "GET") {

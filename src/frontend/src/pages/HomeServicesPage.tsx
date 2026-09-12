@@ -4,14 +4,47 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Link } from "@tanstack/react-router";
 import { CheckCircle2, MapPin, Search, Star } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import { workers } from "../mock-data";
 
 export default function HomeServicesPage() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [workerList, setWorkerList] = useState<any[]>(workers);
 
-  const filteredWorkers = workers.filter(
+  useEffect(() => {
+    async function loadDynamicServices() {
+      try {
+        const res = await fetch("/api/vendors?category=Services");
+        if (res.ok) {
+          const vendors = await res.json();
+          if (Array.isArray(vendors) && vendors.length > 0) {
+            const mapped = vendors.map((v) => ({
+              id: v.id,
+              name: v.businessName || v.ownerName,
+              category: v.serviceType || "Electrical & Maintenance",
+              rating: v.rating || 4.9,
+              totalReviews: v.totalOrders || 45,
+              pricePerHour: v.pricePerHour || 299,
+              isAvailable: v.available !== false,
+              phone: v.phone,
+              city: v.city,
+            }));
+            setWorkerList((prev) => {
+              const liveIds = new Set(mapped.map((m: any) => m.id));
+              const rest = prev.filter((w) => !liveIds.has(w.id));
+              return [...mapped, ...rest];
+            });
+          }
+        }
+      } catch (err) {
+        console.warn("Could not fetch live services providers:", err);
+      }
+    }
+    loadDynamicServices();
+  }, []);
+
+  const filteredWorkers = workerList.filter(
     (w) =>
       w.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       w.category.toLowerCase().includes(searchTerm.toLowerCase()),

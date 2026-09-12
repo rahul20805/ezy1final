@@ -32,7 +32,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { motion } from "motion/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import UserLayout from "../components/UserLayout";
 import { doctors, appointments as initialAppointments } from "../mock-data";
@@ -581,8 +581,39 @@ export default function HealthcarePage() {
   const [bookingDoctor, setBookingDoctor] = useState<Doctor | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [apptList, setApptList] = useState<Appointment[]>(initialAppointments);
+  const [doctorList, setDoctorList] = useState<Doctor[]>(doctors);
+  const [hospitalsList, setHospitalsList] = useState<any[]>([]);
 
-  const filteredDoctors = doctors.filter((d) => {
+  useEffect(() => {
+    async function loadDynamicHealthcare() {
+      try {
+        const docRes = await fetch("/api/doctors");
+        if (docRes.ok) {
+          const dynamicDocs = await docRes.json();
+          if (Array.isArray(dynamicDocs) && dynamicDocs.length > 0) {
+            setDoctorList((prev) => {
+              const liveIds = new Set(dynamicDocs.map((d: any) => d.id));
+              const remaining = prev.filter((d) => !liveIds.has(d.id));
+              return [...dynamicDocs, ...remaining];
+            });
+          }
+        }
+
+        const hospRes = await fetch("/api/hospitals");
+        if (hospRes.ok) {
+          const dynamicHosps = await hospRes.json();
+          if (Array.isArray(dynamicHosps)) {
+            setHospitalsList(dynamicHosps);
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to load dynamic healthcare records, using fallback:", err);
+      }
+    }
+    loadDynamicHealthcare();
+  }, []);
+
+  const filteredDoctors = doctorList.filter((d) => {
     const specMatch =
       specialization === "All" ||
       SPEC_MAP[specialization].some((s) =>
@@ -590,7 +621,6 @@ export default function HealthcarePage() {
       );
     const availMatch =
       availFilter === "all" || (availFilter === "today" ? d.available : true);
-    // visitFilter is a UI toggle — in mock data all doctors support both visit types
     return specMatch && availMatch;
   });
 
@@ -689,6 +719,18 @@ export default function HealthcarePage() {
               {upcomingAppts.length > 0 && (
                 <Badge className="ml-1.5 text-xs px-1.5 py-0 bg-primary text-primary-foreground">
                   {upcomingAppts.length}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger
+              value="hospitals"
+              className="flex-1 sm:flex-none"
+              data-ocid="healthcare.hospitals_tab"
+            >
+              Hospitals & Bed Status
+              {hospitalsList.length > 0 && (
+                <Badge className="ml-1.5 text-xs px-1.5 py-0 bg-emerald-600 text-white">
+                  Live
                 </Badge>
               )}
             </TabsTrigger>
@@ -862,6 +904,65 @@ export default function HealthcarePage() {
                 </div>
               )}
             </section>
+          </TabsContent>
+
+          {/* ── Hospitals & Live Bed Tracking ── */}
+          <TabsContent value="hospitals" className="mt-4 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {hospitalsList.map((hosp) => (
+                <Card key={hosp.id} className="border-border hover:shadow-md transition-shadow">
+                  <CardContent className="p-5 space-y-4">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h3 className="font-bold text-base text-foreground">{hosp.businessName}</h3>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                          <MapPin className="w-3 h-3 text-primary" /> {hosp.address}, {hosp.city}
+                        </p>
+                      </div>
+                      {hosp.hasEmergency24x7 && (
+                        <Badge className="bg-rose-500/10 text-rose-600 border-rose-500/20 text-[10px] whitespace-nowrap">
+                          24x7 Emergency
+                        </Badge>
+                      )}
+                    </div>
+
+                    {/* Bed Counts Display */}
+                    <div className="grid grid-cols-2 gap-2 p-3 rounded-xl bg-muted/40 border border-border/60">
+                      <div>
+                        <p className="text-[11px] text-muted-foreground font-medium">Available Beds</p>
+                        <p className="text-lg font-black text-emerald-600">
+                          {hosp.availableBeds ?? "—"} <span className="text-xs font-normal text-muted-foreground">/ {hosp.totalBeds ?? "—"}</span>
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[11px] text-muted-foreground font-medium">ICU Beds</p>
+                        <p className="text-lg font-black text-rose-600">
+                          {hosp.icuBedsAvailable ?? "—"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {hosp.departments && (
+                      <div>
+                        <p className="text-[11px] font-semibold text-muted-foreground uppercase">Key Departments</p>
+                        <p className="text-xs text-foreground mt-0.5">{hosp.departments}</p>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between pt-2 border-t border-border">
+                      <div className="text-xs text-muted-foreground">
+                        {hosp.openingHours || "24x7"}
+                      </div>
+                      <a href={`tel:${hosp.emergencyPhone || hosp.phone}`}>
+                        <Button size="sm" variant="outline" className="h-8 gap-1.5 text-xs rounded-xl">
+                          <Phone className="w-3 h-3 text-primary" /> Call Hospital
+                        </Button>
+                      </a>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </TabsContent>
         </Tabs>
       </div>

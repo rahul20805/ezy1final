@@ -40,6 +40,7 @@ import { LiveActivityModule } from "../components/admin/modules/main/LiveActivit
 import { CartsManager } from "../components/admin/modules/marketplace/CartsManager";
 import { CouponsManager } from "../components/admin/modules/marketplace/CouponsManager";
 import { DealsPromotions } from "../components/admin/modules/marketplace/DealsPromotions";
+import { MyInformationModule } from "../components/admin/modules/marketplace/MyInformationModule";
 import { OrdersManager } from "../components/admin/modules/marketplace/OrdersManager";
 import { PartnerApplications } from "../components/admin/modules/marketplace/PartnerApplications";
 import { PartnersManager } from "../components/admin/modules/marketplace/PartnersManager";
@@ -144,6 +145,8 @@ export default function AdminPage() {
         return (
           <DashboardHome onNavigateSection={(sec) => setCurrentSection(sec)} />
         );
+      case "my_information":
+        return <MyInformationModule />;
       case "analytics":
         return <AnalyticsModule />;
       case "live_activity":
