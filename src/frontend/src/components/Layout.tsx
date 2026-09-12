@@ -1,24 +1,24 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useAuth } from "../lib/AuthContext";
-import { useStoreData } from "../lib/storeData";
 import { Link } from "@tanstack/react-router";
 import {
+  Bot,
   ChevronDown,
   LogOut,
   MapPin,
   Menu,
+  Search,
+  ShieldCheck,
   User,
   Wallet,
   X,
-  Search,
-  Bot,
-  ShieldCheck,
 } from "lucide-react";
 import { useState } from "react";
 import { useIsMobile } from "../hooks/use-mobile";
+import { useAuth } from "../lib/AuthContext";
 import { setCurrentRole } from "../lib/auth";
+import { useStoreData } from "../lib/storeData";
 import { MOCK_WALLET_BALANCE } from "../mock-data";
 
 const navLinks = [
@@ -37,11 +37,21 @@ export default function Layout({ children }: LayoutProps) {
   const store = useStoreData();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [locationDropdown, setLocationDropdown] = useState(false);
-  const [waMessages, setWaMessages] = useState<{from: 'bot' | 'user', text: string}[]>([
-    { from: 'bot', text: 'Welcome to EZY1! 🛍️\nSend your order here. Try:\n"I want 2kg rice and 1 amul butter"' }
+  const [waMessages, setWaMessages] = useState<
+    { from: "bot" | "user"; text: string }[]
+  >([
+    {
+      from: "bot",
+      text: 'Welcome to EZY1! 🛍️\nSend your order here. Try:\n"I want 2kg rice and 1 amul butter"',
+    },
   ]);
-  const [assistantMessages, setAssistantMessages] = useState<{from: 'bot' | 'user', text: string}[]>([
-    { from: 'bot', text: 'Hi! I\'m your Ezy1 Assistant. I can help you find products, book services, or track your orders. How can I help you today?' }
+  const [assistantMessages, setAssistantMessages] = useState<
+    { from: "bot" | "user"; text: string }[]
+  >([
+    {
+      from: "bot",
+      text: "Hi! I'm your Ezy1 Assistant. I can help you find products, book services, or track your orders. How can I help you today?",
+    },
   ]);
   const isMobile = useIsMobile();
   const { isAuthenticated, login, logout } = useAuth();
@@ -58,11 +68,12 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Top Announcement Ticker */}
-      {store.settings.enableAnnouncementBar && store.settings.announcementBarText && (
-        <div className="bg-primary text-primary-foreground py-1.5 px-4 text-xs font-semibold text-center flex items-center justify-center gap-2">
-          <span>{store.settings.announcementBarText}</span>
-        </div>
-      )}
+      {store.settings.enableAnnouncementBar &&
+        store.settings.announcementBarText && (
+          <div className="bg-primary text-primary-foreground py-1.5 px-4 text-xs font-semibold text-center flex items-center justify-center gap-2">
+            <span>{store.settings.announcementBarText}</span>
+          </div>
+        )}
 
       {/* Saffron accent bar */}
       <div className="h-1 bg-primary w-full" />
@@ -109,9 +120,9 @@ export default function Layout({ children }: LayoutProps) {
           {!isMobile && (
             <div className="flex-1 max-w-md mx-4 relative hidden lg:block">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input 
-                type="text" 
-                placeholder="Search groceries, doctors, services..." 
+              <input
+                type="text"
+                placeholder="Search groceries, doctors, services..."
                 className="w-full h-9 pl-9 pr-4 rounded-full bg-muted/50 border border-transparent focus:border-primary focus:bg-background transition-smooth text-sm outline-none"
               />
             </div>
@@ -134,37 +145,59 @@ export default function Layout({ children }: LayoutProps) {
               </SheetTrigger>
               <SheetContent side="top" className="h-auto">
                 <div className="container py-6">
-                  <h2 className="text-xl font-bold mb-4">Choose your location</h2>
+                  <h2 className="text-xl font-bold mb-4">
+                    Choose your location
+                  </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <Button variant="outline" className="justify-start gap-2 h-auto py-3" onClick={() => {
-                      if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(
-                          (position) => {
-                            alert(`Detected location: Lat ${position.coords.latitude}, Lng ${position.coords.longitude}`);
-                            setLocationDropdown(false);
-                          },
-                          () => alert("Location permission denied.")
-                        );
-                      }
-                    }}>
+                    <Button
+                      variant="outline"
+                      className="justify-start gap-2 h-auto py-3"
+                      onClick={() => {
+                        if (navigator.geolocation) {
+                          navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                              alert(
+                                `Detected location: Lat ${position.coords.latitude}, Lng ${position.coords.longitude}`,
+                              );
+                              setLocationDropdown(false);
+                            },
+                            () => alert("Location permission denied."),
+                          );
+                        }
+                      }}
+                    >
                       <MapPin className="w-5 h-5 text-primary" />
                       <div className="text-left">
-                        <div className="font-semibold">Use My Current Location</div>
-                        <div className="text-xs text-muted-foreground">Using GPS</div>
+                        <div className="font-semibold">
+                          Use My Current Location
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Using GPS
+                        </div>
                       </div>
                     </Button>
-                    <Button variant="outline" className="justify-start gap-2 h-auto py-3">
+                    <Button
+                      variant="outline"
+                      className="justify-start gap-2 h-auto py-3"
+                    >
                       <Search className="w-5 h-5 text-muted-foreground" />
                       <div className="text-left">
                         <div className="font-semibold">Search Location</div>
-                        <div className="text-xs text-muted-foreground">Enter city or pincode</div>
+                        <div className="text-xs text-muted-foreground">
+                          Enter city or pincode
+                        </div>
                       </div>
                     </Button>
-                    <Button variant="outline" className="justify-start gap-2 h-auto py-3">
+                    <Button
+                      variant="outline"
+                      className="justify-start gap-2 h-auto py-3"
+                    >
                       <MapPin className="w-5 h-5 text-muted-foreground" />
                       <div className="text-left">
                         <div className="font-semibold">Choose on Map</div>
-                        <div className="text-xs text-muted-foreground">Pinpoint exactly</div>
+                        <div className="text-xs text-muted-foreground">
+                          Pinpoint exactly
+                        </div>
                       </div>
                     </Button>
                   </div>
@@ -372,13 +405,21 @@ export default function Layout({ children }: LayoutProps) {
       <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
         <Sheet>
           <SheetTrigger asChild>
-            <Button size="icon" className="w-14 h-14 rounded-full shadow-elevated bg-[#25D366] hover:bg-[#20bd5a] hover:-translate-y-1 transition-transform">
+            <Button
+              size="icon"
+              className="w-14 h-14 rounded-full shadow-elevated bg-[#25D366] hover:bg-[#20bd5a] hover:-translate-y-1 transition-transform"
+            >
               <span className="text-2xl text-white">💬</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-[400px] sm:w-[540px] flex flex-col p-0 border-l border-border bg-background">
+          <SheetContent
+            side="right"
+            className="w-[400px] sm:w-[540px] flex flex-col p-0 border-l border-border bg-background"
+          >
             <div className="p-4 border-b bg-[#075E54] text-white flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-xl">🛒</div>
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-xl">
+                🛒
+              </div>
               <div>
                 <h3 className="font-bold">Ezy1 WhatsApp Order</h3>
                 <p className="text-xs opacity-90">Send a message to order</p>
@@ -386,63 +427,94 @@ export default function Layout({ children }: LayoutProps) {
             </div>
             <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-[#E5DDD5]">
               {waMessages.map((msg, i) => (
-                <div key={i} className={`flex ${msg.from === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`p-3 rounded-xl max-w-[80%] text-sm shadow-sm relative whitespace-pre-wrap ${msg.from === 'user' ? 'bg-[#DCF8C6] rounded-tr-sm' : 'bg-white rounded-tl-sm'}`}>
+                <div
+                  key={i}
+                  className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}
+                >
+                  <div
+                    className={`p-3 rounded-xl max-w-[80%] text-sm shadow-sm relative whitespace-pre-wrap ${msg.from === "user" ? "bg-[#DCF8C6] rounded-tr-sm" : "bg-white rounded-tl-sm"}`}
+                  >
                     {msg.text}
                   </div>
                 </div>
               ))}
             </div>
             <div className="p-3 bg-[#f0f0f0]">
-              <form className="flex items-center gap-2" onSubmit={async (e) => {
-                e.preventDefault();
-                const input = e.currentTarget.elements.namedItem('message') as HTMLInputElement;
-                const msg = input.value;
-                if (!msg) return;
-                
-                // Add user message
-                setWaMessages(prev => [...prev, { from: 'user', text: msg }]);
-                input.value = "";
+              <form
+                className="flex items-center gap-2"
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const input = e.currentTarget.elements.namedItem(
+                    "message",
+                  ) as HTMLInputElement;
+                  const msg = input.value;
+                  if (!msg) return;
 
-                try {
-                  await fetch("http://localhost:3000/api/whatsapp/webhook", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      object: "whatsapp_business_account",
-                      entry: [{
-                        changes: [{
-                          value: {
-                            messages: [{
-                              from: "919999999999",
-                              text: { body: msg }
-                            }]
-                          }
-                        }]
-                      }]
-                    })
-                  });
-                  
-                  // Simulate bot response
-                  setTimeout(() => {
-                    setWaMessages(prev => [...prev, { 
-                      from: 'bot', 
-                      text: `Got it! We've received your request for:\n"${msg}"\n\nWe are finding the best partner near you to fulfill this order.`
-                    }]);
-                  }, 1000);
-                  
-                } catch (err) {
-                  setWaMessages(prev => [...prev, { from: 'bot', text: 'Sorry, there was an error connecting to our server.' }]);
-                }
-              }}>
-                <input 
-                  type="text" 
+                  // Add user message
+                  setWaMessages((prev) => [
+                    ...prev,
+                    { from: "user", text: msg },
+                  ]);
+                  input.value = "";
+
+                  try {
+                    await fetch("/api/whatsapp/webhook", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        object: "whatsapp_business_account",
+                        entry: [
+                          {
+                            changes: [
+                              {
+                                value: {
+                                  messages: [
+                                    {
+                                      from: "919999999999",
+                                      text: { body: msg },
+                                    },
+                                  ],
+                                },
+                              },
+                            ],
+                          },
+                        ],
+                      }),
+                    });
+
+                    // Simulate bot response
+                    setTimeout(() => {
+                      setWaMessages((prev) => [
+                        ...prev,
+                        {
+                          from: "bot",
+                          text: `Got it! We've received your request for:\n"${msg}"\n\nWe are finding the best partner near you to fulfill this order.`,
+                        },
+                      ]);
+                    }, 1000);
+                  } catch (err) {
+                    setWaMessages((prev) => [
+                      ...prev,
+                      {
+                        from: "bot",
+                        text: "Sorry, there was an error connecting to our server.",
+                      },
+                    ]);
+                  }
+                }}
+              >
+                <input
+                  type="text"
                   name="message"
-                  placeholder="Type a message" 
+                  placeholder="Type a message"
                   className="w-full h-10 pl-4 pr-4 rounded-full border border-border bg-white focus:outline-none text-sm shadow-sm"
                   autoComplete="off"
                 />
-                <Button type="submit" size="icon" className="w-10 h-10 rounded-full bg-[#075E54] hover:bg-[#128C7E] shrink-0">
+                <Button
+                  type="submit"
+                  size="icon"
+                  className="w-10 h-10 rounded-full bg-[#075E54] hover:bg-[#128C7E] shrink-0"
+                >
                   <span className="text-white">➤</span>
                 </Button>
               </form>
@@ -451,11 +523,17 @@ export default function Layout({ children }: LayoutProps) {
         </Sheet>
         <Sheet>
           <SheetTrigger asChild>
-            <Button size="icon" className="w-14 h-14 rounded-full shadow-elevated bg-primary hover:bg-primary/90 hover:-translate-y-1 transition-transform">
+            <Button
+              size="icon"
+              className="w-14 h-14 rounded-full shadow-elevated bg-primary hover:bg-primary/90 hover:-translate-y-1 transition-transform"
+            >
               <Bot className="w-6 h-6 text-primary-foreground" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-[400px] sm:w-[540px] flex flex-col p-0 border-l border-border bg-background">
+          <SheetContent
+            side="right"
+            className="w-[400px] sm:w-[540px] flex flex-col p-0 border-l border-border bg-background"
+          >
             <div className="p-4 border-b bg-primary text-primary-foreground flex items-center gap-3">
               <Bot className="w-6 h-6" />
               <div>
@@ -465,38 +543,59 @@ export default function Layout({ children }: LayoutProps) {
             </div>
             <div className="flex-1 p-4 overflow-y-auto space-y-4">
               {assistantMessages.map((msg, i) => (
-                <div key={i} className={`flex ${msg.from === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`p-3 text-sm shadow-sm relative ${msg.from === 'user' ? 'bg-primary text-primary-foreground rounded-2xl rounded-tr-sm max-w-[80%]' : 'bg-muted rounded-2xl rounded-tl-sm w-4/5'}`}>
+                <div
+                  key={i}
+                  className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}
+                >
+                  <div
+                    className={`p-3 text-sm shadow-sm relative ${msg.from === "user" ? "bg-primary text-primary-foreground rounded-2xl rounded-tr-sm max-w-[80%]" : "bg-muted rounded-2xl rounded-tl-sm w-4/5"}`}
+                  >
                     {msg.text}
                   </div>
                 </div>
               ))}
             </div>
             <div className="p-4 border-t bg-card">
-              <form className="relative flex items-center" onSubmit={(e) => {
-                e.preventDefault();
-                const input = e.currentTarget.elements.namedItem('assistantMsg') as HTMLInputElement;
-                const msg = input.value;
-                if (!msg) return;
+              <form
+                className="relative flex items-center"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const input = e.currentTarget.elements.namedItem(
+                    "assistantMsg",
+                  ) as HTMLInputElement;
+                  const msg = input.value;
+                  if (!msg) return;
 
-                setAssistantMessages(prev => [...prev, { from: 'user', text: msg }]);
-                input.value = "";
+                  setAssistantMessages((prev) => [
+                    ...prev,
+                    { from: "user", text: msg },
+                  ]);
+                  input.value = "";
 
-                setTimeout(() => {
-                  setAssistantMessages(prev => [...prev, { 
-                    from: 'bot', 
-                    text: `I'm an AI assistant in training! I see you need help with "${msg}". I'll connect you with the right service shortly.`
-                  }]);
-                }, 1000);
-              }}>
-                <input 
-                  type="text" 
+                  setTimeout(() => {
+                    setAssistantMessages((prev) => [
+                      ...prev,
+                      {
+                        from: "bot",
+                        text: `I'm an AI assistant in training! I see you need help with "${msg}". I'll connect you with the right service shortly.`,
+                      },
+                    ]);
+                  }, 1000);
+                }}
+              >
+                <input
+                  type="text"
                   name="assistantMsg"
-                  placeholder="Ask me anything..." 
+                  placeholder="Ask me anything..."
                   className="w-full h-10 pl-4 pr-10 rounded-full border border-border bg-muted/50 focus:bg-background focus:border-primary outline-none text-sm transition-smooth"
                   autoComplete="off"
                 />
-                <Button type="submit" size="icon" variant="ghost" className="absolute right-1 w-8 h-8 rounded-full text-muted-foreground hover:text-primary">
+                <Button
+                  type="submit"
+                  size="icon"
+                  variant="ghost"
+                  className="absolute right-1 w-8 h-8 rounded-full text-muted-foreground hover:text-primary"
+                >
                   <span className="text-lg">➤</span>
                 </Button>
               </form>
@@ -542,27 +641,42 @@ export default function Layout({ children }: LayoutProps) {
               </h4>
               <ul className="space-y-2">
                 <li>
-                  <Link to="/shop" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  <Link
+                    to="/shop"
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
                     Browse Marketplace
                   </Link>
                 </li>
                 <li>
-                  <Link to="/services" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  <Link
+                    to="/services"
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
                     On-Demand Services
                   </Link>
                 </li>
                 <li>
-                  <a href="/#healthcare" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  <a
+                    href="/#healthcare"
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
                     Healthcare & Doctors
                   </a>
                 </li>
                 <li>
-                  <a href="/#transport" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  <a
+                    href="/#transport"
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
                     Transport & Fleet
                   </a>
                 </li>
                 <li>
-                  <Link to="/partner-login" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  <Link
+                    to="/partner-login"
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
                     Partner & Merchant Portal
                   </Link>
                 </li>
@@ -576,22 +690,34 @@ export default function Layout({ children }: LayoutProps) {
               </h4>
               <ul className="space-y-2">
                 <li>
-                  <Link to="/dashboard/wallet" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  <Link
+                    to="/dashboard/wallet"
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
                     Digital Wallet & Balance
                   </Link>
                 </li>
                 <li>
-                  <Link to="/partner-login" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  <Link
+                    to="/partner-login"
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
                     Merchant Login
                   </Link>
                 </li>
                 <li>
-                  <Link to="/owner" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  <Link
+                    to="/owner"
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
                     Owner Control Center
                   </Link>
                 </li>
                 <li>
-                  <Link to="/admin" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  <Link
+                    to="/admin"
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
                     Super Admin Console
                   </Link>
                 </li>

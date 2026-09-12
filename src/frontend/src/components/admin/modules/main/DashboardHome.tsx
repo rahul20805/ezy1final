@@ -1,6 +1,12 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Activity,
   ArrowDownRight,
@@ -38,31 +44,58 @@ interface DashboardHomeProps {
 
 export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
   const store = useStoreData();
-  const [dateFilter, setDateFilter] = useState<"today" | "yesterday" | "week" | "month" | "all">("today");
+  const [dateFilter, setDateFilter] = useState<
+    "today" | "yesterday" | "week" | "month" | "all"
+  >("today");
 
   // Dynamic calculations from database
-  const totalRevenue = store.orders.reduce((acc, o) => acc + (o.paymentStatus === "paid" ? o.totalAmount : 0), 0);
+  const totalRevenue = store.orders.reduce(
+    (acc, o) => acc + (o.paymentStatus === "paid" ? o.totalAmount : 0),
+    0,
+  );
   const platformCommission = Math.round(totalRevenue * 0.05);
   const partnerPayoutsTotal = totalRevenue - platformCommission;
 
   const totalOrders = store.orders.length;
-  const pendingOrders = store.orders.filter((o) => o.status === "NEW" || o.status === "ACCEPTED" || o.status === "PREPARING").length;
-  const outForDelivery = store.orders.filter((o) => o.status === "OUT_FOR_DELIVERY").length;
-  const deliveredOrders = store.orders.filter((o) => o.status === "DELIVERED").length;
-  const cancelledOrders = store.orders.filter((o) => o.status === "CANCELLED").length;
+  const pendingOrders = store.orders.filter(
+    (o) =>
+      o.status === "NEW" || o.status === "ACCEPTED" || o.status === "PREPARING",
+  ).length;
+  const outForDelivery = store.orders.filter(
+    (o) => o.status === "OUT_FOR_DELIVERY",
+  ).length;
+  const deliveredOrders = store.orders.filter(
+    (o) => o.status === "DELIVERED",
+  ).length;
+  const cancelledOrders = store.orders.filter(
+    (o) => o.status === "CANCELLED",
+  ).length;
 
   const totalCustomers = store.customers.length;
-  const activePartners = store.shops.filter((s) => s.status === "active").length;
-  const pendingApplications = store.partnerApplications.filter((a) => a.status === "PENDING" || a.status === "UNDER_REVIEW").length;
+  const activePartners = store.shops.filter(
+    (s) => s.status === "active",
+  ).length;
+  const pendingApplications = store.partnerApplications.filter(
+    (a) => a.status === "PENDING" || a.status === "UNDER_REVIEW",
+  ).length;
 
   const totalProducts = store.products.length;
-  const activeProducts = store.products.filter((p) => p.published && p.inStock).length;
-  const outOfStockProducts = store.products.filter((p) => !p.inStock || p.stockCount === 0).length;
+  const activeProducts = store.products.filter(
+    (p) => p.published && p.inStock,
+  ).length;
+  const outOfStockProducts = store.products.filter(
+    (p) => !p.inStock || p.stockCount === 0,
+  ).length;
 
   const totalBookings = store.bookings.length;
-  const activeServices = store.services.filter((s) => s.published && s.isAvailable).length;
+  const activeServices = store.services.filter(
+    (s) => s.published && s.isAvailable,
+  ).length;
 
-  const availableBeds = store.hospitalBeds.reduce((acc, b) => acc + b.availableBeds, 0);
+  const availableBeds = store.hospitalBeds.reduce(
+    (acc, b) => acc + b.availableBeds,
+    0,
+  );
 
   return (
     <div className="space-y-6">
@@ -73,30 +106,36 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
             <h1 className="text-xl sm:text-2xl font-display font-black text-foreground">
               {store.settings.brandName} Central Command Dashboard
             </h1>
-            <Badge variant="outline" className="text-[10px] text-primary border-primary/30 font-bold">
+            <Badge
+              variant="outline"
+              className="text-[10px] text-primary border-primary/30 font-bold"
+            >
               Real-time DB
             </Badge>
           </div>
           <p className="text-xs text-muted-foreground">
-            Live business overview, orders pipeline, healthcare availability, partner status, and revenue analytics.
+            Live business overview, orders pipeline, healthcare availability,
+            partner status, and revenue analytics.
           </p>
         </div>
 
         {/* Date Filter Tabs */}
         <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-2xl border border-border/60 self-start sm:self-auto">
-          {(["today", "yesterday", "week", "month", "all"] as const).map((filter) => (
-            <button
-              key={filter}
-              onClick={() => setDateFilter(filter)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold capitalize transition-all ${
-                dateFilter === filter
-                  ? "bg-primary text-primary-foreground shadow-xs"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {filter === "all" ? "All Time" : filter}
-            </button>
-          ))}
+          {(["today", "yesterday", "week", "month", "all"] as const).map(
+            (filter) => (
+              <button
+                key={filter}
+                onClick={() => setDateFilter(filter)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold capitalize transition-all ${
+                  dateFilter === filter
+                    ? "bg-primary text-primary-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {filter === "all" ? "All Time" : filter}
+              </button>
+            ),
+          )}
         </div>
       </div>
 
@@ -112,7 +151,9 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-display font-black text-foreground">₹{totalRevenue.toLocaleString()}</div>
+            <div className="text-2xl font-display font-black text-foreground">
+              ₹{totalRevenue.toLocaleString()}
+            </div>
             <div className="flex items-center gap-1.5 text-xs text-emerald-600 mt-1 font-semibold">
               <ArrowUpRight className="w-3.5 h-3.5" />
               <span>+18.4% vs last period</span>
@@ -130,10 +171,17 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-display font-black text-foreground">{totalOrders}</div>
+            <div className="text-2xl font-display font-black text-foreground">
+              {totalOrders}
+            </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-              <span className="text-amber-500 font-bold">{pendingOrders} Active</span> •{" "}
-              <span className="text-emerald-500 font-bold">{deliveredOrders} Completed</span>
+              <span className="text-amber-500 font-bold">
+                {pendingOrders} Active
+              </span>{" "}
+              •{" "}
+              <span className="text-emerald-500 font-bold">
+                {deliveredOrders} Completed
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -148,7 +196,9 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-display font-black text-foreground">{activePartners}</div>
+            <div className="text-2xl font-display font-black text-foreground">
+              {activePartners}
+            </div>
             <div className="flex items-center gap-1.5 text-xs text-blue-600 mt-1 font-semibold">
               <FileCheck className="w-3.5 h-3.5" />
               <span>{pendingApplications} KYC pending review</span>
@@ -166,7 +216,9 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-display font-black text-foreground">{availableBeds} Beds</div>
+            <div className="text-2xl font-display font-black text-foreground">
+              {availableBeds} Beds
+            </div>
             <div className="flex items-center gap-1.5 text-xs text-rose-600 mt-1 font-semibold">
               <CheckCircle2 className="w-3.5 h-3.5" />
               <span>Across {store.hospitals.length} verified hospitals</span>
@@ -181,8 +233,12 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
         <Card className="rounded-3xl border-border bg-card shadow-xs md:col-span-2">
           <CardHeader className="pb-3 flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-base font-display font-bold">Live Orders Pipeline</CardTitle>
-              <CardDescription className="text-xs">Real-time status breakdown across Web and WhatsApp orders</CardDescription>
+              <CardTitle className="text-base font-display font-bold">
+                Live Orders Pipeline
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Real-time status breakdown across Web and WhatsApp orders
+              </CardDescription>
             </div>
             <Button
               variant="outline"
@@ -197,26 +253,44 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div className="p-3.5 rounded-2xl bg-muted/40 border border-border/60 text-center">
-                <span className="text-[11px] text-muted-foreground font-semibold">New / Pending</span>
-                <p className="text-xl font-display font-bold text-amber-500 mt-0.5">{pendingOrders}</p>
+                <span className="text-[11px] text-muted-foreground font-semibold">
+                  New / Pending
+                </span>
+                <p className="text-xl font-display font-bold text-amber-500 mt-0.5">
+                  {pendingOrders}
+                </p>
               </div>
               <div className="p-3.5 rounded-2xl bg-muted/40 border border-border/60 text-center">
-                <span className="text-[11px] text-muted-foreground font-semibold">Out for Delivery</span>
-                <p className="text-xl font-display font-bold text-sky-500 mt-0.5">{outForDelivery}</p>
+                <span className="text-[11px] text-muted-foreground font-semibold">
+                  Out for Delivery
+                </span>
+                <p className="text-xl font-display font-bold text-sky-500 mt-0.5">
+                  {outForDelivery}
+                </p>
               </div>
               <div className="p-3.5 rounded-2xl bg-muted/40 border border-border/60 text-center">
-                <span className="text-[11px] text-muted-foreground font-semibold">Delivered</span>
-                <p className="text-xl font-display font-bold text-emerald-500 mt-0.5">{deliveredOrders}</p>
+                <span className="text-[11px] text-muted-foreground font-semibold">
+                  Delivered
+                </span>
+                <p className="text-xl font-display font-bold text-emerald-500 mt-0.5">
+                  {deliveredOrders}
+                </p>
               </div>
               <div className="p-3.5 rounded-2xl bg-muted/40 border border-border/60 text-center">
-                <span className="text-[11px] text-muted-foreground font-semibold">Cancelled</span>
-                <p className="text-xl font-display font-bold text-rose-500 mt-0.5">{cancelledOrders}</p>
+                <span className="text-[11px] text-muted-foreground font-semibold">
+                  Cancelled
+                </span>
+                <p className="text-xl font-display font-bold text-rose-500 mt-0.5">
+                  {cancelledOrders}
+                </p>
               </div>
             </div>
 
             {/* Recent Incoming Orders Table */}
             <div className="space-y-2 pt-2">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Recent Orders</h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                Recent Orders
+              </h4>
               <div className="space-y-2">
                 {store.orders.slice(0, 3).map((order) => (
                   <div
@@ -225,8 +299,13 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
                   >
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-foreground">{order.orderNumber}</span>
-                        <Badge variant="outline" className="text-[9px] uppercase font-bold">
+                        <span className="font-mono font-bold text-foreground">
+                          {order.orderNumber}
+                        </span>
+                        <Badge
+                          variant="outline"
+                          className="text-[9px] uppercase font-bold"
+                        >
                           {order.orderSource}
                         </Badge>
                       </div>
@@ -236,14 +315,16 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
                     </div>
 
                     <div className="text-right">
-                      <p className="font-bold text-foreground">₹{order.totalAmount}</p>
+                      <p className="font-bold text-foreground">
+                        ₹{order.totalAmount}
+                      </p>
                       <Badge
                         className={`text-[9px] uppercase font-bold mt-0.5 ${
                           order.status === "DELIVERED"
                             ? "bg-emerald-500/10 text-emerald-600"
                             : order.status === "OUT_FOR_DELIVERY"
-                            ? "bg-sky-500/10 text-sky-600"
-                            : "bg-amber-500/10 text-amber-600"
+                              ? "bg-sky-500/10 text-sky-600"
+                              : "bg-amber-500/10 text-amber-600"
                         }`}
                       >
                         {order.status.replace(/_/g, " ")}
@@ -259,8 +340,12 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
         {/* Quick Action Shortcuts */}
         <Card className="rounded-3xl border-border bg-card shadow-xs">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base font-display font-bold">Quick Operating Actions</CardTitle>
-            <CardDescription className="text-xs">Direct access to frequent administrative tasks</CardDescription>
+            <CardTitle className="text-base font-display font-bold">
+              Quick Operating Actions
+            </CardTitle>
+            <CardDescription className="text-xs">
+              Direct access to frequent administrative tasks
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2.5">
             <Button
@@ -280,7 +365,8 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
               className="w-full justify-between rounded-2xl text-xs h-10 border-border bg-muted/20 hover:bg-blue-500/10 hover:text-blue-600 transition-all"
             >
               <span className="flex items-center gap-2">
-                <FileCheck className="w-3.5 h-3.5 text-blue-500" /> Review Partner KYC
+                <FileCheck className="w-3.5 h-3.5 text-blue-500" /> Review
+                Partner KYC
               </span>
               <Badge variant="destructive" className="text-[9px] h-4 font-bold">
                 {pendingApplications}
@@ -293,7 +379,8 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
               className="w-full justify-between rounded-2xl text-xs h-10 border-border bg-muted/20 hover:bg-rose-500/10 hover:text-rose-600 transition-all"
             >
               <span className="flex items-center gap-2">
-                <Stethoscope className="w-3.5 h-3.5 text-rose-500" /> Update Hospital Beds
+                <Stethoscope className="w-3.5 h-3.5 text-rose-500" /> Update
+                Hospital Beds
               </span>
               <ArrowUpRight className="w-3.5 h-3.5" />
             </Button>
@@ -304,7 +391,8 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
               className="w-full justify-between rounded-2xl text-xs h-10 border-border bg-muted/20 hover:bg-amber-500/10 hover:text-amber-600 transition-all"
             >
               <span className="flex items-center gap-2">
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Create Discount Coupon
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Create
+                Discount Coupon
               </span>
               <Plus className="w-3.5 h-3.5" />
             </Button>
@@ -315,7 +403,8 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
               className="w-full justify-between rounded-2xl text-xs h-10 border-border bg-muted/20 hover:bg-primary/10 hover:text-primary transition-all"
             >
               <span className="flex items-center gap-2">
-                <ShieldCheck className="w-3.5 h-3.5 text-primary" /> Master Owner Settings
+                <ShieldCheck className="w-3.5 h-3.5 text-primary" /> Master
+                Owner Settings
               </span>
               <ArrowUpRight className="w-3.5 h-3.5" />
             </Button>
@@ -330,11 +419,17 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
           className="p-4 rounded-2xl bg-card border border-border/80 hover:border-primary/50 cursor-pointer transition-all shadow-xs"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground font-semibold">Catalog</span>
+            <span className="text-xs text-muted-foreground font-semibold">
+              Catalog
+            </span>
             <Package className="w-4 h-4 text-primary" />
           </div>
-          <p className="text-lg font-display font-black text-foreground mt-2">{totalProducts}</p>
-          <span className="text-[10px] text-muted-foreground">{outOfStockProducts} Out of stock</span>
+          <p className="text-lg font-display font-black text-foreground mt-2">
+            {totalProducts}
+          </p>
+          <span className="text-[10px] text-muted-foreground">
+            {outOfStockProducts} Out of stock
+          </span>
         </div>
 
         <div
@@ -342,11 +437,17 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
           className="p-4 rounded-2xl bg-card border border-border/80 hover:border-primary/50 cursor-pointer transition-all shadow-xs"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground font-semibold">Bookings</span>
+            <span className="text-xs text-muted-foreground font-semibold">
+              Bookings
+            </span>
             <Calendar className="w-4 h-4 text-purple-500" />
           </div>
-          <p className="text-lg font-display font-black text-foreground mt-2">{totalBookings}</p>
-          <span className="text-[10px] text-muted-foreground">Workshops & Consults</span>
+          <p className="text-lg font-display font-black text-foreground mt-2">
+            {totalBookings}
+          </p>
+          <span className="text-[10px] text-muted-foreground">
+            Workshops & Consults
+          </span>
         </div>
 
         <div
@@ -354,11 +455,17 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
           className="p-4 rounded-2xl bg-card border border-border/80 hover:border-primary/50 cursor-pointer transition-all shadow-xs"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground font-semibold">Services</span>
+            <span className="text-xs text-muted-foreground font-semibold">
+              Services
+            </span>
             <Wrench className="w-4 h-4 text-indigo-500" />
           </div>
-          <p className="text-lg font-display font-black text-foreground mt-2">{activeServices}</p>
-          <span className="text-[10px] text-muted-foreground">Local Home Services</span>
+          <p className="text-lg font-display font-black text-foreground mt-2">
+            {activeServices}
+          </p>
+          <span className="text-[10px] text-muted-foreground">
+            Local Home Services
+          </span>
         </div>
 
         <div
@@ -366,11 +473,17 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
           className="p-4 rounded-2xl bg-card border border-border/80 hover:border-primary/50 cursor-pointer transition-all shadow-xs"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground font-semibold">Customers</span>
+            <span className="text-xs text-muted-foreground font-semibold">
+              Customers
+            </span>
             <Users className="w-4 h-4 text-blue-500" />
           </div>
-          <p className="text-lg font-display font-black text-foreground mt-2">{totalCustomers}</p>
-          <span className="text-[10px] text-muted-foreground">Verified profiles</span>
+          <p className="text-lg font-display font-black text-foreground mt-2">
+            {totalCustomers}
+          </p>
+          <span className="text-[10px] text-muted-foreground">
+            Verified profiles
+          </span>
         </div>
 
         <div
@@ -378,11 +491,17 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
           className="p-4 rounded-2xl bg-card border border-border/80 hover:border-primary/50 cursor-pointer transition-all shadow-xs"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground font-semibold">Riders</span>
+            <span className="text-xs text-muted-foreground font-semibold">
+              Riders
+            </span>
             <Truck className="w-4 h-4 text-amber-500" />
           </div>
-          <p className="text-lg font-display font-black text-foreground mt-2">{store.deliveryPartners.length}</p>
-          <span className="text-[10px] text-emerald-500 font-semibold">Active delivery fleet</span>
+          <p className="text-lg font-display font-black text-foreground mt-2">
+            {store.deliveryPartners.length}
+          </p>
+          <span className="text-[10px] text-emerald-500 font-semibold">
+            Active delivery fleet
+          </span>
         </div>
 
         <div
@@ -390,11 +509,17 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
           className="p-4 rounded-2xl bg-card border border-border/80 hover:border-primary/50 cursor-pointer transition-all shadow-xs"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground font-semibold">Support</span>
+            <span className="text-xs text-muted-foreground font-semibold">
+              Support
+            </span>
             <Activity className="w-4 h-4 text-rose-500" />
           </div>
-          <p className="text-lg font-display font-black text-foreground mt-2">{store.supportTickets.length}</p>
-          <span className="text-[10px] text-muted-foreground">Open disputes & help</span>
+          <p className="text-lg font-display font-black text-foreground mt-2">
+            {store.supportTickets.length}
+          </p>
+          <span className="text-[10px] text-muted-foreground">
+            Open disputes & help
+          </span>
         </div>
       </div>
     </div>

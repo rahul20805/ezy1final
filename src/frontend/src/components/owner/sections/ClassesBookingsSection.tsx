@@ -33,7 +33,8 @@ import {
   UserCheck,
   Users,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { type StoredBooking, useStoreData } from "../../../lib/storeData";
 import { ConfirmModal } from "../ConfirmModal";
@@ -44,7 +45,9 @@ export function ClassesBookingsSection() {
   const store = useStoreData();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingBooking, setEditingBooking] = useState<StoredBooking | null>(null);
+  const [editingBooking, setEditingBooking] = useState<StoredBooking | null>(
+    null,
+  );
 
   // Form State
   const [title, setTitle] = useState("");
@@ -77,9 +80,13 @@ export function ClassesBookingsSection() {
     setEnrolledCount(0);
     setStatus("CONFIRMED");
     setPublished(true);
-    setImage("https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=500&q=80");
+    setImage(
+      "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=500&q=80",
+    );
     setLocation("Studio 4B, Indiranagar, Bengaluru");
-    setDescription("Interactive workshop covering basics, materials, and live hands-on practice.");
+    setDescription(
+      "Interactive workshop covering basics, materials, and live hands-on practice.",
+    );
     setIsDialogOpen(true);
   };
 
@@ -202,32 +209,42 @@ export function ClassesBookingsSection() {
         defaultSort="newest"
         onSort={(items, sortVal) => {
           const list = [...items];
-          if (sortVal === "price_asc") return list.sort((a, b) => a.price - b.price);
-          if (sortVal === "price_desc") return list.sort((a, b) => b.price - a.price);
-          if (sortVal === "enrolled_desc") return list.sort((a, b) => b.enrolledCount - a.enrolledCount);
+          if (sortVal === "price_asc")
+            return list.sort((a, b) => a.price - b.price);
+          if (sortVal === "price_desc")
+            return list.sort((a, b) => b.price - a.price);
+          if (sortVal === "enrolled_desc")
+            return list.sort((a, b) => b.enrolledCount - a.enrolledCount);
           return list.sort((a, b) => b.id - a.id);
         }}
         onAddNew={openAddDialog}
         addNewLabel="Add Class / Booking"
         pageSize={6}
         renderItem={(item) => {
-          const fillPercentage = Math.round((item.enrolledCount / (item.capacity || 1)) * 100);
+          const fillPercentage = Math.round(
+            (item.enrolledCount / (item.capacity || 1)) * 100,
+          );
 
           return (
             <Card
               key={item.id}
               className={`rounded-2xl overflow-hidden border transition-all duration-200 hover:shadow-md ${
-                item.published ? "border-border/80 bg-card" : "border-border/50 bg-muted/20 opacity-80"
+                item.published
+                  ? "border-border/80 bg-card"
+                  : "border-border/50 bg-muted/20 opacity-80"
               }`}
             >
               {/* Image & Type Badge */}
               <div className="relative aspect-video bg-muted/60 overflow-hidden group">
                 <img
-                  src={item.image || "https://placehold.co/600x400?text=Booking"}
+                  src={
+                    item.image || "https://placehold.co/600x400?text=Booking"
+                  }
                   alt={item.title}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = "https://placehold.co/600x400?text=Class";
+                    (e.target as HTMLImageElement).src =
+                      "https://placehold.co/600x400?text=Class";
                   }}
                 />
                 <div className="absolute top-2.5 left-2.5 flex items-center gap-1">
@@ -283,7 +300,9 @@ export function ClassesBookingsSection() {
                 {/* Capacity Progress Bar */}
                 <div className="space-y-1 pt-1 border-t border-border/60">
                   <div className="flex items-center justify-between text-[11px]">
-                    <span className="text-muted-foreground">Enrolled Capacity</span>
+                    <span className="text-muted-foreground">
+                      Enrolled Capacity
+                    </span>
                     <span className="font-semibold text-foreground">
                       {item.enrolledCount} / {item.capacity} ({fillPercentage}%)
                     </span>
@@ -304,7 +323,9 @@ export function ClassesBookingsSection() {
                     <span className="font-display font-black text-lg text-foreground">
                       ₹{item.price}
                     </span>
-                    <span className="text-[10px] text-muted-foreground ml-1">/ person</span>
+                    <span className="text-[10px] text-muted-foreground ml-1">
+                      / person
+                    </span>
                   </div>
 
                   <div className="flex items-center gap-1">
@@ -316,13 +337,17 @@ export function ClassesBookingsSection() {
                         toast.success(
                           item.published
                             ? `"${item.title}" hidden from public website.`
-                            : `"${item.title}" published live!`
+                            : `"${item.title}" published live!`,
                         );
                       }}
                       className="h-8 px-2 text-xs rounded-xl"
                       title={item.published ? "Hide" : "Publish"}
                     >
-                      {item.published ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5 text-emerald-500" />}
+                      {item.published ? (
+                        <EyeOff className="w-3.5 h-3.5" />
+                      ) : (
+                        <Eye className="w-3.5 h-3.5 text-emerald-500" />
+                      )}
                     </Button>
                     <Button
                       variant="outline"
@@ -354,7 +379,9 @@ export function ClassesBookingsSection() {
           <form onSubmit={handleSave}>
             <DialogHeader>
               <DialogTitle className="text-xl font-display font-bold text-foreground">
-                {editingBooking ? "Edit Class or Booking" : "Create New Class / Workshop"}
+                {editingBooking
+                  ? "Edit Class or Booking"
+                  : "Create New Class / Workshop"}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
                 Set schedules, fee, capacity, instructor and live details.
@@ -363,7 +390,9 @@ export function ClassesBookingsSection() {
 
             <div className="space-y-4 py-4">
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Title / Session Name *</Label>
+                <Label className="text-xs font-semibold">
+                  Title / Session Name *
+                </Label>
                 <Input
                   required
                   placeholder="e.g., Weekend Clay Pottery Workshop"
@@ -376,15 +405,22 @@ export function ClassesBookingsSection() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold">Type</Label>
-                  <Select value={type} onValueChange={(val: any) => setType(val)}>
+                  <Select
+                    value={type}
+                    onValueChange={(val: any) => setType(val)}
+                  >
                     <SelectTrigger className="rounded-xl text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="workshop">Workshop</SelectItem>
                       <SelectItem value="class">Class</SelectItem>
-                      <SelectItem value="doctor">Doctor Consultation</SelectItem>
-                      <SelectItem value="consultation">Specialist Consultation</SelectItem>
+                      <SelectItem value="doctor">
+                        Doctor Consultation
+                      </SelectItem>
+                      <SelectItem value="consultation">
+                        Specialist Consultation
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -400,7 +436,9 @@ export function ClassesBookingsSection() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold">Instructor / Doctor Name *</Label>
+                  <Label className="text-xs font-semibold">
+                    Instructor / Doctor Name *
+                  </Label>
                   <Input
                     required
                     value={instructorOrDoctor}
@@ -413,7 +451,9 @@ export function ClassesBookingsSection() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold">Fee / Price (₹) *</Label>
+                  <Label className="text-xs font-semibold">
+                    Fee / Price (₹) *
+                  </Label>
                   <Input
                     type="number"
                     min={0}
@@ -433,7 +473,9 @@ export function ClassesBookingsSection() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold">Enrolled Count</Label>
+                  <Label className="text-xs font-semibold">
+                    Enrolled Count
+                  </Label>
                   <Input
                     type="number"
                     min={0}
@@ -446,7 +488,9 @@ export function ClassesBookingsSection() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold">Schedule / Timing</Label>
+                  <Label className="text-xs font-semibold">
+                    Schedule / Timing
+                  </Label>
                   <Input
                     placeholder="e.g., Sat & Sun, 10:00 AM - 1:00 PM"
                     value={schedule}
@@ -466,7 +510,9 @@ export function ClassesBookingsSection() {
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Venue / Location</Label>
+                <Label className="text-xs font-semibold">
+                  Venue / Location
+                </Label>
                 <Input
                   placeholder="e.g., Studio 4B, Indiranagar / Online Google Meet"
                   value={location}
@@ -476,7 +522,9 @@ export function ClassesBookingsSection() {
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Session Description</Label>
+                <Label className="text-xs font-semibold">
+                  Session Description
+                </Label>
                 <Textarea
                   rows={2}
                   placeholder="Outline syllabus, materials provided, who can attend..."
@@ -486,22 +534,39 @@ export function ClassesBookingsSection() {
                 />
               </div>
 
-              <ImageUploader label="Banner / Cover Image" value={image} onChange={setImage} previewHeight="h-40" />
+              <ImageUploader
+                label="Banner / Cover Image"
+                value={image}
+                onChange={setImage}
+                previewHeight="h-40"
+              />
 
               <div className="flex items-center justify-between p-3 rounded-2xl bg-muted/40 border border-border">
                 <div>
-                  <Label className="text-xs font-semibold">Publish Live on Website</Label>
-                  <p className="text-[11px] text-muted-foreground">Allow customers to discover and book</p>
+                  <Label className="text-xs font-semibold">
+                    Publish Live on Website
+                  </Label>
+                  <p className="text-[11px] text-muted-foreground">
+                    Allow customers to discover and book
+                  </p>
                 </div>
                 <Switch checked={published} onCheckedChange={setPublished} />
               </div>
             </div>
 
             <DialogFooter className="gap-2 pt-2 border-t border-border">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-xl">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                className="rounded-xl"
+              >
                 Cancel
               </Button>
-              <Button type="submit" className="rounded-xl bg-primary text-primary-foreground font-semibold">
+              <Button
+                type="submit"
+                className="rounded-xl bg-primary text-primary-foreground font-semibold"
+              >
                 {editingBooking ? "Save Changes" : "Create Session"}
               </Button>
             </DialogFooter>

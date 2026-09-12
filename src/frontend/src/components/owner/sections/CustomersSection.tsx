@@ -30,7 +30,8 @@ import {
   User,
   Users,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { type StoredCustomer, useStoreData } from "../../../lib/storeData";
 import { ConfirmModal } from "../ConfirmModal";
@@ -40,7 +41,9 @@ export function CustomersSection() {
   const store = useStoreData();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingCustomer, setEditingCustomer] = useState<StoredCustomer | null>(null);
+  const [editingCustomer, setEditingCustomer] = useState<StoredCustomer | null>(
+    null,
+  );
 
   // Form State
   const [name, setName] = useState("");
@@ -150,9 +153,12 @@ export function CustomersSection() {
         defaultSort="newest"
         onSort={(items, sortVal) => {
           const list = [...items];
-          if (sortVal === "orders_desc") return list.sort((a, b) => b.totalOrders - a.totalOrders);
-          if (sortVal === "spent_desc") return list.sort((a, b) => b.totalSpent - a.totalSpent);
-          if (sortVal === "name_asc") return list.sort((a, b) => a.name.localeCompare(b.name));
+          if (sortVal === "orders_desc")
+            return list.sort((a, b) => b.totalOrders - a.totalOrders);
+          if (sortVal === "spent_desc")
+            return list.sort((a, b) => b.totalSpent - a.totalSpent);
+          if (sortVal === "name_asc")
+            return list.sort((a, b) => a.name.localeCompare(b.name));
           return list.sort((a, b) => b.id - a.id);
         }}
         onAddNew={openAddDialog}
@@ -185,8 +191,8 @@ export function CustomersSection() {
                     customer.status === "active"
                       ? "bg-emerald-500 text-white"
                       : customer.status === "inactive"
-                      ? "bg-muted text-muted-foreground"
-                      : "bg-destructive text-white"
+                        ? "bg-muted text-muted-foreground"
+                        : "bg-destructive text-white"
                   }`}
                 >
                   {customer.status}
@@ -214,12 +220,20 @@ export function CustomersSection() {
               {/* Spending Stats */}
               <div className="grid grid-cols-2 gap-2 p-2.5 rounded-xl bg-muted/40 border border-border/60 text-center">
                 <div>
-                  <span className="text-[10px] text-muted-foreground uppercase font-bold">Total Orders</span>
-                  <p className="font-display font-black text-sm text-foreground">{customer.totalOrders}</p>
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold">
+                    Total Orders
+                  </span>
+                  <p className="font-display font-black text-sm text-foreground">
+                    {customer.totalOrders}
+                  </p>
                 </div>
                 <div>
-                  <span className="text-[10px] text-muted-foreground uppercase font-bold">Total Spent</span>
-                  <p className="font-display font-black text-sm text-primary">₹{customer.totalSpent.toLocaleString()}</p>
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold">
+                    Total Spent
+                  </span>
+                  <p className="font-display font-black text-sm text-primary">
+                    ₹{customer.totalSpent.toLocaleString()}
+                  </p>
                 </div>
               </div>
 
@@ -253,7 +267,9 @@ export function CustomersSection() {
           <form onSubmit={handleSave}>
             <DialogHeader>
               <DialogTitle className="text-xl font-display font-bold">
-                {editingCustomer ? "Edit Customer Details" : "Add New Customer Profile"}
+                {editingCustomer
+                  ? "Edit Customer Details"
+                  : "Add New Customer Profile"}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
                 Enter contact and address information.
@@ -262,7 +278,9 @@ export function CustomersSection() {
 
             <div className="space-y-3.5 py-3">
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Customer Full Name *</Label>
+                <Label className="text-xs font-semibold">
+                  Customer Full Name *
+                </Label>
                 <Input
                   required
                   placeholder="e.g. Ramesh Sharma"
@@ -274,7 +292,9 @@ export function CustomersSection() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Phone Number *</Label>
+                  <Label className="text-xs font-semibold">
+                    Phone Number *
+                  </Label>
                   <Input
                     required
                     placeholder="9876543210"
@@ -306,8 +326,13 @@ export function CustomersSection() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Account Status</Label>
-                  <Select value={status} onValueChange={(val: any) => setStatus(val)}>
+                  <Label className="text-xs font-semibold">
+                    Account Status
+                  </Label>
+                  <Select
+                    value={status}
+                    onValueChange={(val: any) => setStatus(val)}
+                  >
                     <SelectTrigger className="rounded-xl text-sm">
                       <SelectValue />
                     </SelectTrigger>
@@ -321,7 +346,9 @@ export function CustomersSection() {
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Delivery Address</Label>
+                <Label className="text-xs font-semibold">
+                  Delivery Address
+                </Label>
                 <Input
                   placeholder="Apartment, Street, Area..."
                   value={address}
@@ -332,10 +359,18 @@ export function CustomersSection() {
             </div>
 
             <DialogFooter className="gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-xl">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                className="rounded-xl"
+              >
                 Cancel
               </Button>
-              <Button type="submit" className="rounded-xl bg-primary text-primary-foreground font-semibold">
+              <Button
+                type="submit"
+                className="rounded-xl bg-primary text-primary-foreground font-semibold"
+              >
                 {editingCustomer ? "Save Changes" : "Create Customer"}
               </Button>
             </DialogFooter>

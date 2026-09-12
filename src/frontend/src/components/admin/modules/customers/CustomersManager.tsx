@@ -24,7 +24,8 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { type StoredCustomer, useStoreData } from "../../../../lib/storeData";
 import { ConfirmModal } from "../../../owner/ConfirmModal";
@@ -34,7 +35,9 @@ export function CustomersManager() {
   const store = useStoreData();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingCustomer, setEditingCustomer] = useState<StoredCustomer | null>(null);
+  const [editingCustomer, setEditingCustomer] = useState<StoredCustomer | null>(
+    null,
+  );
 
   // Form State
   const [name, setName] = useState("");
@@ -92,7 +95,9 @@ export function CustomersManager() {
     } else {
       store.addCustomer({
         name: name.trim(),
-        email: email.trim() || `${name.toLowerCase().replace(/\s+/g, "")}@customer.ezy1.in`,
+        email:
+          email.trim() ||
+          `${name.toLowerCase().replace(/\s+/g, "")}@customer.ezy1.in`,
         phone: phone.trim(),
         city: city.trim(),
         address: address.trim(),
@@ -145,9 +150,12 @@ export function CustomersManager() {
         defaultSort="spent_desc"
         onSort={(items, sortVal) => {
           const list = [...items];
-          if (sortVal === "spent_desc") return list.sort((a, b) => b.totalSpent - a.totalSpent);
-          if (sortVal === "orders_desc") return list.sort((a, b) => b.totalOrders - a.totalOrders);
-          if (sortVal === "wallet_desc") return list.sort((a, b) => b.walletBalance - a.walletBalance);
+          if (sortVal === "spent_desc")
+            return list.sort((a, b) => b.totalSpent - a.totalSpent);
+          if (sortVal === "orders_desc")
+            return list.sort((a, b) => b.totalOrders - a.totalOrders);
+          if (sortVal === "wallet_desc")
+            return list.sort((a, b) => b.walletBalance - a.walletBalance);
           return list.sort((a, b) => a.name.localeCompare(b.name));
         }}
         onAddNew={openAddDialog}
@@ -169,7 +177,9 @@ export function CustomersManager() {
                     {cust.name.charAt(0)}
                   </div>
                   <div>
-                    <h3 className="font-display font-bold text-base text-foreground">{cust.name}</h3>
+                    <h3 className="font-display font-bold text-base text-foreground">
+                      {cust.name}
+                    </h3>
                     <p className="text-xs text-muted-foreground mt-0.5 font-mono">
                       Joined: {cust.joinedAt} • ID: #{cust.id}
                     </p>
@@ -202,18 +212,28 @@ export function CustomersManager() {
                 </div>
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <Wallet className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                  <span className="truncate font-bold text-foreground">Wallet: ₹{cust.walletBalance}</span>
+                  <span className="truncate font-bold text-foreground">
+                    Wallet: ₹{cust.walletBalance}
+                  </span>
                 </div>
               </div>
 
               <div className="flex items-center justify-between p-3 rounded-2xl bg-muted/40 border border-border/60 text-xs">
                 <div>
-                  <span className="text-[10px] text-muted-foreground block">Lifetime Spend</span>
-                  <span className="font-display font-black text-foreground">₹{cust.totalSpent.toLocaleString()}</span>
+                  <span className="text-[10px] text-muted-foreground block">
+                    Lifetime Spend
+                  </span>
+                  <span className="font-display font-black text-foreground">
+                    ₹{cust.totalSpent.toLocaleString()}
+                  </span>
                 </div>
                 <div className="text-right">
-                  <span className="text-[10px] text-muted-foreground block">Orders Placed</span>
-                  <span className="font-display font-bold text-primary">{cust.totalOrders} Orders</span>
+                  <span className="text-[10px] text-muted-foreground block">
+                    Orders Placed
+                  </span>
+                  <span className="font-display font-bold text-primary">
+                    {cust.totalOrders} Orders
+                  </span>
                 </div>
               </div>
 
@@ -223,7 +243,9 @@ export function CustomersManager() {
                   size="sm"
                   onClick={() => toggleCustomerStatus(cust)}
                   className={`h-8 px-2.5 text-xs rounded-xl font-semibold ${
-                    cust.status === "active" ? "hover:text-destructive" : "text-emerald-600"
+                    cust.status === "active"
+                      ? "hover:text-destructive"
+                      : "text-emerald-600"
                   }`}
                 >
                   <Power className="w-3.5 h-3.5 mr-1" />
@@ -252,7 +274,9 @@ export function CustomersManager() {
           <form onSubmit={handleSave}>
             <DialogHeader>
               <DialogTitle className="text-lg font-display font-bold">
-                {editingCustomer ? "Edit Customer Details" : "Add Customer Profile"}
+                {editingCustomer
+                  ? "Edit Customer Details"
+                  : "Add Customer Profile"}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
                 Manage contact info, saved address and digital wallet balance.
@@ -261,7 +285,9 @@ export function CustomersManager() {
 
             <div className="space-y-3 py-3">
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Customer Full Name *</Label>
+                <Label className="text-xs font-semibold">
+                  Customer Full Name *
+                </Label>
                 <Input
                   required
                   value={name}
@@ -272,7 +298,9 @@ export function CustomersManager() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Phone Number *</Label>
+                  <Label className="text-xs font-semibold">
+                    Phone Number *
+                  </Label>
                   <Input
                     required
                     value={phone}
@@ -301,7 +329,9 @@ export function CustomersManager() {
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Wallet Balance Credit (₹)</Label>
+                <Label className="text-xs font-semibold">
+                  Wallet Balance Credit (₹)
+                </Label>
                 <Input
                   type="number"
                   value={walletBalance}
@@ -311,7 +341,9 @@ export function CustomersManager() {
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Saved Delivery Address</Label>
+                <Label className="text-xs font-semibold">
+                  Saved Delivery Address
+                </Label>
                 <Input
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
@@ -321,10 +353,18 @@ export function CustomersManager() {
             </div>
 
             <DialogFooter className="gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-xl">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                className="rounded-xl"
+              >
                 Cancel
               </Button>
-              <Button type="submit" className="rounded-xl bg-primary text-primary-foreground font-semibold">
+              <Button
+                type="submit"
+                className="rounded-xl bg-primary text-primary-foreground font-semibold"
+              >
                 {editingCustomer ? "Save Changes" : "Create Profile"}
               </Button>
             </DialogFooter>

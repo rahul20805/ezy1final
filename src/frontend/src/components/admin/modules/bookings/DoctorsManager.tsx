@@ -23,7 +23,8 @@ import {
   Trash2,
   User,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { type StoredDoctor, useStoreData } from "../../../../lib/storeData";
 import { ConfirmModal } from "../../../owner/ConfirmModal";
@@ -43,7 +44,9 @@ export function DoctorsManager() {
   const [experienceYears, setExperienceYears] = useState<number>(10);
   const [hospitalName, setHospitalName] = useState("");
   const [consultationFee, setConsultationFee] = useState<number>(500);
-  const [availability, setAvailability] = useState("Mon - Sat: 09:00 AM - 02:00 PM");
+  const [availability, setAvailability] = useState(
+    "Mon - Sat: 09:00 AM - 02:00 PM",
+  );
   const [phone, setPhone] = useState("");
   const [image, setImage] = useState("");
   const [bio, setBio] = useState("");
@@ -97,7 +100,9 @@ export function DoctorsManager() {
         consultationFee: Number(consultationFee),
         availability: availability.trim(),
         phone: phone.trim(),
-        image: image || "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=500&q=80",
+        image:
+          image ||
+          "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=500&q=80",
         bio: bio.trim(),
       });
       toast.success(`Doctor profile "${name}" updated!`);
@@ -114,7 +119,9 @@ export function DoctorsManager() {
         totalReviews: 0,
         phone: phone.trim(),
         verified: true,
-        image: image || "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=500&q=80",
+        image:
+          image ||
+          "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=500&q=80",
         bio: bio.trim(),
       });
       toast.success(`New Doctor "${name}" added to roster!`);
@@ -148,8 +155,14 @@ export function DoctorsManager() {
             key: "specialization",
             label: "Specialization",
             options: [
-              { label: "General Physician", value: "General Physician & Internal Medicine" },
-              { label: "Pediatrician", value: "Pediatrician & Child Specialist" },
+              {
+                label: "General Physician",
+                value: "General Physician & Internal Medicine",
+              },
+              {
+                label: "Pediatrician",
+                value: "Pediatrician & Child Specialist",
+              },
               { label: "Orthopedic", value: "Orthopedic & Joint Specialist" },
             ],
           },
@@ -163,16 +176,22 @@ export function DoctorsManager() {
         defaultSort="name_asc"
         onSort={(items, sortVal) => {
           const list = [...items];
-          if (sortVal === "fee_asc") return list.sort((a, b) => a.consultationFee - b.consultationFee);
-          if (sortVal === "fee_desc") return list.sort((a, b) => b.consultationFee - a.consultationFee);
-          if (sortVal === "exp_desc") return list.sort((a, b) => b.experienceYears - a.experienceYears);
+          if (sortVal === "fee_asc")
+            return list.sort((a, b) => a.consultationFee - b.consultationFee);
+          if (sortVal === "fee_desc")
+            return list.sort((a, b) => b.consultationFee - a.consultationFee);
+          if (sortVal === "exp_desc")
+            return list.sort((a, b) => b.experienceYears - a.experienceYears);
           return list.sort((a, b) => a.name.localeCompare(b.name));
         }}
         onAddNew={openAddDialog}
         addNewLabel="Add Doctor"
         pageSize={6}
         renderItem={(doc) => (
-          <Card key={doc.id} className="rounded-3xl border-border bg-card p-5 shadow-xs">
+          <Card
+            key={doc.id}
+            className="rounded-3xl border-border bg-card p-5 shadow-xs"
+          >
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
                 <img
@@ -182,11 +201,19 @@ export function DoctorsManager() {
                 />
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <h3 className="font-display font-bold text-sm text-foreground line-clamp-1">{doc.name}</h3>
-                    {doc.verified && <ShieldCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" />}
+                    <h3 className="font-display font-bold text-sm text-foreground line-clamp-1">
+                      {doc.name}
+                    </h3>
+                    {doc.verified && (
+                      <ShieldCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                    )}
                   </div>
-                  <p className="text-xs text-primary font-medium">{doc.specialization}</p>
-                  <span className="text-[10px] text-muted-foreground">{doc.qualification}</span>
+                  <p className="text-xs text-primary font-medium">
+                    {doc.specialization}
+                  </p>
+                  <span className="text-[10px] text-muted-foreground">
+                    {doc.qualification}
+                  </span>
                 </div>
               </div>
 
@@ -197,19 +224,30 @@ export function DoctorsManager() {
 
             <div className="p-3 rounded-2xl bg-muted/40 border border-border/60 text-xs my-3 space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Hospital / Clinic:</span>
-                <span className="font-semibold text-foreground truncate max-w-[180px]">{doc.hospitalName}</span>
+                <span className="text-muted-foreground">
+                  Hospital / Clinic:
+                </span>
+                <span className="font-semibold text-foreground truncate max-w-[180px]">
+                  {doc.hospitalName}
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Availability:</span>
-                <span className="font-mono text-muted-foreground">{doc.availability}</span>
+                <span className="font-mono text-muted-foreground">
+                  {doc.availability}
+                </span>
               </div>
             </div>
 
             <div className="flex items-center justify-between pt-2 border-t border-border/60">
               <div>
-                <span className="font-display font-black text-base text-foreground">₹{doc.consultationFee}</span>
-                <span className="text-[10px] text-muted-foreground"> / consult</span>
+                <span className="font-display font-black text-base text-foreground">
+                  ₹{doc.consultationFee}
+                </span>
+                <span className="text-[10px] text-muted-foreground">
+                  {" "}
+                  / consult
+                </span>
               </div>
 
               <div className="flex items-center gap-1.5">
@@ -241,17 +279,22 @@ export function DoctorsManager() {
           <form onSubmit={handleSave}>
             <DialogHeader>
               <DialogTitle className="text-xl font-display font-bold">
-                {editingDoc ? "Edit Doctor Profile" : "Register Doctor Specialist"}
+                {editingDoc
+                  ? "Edit Doctor Profile"
+                  : "Register Doctor Specialist"}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                Set doctor qualifications, hospital affiliations, consultation fees and hours.
+                Set doctor qualifications, hospital affiliations, consultation
+                fees and hours.
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-3.5 py-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Doctor Full Name *</Label>
+                  <Label className="text-xs font-semibold">
+                    Doctor Full Name *
+                  </Label>
                   <Input
                     required
                     placeholder="e.g. Dr. Arvind Rao"
@@ -261,7 +304,9 @@ export function DoctorsManager() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Specialization</Label>
+                  <Label className="text-xs font-semibold">
+                    Specialization
+                  </Label>
                   <Input
                     value={specialization}
                     onChange={(e) => setSpecialization(e.target.value)}
@@ -282,7 +327,9 @@ export function DoctorsManager() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Experience (Years)</Label>
+                  <Label className="text-xs font-semibold">
+                    Experience (Years)
+                  </Label>
                   <Input
                     type="number"
                     value={experienceYears}
@@ -291,7 +338,9 @@ export function DoctorsManager() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Consultation Fee (₹)</Label>
+                  <Label className="text-xs font-semibold">
+                    Consultation Fee (₹)
+                  </Label>
                   <Input
                     type="number"
                     value={consultationFee}
@@ -302,7 +351,9 @@ export function DoctorsManager() {
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Hospital / Clinic Name</Label>
+                <Label className="text-xs font-semibold">
+                  Hospital / Clinic Name
+                </Label>
                 <Input
                   value={hospitalName}
                   onChange={(e) => setHospitalName(e.target.value)}
@@ -311,7 +362,9 @@ export function DoctorsManager() {
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Availability Hours</Label>
+                <Label className="text-xs font-semibold">
+                  Availability Hours
+                </Label>
                 <Input
                   value={availability}
                   onChange={(e) => setAvailability(e.target.value)}
@@ -321,15 +374,27 @@ export function DoctorsManager() {
 
               <div className="space-y-1">
                 <Label className="text-xs font-semibold">Profile Photo</Label>
-                <ImageUploader currentImage={image} onImageChange={setImage} label="Doctor Photo" />
+                <ImageUploader
+                  currentImage={image}
+                  onImageChange={setImage}
+                  label="Doctor Photo"
+                />
               </div>
             </div>
 
             <DialogFooter className="gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-xl">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                className="rounded-xl"
+              >
                 Cancel
               </Button>
-              <Button type="submit" className="rounded-xl bg-primary text-primary-foreground font-semibold">
+              <Button
+                type="submit"
+                className="rounded-xl bg-primary text-primary-foreground font-semibold"
+              >
                 {editingDoc ? "Save Changes" : "Register Doctor"}
               </Button>
             </DialogFooter>

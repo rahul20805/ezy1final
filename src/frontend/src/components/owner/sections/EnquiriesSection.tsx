@@ -29,7 +29,8 @@ import {
   Trash2,
   User,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { type StoredEnquiry, useStoreData } from "../../../lib/storeData";
 import { ConfirmModal } from "../ConfirmModal";
@@ -39,7 +40,9 @@ export function EnquiriesSection() {
   const store = useStoreData();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedEnquiry, setSelectedEnquiry] = useState<StoredEnquiry | null>(null);
+  const [selectedEnquiry, setSelectedEnquiry] = useState<StoredEnquiry | null>(
+    null,
+  );
   const [resolutionNotes, setResolutionNotes] = useState("");
   const [newStatus, setNewStatus] = useState<StoredEnquiry["status"]>("new");
 
@@ -49,7 +52,8 @@ export function EnquiriesSection() {
   const [phone, setPhone] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
-  const [category, setCategory] = useState<StoredEnquiry["category"]>("General");
+  const [category, setCategory] =
+    useState<StoredEnquiry["category"]>("General");
 
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
 
@@ -92,7 +96,11 @@ export function EnquiriesSection() {
 
   const handleUpdateStatus = () => {
     if (!selectedEnquiry) return;
-    store.updateEnquiryStatus(selectedEnquiry.id, newStatus, resolutionNotes.trim());
+    store.updateEnquiryStatus(
+      selectedEnquiry.id,
+      newStatus,
+      resolutionNotes.trim(),
+    );
     toast.success("Enquiry status updated successfully!");
     setSelectedEnquiry(null);
   };
@@ -161,7 +169,10 @@ export function EnquiriesSection() {
           >
             <div>
               <div className="p-4 border-b border-border/60 flex items-center justify-between gap-2 bg-muted/20">
-                <Badge variant="outline" className="text-[10px] font-semibold border-border">
+                <Badge
+                  variant="outline"
+                  className="text-[10px] font-semibold border-border"
+                >
                   {item.category}
                 </Badge>
                 <Badge
@@ -169,10 +180,10 @@ export function EnquiriesSection() {
                     item.status === "new"
                       ? "bg-purple-500 text-white"
                       : item.status === "in_progress"
-                      ? "bg-amber-500 text-white"
-                      : item.status === "resolved"
-                      ? "bg-emerald-500 text-white"
-                      : "bg-muted text-muted-foreground"
+                        ? "bg-amber-500 text-white"
+                        : item.status === "resolved"
+                          ? "bg-emerald-500 text-white"
+                          : "bg-muted text-muted-foreground"
                   }`}
                 >
                   {item.status.replace(/_/g, " ")}
@@ -209,7 +220,9 @@ export function EnquiriesSection() {
             </div>
 
             <div className="p-4 pt-0 flex items-center justify-between gap-2 border-t border-border/60 mt-2">
-              <span className="text-[11px] text-muted-foreground">{item.createdAt}</span>
+              <span className="text-[11px] text-muted-foreground">
+                {item.createdAt}
+              </span>
 
               <div className="flex items-center gap-1">
                 <Button
@@ -239,15 +252,20 @@ export function EnquiriesSection() {
         <DialogContent className="max-w-lg bg-card border-border shadow-2xl rounded-3xl">
           <form onSubmit={handleCreateEnquiry}>
             <DialogHeader>
-              <DialogTitle className="text-xl font-display font-bold">Log New Customer Enquiry</DialogTitle>
+              <DialogTitle className="text-xl font-display font-bold">
+                Log New Customer Enquiry
+              </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                Enter enquiry or lead details from phone calls, WhatsApp or walk-in customers.
+                Enter enquiry or lead details from phone calls, WhatsApp or
+                walk-in customers.
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-3.5 py-3">
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Customer Full Name *</Label>
+                <Label className="text-xs font-semibold">
+                  Customer Full Name *
+                </Label>
                 <Input
                   required
                   placeholder="e.g. Kavita Singhal"
@@ -259,7 +277,9 @@ export function EnquiriesSection() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Phone Number *</Label>
+                  <Label className="text-xs font-semibold">
+                    Phone Number *
+                  </Label>
                   <Input
                     required
                     placeholder="e.g. 9876543210"
@@ -283,21 +303,30 @@ export function EnquiriesSection() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs font-semibold">Category</Label>
-                  <Select value={category} onValueChange={(val: any) => setCategory(val)}>
+                  <Select
+                    value={category}
+                    onValueChange={(val: any) => setCategory(val)}
+                  >
                     <SelectTrigger className="rounded-xl text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="General">General Question</SelectItem>
                       <SelectItem value="Bulk Order">Bulk Order</SelectItem>
-                      <SelectItem value="Custom Service">Custom Service</SelectItem>
+                      <SelectItem value="Custom Service">
+                        Custom Service
+                      </SelectItem>
                       <SelectItem value="Support">Support</SelectItem>
-                      <SelectItem value="Partner Application">Partner Application</SelectItem>
+                      <SelectItem value="Partner Application">
+                        Partner Application
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Subject / Title *</Label>
+                  <Label className="text-xs font-semibold">
+                    Subject / Title *
+                  </Label>
                   <Input
                     required
                     placeholder="e.g. Bulk 100 Cups Quote"
@@ -309,7 +338,9 @@ export function EnquiriesSection() {
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Message / Query Description</Label>
+                <Label className="text-xs font-semibold">
+                  Message / Query Description
+                </Label>
                 <Textarea
                   rows={3}
                   placeholder="Details of the request, timeline, delivery expectations..."
@@ -321,10 +352,18 @@ export function EnquiriesSection() {
             </div>
 
             <DialogFooter className="gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-xl">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                className="rounded-xl"
+              >
                 Cancel
               </Button>
-              <Button type="submit" className="rounded-xl bg-primary text-primary-foreground font-semibold">
+              <Button
+                type="submit"
+                className="rounded-xl bg-primary text-primary-foreground font-semibold"
+              >
                 Save Enquiry
               </Button>
             </DialogFooter>
@@ -334,12 +373,17 @@ export function EnquiriesSection() {
 
       {/* View & Update Enquiry Modal */}
       {selectedEnquiry && (
-        <Dialog open={!!selectedEnquiry} onOpenChange={() => setSelectedEnquiry(null)}>
+        <Dialog
+          open={!!selectedEnquiry}
+          onOpenChange={() => setSelectedEnquiry(null)}
+        >
           <DialogContent className="max-w-lg bg-card border-border shadow-2xl rounded-3xl">
             <DialogHeader>
               <div className="flex items-center justify-between">
                 <Badge variant="outline">{selectedEnquiry.category}</Badge>
-                <span className="text-xs text-muted-foreground">{selectedEnquiry.createdAt}</span>
+                <span className="text-xs text-muted-foreground">
+                  {selectedEnquiry.createdAt}
+                </span>
               </div>
               <DialogTitle className="text-lg font-display font-bold mt-1">
                 {selectedEnquiry.subject}
@@ -348,12 +392,19 @@ export function EnquiriesSection() {
 
             <div className="space-y-4 py-3">
               <div className="p-3 rounded-2xl bg-muted/40 border border-border text-xs space-y-1">
-                <p className="font-semibold text-foreground">{selectedEnquiry.customerName}</p>
-                <p className="text-muted-foreground">{selectedEnquiry.phone} {selectedEnquiry.email ? `• ${selectedEnquiry.email}` : ""}</p>
+                <p className="font-semibold text-foreground">
+                  {selectedEnquiry.customerName}
+                </p>
+                <p className="text-muted-foreground">
+                  {selectedEnquiry.phone}{" "}
+                  {selectedEnquiry.email ? `• ${selectedEnquiry.email}` : ""}
+                </p>
               </div>
 
               <div>
-                <Label className="text-xs font-semibold text-muted-foreground">Customer Message</Label>
+                <Label className="text-xs font-semibold text-muted-foreground">
+                  Customer Message
+                </Label>
                 <p className="text-xs text-foreground bg-muted/30 p-3 rounded-2xl border border-border mt-1 whitespace-pre-wrap">
                   {selectedEnquiry.message}
                 </p>
@@ -361,7 +412,10 @@ export function EnquiriesSection() {
 
               <div className="space-y-1.5">
                 <Label className="text-xs font-semibold">Lead Status</Label>
-                <Select value={newStatus} onValueChange={(val: any) => setNewStatus(val)}>
+                <Select
+                  value={newStatus}
+                  onValueChange={(val: any) => setNewStatus(val)}
+                >
                   <SelectTrigger className="rounded-xl text-sm">
                     <SelectValue />
                   </SelectTrigger>
@@ -375,7 +429,9 @@ export function EnquiriesSection() {
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Internal Resolution Notes</Label>
+                <Label className="text-xs font-semibold">
+                  Internal Resolution Notes
+                </Label>
                 <Textarea
                   rows={2}
                   placeholder="Record quote given, follow-up actions or closure notes..."
@@ -405,10 +461,19 @@ export function EnquiriesSection() {
             </div>
 
             <DialogFooter className="gap-2">
-              <Button variant="outline" size="sm" onClick={() => setSelectedEnquiry(null)} className="rounded-xl">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedEnquiry(null)}
+                className="rounded-xl"
+              >
                 Close
               </Button>
-              <Button size="sm" onClick={handleUpdateStatus} className="rounded-xl bg-primary text-primary-foreground">
+              <Button
+                size="sm"
+                onClick={handleUpdateStatus}
+                className="rounded-xl bg-primary text-primary-foreground"
+              >
                 Save Status
               </Button>
             </DialogFooter>

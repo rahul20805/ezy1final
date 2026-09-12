@@ -29,9 +29,14 @@ import {
   User,
   UserCheck,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
-import { type AdminRole, type PartnerAccount, usePartnerAuth } from "../../../../lib/partnerAuthStore";
+import {
+  type AdminRole,
+  type PartnerAccount,
+  usePartnerAuth,
+} from "../../../../lib/partnerAuthStore";
 import { DataTable } from "../../../owner/DataTable";
 
 export function AdminUsersManager() {
@@ -51,7 +56,9 @@ export function AdminUsersManager() {
       return;
     }
 
-    if (partners.some((p) => p.id.toLowerCase() === adminId.trim().toLowerCase())) {
+    if (
+      partners.some((p) => p.id.toLowerCase() === adminId.trim().toLowerCase())
+    ) {
       toast.error("An admin account with this ID already exists.");
       return;
     }
@@ -76,9 +83,11 @@ export function AdminUsersManager() {
         canManageCustomers: true,
         canManageGallery: true,
         canManageReviews: true,
-        canManageWebsiteContent: role === "SUPER_ADMIN" || role === "CONTENT_MANAGER",
+        canManageWebsiteContent:
+          role === "SUPER_ADMIN" || role === "CONTENT_MANAGER",
         canManageCategories: role === "SUPER_ADMIN",
-        canManageOwnerSettings: role === "SUPER_ADMIN" || role === "super_owner",
+        canManageOwnerSettings:
+          role === "SUPER_ADMIN" || role === "super_owner",
         canManageHealthcare: true,
         canManageTransport: true,
         canManageDelivery: true,
@@ -122,15 +131,22 @@ export function AdminUsersManager() {
         addNewLabel="Create Admin User"
         pageSize={6}
         renderItem={(admin) => (
-          <Card key={admin.id} className="rounded-3xl border-border bg-card p-5 shadow-xs space-y-3">
+          <Card
+            key={admin.id}
+            className="rounded-3xl border-border bg-card p-5 shadow-xs space-y-3"
+          >
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold">
                   <Shield className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="font-display font-bold text-base text-foreground">{admin.ownerName}</h3>
-                  <p className="text-xs text-muted-foreground font-mono">ID: {admin.id}</p>
+                  <h3 className="font-display font-bold text-base text-foreground">
+                    {admin.ownerName}
+                  </h3>
+                  <p className="text-xs text-muted-foreground font-mono">
+                    ID: {admin.id}
+                  </p>
                 </div>
               </div>
 
@@ -157,7 +173,9 @@ export function AdminUsersManager() {
             </div>
 
             <div className="flex items-center justify-between pt-2 border-t border-border/60">
-              <span className="text-xs text-emerald-600 font-semibold">● Active Session</span>
+              <span className="text-xs text-emerald-600 font-semibold">
+                ● Active Session
+              </span>
               {admin.role !== "super_owner" && (
                 <Button
                   variant="ghost"
@@ -181,7 +199,9 @@ export function AdminUsersManager() {
         <DialogContent className="max-w-md bg-card border-border shadow-2xl rounded-3xl">
           <form onSubmit={handleCreateAdmin}>
             <DialogHeader>
-              <DialogTitle className="text-lg font-display font-bold">Create Admin Operator Account</DialogTitle>
+              <DialogTitle className="text-lg font-display font-bold">
+                Create Admin Operator Account
+              </DialogTitle>
               <DialogDescription className="text-xs">
                 Issue credentials with granular operational role access.
               </DialogDescription>
@@ -189,7 +209,9 @@ export function AdminUsersManager() {
 
             <div className="space-y-3 py-3">
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Admin Login ID *</Label>
+                <Label className="text-xs font-semibold">
+                  Admin Login ID *
+                </Label>
                 <Input
                   required
                   placeholder="e.g. order_manager_1"
@@ -223,17 +245,28 @@ export function AdminUsersManager() {
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs font-semibold">Role Tier</Label>
-                  <Select value={role} onValueChange={(val: any) => setRole(val)}>
+                  <Select
+                    value={role}
+                    onValueChange={(val: any) => setRole(val)}
+                  >
                     <SelectTrigger className="rounded-xl text-xs">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="SUPER_ADMIN">SUPER ADMIN</SelectItem>
                       <SelectItem value="ADMIN">GENERAL ADMIN</SelectItem>
-                      <SelectItem value="ORDER_MANAGER">ORDER MANAGER</SelectItem>
-                      <SelectItem value="SUPPORT_AGENT">SUPPORT AGENT</SelectItem>
-                      <SelectItem value="FINANCE_MANAGER">FINANCE MANAGER</SelectItem>
-                      <SelectItem value="CONTENT_MANAGER">CONTENT MANAGER</SelectItem>
+                      <SelectItem value="ORDER_MANAGER">
+                        ORDER MANAGER
+                      </SelectItem>
+                      <SelectItem value="SUPPORT_AGENT">
+                        SUPPORT AGENT
+                      </SelectItem>
+                      <SelectItem value="FINANCE_MANAGER">
+                        FINANCE MANAGER
+                      </SelectItem>
+                      <SelectItem value="CONTENT_MANAGER">
+                        CONTENT MANAGER
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -241,10 +274,18 @@ export function AdminUsersManager() {
             </div>
 
             <DialogFooter className="gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-xl text-xs">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                className="rounded-xl text-xs"
+              >
                 Cancel
               </Button>
-              <Button type="submit" className="rounded-xl bg-primary text-primary-foreground font-semibold text-xs">
+              <Button
+                type="submit"
+                className="rounded-xl bg-primary text-primary-foreground font-semibold text-xs"
+              >
                 Create Admin User
               </Button>
             </DialogFooter>

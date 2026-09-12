@@ -46,7 +46,7 @@ const services = [
     desc: "Mobile top-ups, DTH, electricity, water & more",
     color: "primary",
     trending: true,
-    path: "/dashboard/wallet"
+    path: "/dashboard/wallet",
   },
   {
     id: 2,
@@ -55,7 +55,7 @@ const services = [
     desc: "Book flights, buses, trains, and hotels easily",
     color: "secondary",
     trending: true,
-    path: "/dashboard/transport"
+    path: "/dashboard/transport",
   },
   {
     id: 3,
@@ -64,7 +64,7 @@ const services = [
     desc: "Book doctors, order medicines, emergency access",
     color: "accent",
     trending: false,
-    path: "/dashboard/healthcare"
+    path: "/dashboard/healthcare",
   },
   {
     id: 4,
@@ -73,7 +73,7 @@ const services = [
     desc: "Groceries, electronics, fashion and beauty",
     color: "primary",
     trending: false,
-    path: "/shop"
+    path: "/shop",
   },
   {
     id: 5,
@@ -82,7 +82,7 @@ const services = [
     desc: "Maids, plumbers, electricians, repair, beauty",
     color: "secondary",
     trending: true,
-    path: "/services"
+    path: "/services",
   },
 ];
 
@@ -459,7 +459,10 @@ export default function LandingPage() {
               };
               return (
                 <RevealSection key={svc.id}>
-                  <Link to={svc.path} data-ocid={`landing.service_card.${i + 1}`}>
+                  <Link
+                    to={svc.path}
+                    data-ocid={`landing.service_card.${i + 1}`}
+                  >
                     <Card className="hover:shadow-elevated hover:-translate-y-1.5 transition-smooth cursor-pointer border-border h-full group relative overflow-hidden">
                       {svc.trending && (
                         <div className="absolute top-3 right-3">

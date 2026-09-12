@@ -34,7 +34,8 @@ import {
   Store,
   Trash2,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { type StoredShop, useStoreData } from "../../../../lib/storeData";
 import { ConfirmModal } from "../../../owner/ConfirmModal";
@@ -55,7 +56,9 @@ export function ShopsManager() {
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"active" | "suspended" | "pending">("active");
+  const [status, setStatus] = useState<"active" | "suspended" | "pending">(
+    "active",
+  );
   const [openingHours, setOpeningHours] = useState("07:00 AM - 10:00 PM");
   const [deliveryRadiusKm, setDeliveryRadiusKm] = useState(8);
   const [image, setImage] = useState("");
@@ -187,9 +190,14 @@ export function ShopsManager() {
         defaultSort="orders_desc"
         onSort={(items, sortVal) => {
           const list = [...items];
-          if (sortVal === "revenue_desc") return list.sort((a, b) => b.totalRevenue - a.totalRevenue);
-          if (sortVal === "rating_desc") return list.sort((a, b) => b.rating - a.rating);
-          if (sortVal === "name_asc") return list.sort((a, b) => a.businessName.localeCompare(b.businessName));
+          if (sortVal === "revenue_desc")
+            return list.sort((a, b) => b.totalRevenue - a.totalRevenue);
+          if (sortVal === "rating_desc")
+            return list.sort((a, b) => b.rating - a.rating);
+          if (sortVal === "name_asc")
+            return list.sort((a, b) =>
+              a.businessName.localeCompare(b.businessName),
+            );
           return list.sort((a, b) => b.totalOrders - a.totalOrders);
         }}
         onAddNew={openAddDialog}
@@ -217,10 +225,16 @@ export function ShopsManager() {
                       <h3 className="font-display font-bold text-base text-foreground line-clamp-1">
                         {shop.businessName}
                       </h3>
-                      {shop.verified && <ShieldCheck className="w-4 h-4 text-primary flex-shrink-0" />}
+                      {shop.verified && (
+                        <ShieldCheck className="w-4 h-4 text-primary flex-shrink-0" />
+                      )}
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Owner: <span className="font-medium text-foreground">{shop.ownerName}</span> • ID: #{shop.id}
+                      Owner:{" "}
+                      <span className="font-medium text-foreground">
+                        {shop.ownerName}
+                      </span>{" "}
+                      • ID: #{shop.id}
                     </p>
                   </div>
                 </div>
@@ -243,7 +257,9 @@ export function ShopsManager() {
                 </div>
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <MapPin className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                  <span className="truncate">{shop.city} ({shop.deliveryRadiusKm}km)</span>
+                  <span className="truncate">
+                    {shop.city} ({shop.deliveryRadiusKm}km)
+                  </span>
                 </div>
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <Clock className="w-3.5 h-3.5 text-primary flex-shrink-0" />
@@ -257,12 +273,20 @@ export function ShopsManager() {
 
               <div className="flex items-center justify-between p-2.5 rounded-2xl bg-muted/40 border border-border/60 text-xs">
                 <div>
-                  <span className="text-[10px] text-muted-foreground block">Total Revenue</span>
-                  <span className="font-display font-bold text-foreground">₹{shop.totalRevenue.toLocaleString()}</span>
+                  <span className="text-[10px] text-muted-foreground block">
+                    Total Revenue
+                  </span>
+                  <span className="font-display font-bold text-foreground">
+                    ₹{shop.totalRevenue.toLocaleString()}
+                  </span>
                 </div>
                 <div className="text-right">
-                  <span className="text-[10px] text-muted-foreground block">Orders Processed</span>
-                  <span className="font-display font-bold text-primary">{shop.totalOrders}</span>
+                  <span className="text-[10px] text-muted-foreground block">
+                    Orders Processed
+                  </span>
+                  <span className="font-display font-bold text-primary">
+                    {shop.totalOrders}
+                  </span>
                 </div>
               </div>
 
@@ -272,7 +296,9 @@ export function ShopsManager() {
                   size="sm"
                   onClick={() => toggleShopStatus(shop)}
                   className={`h-8 px-2.5 text-xs rounded-xl gap-1 font-semibold ${
-                    shop.status === "active" ? "hover:text-destructive" : "text-emerald-600"
+                    shop.status === "active"
+                      ? "hover:text-destructive"
+                      : "text-emerald-600"
                   }`}
                 >
                   <Power className="w-3.5 h-3.5" />
@@ -309,17 +335,22 @@ export function ShopsManager() {
           <form onSubmit={handleSave}>
             <DialogHeader>
               <DialogTitle className="text-xl font-display font-bold">
-                {editingShop ? "Edit Merchant Store Profile" : "Register New Merchant Store"}
+                {editingShop
+                  ? "Edit Merchant Store Profile"
+                  : "Register New Merchant Store"}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                Define the merchant's business details, category, operational hours and delivery coverage.
+                Define the merchant's business details, category, operational
+                hours and delivery coverage.
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 py-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Store / Business Name *</Label>
+                  <Label className="text-xs font-semibold">
+                    Store / Business Name *
+                  </Label>
                   <Input
                     required
                     placeholder="e.g. Sharma Kirana Store"
@@ -329,7 +360,9 @@ export function ShopsManager() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Owner Full Name *</Label>
+                  <Label className="text-xs font-semibold">
+                    Owner Full Name *
+                  </Label>
                   <Input
                     required
                     placeholder="e.g. Ramesh Sharma"
@@ -360,11 +393,15 @@ export function ShopsManager() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Delivery Radius (km)</Label>
+                  <Label className="text-xs font-semibold">
+                    Delivery Radius (km)
+                  </Label>
                   <Input
                     type="number"
                     value={deliveryRadiusKm}
-                    onChange={(e) => setDeliveryRadiusKm(Number(e.target.value))}
+                    onChange={(e) =>
+                      setDeliveryRadiusKm(Number(e.target.value))
+                    }
                     className="rounded-xl text-xs font-bold"
                   />
                 </div>
@@ -393,7 +430,9 @@ export function ShopsManager() {
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Store Address & Landmark</Label>
+                <Label className="text-xs font-semibold">
+                  Store Address & Landmark
+                </Label>
                 <Input
                   placeholder="Full physical street address..."
                   value={address}
@@ -404,15 +443,27 @@ export function ShopsManager() {
 
               <div className="space-y-1">
                 <Label className="text-xs font-semibold">Store Image</Label>
-                <ImageUploader currentImage={image} onImageChange={setImage} label="Storefront Banner Photo" />
+                <ImageUploader
+                  currentImage={image}
+                  onImageChange={setImage}
+                  label="Storefront Banner Photo"
+                />
               </div>
             </div>
 
             <DialogFooter className="gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-xl">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                className="rounded-xl"
+              >
                 Cancel
               </Button>
-              <Button type="submit" className="rounded-xl bg-primary text-primary-foreground font-semibold">
+              <Button
+                type="submit"
+                className="rounded-xl bg-primary text-primary-foreground font-semibold"
+              >
                 {editingShop ? "Save Changes" : "Register Store"}
               </Button>
             </DialogFooter>

@@ -56,8 +56,12 @@ import {
   Wrench,
   Zap,
 } from "lucide-react";
-import React, { useState } from "react";
-import { type PartnerAccount, usePartnerAuth } from "../../lib/partnerAuthStore";
+import type React from "react";
+import { useState } from "react";
+import {
+  type PartnerAccount,
+  usePartnerAuth,
+} from "../../lib/partnerAuthStore";
 import { useStoreData } from "../../lib/storeData";
 
 export type AdminSectionId =
@@ -126,7 +130,9 @@ export interface NavSubItem {
   id: AdminSectionId;
   label: string;
   icon: React.ElementType;
-  getBadge?: (store: ReturnType<typeof useStoreData.getState>) => string | number | null;
+  getBadge?: (
+    store: ReturnType<typeof useStoreData.getState>,
+  ) => string | number | null;
   badgeVariant?: "default" | "destructive" | "secondary" | "outline";
 }
 
@@ -156,26 +162,52 @@ export const ADMIN_NAV_GROUPS: NavGroup[] = [
     name: "Marketplace",
     icon: Store,
     items: [
-      { id: "shops", label: "Inventory / Shops", icon: Store, getBadge: (s) => s.shops.length },
-      { id: "products", label: "Products Catalog", icon: Package, getBadge: (s) => s.products.length },
-      { id: "categories", label: "Categories & Taxonomy", icon: Layers, getBadge: (s) => s.categories.length },
+      {
+        id: "shops",
+        label: "Inventory / Shops",
+        icon: Store,
+        getBadge: (s) => s.shops.length,
+      },
+      {
+        id: "products",
+        label: "Products Catalog",
+        icon: Package,
+        getBadge: (s) => s.products.length,
+      },
+      {
+        id: "categories",
+        label: "Categories & Taxonomy",
+        icon: Layers,
+        getBadge: (s) => s.categories.length,
+      },
       { id: "partners", label: "Vendors & Partners", icon: UserCheck },
       {
         id: "partner_applications",
         label: "Partner Applications",
         icon: FileCheck,
-        getBadge: (s) => s.partnerApplications.filter((a) => a.status === "PENDING" || a.status === "UNDER_REVIEW").length || null,
+        getBadge: (s) =>
+          s.partnerApplications.filter(
+            (a) => a.status === "PENDING" || a.status === "UNDER_REVIEW",
+          ).length || null,
         badgeVariant: "destructive",
       },
       {
         id: "orders",
         label: "Orders Pipeline",
         icon: ShoppingBag,
-        getBadge: (s) => s.orders.filter((o) => o.status !== "DELIVERED" && o.status !== "CANCELLED").length || null,
+        getBadge: (s) =>
+          s.orders.filter(
+            (o) => o.status !== "DELIVERED" && o.status !== "CANCELLED",
+          ).length || null,
         badgeVariant: "default",
       },
       { id: "abandoned_carts", label: "Carts & Recovery", icon: ShoppingCart },
-      { id: "coupons", label: "Coupons & Discounts", icon: Ticket, getBadge: (s) => s.coupons.length },
+      {
+        id: "coupons",
+        label: "Coupons & Discounts",
+        icon: Ticket,
+        getBadge: (s) => s.coupons.length,
+      },
       { id: "deals_promotions", label: "Deals & Promotions", icon: Zap },
     ],
   },
@@ -183,17 +215,43 @@ export const ADMIN_NAV_GROUPS: NavGroup[] = [
     name: "Bookings & Services",
     icon: Calendar,
     items: [
-      { id: "bookings", label: "Classes & Bookings", icon: Calendar, getBadge: (s) => s.bookings.length },
-      { id: "services", label: "On-Demand Services", icon: Wrench, getBadge: (s) => s.services.length },
+      {
+        id: "bookings",
+        label: "Classes & Bookings",
+        icon: Calendar,
+        getBadge: (s) => s.bookings.length,
+      },
+      {
+        id: "services",
+        label: "On-Demand Services",
+        icon: Wrench,
+        getBadge: (s) => s.services.length,
+      },
       { id: "service_providers", label: "Service Providers", icon: Users },
-      { id: "transport", label: "Transport & Fleet", icon: MapPin, getBadge: (s) => s.transportListings.length },
-      { id: "doctors", label: "Doctors Roster", icon: Stethoscope, getBadge: (s) => s.doctors.length },
-      { id: "hospitals", label: "Hospitals Directory", icon: Building2, getBadge: (s) => s.hospitals.length },
+      {
+        id: "transport",
+        label: "Transport & Fleet",
+        icon: MapPin,
+        getBadge: (s) => s.transportListings.length,
+      },
+      {
+        id: "doctors",
+        label: "Doctors Roster",
+        icon: Stethoscope,
+        getBadge: (s) => s.doctors.length,
+      },
+      {
+        id: "hospitals",
+        label: "Hospitals Directory",
+        icon: Building2,
+        getBadge: (s) => s.hospitals.length,
+      },
       {
         id: "hospital_beds",
         label: "Hospital Beds Tracker",
         icon: Radio,
-        getBadge: (s) => s.hospitalBeds.reduce((acc, b) => acc + b.availableBeds, 0) + " Free",
+        getBadge: (s) =>
+          s.hospitalBeds.reduce((acc, b) => acc + b.availableBeds, 0) + " Free",
         badgeVariant: "secondary",
       },
     ],
@@ -202,12 +260,20 @@ export const ADMIN_NAV_GROUPS: NavGroup[] = [
     name: "Customers",
     icon: Users,
     items: [
-      { id: "customers", label: "Customer Directory", icon: Users, getBadge: (s) => s.customers.length },
+      {
+        id: "customers",
+        label: "Customer Directory",
+        icon: Users,
+        getBadge: (s) => s.customers.length,
+      },
       {
         id: "support_tickets",
         label: "Support Tickets",
         icon: LifeBuoy,
-        getBadge: (s) => s.supportTickets.filter((t) => t.status === "OPEN" || t.status === "IN_PROGRESS").length || null,
+        getBadge: (s) =>
+          s.supportTickets.filter(
+            (t) => t.status === "OPEN" || t.status === "IN_PROGRESS",
+          ).length || null,
         badgeVariant: "destructive",
       },
       { id: "enquiries", label: "Leads & Enquiries", icon: HelpCircle },
@@ -215,7 +281,10 @@ export const ADMIN_NAV_GROUPS: NavGroup[] = [
         id: "disputes",
         label: "Disputes Resolution",
         icon: ShieldAlert,
-        getBadge: (s) => s.disputes.filter((d) => d.status === "PENDING" || d.status === "INVESTIGATING").length || null,
+        getBadge: (s) =>
+          s.disputes.filter(
+            (d) => d.status === "PENDING" || d.status === "INVESTIGATING",
+          ).length || null,
         badgeVariant: "destructive",
       },
     ],
@@ -229,7 +298,9 @@ export const ADMIN_NAV_GROUPS: NavGroup[] = [
         id: "delivery_partners",
         label: "Delivery Drivers",
         icon: Users,
-        getBadge: (s) => s.deliveryPartners.filter((d) => d.currentStatus === "ONLINE").length + " Online",
+        getBadge: (s) =>
+          s.deliveryPartners.filter((d) => d.currentStatus === "ONLINE")
+            .length + " Online",
         badgeVariant: "secondary",
       },
       { id: "delivery_zones", label: "Delivery Zones", icon: Map },
@@ -241,11 +312,26 @@ export const ADMIN_NAV_GROUPS: NavGroup[] = [
     name: "Content & CMS",
     icon: ImageIcon,
     items: [
-      { id: "gallery", label: "Media & Gallery", icon: ImageIcon, getBadge: (s) => s.gallery.length },
+      {
+        id: "gallery",
+        label: "Media & Gallery",
+        icon: ImageIcon,
+        getBadge: (s) => s.gallery.length,
+      },
       { id: "website_content", label: "Website CMS", icon: FileText },
-      { id: "banners", label: "Promo Banners", icon: Sparkles, getBadge: (s) => s.heroSlides.length },
+      {
+        id: "banners",
+        label: "Promo Banners",
+        icon: Sparkles,
+        getBadge: (s) => s.heroSlides.length,
+      },
       { id: "gift_categories", label: "Gift Categories", icon: Gift },
-      { id: "faqs", label: "FAQs Management", icon: FileQuestion, getBadge: (s) => s.faqs.length },
+      {
+        id: "faqs",
+        label: "FAQs Management",
+        icon: FileQuestion,
+        getBadge: (s) => s.faqs.length,
+      },
       { id: "seo", label: "SEO & Social Meta", icon: Search },
     ],
   },
@@ -254,12 +340,18 @@ export const ADMIN_NAV_GROUPS: NavGroup[] = [
     icon: CreditCard,
     items: [
       { id: "payments", label: "Payments & Gateway", icon: CreditCard },
-      { id: "transactions", label: "Financial Ledger", icon: FileSpreadsheet, getBadge: (s) => s.transactions.length },
+      {
+        id: "transactions",
+        label: "Financial Ledger",
+        icon: FileSpreadsheet,
+        getBadge: (s) => s.transactions.length,
+      },
       {
         id: "refunds",
         label: "Refunds Processing",
         icon: History,
-        getBadge: (s) => s.refunds.filter((r) => r.status === "PENDING").length || null,
+        getBadge: (s) =>
+          s.refunds.filter((r) => r.status === "PENDING").length || null,
         badgeVariant: "destructive",
       },
       { id: "wallet", label: "Digital Wallet", icon: Wallet },
@@ -267,7 +359,8 @@ export const ADMIN_NAV_GROUPS: NavGroup[] = [
         id: "partner_payouts",
         label: "Partner Payouts",
         icon: TrendingUp,
-        getBadge: (s) => s.partnerPayouts.filter((p) => p.status === "PENDING").length || null,
+        getBadge: (s) =>
+          s.partnerPayouts.filter((p) => p.status === "PENDING").length || null,
         badgeVariant: "destructive",
       },
       { id: "commissions", label: "Commissions & GST", icon: Percent },
@@ -278,7 +371,11 @@ export const ADMIN_NAV_GROUPS: NavGroup[] = [
     icon: MessageSquare,
     items: [
       { id: "notifications", label: "Notifications & Alerts", icon: Bell },
-      { id: "whatsapp_admin", label: "WhatsApp Business Bot", icon: MessageCircle },
+      {
+        id: "whatsapp_admin",
+        label: "WhatsApp Business Bot",
+        icon: MessageCircle,
+      },
       { id: "customer_messages", label: "Customer Inbox", icon: MessageSquare },
     ],
   },
@@ -286,7 +383,12 @@ export const ADMIN_NAV_GROUPS: NavGroup[] = [
     name: "Reviews & Quality",
     icon: Star,
     items: [
-      { id: "reviews", label: "Reviews & Ratings", icon: Star, getBadge: (s) => s.reviews.length },
+      {
+        id: "reviews",
+        label: "Reviews & Ratings",
+        icon: Star,
+        getBadge: (s) => s.reviews.length,
+      },
       {
         id: "reported_reviews",
         label: "Reported Content",
@@ -294,7 +396,11 @@ export const ADMIN_NAV_GROUPS: NavGroup[] = [
         getBadge: (s) => s.reviews.filter((r) => r.isReported).length || null,
         badgeVariant: "destructive",
       },
-      { id: "partner_verification", label: "KYC & Verification", icon: ShieldCheck },
+      {
+        id: "partner_verification",
+        label: "KYC & Verification",
+        icon: ShieldCheck,
+      },
     ],
   },
   {
@@ -303,7 +409,12 @@ export const ADMIN_NAV_GROUPS: NavGroup[] = [
     items: [
       { id: "owner_settings", label: "Master Owner Settings", icon: Settings },
       { id: "admin_users", label: "Admin Users & RBAC", icon: Shield },
-      { id: "audit_logs", label: "Audit Logs Trail", icon: History, getBadge: (s) => s.auditLogs.length },
+      {
+        id: "audit_logs",
+        label: "Audit Logs Trail",
+        icon: History,
+        getBadge: (s) => s.auditLogs.length,
+      },
       { id: "api_integrations", label: "API & Webhooks", icon: FileCode },
     ],
   },
@@ -327,18 +438,20 @@ export function AdminSidebar({
   const store = useStoreData();
   const { currentPartner, logout } = usePartnerAuth();
 
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
-    Main: true,
-    Marketplace: true,
-    "Bookings & Services": true,
-    Customers: true,
-    Delivery: true,
-    "Content & CMS": true,
-    Finance: true,
-    Communication: true,
-    "Reviews & Quality": true,
-    "System & Governance": true,
-  });
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(
+    {
+      Main: true,
+      Marketplace: true,
+      "Bookings & Services": true,
+      Customers: true,
+      Delivery: true,
+      "Content & CMS": true,
+      Finance: true,
+      Communication: true,
+      "Reviews & Quality": true,
+      "System & Governance": true,
+    },
+  );
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -349,7 +462,7 @@ export function AdminSidebar({
   const filteredGroups = ADMIN_NAV_GROUPS.map((group) => ({
     ...group,
     items: group.items.filter((item) =>
-      item.label.toLowerCase().includes(searchQuery.toLowerCase())
+      item.label.toLowerCase().includes(searchQuery.toLowerCase()),
     ),
   })).filter((group) => group.items.length > 0);
 
@@ -368,7 +481,8 @@ export function AdminSidebar({
             </div>
             <div className="truncate">
               <h1 className="font-display font-bold text-sm text-foreground tracking-tight leading-none">
-                {store.settings.brandName} <span className="text-primary font-black">OS</span>
+                {store.settings.brandName}{" "}
+                <span className="text-primary font-black">OS</span>
               </h1>
               <p className="text-[10px] text-muted-foreground font-medium truncate mt-0.5">
                 Central Admin Control Center
@@ -386,7 +500,11 @@ export function AdminSidebar({
           className="hidden md:flex p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
           title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          {collapsed ? (
+            <ChevronRight className="w-4 h-4" />
+          ) : (
+            <ChevronLeft className="w-4 h-4" />
+          )}
         </button>
       </div>
 
@@ -435,7 +553,9 @@ export function AdminSidebar({
                 <div className="space-y-0.5">
                   {group.items.map((item) => {
                     const isActive = currentSection === item.id;
-                    const badgeVal = item.getBadge ? item.getBadge(store) : null;
+                    const badgeVal = item.getBadge
+                      ? item.getBadge(store)
+                      : null;
                     const Icon = item.icon;
 
                     return (
@@ -454,7 +574,9 @@ export function AdminSidebar({
                       >
                         <Icon
                           className={`w-4 h-4 flex-shrink-0 ${
-                            isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-primary"
+                            isActive
+                              ? "text-primary-foreground"
+                              : "text-muted-foreground group-hover:text-primary"
                           }`}
                         />
 
@@ -463,9 +585,14 @@ export function AdminSidebar({
                             <span className="truncate">{item.label}</span>
                             {badgeVal !== null && badgeVal !== undefined && (
                               <Badge
-                                variant={item.badgeVariant || (isActive ? "secondary" : "outline")}
+                                variant={
+                                  item.badgeVariant ||
+                                  (isActive ? "secondary" : "outline")
+                                }
                                 className={`text-[9px] px-1.5 py-0 h-4 font-bold rounded-md ${
-                                  isActive ? "bg-white/20 text-white border-0" : ""
+                                  isActive
+                                    ? "bg-white/20 text-white border-0"
+                                    : ""
                                 }`}
                               >
                                 {badgeVal}
@@ -496,7 +623,8 @@ export function AdminSidebar({
                   {currentPartner?.ownerName || "Super Administrator"}
                 </p>
                 <span className="text-[10px] text-muted-foreground font-mono truncate block">
-                  Role: {currentPartner?.role?.replace(/_/g, " ") || "SUPER ADMIN"}
+                  Role:{" "}
+                  {currentPartner?.role?.replace(/_/g, " ") || "SUPER ADMIN"}
                 </span>
               </div>
             </div>

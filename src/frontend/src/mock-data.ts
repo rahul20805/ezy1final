@@ -5,13 +5,13 @@ import type {
   Doctor,
   Listing,
   Product,
+  ProductCategory,
   RideRequest,
   ServiceCategory,
   Testimonial,
   Vendor,
   WalletTransaction,
   Worker,
-  ProductCategory,
 } from "./types";
 
 export const serviceCategories: ServiceCategory[] = [
@@ -490,7 +490,7 @@ export const products: Product[] = [
     isAvailable: true,
     rating: 4.9,
     totalReviews: 1200,
-  }
+  },
 ];
 
 export const instamartCategories: ProductCategory[] = [

@@ -103,9 +103,11 @@ import { useStoreData } from "../lib/storeData";
 export default function AdminPage() {
   const navigate = useNavigate();
   const store = useStoreData();
-  const { currentPartner, partners, login, logout, isAuthenticated } = usePartnerAuth();
+  const { currentPartner, partners, login, logout, isAuthenticated } =
+    usePartnerAuth();
 
-  const [currentSection, setCurrentSection] = useState<AdminSectionId>("dashboard");
+  const [currentSection, setCurrentSection] =
+    useState<AdminSectionId>("dashboard");
   const [collapsed, setCollapsed] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
@@ -117,9 +119,12 @@ export default function AdminPage() {
           <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto">
             <Lock className="w-6 h-6" />
           </div>
-          <h2 className="text-2xl font-display font-bold">Admin Authorization Required</h2>
+          <h2 className="text-2xl font-display font-bold">
+            Admin Authorization Required
+          </h2>
           <p className="text-xs text-muted-foreground">
-            Please authenticate with your assigned Admin ID and Password to access the central platform control center.
+            Please authenticate with your assigned Admin ID and Password to
+            access the central platform control center.
           </p>
           <Button
             onClick={() => navigate({ to: "/partner-login" })}
@@ -136,7 +141,9 @@ export default function AdminPage() {
     switch (currentSection) {
       // 1. Main
       case "dashboard":
-        return <DashboardHome onNavigateSection={(sec) => setCurrentSection(sec)} />;
+        return (
+          <DashboardHome onNavigateSection={(sec) => setCurrentSection(sec)} />
+        );
       case "analytics":
         return <AnalyticsModule />;
       case "live_activity":
@@ -253,7 +260,9 @@ export default function AdminPage() {
         return <ApiIntegrations />;
 
       default:
-        return <DashboardHome onNavigateSection={(sec) => setCurrentSection(sec)} />;
+        return (
+          <DashboardHome onNavigateSection={(sec) => setCurrentSection(sec)} />
+        );
     }
   };
 
@@ -304,7 +313,10 @@ export default function AdminPage() {
                 <h2 className="font-display font-bold text-sm sm:text-base text-foreground leading-none capitalize">
                   {currentSection.replace(/_/g, " ")}
                 </h2>
-                <Badge variant="outline" className="text-[10px] hidden sm:inline-flex text-emerald-600 border-emerald-300">
+                <Badge
+                  variant="outline"
+                  className="text-[10px] hidden sm:inline-flex text-emerald-600 border-emerald-300"
+                >
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse" />
                   Live Reactive
                 </Badge>
@@ -326,12 +338,16 @@ export default function AdminPage() {
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-500" />
                   <span className="truncate max-w-[120px] sm:max-w-[160px] font-semibold">
-                    {currentPartner.ownerName.split(" ")[0]} ({currentPartner.id})
+                    {currentPartner.ownerName.split(" ")[0]} (
+                    {currentPartner.id})
                   </span>
                   <ChevronDown className="w-3 h-3 text-muted-foreground" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64 bg-card border-border rounded-2xl p-1.5 shadow-xl">
+              <DropdownMenuContent
+                align="end"
+                className="w-64 bg-card border-border rounded-2xl p-1.5 shadow-xl"
+              >
                 <DropdownMenuLabel className="text-xs text-muted-foreground">
                   Switch Active Admin / Partner
                 </DropdownMenuLabel>
@@ -341,17 +357,27 @@ export default function AdminPage() {
                     key={p.id}
                     onClick={() => {
                       login(p.id, p.password);
-                      toast.success(`Switched active view to: ${p.businessName}`);
+                      toast.success(
+                        `Switched active view to: ${p.businessName}`,
+                      );
                     }}
                     className={`rounded-xl text-xs flex items-center justify-between p-2 cursor-pointer ${
-                      currentPartner.id === p.id ? "bg-primary/10 font-bold text-primary" : ""
+                      currentPartner.id === p.id
+                        ? "bg-primary/10 font-bold text-primary"
+                        : ""
                     }`}
                   >
                     <div>
-                      <p className="font-medium text-foreground">{p.businessName}</p>
-                      <p className="text-[10px] text-muted-foreground font-mono">ID: {p.id}</p>
+                      <p className="font-medium text-foreground">
+                        {p.businessName}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground font-mono">
+                        ID: {p.id}
+                      </p>
                     </div>
-                    {currentPartner.id === p.id && <span className="text-xs">✓</span>}
+                    {currentPartner.id === p.id && (
+                      <span className="text-xs">✓</span>
+                    )}
                   </DropdownMenuItem>
                 ))}
                 <DropdownMenuSeparator />

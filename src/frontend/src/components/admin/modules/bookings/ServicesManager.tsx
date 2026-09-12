@@ -26,7 +26,8 @@ import {
   User,
   Wrench,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { type StoredService, useStoreData } from "../../../../lib/storeData";
 import { ConfirmModal } from "../../../owner/ConfirmModal";
@@ -37,7 +38,9 @@ export function ServicesManager() {
   const store = useStoreData();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingService, setEditingService] = useState<StoredService | null>(null);
+  const [editingService, setEditingService] = useState<StoredService | null>(
+    null,
+  );
 
   // Form State
   const [name, setName] = useState("");
@@ -90,7 +93,10 @@ export function ServicesManager() {
       return;
     }
 
-    const tags = tagsInput.split(",").map((t) => t.trim()).filter(Boolean);
+    const tags = tagsInput
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
 
     if (editingService) {
       store.updateService(editingService.id, {
@@ -102,7 +108,9 @@ export function ServicesManager() {
         duration,
         isAvailable,
         published,
-        image: image || "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80",
+        image:
+          image ||
+          "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80",
         tags,
       });
       toast.success(`Service "${name}" updated!`);
@@ -119,7 +127,9 @@ export function ServicesManager() {
         rating: 5.0,
         totalReviews: 0,
         duration,
-        image: image || "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80",
+        image:
+          image ||
+          "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80",
         tags,
       });
       toast.success(`New on-demand service "${name}" registered!`);
@@ -169,8 +179,10 @@ export function ServicesManager() {
         defaultSort="name_asc"
         onSort={(items, sortVal) => {
           const list = [...items];
-          if (sortVal === "rate_desc") return list.sort((a, b) => b.pricePerHour - a.pricePerHour);
-          if (sortVal === "rate_asc") return list.sort((a, b) => a.pricePerHour - b.pricePerHour);
+          if (sortVal === "rate_desc")
+            return list.sort((a, b) => b.pricePerHour - a.pricePerHour);
+          if (sortVal === "rate_asc")
+            return list.sort((a, b) => a.pricePerHour - b.pricePerHour);
           return list.sort((a, b) => a.name.localeCompare(b.name));
         }}
         onAddNew={openAddDialog}
@@ -180,14 +192,18 @@ export function ServicesManager() {
           <Card
             key={svc.id}
             className={`rounded-3xl border transition-all hover:shadow-md ${
-              svc.published ? "border-border/80 bg-card" : "border-border/50 bg-muted/20 opacity-70"
+              svc.published
+                ? "border-border/80 bg-card"
+                : "border-border/50 bg-muted/20 opacity-70"
             }`}
           >
             <CardContent className="p-5 space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <img
-                    src={svc.image || "https://placehold.co/100x100?text=Service"}
+                    src={
+                      svc.image || "https://placehold.co/100x100?text=Service"
+                    }
                     alt={svc.name}
                     className="w-14 h-14 rounded-2xl object-cover border border-border/80 flex-shrink-0 shadow-xs"
                   />
@@ -196,21 +212,33 @@ export function ServicesManager() {
                       {svc.name}
                     </h3>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Specialist: <span className="font-medium text-foreground">{svc.providerName}</span>
+                      Specialist:{" "}
+                      <span className="font-medium text-foreground">
+                        {svc.providerName}
+                      </span>
                     </p>
                   </div>
                 </div>
 
-                <Badge variant="outline" className="text-[10px] uppercase font-bold">
+                <Badge
+                  variant="outline"
+                  className="text-[10px] uppercase font-bold"
+                >
                   {svc.category}
                 </Badge>
               </div>
 
-              <p className="text-xs text-muted-foreground line-clamp-2">{svc.description}</p>
+              <p className="text-xs text-muted-foreground line-clamp-2">
+                {svc.description}
+              </p>
 
               <div className="flex flex-wrap gap-1.5 pt-1">
                 {(svc.tags || []).map((tag, i) => (
-                  <Badge key={i} variant="secondary" className="text-[10px] px-2 py-0.5 rounded-lg">
+                  <Badge
+                    key={i}
+                    variant="secondary"
+                    className="text-[10px] px-2 py-0.5 rounded-lg"
+                  >
                     {tag}
                   </Badge>
                 ))}
@@ -218,8 +246,13 @@ export function ServicesManager() {
 
               <div className="flex items-center justify-between pt-2 border-t border-border/60">
                 <div>
-                  <span className="font-display font-black text-base text-foreground">₹{svc.pricePerHour}</span>
-                  <span className="text-[10px] text-muted-foreground"> / hour</span>
+                  <span className="font-display font-black text-base text-foreground">
+                    ₹{svc.pricePerHour}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">
+                    {" "}
+                    / hour
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-1.5">
@@ -228,11 +261,19 @@ export function ServicesManager() {
                     size="sm"
                     onClick={() => {
                       store.toggleServicePublish(svc.id);
-                      toast.success(svc.published ? `"${svc.name}" hidden.` : `"${svc.name}" published live!`);
+                      toast.success(
+                        svc.published
+                          ? `"${svc.name}" hidden.`
+                          : `"${svc.name}" published live!`,
+                      );
                     }}
                     className="h-8 px-2 text-xs rounded-xl"
                   >
-                    {svc.published ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5 text-emerald-500" />}
+                    {svc.published ? (
+                      <EyeOff className="w-3.5 h-3.5" />
+                    ) : (
+                      <Eye className="w-3.5 h-3.5 text-emerald-500" />
+                    )}
                   </Button>
                   <Button
                     variant="outline"
@@ -266,7 +307,8 @@ export function ServicesManager() {
                 {editingService ? "Edit Service" : "Register On-Demand Service"}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                Set trade category, hourly rate, specialist assignment, and tags.
+                Set trade category, hourly rate, specialist assignment, and
+                tags.
               </DialogDescription>
             </DialogHeader>
 
@@ -292,7 +334,9 @@ export function ServicesManager() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Rate Per Hour (₹) *</Label>
+                  <Label className="text-xs font-semibold">
+                    Rate Per Hour (₹) *
+                  </Label>
                   <Input
                     type="number"
                     required
@@ -302,7 +346,9 @@ export function ServicesManager() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Specialist Provider</Label>
+                  <Label className="text-xs font-semibold">
+                    Specialist Provider
+                  </Label>
                   <Input
                     value={providerName}
                     onChange={(e) => setProviderName(e.target.value)}
@@ -323,7 +369,9 @@ export function ServicesManager() {
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Search Tags (Comma-separated)</Label>
+                <Label className="text-xs font-semibold">
+                  Search Tags (Comma-separated)
+                </Label>
                 <Input
                   value={tagsInput}
                   onChange={(e) => setTagsInput(e.target.value)}
@@ -333,16 +381,30 @@ export function ServicesManager() {
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Service Cover Photo</Label>
-                <ImageUploader currentImage={image} onImageChange={setImage} label="Service Photo" />
+                <Label className="text-xs font-semibold">
+                  Service Cover Photo
+                </Label>
+                <ImageUploader
+                  currentImage={image}
+                  onImageChange={setImage}
+                  label="Service Photo"
+                />
               </div>
             </div>
 
             <DialogFooter className="gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-xl">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                className="rounded-xl"
+              >
                 Cancel
               </Button>
-              <Button type="submit" className="rounded-xl bg-primary text-primary-foreground font-semibold">
+              <Button
+                type="submit"
+                className="rounded-xl bg-primary text-primary-foreground font-semibold"
+              >
                 {editingService ? "Save Changes" : "Register Service"}
               </Button>
             </DialogFooter>

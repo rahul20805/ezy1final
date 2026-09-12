@@ -21,7 +21,8 @@ import {
   Tag,
   Trash2,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { type StoredGalleryItem, useStoreData } from "../../../lib/storeData";
 import { ConfirmModal } from "../ConfirmModal";
@@ -32,7 +33,9 @@ export function GallerySection() {
   const store = useStoreData();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<StoredGalleryItem | null>(null);
+  const [selectedImage, setSelectedImage] = useState<StoredGalleryItem | null>(
+    null,
+  );
 
   // Form State
   const [title, setTitle] = useState("");
@@ -47,7 +50,9 @@ export function GallerySection() {
   const openAddDialog = () => {
     setTitle("");
     setCategory("Art & Studio");
-    setImageUrl("https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=800&q=80");
+    setImageUrl(
+      "https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=800&q=80",
+    );
     setCaption("");
     setTagsInput("Pottery, Handcrafted");
     setPublished(true);
@@ -119,7 +124,9 @@ export function GallerySection() {
           <Card
             key={item.id}
             className={`rounded-2xl overflow-hidden border transition-all hover:shadow-md ${
-              item.published ? "border-border/80 bg-card" : "border-border/50 bg-muted/20 opacity-70"
+              item.published
+                ? "border-border/80 bg-card"
+                : "border-border/50 bg-muted/20 opacity-70"
             }`}
           >
             <div
@@ -131,7 +138,8 @@ export function GallerySection() {
                 alt={item.title}
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = "https://placehold.co/600x400?text=Gallery";
+                  (e.target as HTMLImageElement).src =
+                    "https://placehold.co/600x400?text=Gallery";
                 }}
               />
               <div className="absolute top-2.5 left-2.5">
@@ -147,14 +155,19 @@ export function GallerySection() {
                   {item.title}
                 </h3>
                 {item.caption && (
-                  <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{item.caption}</p>
+                  <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+                    {item.caption}
+                  </p>
                 )}
               </div>
 
               {item.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                   {item.tags.map((t, idx) => (
-                    <span key={idx} className="text-[10px] text-muted-foreground font-mono">
+                    <span
+                      key={idx}
+                      className="text-[10px] text-muted-foreground font-mono"
+                    >
                       #{t}
                     </span>
                   ))}
@@ -162,7 +175,9 @@ export function GallerySection() {
               )}
 
               <div className="flex items-center justify-between pt-2 border-t border-border/60">
-                <span className="text-[11px] text-muted-foreground">{item.uploadedAt}</span>
+                <span className="text-[11px] text-muted-foreground">
+                  {item.uploadedAt}
+                </span>
 
                 <div className="flex items-center gap-1">
                   <Button
@@ -171,12 +186,18 @@ export function GallerySection() {
                     onClick={() => {
                       store.toggleGalleryPublish(item.id);
                       toast.success(
-                        item.published ? "Image hidden from live gallery." : "Image published live!"
+                        item.published
+                          ? "Image hidden from live gallery."
+                          : "Image published live!",
                       );
                     }}
                     className="h-8 px-2 text-xs rounded-xl"
                   >
-                    {item.published ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5 text-emerald-500" />}
+                    {item.published ? (
+                      <EyeOff className="w-3.5 h-3.5" />
+                    ) : (
+                      <Eye className="w-3.5 h-3.5 text-emerald-500" />
+                    )}
                   </Button>
                   <Button
                     variant="ghost"
@@ -198,7 +219,9 @@ export function GallerySection() {
         <DialogContent className="max-w-md bg-card border-border shadow-2xl rounded-3xl">
           <form onSubmit={handleSave}>
             <DialogHeader>
-              <DialogTitle className="text-xl font-display font-bold">Upload Showcase Photo</DialogTitle>
+              <DialogTitle className="text-xl font-display font-bold">
+                Upload Showcase Photo
+              </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
                 Add high-resolution photos to your public store gallery.
               </DialogDescription>
@@ -227,7 +250,9 @@ export function GallerySection() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Tags (comma separated)</Label>
+                  <Label className="text-xs font-semibold">
+                    Tags (comma separated)
+                  </Label>
                   <Input
                     placeholder="Pottery, Decor, Handmade"
                     value={tagsInput}
@@ -237,7 +262,12 @@ export function GallerySection() {
                 </div>
               </div>
 
-              <ImageUploader label="Upload Photo *" value={imageUrl} onChange={setImageUrl} previewHeight="h-44" />
+              <ImageUploader
+                label="Upload Photo *"
+                value={imageUrl}
+                onChange={setImageUrl}
+                previewHeight="h-44"
+              />
 
               <div className="space-y-1">
                 <Label className="text-xs font-semibold">Caption / Story</Label>
@@ -253,17 +283,27 @@ export function GallerySection() {
               <div className="flex items-center justify-between p-3 rounded-2xl bg-muted/40 border border-border">
                 <div>
                   <Label className="text-xs font-semibold">Publish Live</Label>
-                  <p className="text-[11px] text-muted-foreground">Visible on public gallery</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Visible on public gallery
+                  </p>
                 </div>
                 <Switch checked={published} onCheckedChange={setPublished} />
               </div>
             </div>
 
             <DialogFooter className="gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-xl">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                className="rounded-xl"
+              >
                 Cancel
               </Button>
-              <Button type="submit" className="rounded-xl bg-primary text-primary-foreground font-semibold">
+              <Button
+                type="submit"
+                className="rounded-xl bg-primary text-primary-foreground font-semibold"
+              >
                 Upload & Publish
               </Button>
             </DialogFooter>
@@ -273,17 +313,30 @@ export function GallerySection() {
 
       {/* Lightbox / Preview Modal */}
       {selectedImage && (
-        <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
+        <Dialog
+          open={!!selectedImage}
+          onOpenChange={() => setSelectedImage(null)}
+        >
           <DialogContent className="max-w-2xl bg-card border-border shadow-2xl rounded-3xl p-0 overflow-hidden">
             <div className="relative aspect-video w-full bg-black flex items-center justify-center">
-              <img src={selectedImage.imageUrl} alt={selectedImage.title} className="max-h-full max-w-full object-contain" />
+              <img
+                src={selectedImage.imageUrl}
+                alt={selectedImage.title}
+                className="max-h-full max-w-full object-contain"
+              />
             </div>
             <div className="p-4 space-y-2">
               <div className="flex items-center justify-between">
-                <h3 className="font-display font-bold text-base">{selectedImage.title}</h3>
+                <h3 className="font-display font-bold text-base">
+                  {selectedImage.title}
+                </h3>
                 <Badge variant="outline">{selectedImage.category}</Badge>
               </div>
-              {selectedImage.caption && <p className="text-xs text-muted-foreground">{selectedImage.caption}</p>}
+              {selectedImage.caption && (
+                <p className="text-xs text-muted-foreground">
+                  {selectedImage.caption}
+                </p>
+              )}
             </div>
           </DialogContent>
         </Dialog>

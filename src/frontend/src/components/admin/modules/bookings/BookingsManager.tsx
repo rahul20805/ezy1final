@@ -33,7 +33,8 @@ import {
   User,
   Users,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { type StoredBooking, useStoreData } from "../../../../lib/storeData";
 import { ConfirmModal } from "../../../owner/ConfirmModal";
@@ -44,7 +45,9 @@ export function BookingsManager() {
   const store = useStoreData();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingBooking, setEditingBooking] = useState<StoredBooking | null>(null);
+  const [editingBooking, setEditingBooking] = useState<StoredBooking | null>(
+    null,
+  );
 
   // Form State
   const [title, setTitle] = useState("");
@@ -119,7 +122,9 @@ export function BookingsManager() {
         status,
         location: location.trim(),
         description: description.trim(),
-        image: image || "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=500&q=80",
+        image:
+          image ||
+          "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=500&q=80",
         published,
       });
       toast.success(`Booking session "${title}" updated!`);
@@ -137,7 +142,9 @@ export function BookingsManager() {
         status,
         location: location.trim(),
         description: description.trim(),
-        image: image || "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=500&q=80",
+        image:
+          image ||
+          "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=500&q=80",
         published,
       });
       toast.success(`New Session "${title}" created and published!`);
@@ -186,28 +193,37 @@ export function BookingsManager() {
         defaultSort="title_asc"
         onSort={(items, sortVal) => {
           const list = [...items];
-          if (sortVal === "price_desc") return list.sort((a, b) => b.price - a.price);
-          if (sortVal === "cap_desc") return list.sort((a, b) => b.capacity - a.capacity);
+          if (sortVal === "price_desc")
+            return list.sort((a, b) => b.price - a.price);
+          if (sortVal === "cap_desc")
+            return list.sort((a, b) => b.capacity - a.capacity);
           return list.sort((a, b) => a.title.localeCompare(b.title));
         }}
         onAddNew={openAddDialog}
         addNewLabel="Add New Session"
         pageSize={6}
         renderItem={(booking) => {
-          const progressPercent = Math.round((booking.enrolledCount / booking.capacity) * 100);
+          const progressPercent = Math.round(
+            (booking.enrolledCount / booking.capacity) * 100,
+          );
 
           return (
             <Card
               key={booking.id}
               className={`rounded-3xl border transition-all hover:shadow-md ${
-                booking.published ? "border-border/80 bg-card" : "border-border/50 bg-muted/20 opacity-70"
+                booking.published
+                  ? "border-border/80 bg-card"
+                  : "border-border/50 bg-muted/20 opacity-70"
               }`}
             >
               <CardContent className="p-5 space-y-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <img
-                      src={booking.image || "https://placehold.co/100x100?text=Booking"}
+                      src={
+                        booking.image ||
+                        "https://placehold.co/100x100?text=Booking"
+                      }
                       alt={booking.title}
                       className="w-14 h-14 rounded-2xl object-cover border border-border/80 flex-shrink-0 shadow-xs"
                     />
@@ -216,13 +232,18 @@ export function BookingsManager() {
                         {booking.title}
                       </h3>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                        <span className="text-foreground font-medium">{booking.instructorOrDoctor}</span>
+                        <span className="text-foreground font-medium">
+                          {booking.instructorOrDoctor}
+                        </span>
                         <span>• {booking.duration}</span>
                       </div>
                     </div>
                   </div>
 
-                  <Badge variant="outline" className="text-[10px] uppercase font-bold">
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] uppercase font-bold"
+                  >
                     {booking.type}
                   </Badge>
                 </div>
@@ -234,22 +255,31 @@ export function BookingsManager() {
                   </div>
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     <MapPin className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                    <span className="truncate">{booking.location || "Online"}</span>
+                    <span className="truncate">
+                      {booking.location || "Online"}
+                    </span>
                   </div>
                 </div>
 
                 {/* Capacity Progress */}
                 <div className="space-y-1 pt-1">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">Enrollment Capacity</span>
+                    <span className="text-muted-foreground">
+                      Enrollment Capacity
+                    </span>
                     <span className="font-mono font-bold text-foreground">
-                      {booking.enrolledCount} / {booking.capacity} seats ({progressPercent}%)
+                      {booking.enrolledCount} / {booking.capacity} seats (
+                      {progressPercent}%)
                     </span>
                   </div>
                   <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all ${
-                        progressPercent >= 90 ? "bg-rose-500" : progressPercent >= 60 ? "bg-amber-500" : "bg-primary"
+                        progressPercent >= 90
+                          ? "bg-rose-500"
+                          : progressPercent >= 60
+                            ? "bg-amber-500"
+                            : "bg-primary"
                       }`}
                       style={{ width: `${Math.min(progressPercent, 100)}%` }}
                     />
@@ -257,7 +287,9 @@ export function BookingsManager() {
                 </div>
 
                 <div className="flex items-center justify-between pt-2 border-t border-border/60">
-                  <span className="font-display font-black text-base text-foreground">₹{booking.price}</span>
+                  <span className="font-display font-black text-base text-foreground">
+                    ₹{booking.price}
+                  </span>
 
                   <div className="flex items-center gap-1.5">
                     <Button
@@ -290,16 +322,21 @@ export function BookingsManager() {
           <form onSubmit={handleSave}>
             <DialogHeader>
               <DialogTitle className="text-xl font-display font-bold">
-                {editingBooking ? "Edit Session Details" : "Create New Class / Booking Slot"}
+                {editingBooking
+                  ? "Edit Session Details"
+                  : "Create New Class / Booking Slot"}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                Set session title, mentor/instructor, schedule, capacity limit, and fee.
+                Set session title, mentor/instructor, schedule, capacity limit,
+                and fee.
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-3.5 py-3">
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Session / Class Title *</Label>
+                <Label className="text-xs font-semibold">
+                  Session / Class Title *
+                </Label>
                 <Input
                   required
                   placeholder="e.g. Pottery & Clay Art Mastery Weekend Workshop"
@@ -312,7 +349,10 @@ export function BookingsManager() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs font-semibold">Type</Label>
-                  <Select value={type} onValueChange={(val: any) => setType(val)}>
+                  <Select
+                    value={type}
+                    onValueChange={(val: any) => setType(val)}
+                  >
                     <SelectTrigger className="rounded-xl text-xs">
                       <SelectValue />
                     </SelectTrigger>
@@ -324,7 +364,9 @@ export function BookingsManager() {
                   </Select>
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Instructor / Doctor</Label>
+                  <Label className="text-xs font-semibold">
+                    Instructor / Doctor
+                  </Label>
                   <Input
                     value={instructorOrDoctor}
                     onChange={(e) => setInstructorOrDoctor(e.target.value)}
@@ -332,7 +374,9 @@ export function BookingsManager() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Fee / Price (₹) *</Label>
+                  <Label className="text-xs font-semibold">
+                    Fee / Price (₹) *
+                  </Label>
                   <Input
                     type="number"
                     required
@@ -345,7 +389,9 @@ export function BookingsManager() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Schedule Days & Time</Label>
+                  <Label className="text-xs font-semibold">
+                    Schedule Days & Time
+                  </Label>
                   <Input
                     placeholder="Sat & Sun: 10:00 AM - 1:00 PM"
                     value={schedule}
@@ -354,7 +400,9 @@ export function BookingsManager() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Capacity Limit (Seats)</Label>
+                  <Label className="text-xs font-semibold">
+                    Capacity Limit (Seats)
+                  </Label>
                   <Input
                     type="number"
                     value={capacity}
@@ -365,7 +413,9 @@ export function BookingsManager() {
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Studio / Clinic Location</Label>
+                <Label className="text-xs font-semibold">
+                  Studio / Clinic Location
+                </Label>
                 <Input
                   placeholder="Studio 4B, Indiranagar, Bengaluru"
                   value={location}
@@ -375,16 +425,30 @@ export function BookingsManager() {
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Cover Banner Image</Label>
-                <ImageUploader currentImage={image} onImageChange={setImage} label="Session Banner" />
+                <Label className="text-xs font-semibold">
+                  Cover Banner Image
+                </Label>
+                <ImageUploader
+                  currentImage={image}
+                  onImageChange={setImage}
+                  label="Session Banner"
+                />
               </div>
             </div>
 
             <DialogFooter className="gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-xl">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                className="rounded-xl"
+              >
                 Cancel
               </Button>
-              <Button type="submit" className="rounded-xl bg-primary text-primary-foreground font-semibold">
+              <Button
+                type="submit"
+                className="rounded-xl bg-primary text-primary-foreground font-semibold"
+              >
                 {editingBooking ? "Save Changes" : "Publish Session"}
               </Button>
             </DialogFooter>

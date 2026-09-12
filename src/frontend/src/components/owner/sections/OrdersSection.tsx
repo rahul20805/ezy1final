@@ -45,20 +45,30 @@ export function OrdersSection() {
   const partnerOrders =
     currentPartner?.role === "super_owner"
       ? store.orders
-      : store.orders.filter((o) => o.vendorId === currentPartner?.vendorId || o.vendorId === 0);
+      : store.orders.filter(
+          (o) => o.vendorId === currentPartner?.vendorId || o.vendorId === 0,
+        );
 
   const [selectedOrder, setSelectedOrder] = useState<StoredOrder | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
 
-  const handleStatusChange = (orderId: number, newStatus: StoredOrder["status"]) => {
+  const handleStatusChange = (
+    orderId: number,
+    newStatus: StoredOrder["status"],
+  ) => {
     store.updateOrderStatus(orderId, newStatus);
     toast.success(`Order status updated to "${newStatus.replace(/_/g, " ")}"`);
     if (selectedOrder && selectedOrder.id === orderId) {
-      setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus } : null));
+      setSelectedOrder((prev) =>
+        prev ? { ...prev, status: newStatus } : null,
+      );
     }
   };
 
-  const handlePaymentStatusChange = (orderId: number, paymentStatus: StoredOrder["paymentStatus"]) => {
+  const handlePaymentStatusChange = (
+    orderId: number,
+    paymentStatus: StoredOrder["paymentStatus"],
+  ) => {
     store.updateOrderPaymentStatus(orderId, paymentStatus);
     toast.success(`Payment status marked as "${paymentStatus}"`);
     if (selectedOrder && selectedOrder.id === orderId) {
@@ -128,8 +138,10 @@ export function OrdersSection() {
         defaultSort="newest"
         onSort={(items, sortVal) => {
           const list = [...items];
-          if (sortVal === "amount_desc") return list.sort((a, b) => b.totalAmount - a.totalAmount);
-          if (sortVal === "amount_asc") return list.sort((a, b) => a.totalAmount - b.totalAmount);
+          if (sortVal === "amount_desc")
+            return list.sort((a, b) => b.totalAmount - a.totalAmount);
+          if (sortVal === "amount_asc")
+            return list.sort((a, b) => a.totalAmount - b.totalAmount);
           return list.sort((a, b) => b.id - a.id);
         }}
         pageSize={6}
@@ -140,20 +152,26 @@ export function OrdersSection() {
           >
             <div className="p-4 border-b border-border/60 flex items-center justify-between gap-2 bg-muted/20">
               <div>
-                <span className="font-mono text-xs font-bold text-foreground">{order.orderNumber}</span>
-                <p className="text-[11px] text-muted-foreground">{order.createdAt}</p>
+                <span className="font-mono text-xs font-bold text-foreground">
+                  {order.orderNumber}
+                </span>
+                <p className="text-[11px] text-muted-foreground">
+                  {order.createdAt}
+                </p>
               </div>
               <Badge
                 className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-md ${
                   order.status === "DELIVERED"
                     ? "bg-emerald-500 text-white"
                     : order.status === "OUT_FOR_DELIVERY"
-                    ? "bg-blue-500 text-white"
-                    : order.status === "ACCEPTED" || order.status === "PREPARING" || order.status === "READY"
-                    ? "bg-amber-500 text-white"
-                    : order.status === "CANCELLED"
-                    ? "bg-destructive text-white"
-                    : "bg-purple-500 text-white"
+                      ? "bg-blue-500 text-white"
+                      : order.status === "ACCEPTED" ||
+                          order.status === "PREPARING" ||
+                          order.status === "READY"
+                        ? "bg-amber-500 text-white"
+                        : order.status === "CANCELLED"
+                          ? "bg-destructive text-white"
+                          : "bg-purple-500 text-white"
                 }`}
               >
                 {order.status.replace(/_/g, " ")}
@@ -184,11 +202,16 @@ export function OrdersSection() {
                 </span>
                 <div className="space-y-0.5">
                   {order.items.slice(0, 2).map((item, i) => (
-                    <div key={i} className="flex items-center justify-between text-xs">
+                    <div
+                      key={i}
+                      className="flex items-center justify-between text-xs"
+                    >
                       <span className="truncate text-foreground font-medium">
                         {item.quantity}x {item.name}
                       </span>
-                      <span className="text-muted-foreground font-mono">₹{item.price * item.quantity}</span>
+                      <span className="text-muted-foreground font-mono">
+                        ₹{item.price * item.quantity}
+                      </span>
                     </div>
                   ))}
                   {order.items.length > 2 && (
@@ -202,8 +225,12 @@ export function OrdersSection() {
               {/* Price & Payment */}
               <div className="flex items-center justify-between pt-1">
                 <div>
-                  <span className="text-[10px] text-muted-foreground">Total Bill</span>
-                  <p className="font-display font-black text-lg text-foreground">₹{order.totalAmount}</p>
+                  <span className="text-[10px] text-muted-foreground">
+                    Total Bill
+                  </span>
+                  <p className="font-display font-black text-lg text-foreground">
+                    ₹{order.totalAmount}
+                  </p>
                 </div>
                 <div className="text-right">
                   <Badge variant="outline" className="text-[10px] font-mono">
@@ -216,7 +243,9 @@ export function OrdersSection() {
               <div className="flex items-center gap-2 pt-2 border-t border-border/60">
                 <Select
                   value={order.status}
-                  onValueChange={(val: any) => handleStatusChange(order.id, val)}
+                  onValueChange={(val: any) =>
+                    handleStatusChange(order.id, val)
+                  }
                 >
                   <SelectTrigger className="h-8 text-xs rounded-xl flex-1">
                     <SelectValue />
@@ -225,7 +254,9 @@ export function OrdersSection() {
                     <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="confirmed">Confirmed</SelectItem>
                     <SelectItem value="preparing">Preparing</SelectItem>
-                    <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
+                    <SelectItem value="out_for_delivery">
+                      Out for Delivery
+                    </SelectItem>
                     <SelectItem value="delivered">Delivered</SelectItem>
                     <SelectItem value="cancelled">Cancelled</SelectItem>
                   </SelectContent>
@@ -256,7 +287,10 @@ export function OrdersSection() {
 
       {/* Order Detail & Invoice Modal */}
       {selectedOrder && (
-        <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
+        <Dialog
+          open={!!selectedOrder}
+          onOpenChange={() => setSelectedOrder(null)}
+        >
           <DialogContent className="max-w-lg bg-card border-border shadow-2xl rounded-3xl">
             <DialogHeader>
               <div className="flex items-center justify-between">
@@ -283,11 +317,22 @@ export function OrdersSection() {
             <div className="space-y-4 py-3">
               {/* Customer Box */}
               <div className="p-3 rounded-2xl bg-muted/40 border border-border text-xs space-y-1">
-                <p className="font-semibold text-foreground">{selectedOrder.customerName}</p>
-                <p className="text-muted-foreground">{selectedOrder.customerPhone} {selectedOrder.customerEmail ? `• ${selectedOrder.customerEmail}` : ""}</p>
-                <p className="text-muted-foreground">{selectedOrder.deliveryAddress}</p>
+                <p className="font-semibold text-foreground">
+                  {selectedOrder.customerName}
+                </p>
+                <p className="text-muted-foreground">
+                  {selectedOrder.customerPhone}{" "}
+                  {selectedOrder.customerEmail
+                    ? `• ${selectedOrder.customerEmail}`
+                    : ""}
+                </p>
+                <p className="text-muted-foreground">
+                  {selectedOrder.deliveryAddress}
+                </p>
                 {selectedOrder.notes && (
-                  <p className="text-primary font-medium pt-1">Note: {selectedOrder.notes}</p>
+                  <p className="text-primary font-medium pt-1">
+                    Note: {selectedOrder.notes}
+                  </p>
                 )}
               </div>
 
@@ -299,30 +344,43 @@ export function OrdersSection() {
                 </div>
                 <div className="divide-y divide-border">
                   {selectedOrder.items.map((item, i) => (
-                    <div key={i} className="p-3 flex items-center justify-between text-xs">
+                    <div
+                      key={i}
+                      className="p-3 flex items-center justify-between text-xs"
+                    >
                       <div>
-                        <p className="font-semibold text-foreground">{item.name}</p>
+                        <p className="font-semibold text-foreground">
+                          {item.name}
+                        </p>
                         <p className="text-[11px] text-muted-foreground">
                           ₹{item.price} × {item.quantity}
                         </p>
                       </div>
-                      <span className="font-mono font-bold">₹{item.price * item.quantity}</span>
+                      <span className="font-mono font-bold">
+                        ₹{item.price * item.quantity}
+                      </span>
                     </div>
                   ))}
                 </div>
                 <div className="p-3 bg-muted/30 border-t border-border flex items-center justify-between text-sm font-bold">
                   <span>Grand Total</span>
-                  <span className="text-primary font-display text-base">₹{selectedOrder.totalAmount}</span>
+                  <span className="text-primary font-display text-base">
+                    ₹{selectedOrder.totalAmount}
+                  </span>
                 </div>
               </div>
 
               {/* Status Update Quick Toggles */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <span className="text-[11px] font-semibold text-muted-foreground">Fulfillment Status</span>
+                  <span className="text-[11px] font-semibold text-muted-foreground">
+                    Fulfillment Status
+                  </span>
                   <Select
                     value={selectedOrder.status}
-                    onValueChange={(val: any) => handleStatusChange(selectedOrder.id, val)}
+                    onValueChange={(val: any) =>
+                      handleStatusChange(selectedOrder.id, val)
+                    }
                   >
                     <SelectTrigger className="h-9 text-xs rounded-xl">
                       <SelectValue />
@@ -331,7 +389,9 @@ export function OrdersSection() {
                       <SelectItem value="pending">Pending</SelectItem>
                       <SelectItem value="confirmed">Confirmed</SelectItem>
                       <SelectItem value="preparing">Preparing</SelectItem>
-                      <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
+                      <SelectItem value="out_for_delivery">
+                        Out for Delivery
+                      </SelectItem>
                       <SelectItem value="delivered">Delivered</SelectItem>
                       <SelectItem value="cancelled">Cancelled</SelectItem>
                     </SelectContent>
@@ -339,10 +399,14 @@ export function OrdersSection() {
                 </div>
 
                 <div className="space-y-1">
-                  <span className="text-[11px] font-semibold text-muted-foreground">Payment Status</span>
+                  <span className="text-[11px] font-semibold text-muted-foreground">
+                    Payment Status
+                  </span>
                   <Select
                     value={selectedOrder.paymentStatus}
-                    onValueChange={(val: any) => handlePaymentStatusChange(selectedOrder.id, val)}
+                    onValueChange={(val: any) =>
+                      handlePaymentStatusChange(selectedOrder.id, val)
+                    }
                   >
                     <SelectTrigger className="h-9 text-xs rounded-xl">
                       <SelectValue />

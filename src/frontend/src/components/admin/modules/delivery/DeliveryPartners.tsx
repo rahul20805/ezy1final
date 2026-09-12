@@ -32,23 +32,30 @@ import {
   Truck,
   Zap,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
-import { type StoredDeliveryPartner, useStoreData } from "../../../../lib/storeData";
+import {
+  type StoredDeliveryPartner,
+  useStoreData,
+} from "../../../../lib/storeData";
 import { DataTable } from "../../../owner/DataTable";
 
 export function DeliveryPartners() {
   const store = useStoreData();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingPartner, setEditingPartner] = useState<StoredDeliveryPartner | null>(null);
+  const [editingPartner, setEditingPartner] =
+    useState<StoredDeliveryPartner | null>(null);
 
   // Form State
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [vehicleType, setVehicleType] = useState<StoredDeliveryPartner["vehicleType"]>("Electric Scooter");
+  const [vehicleType, setVehicleType] =
+    useState<StoredDeliveryPartner["vehicleType"]>("Electric Scooter");
   const [vehicleNumber, setVehicleNumber] = useState("");
-  const [currentStatus, setCurrentStatus] = useState<StoredDeliveryPartner["currentStatus"]>("ONLINE");
+  const [currentStatus, setCurrentStatus] =
+    useState<StoredDeliveryPartner["currentStatus"]>("ONLINE");
 
   const openAddDialog = () => {
     setEditingPartner(null);
@@ -142,15 +149,20 @@ export function DeliveryPartners() {
         defaultSort="orders_desc"
         onSort={(items, sortVal) => {
           const list = [...items];
-          if (sortVal === "orders_desc") return list.sort((a, b) => b.ordersDelivered - a.ordersDelivered);
-          if (sortVal === "rating_desc") return list.sort((a, b) => b.rating - a.rating);
+          if (sortVal === "orders_desc")
+            return list.sort((a, b) => b.ordersDelivered - a.ordersDelivered);
+          if (sortVal === "rating_desc")
+            return list.sort((a, b) => b.rating - a.rating);
           return list.sort((a, b) => a.name.localeCompare(b.name));
         }}
         onAddNew={openAddDialog}
         addNewLabel="Register Driver"
         pageSize={6}
         renderItem={(dp) => (
-          <Card key={dp.id} className="rounded-3xl border-border bg-card p-5 shadow-xs">
+          <Card
+            key={dp.id}
+            className="rounded-3xl border-border bg-card p-5 shadow-xs"
+          >
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold">
@@ -158,11 +170,16 @@ export function DeliveryPartners() {
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <h3 className="font-display font-bold text-base text-foreground">{dp.name}</h3>
-                    {dp.verified && <ShieldCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" />}
+                    <h3 className="font-display font-bold text-base text-foreground">
+                      {dp.name}
+                    </h3>
+                    {dp.verified && (
+                      <ShieldCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                    )}
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    {dp.vehicleType} • <span className="font-mono">{dp.vehicleNumber}</span>
+                    {dp.vehicleType} •{" "}
+                    <span className="font-mono">{dp.vehicleNumber}</span>
                   </p>
                 </div>
               </div>
@@ -172,8 +189,8 @@ export function DeliveryPartners() {
                   dp.currentStatus === "ONLINE"
                     ? "bg-emerald-500/10 text-emerald-600"
                     : dp.currentStatus === "BUSY"
-                    ? "bg-sky-500/10 text-sky-600"
-                    : "bg-muted text-muted-foreground"
+                      ? "bg-sky-500/10 text-sky-600"
+                      : "bg-muted text-muted-foreground"
                 }`}
               >
                 {dp.currentStatus}
@@ -194,7 +211,9 @@ export function DeliveryPartners() {
 
             <div className="flex items-center justify-between p-2.5 rounded-2xl bg-muted/40 border border-border/60 text-xs">
               <span className="text-muted-foreground">Earnings Today:</span>
-              <span className="font-display font-bold text-emerald-600 text-sm">₹{dp.earningsToday}</span>
+              <span className="font-display font-bold text-emerald-600 text-sm">
+                ₹{dp.earningsToday}
+              </span>
             </div>
 
             <div className="flex items-center justify-between pt-2 border-t border-border/60 mt-3">
@@ -227,16 +246,21 @@ export function DeliveryPartners() {
           <form onSubmit={handleSave}>
             <DialogHeader>
               <DialogTitle className="text-xl font-display font-bold">
-                {editingPartner ? "Edit Driver Details" : "Register Delivery Rider"}
+                {editingPartner
+                  ? "Edit Driver Details"
+                  : "Register Delivery Rider"}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                Enter driver contact, vehicle registration number and initial status.
+                Enter driver contact, vehicle registration number and initial
+                status.
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-3 py-3">
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Driver Full Name *</Label>
+                <Label className="text-xs font-semibold">
+                  Driver Full Name *
+                </Label>
                 <Input
                   required
                   placeholder="e.g. Akash Kumar"
@@ -248,7 +272,9 @@ export function DeliveryPartners() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Phone Number *</Label>
+                  <Label className="text-xs font-semibold">
+                    Phone Number *
+                  </Label>
                   <Input
                     required
                     placeholder="9876500112"
@@ -259,22 +285,35 @@ export function DeliveryPartners() {
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs font-semibold">Vehicle Type</Label>
-                  <Select value={vehicleType} onValueChange={(val: any) => setVehicleType(val)}>
+                  <Select
+                    value={vehicleType}
+                    onValueChange={(val: any) => setVehicleType(val)}
+                  >
                     <SelectTrigger className="rounded-xl text-xs">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Electric Scooter">Electric Scooter</SelectItem>
-                      <SelectItem value="2-Wheeler (Bike)">2-Wheeler (Bike)</SelectItem>
-                      <SelectItem value="Auto / 3-Wheeler">Auto / 3-Wheeler</SelectItem>
-                      <SelectItem value="Van / Mini-Truck">Van / Mini-Truck</SelectItem>
+                      <SelectItem value="Electric Scooter">
+                        Electric Scooter
+                      </SelectItem>
+                      <SelectItem value="2-Wheeler (Bike)">
+                        2-Wheeler (Bike)
+                      </SelectItem>
+                      <SelectItem value="Auto / 3-Wheeler">
+                        Auto / 3-Wheeler
+                      </SelectItem>
+                      <SelectItem value="Van / Mini-Truck">
+                        Van / Mini-Truck
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Vehicle Registration Number</Label>
+                <Label className="text-xs font-semibold">
+                  Vehicle Registration Number
+                </Label>
                 <Input
                   required
                   placeholder="KA-01-EZ-4411"
@@ -286,10 +325,18 @@ export function DeliveryPartners() {
             </div>
 
             <DialogFooter className="gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-xl">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                className="rounded-xl"
+              >
                 Cancel
               </Button>
-              <Button type="submit" className="rounded-xl bg-primary text-primary-foreground font-semibold">
+              <Button
+                type="submit"
+                className="rounded-xl bg-primary text-primary-foreground font-semibold"
+              >
                 {editingPartner ? "Save Changes" : "Register Driver"}
               </Button>
             </DialogFooter>

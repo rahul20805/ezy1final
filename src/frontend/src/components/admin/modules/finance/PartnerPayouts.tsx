@@ -11,7 +11,10 @@ import {
 } from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
-import { type StoredPartnerPayout, useStoreData } from "../../../../lib/storeData";
+import {
+  type StoredPartnerPayout,
+  useStoreData,
+} from "../../../../lib/storeData";
 import { DataTable } from "../../../owner/DataTable";
 
 export function PartnerPayouts() {
@@ -19,7 +22,9 @@ export function PartnerPayouts() {
 
   const handleApprovePayout = (payout: StoredPartnerPayout) => {
     store.approvePayout(payout.id);
-    toast.success(`Settlement payout of ₹${payout.netPayout.toLocaleString()} approved for ${payout.partnerName}!`);
+    toast.success(
+      `Settlement payout of ₹${payout.netPayout.toLocaleString()} approved for ${payout.partnerName}!`,
+    );
   };
 
   return (
@@ -30,7 +35,8 @@ export function PartnerPayouts() {
         data={store.partnerPayouts}
         searchPlaceholder="Search merchant name, payout period..."
         searchFilter={(item, query) =>
-          item.partnerName.toLowerCase().includes(query) || item.period.toLowerCase().includes(query)
+          item.partnerName.toLowerCase().includes(query) ||
+          item.period.toLowerCase().includes(query)
         }
         filterOptions={[
           {
@@ -43,17 +49,27 @@ export function PartnerPayouts() {
             ],
           },
         ]}
-        sortOptions={[{ label: "Net Payout (High to Low)", value: "payout_desc" }]}
+        sortOptions={[
+          { label: "Net Payout (High to Low)", value: "payout_desc" },
+        ]}
         defaultSort="payout_desc"
         onSort={(items) => [...items].sort((a, b) => b.netPayout - a.netPayout)}
         pageSize={6}
         renderItem={(payout) => (
-          <Card key={payout.id} className="rounded-3xl border-border bg-card p-5 shadow-xs space-y-3">
+          <Card
+            key={payout.id}
+            className="rounded-3xl border-border bg-card p-5 shadow-xs space-y-3"
+          >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h3 className="font-display font-bold text-base text-foreground">{payout.partnerName}</h3>
+                <h3 className="font-display font-bold text-base text-foreground">
+                  {payout.partnerName}
+                </h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Settlement Cycle: <span className="font-semibold text-foreground">{payout.period}</span>
+                  Settlement Cycle:{" "}
+                  <span className="font-semibold text-foreground">
+                    {payout.period}
+                  </span>
                 </p>
               </div>
 
@@ -70,15 +86,25 @@ export function PartnerPayouts() {
 
             <div className="grid grid-cols-3 gap-2 p-3 rounded-2xl bg-muted/40 border border-border/60 text-xs text-center">
               <div>
-                <span className="text-[10px] text-muted-foreground block">Gross Sales</span>
-                <span className="font-mono font-bold text-foreground">₹{payout.grossSales.toLocaleString()}</span>
+                <span className="text-[10px] text-muted-foreground block">
+                  Gross Sales
+                </span>
+                <span className="font-mono font-bold text-foreground">
+                  ₹{payout.grossSales.toLocaleString()}
+                </span>
               </div>
               <div>
-                <span className="text-[10px] text-muted-foreground block">Commission (-5%)</span>
-                <span className="font-mono font-bold text-rose-500">-₹{payout.commissionDeducted.toLocaleString()}</span>
+                <span className="text-[10px] text-muted-foreground block">
+                  Commission (-5%)
+                </span>
+                <span className="font-mono font-bold text-rose-500">
+                  -₹{payout.commissionDeducted.toLocaleString()}
+                </span>
               </div>
               <div>
-                <span className="text-[10px] text-muted-foreground block font-bold text-primary">Net Payout</span>
+                <span className="text-[10px] text-muted-foreground block font-bold text-primary">
+                  Net Payout
+                </span>
                 <span className="font-display font-black text-emerald-600 text-sm">
                   ₹{payout.netPayout.toLocaleString()}
                 </span>
@@ -86,7 +112,9 @@ export function PartnerPayouts() {
             </div>
 
             <div className="flex items-center justify-between pt-2 border-t border-border/60">
-              <span className="text-xs text-muted-foreground">Disbursement Date: {payout.payoutDate}</span>
+              <span className="text-xs text-muted-foreground">
+                Disbursement Date: {payout.payoutDate}
+              </span>
 
               {payout.status === "PENDING" && (
                 <Button

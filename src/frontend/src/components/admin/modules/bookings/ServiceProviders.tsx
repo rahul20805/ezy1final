@@ -15,7 +15,10 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 import { toast } from "sonner";
-import { type StoredServiceProvider, useStoreData } from "../../../../lib/storeData";
+import {
+  type StoredServiceProvider,
+  useStoreData,
+} from "../../../../lib/storeData";
 import { DataTable } from "../../../owner/DataTable";
 
 const defaultProviders: StoredServiceProvider[] = [
@@ -64,11 +67,14 @@ const defaultProviders: StoredServiceProvider[] = [
 ];
 
 export function ServiceProviders() {
-  const [providers, setProviders] = useState<StoredServiceProvider[]>(defaultProviders);
+  const [providers, setProviders] =
+    useState<StoredServiceProvider[]>(defaultProviders);
 
   const toggleAvailability = (id: number) => {
     setProviders((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, isAvailable: !p.isAvailable } : p))
+      prev.map((p) =>
+        p.id === id ? { ...p, isAvailable: !p.isAvailable } : p,
+      ),
     );
     toast.success("Provider availability updated live.");
   };
@@ -103,12 +109,16 @@ export function ServiceProviders() {
         defaultSort="rating_desc"
         onSort={(items, sortVal) => {
           const list = [...items];
-          if (sortVal === "jobs_desc") return list.sort((a, b) => b.jobsCompleted - a.jobsCompleted);
+          if (sortVal === "jobs_desc")
+            return list.sort((a, b) => b.jobsCompleted - a.jobsCompleted);
           return list.sort((a, b) => b.rating - a.rating);
         }}
         pageSize={6}
         renderItem={(provider) => (
-          <Card key={provider.id} className="rounded-3xl border-border bg-card p-5 shadow-xs">
+          <Card
+            key={provider.id}
+            className="rounded-3xl border-border bg-card p-5 shadow-xs"
+          >
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-display font-black text-lg">
@@ -116,16 +126,24 @@ export function ServiceProviders() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="font-display font-bold text-sm text-foreground">{provider.name}</h3>
-                    {provider.verified && <ShieldCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" />}
+                    <h3 className="font-display font-bold text-sm text-foreground">
+                      {provider.name}
+                    </h3>
+                    {provider.verified && (
+                      <ShieldCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                    )}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5 font-medium">{provider.category}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5 font-medium">
+                    {provider.category}
+                  </p>
                 </div>
               </div>
 
               <Badge
                 className={`text-[10px] font-bold ${
-                  provider.isAvailable ? "bg-emerald-500/10 text-emerald-600" : "bg-muted text-muted-foreground"
+                  provider.isAvailable
+                    ? "bg-emerald-500/10 text-emerald-600"
+                    : "bg-muted text-muted-foreground"
                 }`}
               >
                 {provider.isAvailable ? "Available Now" : "On Leave / Busy"}
@@ -135,7 +153,9 @@ export function ServiceProviders() {
             <div className="grid grid-cols-2 gap-2 text-xs my-3">
               <div className="flex items-center gap-1.5 text-muted-foreground">
                 <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500 flex-shrink-0" />
-                <span className="font-bold text-foreground">{provider.rating}</span>
+                <span className="font-bold text-foreground">
+                  {provider.rating}
+                </span>
                 <span>({provider.jobsCompleted} jobs)</span>
               </div>
               <div className="flex items-center gap-1.5 text-muted-foreground">
@@ -154,8 +174,13 @@ export function ServiceProviders() {
 
             <div className="flex items-center justify-between pt-2 border-t border-border/60">
               <div>
-                <span className="font-display font-black text-sm text-foreground">₹{provider.hourlyRate}</span>
-                <span className="text-[10px] text-muted-foreground"> / hour</span>
+                <span className="font-display font-black text-sm text-foreground">
+                  ₹{provider.hourlyRate}
+                </span>
+                <span className="text-[10px] text-muted-foreground">
+                  {" "}
+                  / hour
+                </span>
               </div>
 
               <Button

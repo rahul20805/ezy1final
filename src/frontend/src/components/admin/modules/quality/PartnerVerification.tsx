@@ -40,14 +40,23 @@ export function PartnerVerification() {
         filterOptions={[]}
         sortOptions={[{ label: "Store Name (A-Z)", value: "name_asc" }]}
         defaultSort="name_asc"
-        onSort={(items) => [...items].sort((a, b) => a.businessName.localeCompare(b.businessName))}
+        onSort={(items) =>
+          [...items].sort((a, b) =>
+            a.businessName.localeCompare(b.businessName),
+          )
+        }
         pageSize={6}
         renderItem={(shop) => (
-          <Card key={shop.id} className="rounded-3xl border-border bg-card p-5 shadow-xs space-y-3">
+          <Card
+            key={shop.id}
+            className="rounded-3xl border-border bg-card p-5 shadow-xs space-y-3"
+          >
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="font-display font-bold text-base text-foreground">{shop.businessName}</h3>
+                  <h3 className="font-display font-bold text-base text-foreground">
+                    {shop.businessName}
+                  </h3>
                   {shop.verified ? (
                     <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-300 text-[10px] font-bold">
                       <ShieldCheck className="w-3 h-3 mr-1" /> Verified
@@ -63,7 +72,9 @@ export function PartnerVerification() {
                 </p>
               </div>
 
-              <span className="font-mono text-xs text-muted-foreground">ID: #{shop.id}</span>
+              <span className="font-mono text-xs text-muted-foreground">
+                ID: #{shop.id}
+              </span>
             </div>
 
             <div className="p-3 rounded-2xl bg-muted/40 border border-border/60 text-xs flex flex-wrap gap-2">
@@ -76,7 +87,9 @@ export function PartnerVerification() {
             </div>
 
             <div className="flex items-center justify-between pt-2 border-t border-border/60">
-              <span className="text-[11px] text-muted-foreground">Status: Operational</span>
+              <span className="text-[11px] text-muted-foreground">
+                Status: Operational
+              </span>
               {!shop.verified ? (
                 <Button
                   size="sm"
@@ -86,7 +99,9 @@ export function PartnerVerification() {
                   <CheckCircle2 className="w-3.5 h-3.5" /> Approve Verification
                 </Button>
               ) : (
-                <span className="text-xs font-semibold text-emerald-600">✓ Compliance Cleared</span>
+                <span className="text-xs font-semibold text-emerald-600">
+                  ✓ Compliance Cleared
+                </span>
               )}
             </div>
           </Card>

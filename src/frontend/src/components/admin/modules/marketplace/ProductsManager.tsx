@@ -33,7 +33,8 @@ import {
   Tag,
   Trash2,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { type StoredProduct, useStoreData } from "../../../../lib/storeData";
 import { ConfirmModal } from "../../../owner/ConfirmModal";
@@ -44,7 +45,9 @@ export function ProductsManager() {
   const store = useStoreData();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<StoredProduct | null>(null);
+  const [editingProduct, setEditingProduct] = useState<StoredProduct | null>(
+    null,
+  );
 
   // Form State
   const [name, setName] = useState("");
@@ -124,7 +127,10 @@ export function ProductsManager() {
 
     const discount = mrp > price ? Math.round(((mrp - price) / mrp) * 100) : 0;
     const vendorObj = store.shops.find((s) => s.id === vendorId);
-    const tags = tagsInput.split(",").map((t) => t.trim()).filter(Boolean);
+    const tags = tagsInput
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
 
     if (editingProduct) {
       store.updateProduct(editingProduct.id, {
@@ -174,7 +180,10 @@ export function ProductsManager() {
         unit,
         rating: 5.0,
         totalReviews: 0,
-        images: [imageUrl || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80"],
+        images: [
+          imageUrl ||
+            "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80",
+        ],
         tags,
       });
       toast.success(`Product "${name}" added to marketplace!`);
@@ -197,12 +206,16 @@ export function ProductsManager() {
       return;
     }
     store.bulkUpdateProducts(selectedIds, { published: publish });
-    toast.success(`${selectedIds.length} products ${publish ? "published" : "hidden"}.`);
+    toast.success(
+      `${selectedIds.length} products ${publish ? "published" : "hidden"}.`,
+    );
     setSelectedIds([]);
   };
 
   const toggleSelect = (id: number) => {
-    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
+    );
   };
 
   return (
@@ -210,15 +223,31 @@ export function ProductsManager() {
       {/* Bulk Action Header Bar */}
       {selectedIds.length > 0 && (
         <div className="p-3 bg-primary/10 border border-primary/30 rounded-2xl flex items-center justify-between gap-3 text-xs">
-          <span className="font-bold text-primary">{selectedIds.length} product(s) selected</span>
+          <span className="font-bold text-primary">
+            {selectedIds.length} product(s) selected
+          </span>
           <div className="flex items-center gap-2">
-            <Button size="sm" onClick={() => handleBulkPublish(true)} className="h-7 text-xs rounded-xl">
+            <Button
+              size="sm"
+              onClick={() => handleBulkPublish(true)}
+              className="h-7 text-xs rounded-xl"
+            >
               Publish Selected
             </Button>
-            <Button size="sm" variant="outline" onClick={() => handleBulkPublish(false)} className="h-7 text-xs rounded-xl">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleBulkPublish(false)}
+              className="h-7 text-xs rounded-xl"
+            >
               Hide Selected
             </Button>
-            <Button size="sm" variant="ghost" onClick={() => setSelectedIds([])} className="h-7 text-xs rounded-xl">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setSelectedIds([])}
+              className="h-7 text-xs rounded-xl"
+            >
               Deselect All
             </Button>
           </div>
@@ -240,7 +269,10 @@ export function ProductsManager() {
           {
             key: "category",
             label: "Department",
-            options: store.categories.map((c) => ({ label: c.name, value: c.name })),
+            options: store.categories.map((c) => ({
+              label: c.name,
+              value: c.name,
+            })),
           },
         ]}
         sortOptions={[
@@ -252,9 +284,12 @@ export function ProductsManager() {
         defaultSort="name_asc"
         onSort={(items, sortVal) => {
           const list = [...items];
-          if (sortVal === "price_desc") return list.sort((a, b) => b.price - a.price);
-          if (sortVal === "price_asc") return list.sort((a, b) => a.price - b.price);
-          if (sortVal === "stock_asc") return list.sort((a, b) => a.stockCount - b.stockCount);
+          if (sortVal === "price_desc")
+            return list.sort((a, b) => b.price - a.price);
+          if (sortVal === "price_asc")
+            return list.sort((a, b) => a.price - b.price);
+          if (sortVal === "stock_asc")
+            return list.sort((a, b) => a.stockCount - b.stockCount);
           return list.sort((a, b) => a.name.localeCompare(b.name));
         }}
         onAddNew={openAddDialog}
@@ -270,8 +305,8 @@ export function ProductsManager() {
                 isSelected
                   ? "border-primary bg-primary/5"
                   : product.published
-                  ? "border-border/80 bg-card"
-                  : "border-border/50 bg-muted/20 opacity-70"
+                    ? "border-border/80 bg-card"
+                    : "border-border/50 bg-muted/20 opacity-70"
               }`}
             >
               <CardContent className="p-4 space-y-3">
@@ -284,7 +319,10 @@ export function ProductsManager() {
                       className="rounded-md border-border text-primary cursor-pointer w-4 h-4"
                     />
                     <img
-                      src={product.images[0] || "https://placehold.co/100x100?text=Item"}
+                      src={
+                        product.images[0] ||
+                        "https://placehold.co/100x100?text=Item"
+                      }
                       alt={product.name}
                       className="w-14 h-14 rounded-2xl object-cover border border-border/80 flex-shrink-0 shadow-xs"
                     />
@@ -293,21 +331,32 @@ export function ProductsManager() {
                         {product.name}
                       </h3>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className="font-mono text-[10px] text-muted-foreground">{product.sku}</span>
-                        <span className="text-[10px] text-muted-foreground">• {product.unit}</span>
+                        <span className="font-mono text-[10px] text-muted-foreground">
+                          {product.sku}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">
+                          • {product.unit}
+                        </span>
                       </div>
                     </div>
                   </div>
 
                   <div className="text-right">
                     <div className="flex items-center gap-1.5 justify-end">
-                      <span className="font-display font-black text-sm text-foreground">₹{product.price}</span>
+                      <span className="font-display font-black text-sm text-foreground">
+                        ₹{product.price}
+                      </span>
                       {product.mrp > product.price && (
-                        <span className="text-[10px] text-muted-foreground line-through">₹{product.mrp}</span>
+                        <span className="text-[10px] text-muted-foreground line-through">
+                          ₹{product.mrp}
+                        </span>
                       )}
                     </div>
                     {product.discountPercent ? (
-                      <Badge variant="secondary" className="text-[9px] font-bold text-emerald-600 bg-emerald-500/10">
+                      <Badge
+                        variant="secondary"
+                        className="text-[9px] font-bold text-emerald-600 bg-emerald-500/10"
+                      >
                         {product.discountPercent}% OFF
                       </Badge>
                     ) : null}
@@ -324,11 +373,13 @@ export function ProductsManager() {
                       product.stockCount === 0
                         ? "text-destructive"
                         : product.stockCount < 10
-                        ? "text-amber-500"
-                        : "text-emerald-600"
+                          ? "text-amber-500"
+                          : "text-emerald-600"
                     }`}
                   >
-                    {product.stockCount === 0 ? "Out of Stock" : `${product.stockCount} in stock`}
+                    {product.stockCount === 0
+                      ? "Out of Stock"
+                      : `${product.stockCount} in stock`}
                   </span>
                 </div>
 
@@ -340,12 +391,18 @@ export function ProductsManager() {
                       onClick={() => {
                         store.toggleProductPublish(product.id);
                         toast.success(
-                          product.published ? `"${product.name}" hidden from shop.` : `"${product.name}" published live!`
+                          product.published
+                            ? `"${product.name}" hidden from shop.`
+                            : `"${product.name}" published live!`,
                         );
                       }}
                       className="h-8 px-2 text-xs rounded-xl"
                     >
-                      {product.published ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5 text-emerald-500" />}
+                      {product.published ? (
+                        <EyeOff className="w-3.5 h-3.5" />
+                      ) : (
+                        <Eye className="w-3.5 h-3.5 text-emerald-500" />
+                      )}
                     </Button>
                     <Button
                       variant="outline"
@@ -378,17 +435,22 @@ export function ProductsManager() {
           <form onSubmit={handleSave}>
             <DialogHeader>
               <DialogTitle className="text-xl font-display font-bold">
-                {editingProduct ? "Edit Marketplace Product" : "Add New Marketplace Product"}
+                {editingProduct
+                  ? "Edit Marketplace Product"
+                  : "Add New Marketplace Product"}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                Set product name, SKU, category, pricing, stock levels and upload high-res image.
+                Set product name, SKU, category, pricing, stock levels and
+                upload high-res image.
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-3.5 py-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Product Name *</Label>
+                  <Label className="text-xs font-semibold">
+                    Product Name *
+                  </Label>
                   <Input
                     required
                     placeholder="e.g. Aashirvaad Shudh Chakki Atta (5kg)"
@@ -398,7 +460,9 @@ export function ProductsManager() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">SKU Identifier</Label>
+                  <Label className="text-xs font-semibold">
+                    SKU Identifier
+                  </Label>
                   <Input
                     required
                     value={sku}
@@ -410,7 +474,9 @@ export function ProductsManager() {
 
               <div className="grid grid-cols-3 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Selling Price (₹) *</Label>
+                  <Label className="text-xs font-semibold">
+                    Selling Price (₹) *
+                  </Label>
                   <Input
                     type="number"
                     required
@@ -430,7 +496,9 @@ export function ProductsManager() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Stock Quantity *</Label>
+                  <Label className="text-xs font-semibold">
+                    Stock Quantity *
+                  </Label>
                   <Input
                     type="number"
                     required
@@ -450,7 +518,11 @@ export function ProductsManager() {
                     </SelectTrigger>
                     <SelectContent>
                       {store.categories.map((c) => (
-                        <SelectItem key={c.id} value={c.name} className="text-xs">
+                        <SelectItem
+                          key={c.id}
+                          value={c.name}
+                          className="text-xs"
+                        >
                           {c.image} {c.name}
                         </SelectItem>
                       ))}
@@ -489,7 +561,9 @@ export function ProductsManager() {
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Search Tags (Comma-separated)</Label>
+                <Label className="text-xs font-semibold">
+                  Search Tags (Comma-separated)
+                </Label>
                 <Input
                   value={tagsInput}
                   onChange={(e) => setTagsInput(e.target.value)}
@@ -500,7 +574,11 @@ export function ProductsManager() {
 
               <div className="space-y-1">
                 <Label className="text-xs font-semibold">Product Image</Label>
-                <ImageUploader currentImage={imageUrl} onImageChange={setImageUrl} label="Product Photo" />
+                <ImageUploader
+                  currentImage={imageUrl}
+                  onImageChange={setImageUrl}
+                  label="Product Photo"
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-3 pt-2">
@@ -509,17 +587,27 @@ export function ProductsManager() {
                   <Switch checked={published} onCheckedChange={setPublished} />
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-2xl bg-muted/40 border border-border">
-                  <Label className="text-xs font-semibold">Feature on Home</Label>
+                  <Label className="text-xs font-semibold">
+                    Feature on Home
+                  </Label>
                   <Switch checked={featured} onCheckedChange={setFeatured} />
                 </div>
               </div>
             </div>
 
             <DialogFooter className="gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-xl">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                className="rounded-xl"
+              >
                 Cancel
               </Button>
-              <Button type="submit" className="rounded-xl bg-primary text-primary-foreground font-semibold">
+              <Button
+                type="submit"
+                className="rounded-xl bg-primary text-primary-foreground font-semibold"
+              >
                 {editingProduct ? "Save Changes" : "Create Product"}
               </Button>
             </DialogFooter>

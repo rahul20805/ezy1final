@@ -1,6 +1,7 @@
+import type { Identity } from "@dfinity/agent";
 import { AuthClient } from "@dfinity/auth-client";
-import { Identity } from "@dfinity/agent";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import type React from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 interface AuthContextType {
   isAuthenticated: boolean;

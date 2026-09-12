@@ -29,7 +29,8 @@ import {
   Ticket,
   Trash2,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { type StoredCoupon, useStoreData } from "../../../../lib/storeData";
 import { ConfirmModal } from "../../../owner/ConfirmModal";
@@ -44,7 +45,9 @@ export function CouponsManager() {
   // Form State
   const [code, setCode] = useState("");
   const [title, setTitle] = useState("");
-  const [discountType, setDiscountType] = useState<"percentage" | "fixed">("percentage");
+  const [discountType, setDiscountType] = useState<"percentage" | "fixed">(
+    "percentage",
+  );
   const [discountValue, setDiscountValue] = useState<number>(10);
   const [minOrderAmount, setMinOrderAmount] = useState<number>(199);
   const [maxDiscount, setMaxDiscount] = useState<number>(100);
@@ -89,7 +92,10 @@ export function CouponsManager() {
       return;
     }
 
-    const cleanCode = code.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+    const cleanCode = code
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "");
 
     if (editingCoupon) {
       store.updateCoupon(editingCoupon.id, {
@@ -138,7 +144,8 @@ export function CouponsManager() {
         data={store.coupons}
         searchPlaceholder="Search coupon code, description..."
         searchFilter={(item, query) =>
-          item.code.toLowerCase().includes(query) || item.title.toLowerCase().includes(query)
+          item.code.toLowerCase().includes(query) ||
+          item.title.toLowerCase().includes(query)
         }
         filterOptions={[
           {
@@ -157,7 +164,8 @@ export function CouponsManager() {
         defaultSort="code_asc"
         onSort={(items, sortVal) => {
           const list = [...items];
-          if (sortVal === "usage_desc") return list.sort((a, b) => b.usedCount - a.usedCount);
+          if (sortVal === "usage_desc")
+            return list.sort((a, b) => b.usedCount - a.usedCount);
           return list.sort((a, b) => a.code.localeCompare(b.code));
         }}
         onAddNew={openAddDialog}
@@ -167,7 +175,9 @@ export function CouponsManager() {
           <Card
             key={coupon.id}
             className={`rounded-3xl border transition-all hover:shadow-md ${
-              coupon.active ? "border-border/80 bg-card" : "border-border/50 bg-muted/20 opacity-70"
+              coupon.active
+                ? "border-border/80 bg-card"
+                : "border-border/50 bg-muted/20 opacity-70"
             }`}
           >
             <CardContent className="p-5 space-y-3">
@@ -177,8 +187,12 @@ export function CouponsManager() {
                     <Ticket className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="font-mono font-bold text-base text-foreground">{coupon.code}</h3>
-                    <p className="text-xs text-muted-foreground">{coupon.title}</p>
+                    <h3 className="font-mono font-bold text-base text-foreground">
+                      {coupon.code}
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      {coupon.title}
+                    </p>
                   </div>
                 </div>
 
@@ -189,14 +203,20 @@ export function CouponsManager() {
                       : "bg-emerald-500/10 text-emerald-600"
                   }`}
                 >
-                  {coupon.discountType === "percentage" ? `${coupon.discountValue}% OFF` : `₹${coupon.discountValue} OFF`}
+                  {coupon.discountType === "percentage"
+                    ? `${coupon.discountValue}% OFF`
+                    : `₹${coupon.discountValue} OFF`}
                 </Badge>
               </div>
 
               <div className="p-3 rounded-2xl bg-muted/40 border border-border/60 text-xs space-y-1.5">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Min Order Value:</span>
-                  <span className="font-bold text-foreground">₹{coupon.minOrderAmount}</span>
+                  <span className="text-muted-foreground">
+                    Min Order Value:
+                  </span>
+                  <span className="font-bold text-foreground">
+                    ₹{coupon.minOrderAmount}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Usage Progress:</span>
@@ -251,7 +271,8 @@ export function CouponsManager() {
                 {editingCoupon ? "Edit Coupon" : "Create Promotional Coupon"}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                Define the discount code, percentage/fixed value, and expiration date.
+                Define the discount code, percentage/fixed value, and expiration
+                date.
               </DialogDescription>
             </DialogHeader>
 
@@ -268,7 +289,9 @@ export function CouponsManager() {
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Campaign Title / Description</Label>
+                <Label className="text-xs font-semibold">
+                  Campaign Title / Description
+                </Label>
                 <Input
                   placeholder="Flat 50 OFF on fresh groceries"
                   value={title}
@@ -280,7 +303,10 @@ export function CouponsManager() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs font-semibold">Discount Type</Label>
-                  <Select value={discountType} onValueChange={(val: any) => setDiscountType(val)}>
+                  <Select
+                    value={discountType}
+                    onValueChange={(val: any) => setDiscountType(val)}
+                  >
                     <SelectTrigger className="rounded-xl text-xs">
                       <SelectValue />
                     </SelectTrigger>
@@ -291,7 +317,9 @@ export function CouponsManager() {
                   </Select>
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Discount Value *</Label>
+                  <Label className="text-xs font-semibold">
+                    Discount Value *
+                  </Label>
                   <Input
                     type="number"
                     required
@@ -304,7 +332,9 @@ export function CouponsManager() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Min Order Amount (₹)</Label>
+                  <Label className="text-xs font-semibold">
+                    Min Order Amount (₹)
+                  </Label>
                   <Input
                     type="number"
                     value={minOrderAmount}
@@ -330,10 +360,18 @@ export function CouponsManager() {
             </div>
 
             <DialogFooter className="gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-xl">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                className="rounded-xl"
+              >
                 Cancel
               </Button>
-              <Button type="submit" className="rounded-xl bg-primary text-primary-foreground font-semibold">
+              <Button
+                type="submit"
+                className="rounded-xl bg-primary text-primary-foreground font-semibold"
+              >
                 {editingCoupon ? "Save Changes" : "Create Voucher"}
               </Button>
             </DialogFooter>

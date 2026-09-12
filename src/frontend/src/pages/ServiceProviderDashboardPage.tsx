@@ -12,12 +12,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   CheckCircle,
   Clock,
@@ -591,22 +591,37 @@ export default function ServiceProviderDashboardPage() {
             <CardContent className="p-5">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="font-display font-semibold text-lg">Daily Availability</h3>
-                  <p className="text-sm text-muted-foreground">Toggle the slots you are available to be booked.</p>
+                  <h3 className="font-display font-semibold text-lg">
+                    Daily Availability
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Toggle the slots you are available to be booked.
+                  </p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => {
-                  setTimeSlots(prev => prev.map(s => ({ ...s, available: true })))
-                }}>Enable All</Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setTimeSlots((prev) =>
+                      prev.map((s) => ({ ...s, available: true })),
+                    );
+                  }}
+                >
+                  Enable All
+                </Button>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {timeSlots.map((slot) => (
-                  <div 
-                    key={slot.id} 
-                    className={`p-3 border rounded-xl flex items-center justify-between cursor-pointer transition-smooth ${slot.available ? 'border-primary/50 bg-primary/5' : 'border-border bg-muted/30 opacity-60'}`}
+                  <div
+                    key={slot.id}
+                    className={`p-3 border rounded-xl flex items-center justify-between cursor-pointer transition-smooth ${slot.available ? "border-primary/50 bg-primary/5" : "border-border bg-muted/30 opacity-60"}`}
                     onClick={() => handleToggleSlot(slot.id)}
                   >
                     <span className="text-sm font-medium">{slot.time}</span>
-                    <Checkbox checked={slot.available} onCheckedChange={() => handleToggleSlot(slot.id)} />
+                    <Checkbox
+                      checked={slot.available}
+                      onCheckedChange={() => handleToggleSlot(slot.id)}
+                    />
                   </div>
                 ))}
               </div>

@@ -111,6 +111,8 @@ src/frontend/dist
 
 # Vercel
 .vercel
+ezy1_db.json
+live.html
 
 # DFX
 .dfx

@@ -25,9 +25,14 @@ import {
   Sliders,
   Trash2,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
-import { type StoredFaq, type StoredHeroSlide, useStoreData } from "../../../lib/storeData";
+import {
+  type StoredFaq,
+  type StoredHeroSlide,
+  useStoreData,
+} from "../../../lib/storeData";
 import { ConfirmModal } from "../ConfirmModal";
 import { ImageUploader } from "../ImageUploader";
 
@@ -35,12 +40,18 @@ export function WebsiteContentSection() {
   const store = useStoreData();
 
   // Announcement Bar Form State
-  const [announcementText, setAnnouncementText] = useState(store.settings.announcementBarText);
-  const [enableAnnouncement, setEnableAnnouncement] = useState(store.settings.enableAnnouncementBar);
+  const [announcementText, setAnnouncementText] = useState(
+    store.settings.announcementBarText,
+  );
+  const [enableAnnouncement, setEnableAnnouncement] = useState(
+    store.settings.enableAnnouncementBar,
+  );
 
   // Hero Slide Modal State
   const [isSlideDialogOpen, setIsSlideDialogOpen] = useState(false);
-  const [editingSlide, setEditingSlide] = useState<StoredHeroSlide | null>(null);
+  const [editingSlide, setEditingSlide] = useState<StoredHeroSlide | null>(
+    null,
+  );
   const [slideTitle, setSlideTitle] = useState("");
   const [slideSubtitle, setSlideSubtitle] = useState("");
   const [slideBadge, setSlideBadge] = useState("");
@@ -71,9 +82,13 @@ export function WebsiteContentSection() {
   const openAddSlide = () => {
     setEditingSlide(null);
     setSlideTitle("Fresh Farm Organics & Daily Groceries");
-    setSlideSubtitle("Delivered to your home in 10 to 20 minutes from verified local vendors.");
+    setSlideSubtitle(
+      "Delivered to your home in 10 to 20 minutes from verified local vendors.",
+    );
     setSlideBadge("⚡ Fast Local Dispatch");
-    setSlideImageUrl("https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&q=80");
+    setSlideImageUrl(
+      "https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&q=80",
+    );
     setSlideBtnText("Explore Groceries");
     setSlideBtnLink("/shop");
     setSlidePublished(true);
@@ -179,19 +194,30 @@ export function WebsiteContentSection() {
           Website Content Management
         </h1>
         <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-          Customize hero banners, promotional announcement bars, FAQs and homepage copy without touching code.
+          Customize hero banners, promotional announcement bars, FAQs and
+          homepage copy without touching code.
         </p>
       </div>
 
       <Tabs defaultValue="hero" className="space-y-6">
         <TabsList className="bg-muted/80 p-1 rounded-2xl">
-          <TabsTrigger value="hero" className="rounded-xl text-xs sm:text-sm gap-1.5">
-            <Sliders className="w-3.5 h-3.5" /> Hero Banners ({store.heroSlides.length})
+          <TabsTrigger
+            value="hero"
+            className="rounded-xl text-xs sm:text-sm gap-1.5"
+          >
+            <Sliders className="w-3.5 h-3.5" /> Hero Banners (
+            {store.heroSlides.length})
           </TabsTrigger>
-          <TabsTrigger value="announcement" className="rounded-xl text-xs sm:text-sm gap-1.5">
+          <TabsTrigger
+            value="announcement"
+            className="rounded-xl text-xs sm:text-sm gap-1.5"
+          >
             <Megaphone className="w-3.5 h-3.5" /> Top Announcement Bar
           </TabsTrigger>
-          <TabsTrigger value="faqs" className="rounded-xl text-xs sm:text-sm gap-1.5">
+          <TabsTrigger
+            value="faqs"
+            className="rounded-xl text-xs sm:text-sm gap-1.5"
+          >
             <HelpCircle className="w-3.5 h-3.5" /> FAQs ({store.faqs.length})
           </TabsTrigger>
         </TabsList>
@@ -200,19 +226,34 @@ export function WebsiteContentSection() {
         <TabsContent value="hero" className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-display font-bold text-base">Homepage Hero Banners</h3>
-              <p className="text-xs text-muted-foreground">Manage animated slides on the storefront landing page.</p>
+              <h3 className="font-display font-bold text-base">
+                Homepage Hero Banners
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Manage animated slides on the storefront landing page.
+              </p>
             </div>
-            <Button onClick={openAddSlide} size="sm" className="gap-1.5 text-xs rounded-xl bg-primary text-primary-foreground font-semibold">
+            <Button
+              onClick={openAddSlide}
+              size="sm"
+              className="gap-1.5 text-xs rounded-xl bg-primary text-primary-foreground font-semibold"
+            >
               <Plus className="w-3.5 h-3.5" /> Add Banner Slide
             </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {store.heroSlides.map((slide) => (
-              <Card key={slide.id} className="rounded-2xl border-border overflow-hidden bg-card shadow-xs">
+              <Card
+                key={slide.id}
+                className="rounded-2xl border-border overflow-hidden bg-card shadow-xs"
+              >
                 <div className="relative aspect-video bg-muted/60">
-                  <img src={slide.imageUrl} alt={slide.title} className="w-full h-full object-cover" />
+                  <img
+                    src={slide.imageUrl}
+                    alt={slide.title}
+                    className="w-full h-full object-cover"
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-4 flex flex-col justify-end text-white">
                     {slide.badge && (
                       <span className="text-[11px] font-bold text-primary bg-black/50 px-2 py-0.5 rounded-full w-max backdrop-blur-xs mb-1">
@@ -222,12 +263,17 @@ export function WebsiteContentSection() {
                     <h4 className="font-display font-bold text-sm sm:text-base leading-snug line-clamp-2">
                       {slide.title}
                     </h4>
-                    <p className="text-xs text-white/80 line-clamp-2 mt-1">{slide.subtitle}</p>
+                    <p className="text-xs text-white/80 line-clamp-2 mt-1">
+                      {slide.subtitle}
+                    </p>
                   </div>
                 </div>
 
                 <CardContent className="p-4 flex items-center justify-between gap-2 border-t border-border/60">
-                  <Badge variant={slide.published ? "default" : "secondary"} className="text-[10px]">
+                  <Badge
+                    variant={slide.published ? "default" : "secondary"}
+                    className="text-[10px]"
+                  >
                     {slide.published ? "Published (Live)" : "Draft"}
                   </Badge>
 
@@ -259,22 +305,34 @@ export function WebsiteContentSection() {
         <TabsContent value="announcement" className="space-y-4">
           <Card className="rounded-3xl border-border bg-card p-6 shadow-xs max-w-2xl space-y-4">
             <div>
-              <h3 className="font-display font-bold text-base text-foreground">Top Announcement Ticker</h3>
+              <h3 className="font-display font-bold text-base text-foreground">
+                Top Announcement Ticker
+              </h3>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Displays a prominent promotional headline at the very top of all public pages.
+                Displays a prominent promotional headline at the very top of all
+                public pages.
               </p>
             </div>
 
             <div className="flex items-center justify-between p-3.5 rounded-2xl bg-muted/40 border border-border">
               <div>
-                <Label className="text-xs font-semibold">Enable Top Announcement Bar</Label>
-                <p className="text-[11px] text-muted-foreground">Show promotional banner above header</p>
+                <Label className="text-xs font-semibold">
+                  Enable Top Announcement Bar
+                </Label>
+                <p className="text-[11px] text-muted-foreground">
+                  Show promotional banner above header
+                </p>
               </div>
-              <Switch checked={enableAnnouncement} onCheckedChange={setEnableAnnouncement} />
+              <Switch
+                checked={enableAnnouncement}
+                onCheckedChange={setEnableAnnouncement}
+              />
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">Announcement Message Text</Label>
+              <Label className="text-xs font-semibold">
+                Announcement Message Text
+              </Label>
               <Textarea
                 rows={3}
                 value={announcementText}
@@ -286,7 +344,9 @@ export function WebsiteContentSection() {
 
             {/* Live Preview Box */}
             <div className="space-y-1.5 pt-2 border-t border-border">
-              <span className="text-[11px] font-semibold text-muted-foreground">Live Public Preview:</span>
+              <span className="text-[11px] font-semibold text-muted-foreground">
+                Live Public Preview:
+              </span>
               {enableAnnouncement ? (
                 <div className="p-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold text-center shadow-xs">
                   {announcementText || "No announcement text configured"}
@@ -298,7 +358,10 @@ export function WebsiteContentSection() {
               )}
             </div>
 
-            <Button onClick={handleSaveAnnouncement} className="rounded-xl bg-primary text-primary-foreground font-semibold">
+            <Button
+              onClick={handleSaveAnnouncement}
+              className="rounded-xl bg-primary text-primary-foreground font-semibold"
+            >
               Save & Apply Announcement
             </Button>
           </Card>
@@ -308,31 +371,59 @@ export function WebsiteContentSection() {
         <TabsContent value="faqs" className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-display font-bold text-base">Frequently Asked Questions</h3>
-              <p className="text-xs text-muted-foreground">Help customers understand delivery, refunds, ordering and payments.</p>
+              <h3 className="font-display font-bold text-base">
+                Frequently Asked Questions
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Help customers understand delivery, refunds, ordering and
+                payments.
+              </p>
             </div>
-            <Button onClick={openAddFaq} size="sm" className="gap-1.5 text-xs rounded-xl bg-primary text-primary-foreground font-semibold">
+            <Button
+              onClick={openAddFaq}
+              size="sm"
+              className="gap-1.5 text-xs rounded-xl bg-primary text-primary-foreground font-semibold"
+            >
               <Plus className="w-3.5 h-3.5" /> Add FAQ
             </Button>
           </div>
 
           <div className="space-y-3">
             {store.faqs.map((faq) => (
-              <Card key={faq.id} className="rounded-2xl border-border bg-card p-4 shadow-xs">
+              <Card
+                key={faq.id}
+                className="rounded-2xl border-border bg-card p-4 shadow-xs"
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-[10px]">{faq.category}</Badge>
-                      <h4 className="font-display font-bold text-sm text-foreground">{faq.question}</h4>
+                      <Badge variant="outline" className="text-[10px]">
+                        {faq.category}
+                      </Badge>
+                      <h4 className="font-display font-bold text-sm text-foreground">
+                        {faq.question}
+                      </h4>
                     </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed pl-1 pt-1">{faq.answer}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed pl-1 pt-1">
+                      {faq.answer}
+                    </p>
                   </div>
 
                   <div className="flex items-center gap-1 flex-shrink-0">
-                    <Button variant="outline" size="sm" onClick={() => openEditFaq(faq)} className="h-8 px-2 text-xs rounded-xl">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openEditFaq(faq)}
+                      className="h-8 px-2 text-xs rounded-xl"
+                    >
                       <Edit2 className="w-3 h-3" />
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => setDeleteFaqId(faq.id)} className="h-8 px-2 text-destructive hover:bg-destructive/10 rounded-xl">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setDeleteFaqId(faq.id)}
+                      className="h-8 px-2 text-destructive hover:bg-destructive/10 rounded-xl"
+                    >
                       <Trash2 className="w-3.5 h-3.5" />
                     </Button>
                   </div>
@@ -349,43 +440,94 @@ export function WebsiteContentSection() {
           <form onSubmit={handleSaveSlide}>
             <DialogHeader>
               <DialogTitle className="text-xl font-display font-bold">
-                {editingSlide ? "Edit Hero Banner Slide" : "Add Hero Banner Slide"}
+                {editingSlide
+                  ? "Edit Hero Banner Slide"
+                  : "Add Hero Banner Slide"}
               </DialogTitle>
             </DialogHeader>
 
             <div className="space-y-3.5 py-3">
               <div className="space-y-1">
                 <Label className="text-xs font-semibold">Slide Title *</Label>
-                <Input required value={slideTitle} onChange={(e) => setSlideTitle(e.target.value)} className="rounded-xl text-sm" />
+                <Input
+                  required
+                  value={slideTitle}
+                  onChange={(e) => setSlideTitle(e.target.value)}
+                  className="rounded-xl text-sm"
+                />
               </div>
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Badge Pill (Optional)</Label>
-                <Input placeholder="e.g. ⚡ 10-Min Fast Delivery" value={slideBadge} onChange={(e) => setSlideBadge(e.target.value)} className="rounded-xl text-sm" />
+                <Label className="text-xs font-semibold">
+                  Badge Pill (Optional)
+                </Label>
+                <Input
+                  placeholder="e.g. ⚡ 10-Min Fast Delivery"
+                  value={slideBadge}
+                  onChange={(e) => setSlideBadge(e.target.value)}
+                  className="rounded-xl text-sm"
+                />
               </div>
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Subtitle Description</Label>
-                <Textarea rows={2} value={slideSubtitle} onChange={(e) => setSlideSubtitle(e.target.value)} className="rounded-xl text-xs" />
+                <Label className="text-xs font-semibold">
+                  Subtitle Description
+                </Label>
+                <Textarea
+                  rows={2}
+                  value={slideSubtitle}
+                  onChange={(e) => setSlideSubtitle(e.target.value)}
+                  className="rounded-xl text-xs"
+                />
               </div>
-              <ImageUploader label="Banner Image *" value={slideImageUrl} onChange={setSlideImageUrl} previewHeight="h-36" />
+              <ImageUploader
+                label="Banner Image *"
+                value={slideImageUrl}
+                onChange={setSlideImageUrl}
+                previewHeight="h-36"
+              />
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs font-semibold">Button Label</Label>
-                  <Input value={slideBtnText} onChange={(e) => setSlideBtnText(e.target.value)} className="rounded-xl text-sm" placeholder="Shop Now" />
+                  <Input
+                    value={slideBtnText}
+                    onChange={(e) => setSlideBtnText(e.target.value)}
+                    className="rounded-xl text-sm"
+                    placeholder="Shop Now"
+                  />
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs font-semibold">Button Link</Label>
-                  <Input value={slideBtnLink} onChange={(e) => setSlideBtnLink(e.target.value)} className="rounded-xl text-sm" placeholder="/shop" />
+                  <Input
+                    value={slideBtnLink}
+                    onChange={(e) => setSlideBtnLink(e.target.value)}
+                    className="rounded-xl text-sm"
+                    placeholder="/shop"
+                  />
                 </div>
               </div>
               <div className="flex items-center justify-between p-3 rounded-2xl bg-muted/40 border border-border">
                 <Label className="text-xs font-semibold">Publish Live</Label>
-                <Switch checked={slidePublished} onCheckedChange={setSlidePublished} />
+                <Switch
+                  checked={slidePublished}
+                  onCheckedChange={setSlidePublished}
+                />
               </div>
             </div>
 
             <DialogFooter className="gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsSlideDialogOpen(false)} className="rounded-xl">Cancel</Button>
-              <Button type="submit" className="rounded-xl bg-primary text-primary-foreground font-semibold">Save Slide</Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsSlideDialogOpen(false)}
+                className="rounded-xl"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="rounded-xl bg-primary text-primary-foreground font-semibold"
+              >
+                Save Slide
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -404,21 +546,49 @@ export function WebsiteContentSection() {
             <div className="space-y-3.5 py-3">
               <div className="space-y-1">
                 <Label className="text-xs font-semibold">Category</Label>
-                <Input value={faqCategory} onChange={(e) => setFaqCategory(e.target.value)} className="rounded-xl text-sm" placeholder="Delivery, Payments..." />
+                <Input
+                  value={faqCategory}
+                  onChange={(e) => setFaqCategory(e.target.value)}
+                  className="rounded-xl text-sm"
+                  placeholder="Delivery, Payments..."
+                />
               </div>
               <div className="space-y-1">
                 <Label className="text-xs font-semibold">Question *</Label>
-                <Input required value={faqQuestion} onChange={(e) => setFaqQuestion(e.target.value)} className="rounded-xl text-sm" />
+                <Input
+                  required
+                  value={faqQuestion}
+                  onChange={(e) => setFaqQuestion(e.target.value)}
+                  className="rounded-xl text-sm"
+                />
               </div>
               <div className="space-y-1">
                 <Label className="text-xs font-semibold">Answer *</Label>
-                <Textarea rows={3} required value={faqAnswer} onChange={(e) => setFaqAnswer(e.target.value)} className="rounded-xl text-xs sm:text-sm" />
+                <Textarea
+                  rows={3}
+                  required
+                  value={faqAnswer}
+                  onChange={(e) => setFaqAnswer(e.target.value)}
+                  className="rounded-xl text-xs sm:text-sm"
+                />
               </div>
             </div>
 
             <DialogFooter className="gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsFaqDialogOpen(false)} className="rounded-xl">Cancel</Button>
-              <Button type="submit" className="rounded-xl bg-primary text-primary-foreground font-semibold">Save FAQ</Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsFaqDialogOpen(false)}
+                className="rounded-xl"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="rounded-xl bg-primary text-primary-foreground font-semibold"
+              >
+                Save FAQ
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>

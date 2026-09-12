@@ -11,15 +11,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Edit2,
-  Gift,
-  Plus,
-  Sparkles,
-  Tag,
-  Trash2,
-} from "lucide-react";
-import React, { useState } from "react";
+import { Edit2, Gift, Plus, Sparkles, Tag, Trash2 } from "lucide-react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { DataTable } from "../../../owner/DataTable";
 
@@ -33,14 +27,44 @@ interface GiftCategoryItem {
 }
 
 const initialGiftCategories: GiftCategoryItem[] = [
-  { id: 1, name: "Diwali & Festive Sweet Hampers", emoji: "🪔", tagline: "Artisan dry fruits, handmade mithai & brass diyas", itemsCount: 18, active: true },
-  { id: 2, name: "Ceramic & Pottery Gift Bundles", emoji: "🏺", tagline: "Handcrafted terracotta and glazed tableware", itemsCount: 12, active: true },
-  { id: 3, name: "Organic Honey & Tea Gift Box", emoji: "🍯", tagline: "Raw forest honey, herbal infusions & organic jaggery", itemsCount: 8, active: true },
-  { id: 4, name: "Birthday & Celebration Combos", emoji: "🎂", tagline: "Gourmet chocolates, pastries & party snack boxes", itemsCount: 24, active: true },
+  {
+    id: 1,
+    name: "Diwali & Festive Sweet Hampers",
+    emoji: "🪔",
+    tagline: "Artisan dry fruits, handmade mithai & brass diyas",
+    itemsCount: 18,
+    active: true,
+  },
+  {
+    id: 2,
+    name: "Ceramic & Pottery Gift Bundles",
+    emoji: "🏺",
+    tagline: "Handcrafted terracotta and glazed tableware",
+    itemsCount: 12,
+    active: true,
+  },
+  {
+    id: 3,
+    name: "Organic Honey & Tea Gift Box",
+    emoji: "🍯",
+    tagline: "Raw forest honey, herbal infusions & organic jaggery",
+    itemsCount: 8,
+    active: true,
+  },
+  {
+    id: 4,
+    name: "Birthday & Celebration Combos",
+    emoji: "🎂",
+    tagline: "Gourmet chocolates, pastries & party snack boxes",
+    itemsCount: 24,
+    active: true,
+  },
 ];
 
 export function GiftCategories() {
-  const [giftCats, setGiftCats] = useState<GiftCategoryItem[]>(initialGiftCategories);
+  const [giftCats, setGiftCats] = useState<GiftCategoryItem[]>(
+    initialGiftCategories,
+  );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [name, setName] = useState("");
   const [emoji, setEmoji] = useState("🎁");
@@ -71,12 +95,15 @@ export function GiftCategories() {
         data={giftCats}
         searchPlaceholder="Search gift collection, tagline..."
         searchFilter={(item, query) =>
-          item.name.toLowerCase().includes(query) || item.tagline.toLowerCase().includes(query)
+          item.name.toLowerCase().includes(query) ||
+          item.tagline.toLowerCase().includes(query)
         }
         filterOptions={[]}
         sortOptions={[{ label: "Name (A-Z)", value: "name_asc" }]}
         defaultSort="name_asc"
-        onSort={(items) => [...items].sort((a, b) => a.name.localeCompare(b.name))}
+        onSort={(items) =>
+          [...items].sort((a, b) => a.name.localeCompare(b.name))
+        }
         onAddNew={() => {
           setName("");
           setEmoji("🎁");
@@ -86,15 +113,22 @@ export function GiftCategories() {
         addNewLabel="Create Gift Category"
         pageSize={6}
         renderItem={(item) => (
-          <Card key={item.id} className="rounded-3xl border-border bg-card p-5 shadow-xs">
+          <Card
+            key={item.id}
+            className="rounded-3xl border-border bg-card p-5 shadow-xs"
+          >
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-2xl flex items-center justify-center flex-shrink-0">
                   {item.emoji}
                 </div>
                 <div>
-                  <h3 className="font-display font-bold text-sm text-foreground">{item.name}</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">{item.tagline}</p>
+                  <h3 className="font-display font-bold text-sm text-foreground">
+                    {item.name}
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {item.tagline}
+                  </p>
                 </div>
               </div>
               <Badge variant="secondary" className="text-[10px] font-bold">
@@ -103,7 +137,9 @@ export function GiftCategories() {
             </div>
 
             <div className="flex items-center justify-between pt-3 border-t border-border/60 mt-3">
-              <span className="text-xs text-emerald-600 font-semibold">● Active on App</span>
+              <span className="text-xs text-emerald-600 font-semibold">
+                ● Active on App
+              </span>
               <Button
                 variant="ghost"
                 size="sm"
@@ -124,9 +160,12 @@ export function GiftCategories() {
         <DialogContent className="max-w-md bg-card border-border shadow-2xl rounded-3xl">
           <form onSubmit={handleCreate}>
             <DialogHeader>
-              <DialogTitle className="text-lg font-display font-bold">Create Gift Category</DialogTitle>
+              <DialogTitle className="text-lg font-display font-bold">
+                Create Gift Category
+              </DialogTitle>
               <DialogDescription className="text-xs">
-                Group products and special festive hampers into curated gift categories.
+                Group products and special festive hampers into curated gift
+                categories.
               </DialogDescription>
             </DialogHeader>
 
@@ -141,7 +180,9 @@ export function GiftCategories() {
                   />
                 </div>
                 <div className="space-y-1 col-span-3">
-                  <Label className="text-xs font-semibold">Category Name *</Label>
+                  <Label className="text-xs font-semibold">
+                    Category Name *
+                  </Label>
                   <Input
                     required
                     placeholder="e.g. Diwali Sweets & Dry Fruits"
@@ -153,7 +194,9 @@ export function GiftCategories() {
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Tagline Description</Label>
+                <Label className="text-xs font-semibold">
+                  Tagline Description
+                </Label>
                 <Input
                   placeholder="Curated selection of handcrafted sweets..."
                   value={tagline}
@@ -164,10 +207,18 @@ export function GiftCategories() {
             </div>
 
             <DialogFooter className="gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-xl text-xs">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                className="rounded-xl text-xs"
+              >
                 Cancel
               </Button>
-              <Button type="submit" className="rounded-xl bg-primary text-primary-foreground font-semibold text-xs">
+              <Button
+                type="submit"
+                className="rounded-xl bg-primary text-primary-foreground font-semibold text-xs"
+              >
                 Create Gift Category
               </Button>
             </DialogFooter>

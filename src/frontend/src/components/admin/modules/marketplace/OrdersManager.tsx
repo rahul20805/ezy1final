@@ -42,8 +42,15 @@ export function OrdersManager() {
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
   const [selectedDriverId, setSelectedDriverId] = useState<string>("");
 
-  const handleStatusChange = (orderId: number, nextStatus: StoredOrder["status"]) => {
-    store.updateOrderStatus(orderId, nextStatus, `Updated to ${nextStatus} by admin`);
+  const handleStatusChange = (
+    orderId: number,
+    nextStatus: StoredOrder["status"],
+  ) => {
+    store.updateOrderStatus(
+      orderId,
+      nextStatus,
+      `Updated to ${nextStatus} by admin`,
+    );
     toast.success(`Order status updated to: ${nextStatus.replace(/_/g, " ")}`);
     if (selectedOrder && selectedOrder.id === orderId) {
       setSelectedOrder(store.orders.find((o) => o.id === orderId) || null);
@@ -51,7 +58,9 @@ export function OrdersManager() {
   };
 
   const handleAssignDriver = (orderId: number) => {
-    const driver = store.deliveryPartners.find((d) => d.id === Number(selectedDriverId));
+    const driver = store.deliveryPartners.find(
+      (d) => d.id === Number(selectedDriverId),
+    );
     if (!driver) {
       toast.error("Please select a delivery rider.");
       return;
@@ -126,8 +135,10 @@ export function OrdersManager() {
         defaultSort="id_desc"
         onSort={(items, sortVal) => {
           const list = [...items];
-          if (sortVal === "amount_desc") return list.sort((a, b) => b.totalAmount - a.totalAmount);
-          if (sortVal === "amount_asc") return list.sort((a, b) => a.totalAmount - b.totalAmount);
+          if (sortVal === "amount_desc")
+            return list.sort((a, b) => b.totalAmount - a.totalAmount);
+          if (sortVal === "amount_asc")
+            return list.sort((a, b) => a.totalAmount - b.totalAmount);
           return list.sort((a, b) => b.id - a.id);
         }}
         pageSize={6}
@@ -138,15 +149,17 @@ export function OrdersManager() {
               order.status === "NEW"
                 ? "border-amber-500/40 bg-amber-500/5"
                 : order.status === "DELIVERED"
-                ? "border-border/60 bg-card opacity-85"
-                : "border-border/80 bg-card"
+                  ? "border-border/60 bg-card opacity-85"
+                  : "border-border/80 bg-card"
             }`}
           >
             <CardContent className="p-5 space-y-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono font-black text-sm text-foreground">{order.orderNumber}</span>
+                    <span className="font-mono font-black text-sm text-foreground">
+                      {order.orderNumber}
+                    </span>
                     <Badge
                       variant="outline"
                       className={`text-[9px] uppercase font-bold ${
@@ -155,16 +168,21 @@ export function OrdersManager() {
                           : ""
                       }`}
                     >
-                      {order.orderSource === "WHATSAPP" && <MessageCircle className="w-2.5 h-2.5 mr-1" />}
+                      {order.orderSource === "WHATSAPP" && (
+                        <MessageCircle className="w-2.5 h-2.5 mr-1" />
+                      )}
                       {order.orderSource}
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    {order.customerName} ({order.customerPhone}) • {order.createdAt}
+                    {order.customerName} ({order.customerPhone}) •{" "}
+                    {order.createdAt}
                   </p>
                 </div>
 
-                <Badge className={`text-[10px] uppercase font-bold ${getStatusColor(order.status)}`}>
+                <Badge
+                  className={`text-[10px] uppercase font-bold ${getStatusColor(order.status)}`}
+                >
                   {order.status.replace(/_/g, " ")}
                 </Badge>
               </div>
@@ -176,7 +194,10 @@ export function OrdersManager() {
                   <span>Qty × Price</span>
                 </div>
                 {order.items.map((it, idx) => (
-                  <div key={idx} className="flex items-center justify-between text-foreground">
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between text-foreground"
+                  >
                     <span className="truncate max-w-[200px]">{it.name}</span>
                     <span className="font-mono font-medium">
                       {it.quantity} × ₹{it.price} = ₹{it.quantity * it.price}
@@ -210,38 +231,44 @@ export function OrdersManager() {
                   </span>
                 </div>
 
-                {!order.assignedDriverName && order.status !== "DELIVERED" && order.status !== "CANCELLED" && (
-                  <div className="flex items-center gap-1">
-                    <select
-                      value={selectedDriverId}
-                      onChange={(e) => setSelectedDriverId(e.target.value)}
-                      className="h-7 text-xs rounded-lg border border-border bg-background px-2"
-                    >
-                      <option value="">Select Rider...</option>
-                      {store.deliveryPartners.map((dp) => (
-                        <option key={dp.id} value={dp.id}>
-                          {dp.name} ({dp.currentStatus})
-                        </option>
-                      ))}
-                    </select>
-                    <Button
-                      size="sm"
-                      onClick={() => handleAssignDriver(order.id)}
-                      className="h-7 px-2 text-[10px] rounded-lg"
-                    >
-                      Assign
-                    </Button>
-                  </div>
-                )}
+                {!order.assignedDriverName &&
+                  order.status !== "DELIVERED" &&
+                  order.status !== "CANCELLED" && (
+                    <div className="flex items-center gap-1">
+                      <select
+                        value={selectedDriverId}
+                        onChange={(e) => setSelectedDriverId(e.target.value)}
+                        className="h-7 text-xs rounded-lg border border-border bg-background px-2"
+                      >
+                        <option value="">Select Rider...</option>
+                        {store.deliveryPartners.map((dp) => (
+                          <option key={dp.id} value={dp.id}>
+                            {dp.name} ({dp.currentStatus})
+                          </option>
+                        ))}
+                      </select>
+                      <Button
+                        size="sm"
+                        onClick={() => handleAssignDriver(order.id)}
+                        className="h-7 px-2 text-[10px] rounded-lg"
+                      >
+                        Assign
+                      </Button>
+                    </div>
+                  )}
               </div>
 
               {/* Status Update & Invoice Actions */}
               <div className="flex items-center justify-between pt-2 border-t border-border/60">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[11px] font-semibold text-muted-foreground">Status:</span>
+                  <span className="text-[11px] font-semibold text-muted-foreground">
+                    Status:
+                  </span>
                   <Select
                     value={order.status}
-                    onValueChange={(val: any) => handleStatusChange(order.id, val)}
+                    onValueChange={(val: any) =>
+                      handleStatusChange(order.id, val)
+                    }
                   >
                     <SelectTrigger className="h-8 text-xs rounded-xl w-36">
                       <SelectValue />
@@ -251,7 +278,9 @@ export function OrdersManager() {
                       <SelectItem value="ACCEPTED">Accepted</SelectItem>
                       <SelectItem value="PREPARING">Preparing</SelectItem>
                       <SelectItem value="READY">Ready for Pickup</SelectItem>
-                      <SelectItem value="OUT_FOR_DELIVERY">Out for Delivery</SelectItem>
+                      <SelectItem value="OUT_FOR_DELIVERY">
+                        Out for Delivery
+                      </SelectItem>
                       <SelectItem value="DELIVERED">Delivered</SelectItem>
                       <SelectItem value="CANCELLED">Cancelled</SelectItem>
                     </SelectContent>
@@ -259,7 +288,9 @@ export function OrdersManager() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="font-display font-black text-sm text-foreground">₹{order.totalAmount}</span>
+                  <span className="font-display font-black text-sm text-foreground">
+                    ₹{order.totalAmount}
+                  </span>
                   <Button
                     variant="outline"
                     size="sm"
@@ -285,18 +316,31 @@ export function OrdersManager() {
             <div className="space-y-4">
               <div className="flex items-start justify-between border-b border-border pb-3">
                 <div>
-                  <h3 className="font-display font-black text-lg text-primary">{store.settings.brandName}</h3>
-                  <p className="text-[10px] text-muted-foreground font-mono">Invoice #{selectedOrder.orderNumber}</p>
+                  <h3 className="font-display font-black text-lg text-primary">
+                    {store.settings.brandName}
+                  </h3>
+                  <p className="text-[10px] text-muted-foreground font-mono">
+                    Invoice #{selectedOrder.orderNumber}
+                  </p>
                 </div>
-                <Badge variant="outline" className="text-xs font-mono font-bold">
+                <Badge
+                  variant="outline"
+                  className="text-xs font-mono font-bold"
+                >
                   {selectedOrder.createdAt}
                 </Badge>
               </div>
 
               <div className="text-xs space-y-1">
-                <p className="font-semibold text-foreground">Customer: {selectedOrder.customerName}</p>
-                <p className="text-muted-foreground">Phone: {selectedOrder.customerPhone}</p>
-                <p className="text-muted-foreground">Address: {selectedOrder.deliveryAddress}</p>
+                <p className="font-semibold text-foreground">
+                  Customer: {selectedOrder.customerName}
+                </p>
+                <p className="text-muted-foreground">
+                  Phone: {selectedOrder.customerPhone}
+                </p>
+                <p className="text-muted-foreground">
+                  Address: {selectedOrder.deliveryAddress}
+                </p>
               </div>
 
               <div className="border border-border rounded-2xl p-3 text-xs space-y-2">
@@ -306,17 +350,25 @@ export function OrdersManager() {
                     <span>
                       {item.name} × {item.quantity}
                     </span>
-                    <span className="font-mono">₹{item.price * item.quantity}</span>
+                    <span className="font-mono">
+                      ₹{item.price * item.quantity}
+                    </span>
                   </div>
                 ))}
                 <div className="border-t border-border pt-2 flex justify-between font-bold text-sm">
                   <span>Grand Total</span>
-                  <span className="text-primary">₹{selectedOrder.totalAmount}</span>
+                  <span className="text-primary">
+                    ₹{selectedOrder.totalAmount}
+                  </span>
                 </div>
               </div>
 
               <DialogFooter className="gap-2">
-                <Button variant="outline" onClick={() => setIsInvoiceOpen(false)} className="rounded-xl text-xs">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsInvoiceOpen(false)}
+                  className="rounded-xl text-xs"
+                >
                   Close
                 </Button>
                 <Button

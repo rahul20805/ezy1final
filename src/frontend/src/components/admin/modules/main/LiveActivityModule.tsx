@@ -1,6 +1,12 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Activity,
   CreditCard,
@@ -43,7 +49,9 @@ export function LiveActivityModule() {
     }
   };
 
-  const filteredEvents = store.liveEvents.filter((ev) => filterType === "all" || ev.type === filterType);
+  const filteredEvents = store.liveEvents.filter(
+    (ev) => filterType === "all" || ev.type === filterType,
+  );
 
   const simulateNewEvent = () => {
     toast.success("Synchronized with real-time websocket cluster!");
@@ -64,7 +72,8 @@ export function LiveActivityModule() {
             </span>
           </div>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-            Live database events: incoming orders, payments, riders dispatched, support queries, and partner actions.
+            Live database events: incoming orders, payments, riders dispatched,
+            support queries, and partner actions.
           </p>
         </div>
 
@@ -85,7 +94,9 @@ export function LiveActivityModule() {
             key={type}
             onClick={() => setFilterType(type)}
             className={`px-3 py-1.5 text-xs font-semibold rounded-xl capitalize transition-all ${
-              filterType === type ? "bg-primary text-primary-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
+              filterType === type
+                ? "bg-primary text-primary-foreground shadow-xs"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             {type === "all" ? "All Events" : type}
@@ -107,16 +118,25 @@ export function LiveActivityModule() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="font-display font-bold text-sm text-foreground">{event.title}</h3>
-                    <Badge variant="secondary" className="text-[10px] font-bold">
+                    <h3 className="font-display font-bold text-sm text-foreground">
+                      {event.title}
+                    </h3>
+                    <Badge
+                      variant="secondary"
+                      className="text-[10px] font-bold"
+                    >
                       {event.badge}
                     </Badge>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">{event.description}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {event.description}
+                  </p>
                 </div>
               </div>
 
-              <span className="text-[10px] text-muted-foreground font-mono flex-shrink-0">{event.timestamp}</span>
+              <span className="text-[10px] text-muted-foreground font-mono flex-shrink-0">
+                {event.timestamp}
+              </span>
             </div>
           </Card>
         ))}

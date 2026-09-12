@@ -25,7 +25,7 @@ function ProtectedRoute({
       // Allow service_partner in vendor routes for now (they share the partner portal)
       return <>{children}</>;
     }
-    
+
     // Also allow customer to access user routes
     if (requiredRole === "user" && role === "customer") {
       return <>{children}</>;

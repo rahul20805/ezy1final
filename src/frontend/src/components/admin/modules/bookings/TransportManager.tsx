@@ -29,9 +29,13 @@ import {
   Truck,
   Users,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
-import { type StoredTransportListing, useStoreData } from "../../../../lib/storeData";
+import {
+  type StoredTransportListing,
+  useStoreData,
+} from "../../../../lib/storeData";
 import { ConfirmModal } from "../../../owner/ConfirmModal";
 import { DataTable } from "../../../owner/DataTable";
 
@@ -39,11 +43,14 @@ export function TransportManager() {
   const store = useStoreData();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<StoredTransportListing | null>(null);
+  const [editingItem, setEditingItem] = useState<StoredTransportListing | null>(
+    null,
+  );
 
   // Form State
   const [operatorName, setOperatorName] = useState("");
-  const [vehicleType, setVehicleType] = useState<StoredTransportListing["vehicleType"]>("Auto");
+  const [vehicleType, setVehicleType] =
+    useState<StoredTransportListing["vehicleType"]>("Auto");
   const [vehicleNumber, setVehicleNumber] = useState("");
   const [routeName, setRouteName] = useState("");
   const [fromLocation, setFromLocation] = useState("");
@@ -52,7 +59,8 @@ export function TransportManager() {
   const [fare, setFare] = useState<number>(50);
   const [totalSeats, setTotalSeats] = useState<number>(3);
   const [availableSeats, setAvailableSeats] = useState<number>(3);
-  const [status, setStatus] = useState<StoredTransportListing["status"]>("Active");
+  const [status, setStatus] =
+    useState<StoredTransportListing["status"]>("Active");
 
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
 
@@ -171,15 +179,22 @@ export function TransportManager() {
         defaultSort="fare_asc"
         onSort={(items, sortVal) => {
           const list = [...items];
-          if (sortVal === "fare_asc") return list.sort((a, b) => a.fare - b.fare);
-          if (sortVal === "fare_desc") return list.sort((a, b) => b.fare - a.fare);
-          return list.sort((a, b) => a.operatorName.localeCompare(b.operatorName));
+          if (sortVal === "fare_asc")
+            return list.sort((a, b) => a.fare - b.fare);
+          if (sortVal === "fare_desc")
+            return list.sort((a, b) => b.fare - a.fare);
+          return list.sort((a, b) =>
+            a.operatorName.localeCompare(b.operatorName),
+          );
         }}
         onAddNew={openAddDialog}
         addNewLabel="Add Vehicle / Route"
         pageSize={6}
         renderItem={(item) => (
-          <Card key={item.id} className="rounded-3xl border-border bg-card p-5 shadow-xs">
+          <Card
+            key={item.id}
+            className="rounded-3xl border-border bg-card p-5 shadow-xs"
+          >
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold">
@@ -187,16 +202,24 @@ export function TransportManager() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="font-display font-bold text-sm text-foreground">{item.routeName}</h3>
-                    {item.verified && <ShieldCheck className="w-4 h-4 text-emerald-500" />}
+                    <h3 className="font-display font-bold text-sm text-foreground">
+                      {item.routeName}
+                    </h3>
+                    {item.verified && (
+                      <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                    )}
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    {item.operatorName} • <span className="font-mono">{item.vehicleNumber}</span>
+                    {item.operatorName} •{" "}
+                    <span className="font-mono">{item.vehicleNumber}</span>
                   </p>
                 </div>
               </div>
 
-              <Badge variant="outline" className="text-[10px] uppercase font-bold">
+              <Badge
+                variant="outline"
+                className="text-[10px] uppercase font-bold"
+              >
                 {item.vehicleType}
               </Badge>
             </div>
@@ -204,7 +227,9 @@ export function TransportManager() {
             <div className="p-3 rounded-2xl bg-muted/40 border border-border/60 text-xs my-3 space-y-1">
               <div className="flex items-center gap-1.5 text-foreground font-medium">
                 <MapPin className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                <span>{item.fromLocation} ➔ {item.toLocation}</span>
+                <span>
+                  {item.fromLocation} ➔ {item.toLocation}
+                </span>
               </div>
               <div className="flex items-center justify-between text-muted-foreground pt-1">
                 <span>Timings: {item.timings}</span>
@@ -215,7 +240,9 @@ export function TransportManager() {
             </div>
 
             <div className="flex items-center justify-between pt-2 border-t border-border/60">
-              <span className="font-display font-black text-base text-foreground">₹{item.fare}</span>
+              <span className="font-display font-black text-base text-foreground">
+                ₹{item.fare}
+              </span>
 
               <div className="flex items-center gap-1.5">
                 <Button
@@ -246,16 +273,21 @@ export function TransportManager() {
           <form onSubmit={handleSave}>
             <DialogHeader>
               <DialogTitle className="text-xl font-display font-bold">
-                {editingItem ? "Edit Route Details" : "Add Transport Vehicle / Route"}
+                {editingItem
+                  ? "Edit Route Details"
+                  : "Add Transport Vehicle / Route"}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                Set route origin, destination, vehicle number, capacity and ticket fare.
+                Set route origin, destination, vehicle number, capacity and
+                ticket fare.
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-3 py-3">
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Route / Shuttle Title *</Label>
+                <Label className="text-xs font-semibold">
+                  Route / Shuttle Title *
+                </Label>
                 <Input
                   required
                   placeholder="e.g. Indiranagar ⇄ Koramangala Shuttle"
@@ -276,7 +308,9 @@ export function TransportManager() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Vehicle Number</Label>
+                  <Label className="text-xs font-semibold">
+                    Vehicle Number
+                  </Label>
                   <Input
                     required
                     value={vehicleNumber}
@@ -296,7 +330,9 @@ export function TransportManager() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">To Destination</Label>
+                  <Label className="text-xs font-semibold">
+                    To Destination
+                  </Label>
                   <Input
                     value={toLocation}
                     onChange={(e) => setToLocation(e.target.value)}
@@ -307,7 +343,9 @@ export function TransportManager() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Ticket Fare (₹)</Label>
+                  <Label className="text-xs font-semibold">
+                    Ticket Fare (₹)
+                  </Label>
                   <Input
                     type="number"
                     value={fare}
@@ -331,10 +369,18 @@ export function TransportManager() {
             </div>
 
             <DialogFooter className="gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-xl">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                className="rounded-xl"
+              >
                 Cancel
               </Button>
-              <Button type="submit" className="rounded-xl bg-primary text-primary-foreground font-semibold">
+              <Button
+                type="submit"
+                className="rounded-xl bg-primary text-primary-foreground font-semibold"
+              >
                 {editingItem ? "Save Changes" : "Create Route"}
               </Button>
             </DialogFooter>

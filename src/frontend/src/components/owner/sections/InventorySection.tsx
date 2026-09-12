@@ -30,7 +30,8 @@ import {
   Star,
   Trash2,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { usePartnerAuth } from "../../../lib/partnerAuthStore";
 import { type StoredProduct, useStoreData } from "../../../lib/storeData";
@@ -50,7 +51,9 @@ export function InventorySection() {
 
   // Dialog State for Add/Edit
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<StoredProduct | null>(null);
+  const [editingProduct, setEditingProduct] = useState<StoredProduct | null>(
+    null,
+  );
 
   // Form State
   const [name, setName] = useState("");
@@ -82,7 +85,9 @@ export function InventorySection() {
     setFeatured(false);
     setUnit("1 unit");
     setSku(`SKU-${Date.now().toString().slice(-4)}`);
-    setImageUrl("https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80");
+    setImageUrl(
+      "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80",
+    );
     setIsDialogOpen(true);
   };
 
@@ -133,7 +138,8 @@ export function InventorySection() {
         unit,
         sku,
         images: imageUrl ? [imageUrl] : editingProduct.images,
-        discountPercent: mrp > price ? Math.round(((mrp - price) / mrp) * 100) : 0,
+        discountPercent:
+          mrp > price ? Math.round(((mrp - price) / mrp) * 100) : 0,
       });
       toast.success(`Product "${name}" updated successfully!`);
     } else {
@@ -154,8 +160,11 @@ export function InventorySection() {
         totalReviews: 1,
         unit,
         sku: sku || `SKU-${Date.now().toString().slice(-4)}`,
-        images: imageUrl ? [imageUrl] : ["https://placehold.co/500x500?text=Product"],
-        discountPercent: mrp > price ? Math.round(((mrp - price) / mrp) * 100) : 0,
+        images: imageUrl
+          ? [imageUrl]
+          : ["https://placehold.co/500x500?text=Product"],
+        discountPercent:
+          mrp > price ? Math.round(((mrp - price) / mrp) * 100) : 0,
       });
       toast.success(`New product "${name}" added to catalog!`);
     }
@@ -171,7 +180,9 @@ export function InventorySection() {
     }
   };
 
-  const uniqueCategories = Array.from(new Set(store.categories.map((c) => c.name)));
+  const uniqueCategories = Array.from(
+    new Set(store.categories.map((c) => c.name)),
+  );
 
   return (
     <div className="space-y-6">
@@ -219,10 +230,14 @@ export function InventorySection() {
         defaultSort="newest"
         onSort={(items, sortVal) => {
           const list = [...items];
-          if (sortVal === "price_asc") return list.sort((a, b) => a.price - b.price);
-          if (sortVal === "price_desc") return list.sort((a, b) => b.price - a.price);
-          if (sortVal === "name_asc") return list.sort((a, b) => a.name.localeCompare(b.name));
-          if (sortVal === "stock_desc") return list.sort((a, b) => b.stockCount - a.stockCount);
+          if (sortVal === "price_asc")
+            return list.sort((a, b) => a.price - b.price);
+          if (sortVal === "price_desc")
+            return list.sort((a, b) => b.price - a.price);
+          if (sortVal === "name_asc")
+            return list.sort((a, b) => a.name.localeCompare(b.name));
+          if (sortVal === "stock_desc")
+            return list.sort((a, b) => b.stockCount - a.stockCount);
           return list.sort((a, b) => b.id - a.id);
         }}
         onAddNew={openAddDialog}
@@ -232,17 +247,23 @@ export function InventorySection() {
           <Card
             key={product.id}
             className={`rounded-2xl overflow-hidden border transition-all duration-200 hover:shadow-md ${
-              product.published ? "border-border/80 bg-card" : "border-border/50 bg-muted/20 opacity-80"
+              product.published
+                ? "border-border/80 bg-card"
+                : "border-border/50 bg-muted/20 opacity-80"
             }`}
           >
             {/* Product Image & Badges */}
             <div className="relative aspect-video sm:aspect-square bg-muted/60 overflow-hidden group">
               <img
-                src={product.images[0] || "https://placehold.co/400x400?text=No+Image"}
+                src={
+                  product.images[0] ||
+                  "https://placehold.co/400x400?text=No+Image"
+                }
                 alt={product.name}
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = "https://placehold.co/400x400?text=Product";
+                  (e.target as HTMLImageElement).src =
+                    "https://placehold.co/400x400?text=Product";
                 }}
               />
 
@@ -269,7 +290,9 @@ export function InventorySection() {
                       : "bg-destructive/90 text-white border-transparent"
                   }`}
                 >
-                  {product.inStock && product.stockCount > 0 ? `${product.stockCount} in stock` : "Out of Stock"}
+                  {product.inStock && product.stockCount > 0
+                    ? `${product.stockCount} in stock`
+                    : "Out of Stock"}
                 </Badge>
               </div>
             </div>
@@ -278,8 +301,12 @@ export function InventorySection() {
             <CardContent className="p-4 space-y-3">
               <div>
                 <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                  <span className="truncate font-medium">{product.category}</span>
-                  {product.sku && <span className="font-mono text-[10px]">{product.sku}</span>}
+                  <span className="truncate font-medium">
+                    {product.category}
+                  </span>
+                  {product.sku && (
+                    <span className="font-mono text-[10px]">{product.sku}</span>
+                  )}
                 </div>
                 <h3 className="font-display font-bold text-sm text-foreground mt-1 line-clamp-1 leading-snug">
                   {product.name}
@@ -316,15 +343,20 @@ export function InventorySection() {
                     toast.success(
                       product.published
                         ? `"${product.name}" is now hidden from public site.`
-                        : `"${product.name}" is now published live!`
+                        : `"${product.name}" is now published live!`,
                     );
                   }}
                   className="flex-1 h-8 text-xs gap-1 rounded-xl"
-                  title={product.published ? "Hide from Storefront" : "Publish to Storefront"}
+                  title={
+                    product.published
+                      ? "Hide from Storefront"
+                      : "Publish to Storefront"
+                  }
                 >
                   {product.published ? (
                     <>
-                      <EyeOff className="w-3.5 h-3.5 text-muted-foreground" /> Hide
+                      <EyeOff className="w-3.5 h-3.5 text-muted-foreground" />{" "}
+                      Hide
                     </>
                   ) : (
                     <>
@@ -364,17 +396,22 @@ export function InventorySection() {
           <form onSubmit={handleSaveProduct}>
             <DialogHeader>
               <DialogTitle className="text-xl font-display font-bold text-foreground">
-                {editingProduct ? "Edit Product Details" : "Add New Inventory Product"}
+                {editingProduct
+                  ? "Edit Product Details"
+                  : "Add New Inventory Product"}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                Fill in product details, pricing, stock levels and images. Changes reflect live on your store.
+                Fill in product details, pricing, stock levels and images.
+                Changes reflect live on your store.
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 py-4">
               {/* Product Name */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Product Title / Name *</Label>
+                <Label className="text-xs font-semibold">
+                  Product Title / Name *
+                </Label>
                 <Input
                   required
                   placeholder="e.g., Aashirvaad Whole Wheat Atta 5kg"
@@ -399,7 +436,9 @@ export function InventorySection() {
               {/* Pricing Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold">Selling Price (₹) *</Label>
+                  <Label className="text-xs font-semibold">
+                    Selling Price (₹) *
+                  </Label>
                   <Input
                     type="number"
                     required
@@ -420,7 +459,9 @@ export function InventorySection() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold">Unit / Packaging</Label>
+                  <Label className="text-xs font-semibold">
+                    Unit / Packaging
+                  </Label>
                   <Input
                     placeholder="e.g., 500g, 1 kg, Pack of 2"
                     value={unit}
@@ -448,7 +489,9 @@ export function InventorySection() {
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold">SKU / Item Code</Label>
+                  <Label className="text-xs font-semibold">
+                    SKU / Item Code
+                  </Label>
                   <Input
                     placeholder="e.g. GROC-ATT-001"
                     value={sku}
@@ -461,7 +504,9 @@ export function InventorySection() {
               {/* Stock Management */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-2xl bg-muted/40 border border-border/80">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold">Inventory Stock Count</Label>
+                  <Label className="text-xs font-semibold">
+                    Inventory Stock Count
+                  </Label>
                   <Input
                     type="number"
                     min={0}
@@ -472,10 +517,17 @@ export function InventorySection() {
                 </div>
                 <div className="flex items-center justify-between pt-4 sm:pt-6">
                   <div>
-                    <Label className="text-xs font-semibold cursor-pointer">In Stock Status</Label>
-                    <p className="text-[11px] text-muted-foreground">Available for immediate purchase</p>
+                    <Label className="text-xs font-semibold cursor-pointer">
+                      In Stock Status
+                    </Label>
+                    <p className="text-[11px] text-muted-foreground">
+                      Available for immediate purchase
+                    </p>
                   </div>
-                  <Switch checked={inStock && stockCount > 0} onCheckedChange={setInStock} />
+                  <Switch
+                    checked={inStock && stockCount > 0}
+                    onCheckedChange={setInStock}
+                  />
                 </div>
               </div>
 
@@ -491,15 +543,23 @@ export function InventorySection() {
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-3 rounded-2xl bg-muted/30 border border-border/80">
                 <div className="flex items-center justify-between w-full sm:w-auto gap-4">
                   <div>
-                    <Label className="text-xs font-semibold">Publish to Website</Label>
-                    <p className="text-[11px] text-muted-foreground">Visible on public store</p>
+                    <Label className="text-xs font-semibold">
+                      Publish to Website
+                    </Label>
+                    <p className="text-[11px] text-muted-foreground">
+                      Visible on public store
+                    </p>
                   </div>
                   <Switch checked={published} onCheckedChange={setPublished} />
                 </div>
                 <div className="flex items-center justify-between w-full sm:w-auto gap-4">
                   <div>
-                    <Label className="text-xs font-semibold">Feature on Homepage</Label>
-                    <p className="text-[11px] text-muted-foreground">Highlight in featured carousel</p>
+                    <Label className="text-xs font-semibold">
+                      Feature on Homepage
+                    </Label>
+                    <p className="text-[11px] text-muted-foreground">
+                      Highlight in featured carousel
+                    </p>
                   </div>
                   <Switch checked={featured} onCheckedChange={setFeatured} />
                 </div>
@@ -515,7 +575,10 @@ export function InventorySection() {
               >
                 Cancel
               </Button>
-              <Button type="submit" className="rounded-xl bg-primary text-primary-foreground font-semibold">
+              <Button
+                type="submit"
+                className="rounded-xl bg-primary text-primary-foreground font-semibold"
+              >
                 {editingProduct ? "Save Changes" : "Create Product"}
               </Button>
             </DialogFooter>

@@ -31,7 +31,9 @@ import { DataTable } from "../DataTable";
 export function ReviewsSection() {
   const store = useStoreData();
 
-  const [selectedReview, setSelectedReview] = useState<StoredReview | null>(null);
+  const [selectedReview, setSelectedReview] = useState<StoredReview | null>(
+    null,
+  );
   const [replyText, setReplyText] = useState("");
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
 
@@ -47,7 +49,10 @@ export function ReviewsSection() {
     setSelectedReview(null);
   };
 
-  const handleToggleStatus = (review: StoredReview, newStatus: StoredReview["status"]) => {
+  const handleToggleStatus = (
+    review: StoredReview,
+    newStatus: StoredReview["status"],
+  ) => {
     store.updateReview(review.id, { status: newStatus });
     toast.success(`Review marked as "${newStatus}"`);
   };
@@ -57,7 +62,7 @@ export function ReviewsSection() {
     toast.success(
       review.isFeatured
         ? "Review removed from featured highlights."
-        : "Review featured on public website!"
+        : "Review featured on public website!",
     );
   };
 
@@ -108,8 +113,10 @@ export function ReviewsSection() {
         defaultSort="newest"
         onSort={(items, sortVal) => {
           const list = [...items];
-          if (sortVal === "rating_desc") return list.sort((a, b) => b.rating - a.rating);
-          if (sortVal === "rating_asc") return list.sort((a, b) => a.rating - b.rating);
+          if (sortVal === "rating_desc")
+            return list.sort((a, b) => b.rating - a.rating);
+          if (sortVal === "rating_asc")
+            return list.sort((a, b) => a.rating - b.rating);
           return list.sort((a, b) => b.id - a.id);
         }}
         pageSize={6}
@@ -137,7 +144,9 @@ export function ReviewsSection() {
                         }`}
                       />
                     ))}
-                    <span className="text-xs font-bold ml-1 text-foreground">{review.rating}.0</span>
+                    <span className="text-xs font-bold ml-1 text-foreground">
+                      {review.rating}.0
+                    </span>
                   </div>
                 </div>
 
@@ -152,8 +161,8 @@ export function ReviewsSection() {
                       review.status === "approved"
                         ? "bg-emerald-500 text-white"
                         : review.status === "pending"
-                        ? "bg-amber-500 text-white"
-                        : "bg-destructive text-white"
+                          ? "bg-amber-500 text-white"
+                          : "bg-destructive text-white"
                     }`}
                   >
                     {review.status}
@@ -163,8 +172,15 @@ export function ReviewsSection() {
 
               {/* Target Item badge */}
               <div className="text-[11px] text-muted-foreground bg-muted/40 px-2.5 py-1 rounded-lg border border-border/60 flex items-center justify-between">
-                <span className="truncate">Reviewed: <span className="font-semibold text-foreground">{review.targetName}</span></span>
-                <span className="capitalize text-[10px] font-medium font-mono">{review.targetType}</span>
+                <span className="truncate">
+                  Reviewed:{" "}
+                  <span className="font-semibold text-foreground">
+                    {review.targetName}
+                  </span>
+                </span>
+                <span className="capitalize text-[10px] font-medium font-mono">
+                  {review.targetType}
+                </span>
               </div>
 
               {/* Comment Body */}
@@ -176,16 +192,21 @@ export function ReviewsSection() {
               {review.reply && (
                 <div className="p-2.5 rounded-xl bg-primary/5 border border-primary/20 text-xs space-y-1">
                   <div className="flex items-center gap-1 text-[11px] font-bold text-primary">
-                    <MessageSquare className="w-3 h-3" /> Official Store Response:
+                    <MessageSquare className="w-3 h-3" /> Official Store
+                    Response:
                   </div>
-                  <p className="text-muted-foreground text-[11px]">{review.reply}</p>
+                  <p className="text-muted-foreground text-[11px]">
+                    {review.reply}
+                  </p>
                 </div>
               )}
             </CardContent>
 
             {/* Bottom Actions Bar */}
             <div className="p-4 pt-0 flex items-center justify-between gap-1 border-t border-border/60 mt-2">
-              <span className="text-[11px] text-muted-foreground">{review.date}</span>
+              <span className="text-[11px] text-muted-foreground">
+                {review.date}
+              </span>
 
               <div className="flex items-center gap-1">
                 {review.status !== "approved" && (
@@ -205,9 +226,13 @@ export function ReviewsSection() {
                   size="sm"
                   onClick={() => handleToggleFeature(review)}
                   className={`h-8 px-2 text-xs rounded-xl ${
-                    review.isFeatured ? "text-amber-600 bg-amber-50 border-amber-200" : ""
+                    review.isFeatured
+                      ? "text-amber-600 bg-amber-50 border-amber-200"
+                      : ""
                   }`}
-                  title={review.isFeatured ? "Unfeature" : "Feature on Homepage"}
+                  title={
+                    review.isFeatured ? "Unfeature" : "Feature on Homepage"
+                  }
                 >
                   <Sparkles className="w-3.5 h-3.5" />
                 </Button>
@@ -237,10 +262,15 @@ export function ReviewsSection() {
 
       {/* Reply Modal */}
       {selectedReview && (
-        <Dialog open={!!selectedReview} onOpenChange={() => setSelectedReview(null)}>
+        <Dialog
+          open={!!selectedReview}
+          onOpenChange={() => setSelectedReview(null)}
+        >
           <DialogContent className="max-w-md bg-card border-border shadow-2xl rounded-3xl">
             <DialogHeader>
-              <DialogTitle className="text-lg font-display font-bold">Reply to Customer Review</DialogTitle>
+              <DialogTitle className="text-lg font-display font-bold">
+                Reply to Customer Review
+              </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
                 Your response will appear publicly below the customer's review.
               </DialogDescription>
@@ -248,12 +278,18 @@ export function ReviewsSection() {
 
             <div className="space-y-3 py-2">
               <div className="p-3 rounded-2xl bg-muted/40 border border-border text-xs">
-                <p className="font-semibold text-foreground">{selectedReview.author} says:</p>
-                <p className="text-muted-foreground italic mt-1">"{selectedReview.comment}"</p>
+                <p className="font-semibold text-foreground">
+                  {selectedReview.author} says:
+                </p>
+                <p className="text-muted-foreground italic mt-1">
+                  "{selectedReview.comment}"
+                </p>
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Your Official Response</Label>
+                <Label className="text-xs font-semibold">
+                  Your Official Response
+                </Label>
                 <Textarea
                   rows={3}
                   placeholder="Thank the customer, address feedback or offer assistance..."
@@ -265,10 +301,19 @@ export function ReviewsSection() {
             </div>
 
             <DialogFooter className="gap-2">
-              <Button variant="outline" size="sm" onClick={() => setSelectedReview(null)} className="rounded-xl">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedReview(null)}
+                className="rounded-xl"
+              >
                 Cancel
               </Button>
-              <Button size="sm" onClick={handleSaveReply} className="rounded-xl bg-primary text-primary-foreground font-semibold">
+              <Button
+                size="sm"
+                onClick={handleSaveReply}
+                className="rounded-xl bg-primary text-primary-foreground font-semibold"
+              >
                 Post Reply
               </Button>
             </DialogFooter>

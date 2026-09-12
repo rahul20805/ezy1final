@@ -37,7 +37,10 @@ export function AuditLogsManager() {
         onSort={(items) => [...items].sort((a, b) => b.id - a.id)}
         pageSize={8}
         renderItem={(log) => (
-          <Card key={log.id} className="rounded-3xl border-border bg-card p-4 shadow-xs">
+          <Card
+            key={log.id}
+            className="rounded-3xl border-border bg-card p-4 shadow-xs"
+          >
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-start gap-3">
                 <div className="w-9 h-9 rounded-xl bg-muted/60 border border-border/80 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -45,19 +48,29 @@ export function AuditLogsManager() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono font-bold text-xs text-foreground uppercase">{log.action}</span>
+                    <span className="font-mono font-bold text-xs text-foreground uppercase">
+                      {log.action}
+                    </span>
                     <Badge variant="outline" className="text-[9px] font-mono">
                       {log.entityType} #{log.entityId}
                     </Badge>
                   </div>
-                  <p className="text-xs text-foreground mt-1 font-medium">{log.details}</p>
+                  <p className="text-xs text-foreground mt-1 font-medium">
+                    {log.details}
+                  </p>
                   <p className="text-[10px] text-muted-foreground mt-0.5">
-                    Operator: <span className="font-semibold text-foreground">{log.adminName}</span> ({log.adminRole}) • IP: {log.ipAddress}
+                    Operator:{" "}
+                    <span className="font-semibold text-foreground">
+                      {log.adminName}
+                    </span>{" "}
+                    ({log.adminRole}) • IP: {log.ipAddress}
                   </p>
                 </div>
               </div>
 
-              <span className="text-[10px] text-muted-foreground font-mono flex-shrink-0">{log.timestamp}</span>
+              <span className="text-[10px] text-muted-foreground font-mono flex-shrink-0">
+                {log.timestamp}
+              </span>
             </div>
           </Card>
         )}

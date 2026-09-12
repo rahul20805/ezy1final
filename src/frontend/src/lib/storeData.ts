@@ -65,7 +65,12 @@ export interface StoredPartnerApplication {
   city: string;
   address: string;
   documentsSubmitted: string[];
-  status: "PENDING" | "UNDER_REVIEW" | "APPROVED" | "REJECTED" | "MORE_INFORMATION_REQUIRED";
+  status:
+    | "PENDING"
+    | "UNDER_REVIEW"
+    | "APPROVED"
+    | "REJECTED"
+    | "MORE_INFORMATION_REQUIRED";
   notes?: string;
   appliedAt: string;
 }
@@ -106,7 +111,13 @@ export interface StoredServiceProvider {
 export interface StoredBooking {
   id: number;
   title: string;
-  type: "class" | "workshop" | "doctor" | "consultation" | "service" | "transport";
+  type:
+    | "class"
+    | "workshop"
+    | "doctor"
+    | "consultation"
+    | "service"
+    | "transport";
   category: string;
   instructorOrDoctor: string;
   price: number;
@@ -114,7 +125,13 @@ export interface StoredBooking {
   duration: string;
   capacity: number;
   enrolledCount: number;
-  status: "PENDING" | "CONFIRMED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED" | "NO_SHOW";
+  status:
+    | "PENDING"
+    | "CONFIRMED"
+    | "IN_PROGRESS"
+    | "COMPLETED"
+    | "CANCELLED"
+    | "NO_SHOW";
   published: boolean;
   image?: string;
   location?: string;
@@ -158,7 +175,12 @@ export interface StoredHospitalBed {
   hospitalId: number;
   hospitalName: string;
   department: string;
-  bedType: "General Ward" | "ICU / Ventilator" | "Semi-Private" | "Emergency" | "Pediatric";
+  bedType:
+    | "General Ward"
+    | "ICU / Ventilator"
+    | "Semi-Private"
+    | "Emergency"
+    | "Pediatric";
   totalBeds: number;
   availableBeds: number;
   occupiedBeds: number;
@@ -199,7 +221,16 @@ export interface StoredOrder {
   deliveryFee: number;
   discountAmount: number;
   orderSource: "WEB" | "MOBILE" | "WHATSAPP";
-  status: "NEW" | "ACCEPTED" | "PREPARING" | "READY" | "PICKED_UP" | "OUT_FOR_DELIVERY" | "DELIVERED" | "CANCELLED" | "REFUNDED";
+  status:
+    | "NEW"
+    | "ACCEPTED"
+    | "PREPARING"
+    | "READY"
+    | "PICKED_UP"
+    | "OUT_FOR_DELIVERY"
+    | "DELIVERED"
+    | "CANCELLED"
+    | "REFUNDED";
   paymentMethod: "UPI" | "Wallet" | "COD" | "Card";
   paymentStatus: "paid" | "pending" | "failed" | "refunded";
   vendorId: number;
@@ -253,7 +284,15 @@ export interface StoredSupportTicket {
   customerName: string;
   customerPhone: string;
   orderId?: string;
-  category: "Order" | "Payment" | "Delivery" | "Partner" | "Product" | "Booking" | "Account" | "Other";
+  category:
+    | "Order"
+    | "Payment"
+    | "Delivery"
+    | "Partner"
+    | "Product"
+    | "Booking"
+    | "Account"
+    | "Other";
   priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
   status: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED";
   subject: string;
@@ -271,7 +310,12 @@ export interface StoredDispute {
   orderNumber: string;
   customerName: string;
   partnerName: string;
-  disputeType: "Damaged Goods" | "Wrong Item" | "Delivery Delay" | "Payment Failure" | "Service Quality";
+  disputeType:
+    | "Damaged Goods"
+    | "Wrong Item"
+    | "Delivery Delay"
+    | "Payment Failure"
+    | "Service Quality";
   amount: number;
   status: "PENDING" | "INVESTIGATING" | "RESOLVED" | "REFUNDED" | "REJECTED";
   reason: string;
@@ -283,7 +327,11 @@ export interface StoredDeliveryPartner {
   id: number;
   name: string;
   phone: string;
-  vehicleType: "2-Wheeler (Bike)" | "Electric Scooter" | "Auto / 3-Wheeler" | "Van / Mini-Truck";
+  vehicleType:
+    | "2-Wheeler (Bike)"
+    | "Electric Scooter"
+    | "Auto / 3-Wheeler"
+    | "Van / Mini-Truck";
   vehicleNumber: string;
   currentStatus: "ONLINE" | "BUSY" | "OFFLINE";
   ordersDelivered: number;
@@ -426,7 +474,15 @@ export interface StoredAuditLog {
 
 export interface StoredLiveEvent {
   id: number;
-  type: "order" | "customer" | "partner" | "payment" | "booking" | "review" | "support" | "delivery";
+  type:
+    | "order"
+    | "customer"
+    | "partner"
+    | "payment"
+    | "booking"
+    | "review"
+    | "support"
+    | "delivery";
   title: string;
   description: string;
   timestamp: string;
@@ -501,7 +557,8 @@ const initialShops: StoredShop[] = [
     openingHours: "07:00 AM - 10:00 PM",
     deliveryRadiusKm: 8,
     verified: true,
-    image: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80",
+    image:
+      "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80",
     joinedAt: "2025-10-15",
   },
   {
@@ -520,7 +577,8 @@ const initialShops: StoredShop[] = [
     openingHours: "08:00 AM - 11:00 PM",
     deliveryRadiusKm: 12,
     verified: true,
-    image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&q=80",
+    image:
+      "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&q=80",
     joinedAt: "2025-11-02",
   },
   {
@@ -539,7 +597,8 @@ const initialShops: StoredShop[] = [
     openingHours: "06:00 AM - 08:00 PM",
     deliveryRadiusKm: 6,
     verified: true,
-    image: "https://images.unsplash.com/photo-1508747703725-719777637510?w=500&q=80",
+    image:
+      "https://images.unsplash.com/photo-1508747703725-719777637510?w=500&q=80",
     joinedAt: "2025-12-10",
   },
   {
@@ -558,7 +617,8 @@ const initialShops: StoredShop[] = [
     openingHours: "08:00 AM - 09:00 PM",
     deliveryRadiusKm: 15,
     verified: true,
-    image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80",
+    image:
+      "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80",
     joinedAt: "2026-01-05",
   },
 ];
@@ -573,7 +633,11 @@ const initialPartnerApplications: StoredPartnerApplication[] = [
     email: "deepak.sweets@gmail.com",
     city: "Jaipur",
     address: "MI Road, Near Panch Batti, Jaipur",
-    documentsSubmitted: ["FSSAI_Cert.pdf", "GST_Registration.pdf", "Aadhaar.jpg"],
+    documentsSubmitted: [
+      "FSSAI_Cert.pdf",
+      "GST_Registration.pdf",
+      "Aadhaar.jpg",
+    ],
     status: "PENDING",
     notes: "Applied for 10-minute instant pastry and dessert delivery.",
     appliedAt: "2026-08-15 08:30 AM",
@@ -622,7 +686,8 @@ const initialDoctors: StoredDoctor[] = [
     totalReviews: 312,
     phone: "9876541100",
     verified: true,
-    image: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=500&q=80",
+    image:
+      "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=500&q=80",
     bio: "Senior consultant specializing in fever management, diabetes, and preventive cardiac wellness.",
   },
   {
@@ -638,7 +703,8 @@ const initialDoctors: StoredDoctor[] = [
     totalReviews: 240,
     phone: "9845019900",
     verified: true,
-    image: "https://images.unsplash.com/photo-1594824813593-305f8d55998f?w=500&q=80",
+    image:
+      "https://images.unsplash.com/photo-1594824813593-305f8d55998f?w=500&q=80",
     bio: "Dedicated pediatric specialist focusing on newborn care, vaccinations, and childhood immunity.",
   },
   {
@@ -654,7 +720,8 @@ const initialDoctors: StoredDoctor[] = [
     totalReviews: 185,
     phone: "9811223399",
     verified: true,
-    image: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=500&q=80",
+    image:
+      "https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=500&q=80",
     bio: "Expert in knee replacement, sports injury rehab, and spine ergonomics.",
   },
 ];
@@ -666,7 +733,13 @@ const initialHospitals: StoredHospital[] = [
     city: "Bengaluru",
     address: "HAL Old Airport Road, Kodihalli, Bengaluru",
     emergencyPhone: "080-25024444",
-    departments: ["Cardiology", "ICU & Critical Care", "Neurology", "Emergency & Trauma", "Pediatrics"],
+    departments: [
+      "Cardiology",
+      "ICU & Critical Care",
+      "Neurology",
+      "Emergency & Trauma",
+      "Pediatrics",
+    ],
     totalBeds: 250,
     availableBeds: 42,
     icuBedsAvailable: 8,
@@ -679,7 +752,13 @@ const initialHospitals: StoredHospital[] = [
     city: "Bengaluru",
     address: "Bannerghatta Main Road, Opp. IIM, Bengaluru",
     emergencyPhone: "080-66214444",
-    departments: ["Orthopedics", "Oncology", "Gastroenterology", "ICU", "Pulmonology"],
+    departments: [
+      "Orthopedics",
+      "Oncology",
+      "Gastroenterology",
+      "ICU",
+      "Pulmonology",
+    ],
     totalBeds: 180,
     availableBeds: 29,
     icuBedsAvailable: 5,
@@ -878,8 +957,16 @@ const initialSupportTickets: StoredSupportTicket[] = [
     subject: "Driver running 10 mins delayed on delivery route",
     assignedAdmin: "Admin Alka",
     messages: [
-      { sender: "customer", text: "Order was expected at 10:00 AM, rider is stuck in Indiranagar signal.", timestamp: "10:05 AM" },
-      { sender: "admin", text: "Checked with rider Akash, he has cleared signal and is 2 mins away from your apartment gate.", timestamp: "10:08 AM" },
+      {
+        sender: "customer",
+        text: "Order was expected at 10:00 AM, rider is stuck in Indiranagar signal.",
+        timestamp: "10:05 AM",
+      },
+      {
+        sender: "admin",
+        text: "Checked with rider Akash, he has cleared signal and is 2 mins away from your apartment gate.",
+        timestamp: "10:08 AM",
+      },
     ],
     createdAt: "2026-08-15 10:05 AM",
   },
@@ -894,7 +981,11 @@ const initialSupportTickets: StoredSupportTicket[] = [
     subject: "UPI transaction debited twice during checkout",
     assignedAdmin: "Finance Team",
     messages: [
-      { sender: "customer", text: "Bank debited ₹476 twice via GPay due to momentary network glitch.", timestamp: "09:30 AM" },
+      {
+        sender: "customer",
+        text: "Bank debited ₹476 twice via GPay due to momentary network glitch.",
+        timestamp: "09:30 AM",
+      },
     ],
     createdAt: "2026-08-15 09:30 AM",
   },
@@ -910,7 +1001,8 @@ const initialDisputes: StoredDispute[] = [
     amount: 120,
     status: "INVESTIGATING",
     reason: "Egg carton outer packing crushed during transit.",
-    resolutionNotes: "Vendor agrees to issue instant ₹120 wallet refund credit.",
+    resolutionNotes:
+      "Vendor agrees to issue instant ₹120 wallet refund credit.",
     createdAt: "2026-08-14 04:30 PM",
   },
 ];
@@ -970,7 +1062,8 @@ const initialAuditLogs: StoredAuditLog[] = [
     action: "APPROVE_PARTNER",
     entityType: "PartnerAccount",
     entityId: "sharma_grocery",
-    details: "Approved Sharma Kirana retail license and activated store catalog",
+    details:
+      "Approved Sharma Kirana retail license and activated store catalog",
     timestamp: "2026-08-15 09:12:00 AM",
     ipAddress: "192.168.1.108",
   },
@@ -981,7 +1074,8 @@ const initialAuditLogs: StoredAuditLog[] = [
     action: "APPROVE_PAYOUT",
     entityType: "PartnerPayout",
     entityId: "PAY-2026-01",
-    details: "Processed weekly settlement payout ₹42,500 to Nair Ayurveda Pharma",
+    details:
+      "Processed weekly settlement payout ₹42,500 to Nair Ayurveda Pharma",
     timestamp: "2026-08-14 05:45:20 PM",
     ipAddress: "10.0.0.12",
   },
@@ -992,7 +1086,8 @@ const initialLiveEvents: StoredLiveEvent[] = [
     id: 1,
     type: "order",
     title: "New WhatsApp Order Received",
-    description: "Customer ordered 5kg Atta & Butter via WhatsApp bot (Order #EZY-2026-0801)",
+    description:
+      "Customer ordered 5kg Atta & Butter via WhatsApp bot (Order #EZY-2026-0801)",
     timestamp: "2 mins ago",
     badge: "Order Placed",
   },
@@ -1008,7 +1103,8 @@ const initialLiveEvents: StoredLiveEvent[] = [
     id: 3,
     type: "delivery",
     title: "Rider Dispatched",
-    description: "Rider Akash picked up grocery packet from Sharma Kirana (ETA 12 mins)",
+    description:
+      "Rider Akash picked up grocery packet from Sharma Kirana (ETA 12 mins)",
     timestamp: "7 mins ago",
     badge: "Out for Delivery",
   },
@@ -1016,7 +1112,8 @@ const initialLiveEvents: StoredLiveEvent[] = [
     id: 4,
     type: "partner",
     title: "New Partner Application",
-    description: "Choudhary Sweets & Bakery submitted partner documents for review",
+    description:
+      "Choudhary Sweets & Bakery submitted partner documents for review",
     timestamp: "25 mins ago",
     badge: "Pending KYC",
   },
@@ -1028,7 +1125,8 @@ const initialProducts: StoredProduct[] = [
     id: 1,
     name: "Aashirvaad Shudh Chakki Atta (5kg)",
     sku: "GROC-ATT-001",
-    description: "100% whole wheat flour, fiber-rich, perfectly milled for super soft rotis.",
+    description:
+      "100% whole wheat flour, fiber-rich, perfectly milled for super soft rotis.",
     price: 240,
     mrp: 260,
     category: "Atta, Rice & Dal",
@@ -1046,7 +1144,9 @@ const initialProducts: StoredProduct[] = [
     featured: true,
     rating: 4.8,
     totalReviews: 430,
-    images: ["https://images.unsplash.com/photo-1586201375761-83865001e31c?w=500&q=80"],
+    images: [
+      "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=500&q=80",
+    ],
     discountPercent: 8,
     unit: "5 kg pack",
     tags: ["wheat", "atta", "staple"],
@@ -1056,7 +1156,8 @@ const initialProducts: StoredProduct[] = [
     id: 2,
     name: "Amul Butter - Pasteurised (500g)",
     sku: "DAIRY-BUT-002",
-    description: "Utterly butterly delicious fresh dairy butter made from pure milk fat.",
+    description:
+      "Utterly butterly delicious fresh dairy butter made from pure milk fat.",
     price: 250,
     mrp: 275,
     category: "Dairy, Bread & Eggs",
@@ -1074,7 +1175,9 @@ const initialProducts: StoredProduct[] = [
     featured: true,
     rating: 4.9,
     totalReviews: 890,
-    images: ["https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=500&q=80"],
+    images: [
+      "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=500&q=80",
+    ],
     discountPercent: 9,
     unit: "500g block",
     tags: ["dairy", "butter", "amul"],
@@ -1084,7 +1187,8 @@ const initialProducts: StoredProduct[] = [
     id: 3,
     name: "Fresh Farm Red Onions (1kg)",
     sku: "VEG-ONI-003",
-    description: "Directly sourced from local farmers. Crisp, fresh, and hand-sorted daily.",
+    description:
+      "Directly sourced from local farmers. Crisp, fresh, and hand-sorted daily.",
     price: 35,
     mrp: 50,
     category: "Fresh Produce & Fruits",
@@ -1102,7 +1206,9 @@ const initialProducts: StoredProduct[] = [
     featured: false,
     rating: 4.5,
     totalReviews: 120,
-    images: ["https://images.unsplash.com/photo-1508747703725-719777637510?w=500&q=80"],
+    images: [
+      "https://images.unsplash.com/photo-1508747703725-719777637510?w=500&q=80",
+    ],
     discountPercent: 30,
     unit: "1 kg",
     tags: ["vegetables", "fresh", "organic"],
@@ -1112,7 +1218,8 @@ const initialProducts: StoredProduct[] = [
     id: 4,
     name: "Lays India's Magic Masala Chips (50g)",
     sku: "SNK-LAY-004",
-    description: "Classic spicy potato chips with exotic Indian aromatic spices.",
+    description:
+      "Classic spicy potato chips with exotic Indian aromatic spices.",
     price: 20,
     mrp: 20,
     category: "Munchies & Snacks",
@@ -1130,7 +1237,9 @@ const initialProducts: StoredProduct[] = [
     featured: true,
     rating: 4.7,
     totalReviews: 540,
-    images: ["https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=500&q=80"],
+    images: [
+      "https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=500&q=80",
+    ],
     discountPercent: 0,
     unit: "50g pack",
     tags: ["chips", "snacks", "lays"],
@@ -1140,7 +1249,8 @@ const initialProducts: StoredProduct[] = [
     id: 5,
     name: "Organic Raw Mountain Honey (500g)",
     sku: "WELL-HON-005",
-    description: "Unfiltered 100% pure wild honey packed with natural antioxidants.",
+    description:
+      "Unfiltered 100% pure wild honey packed with natural antioxidants.",
     price: 380,
     mrp: 450,
     category: "Organic & Wellness",
@@ -1158,7 +1268,9 @@ const initialProducts: StoredProduct[] = [
     featured: true,
     rating: 4.9,
     totalReviews: 95,
-    images: ["https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=500&q=80"],
+    images: [
+      "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=500&q=80",
+    ],
     discountPercent: 15,
     unit: "500g jar",
     tags: ["honey", "organic", "ayurveda"],
@@ -1168,7 +1280,8 @@ const initialProducts: StoredProduct[] = [
     id: 6,
     name: "Dolo 650mg Paracetamol Tablets",
     sku: "MED-DOL-006",
-    description: "Fast relief from fever, headache, body aches, and fever symptoms.",
+    description:
+      "Fast relief from fever, headache, body aches, and fever symptoms.",
     price: 32,
     mrp: 35,
     category: "Pharmacy & First Aid",
@@ -1186,12 +1299,14 @@ const initialProducts: StoredProduct[] = [
     featured: false,
     rating: 4.8,
     totalReviews: 210,
-    images: ["https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&q=80"],
+    images: [
+      "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&q=80",
+    ],
     discountPercent: 9,
     unit: "Strip of 15 tabs",
     tags: ["medicine", "fever", "pharmacy"],
     createdAt: "2026-02-10",
-  }
+  },
 ];
 
 const initialOrders: StoredOrder[] = [
@@ -1201,7 +1316,8 @@ const initialOrders: StoredOrder[] = [
     customerName: "Rahul Sharma",
     customerPhone: "9876543210",
     customerEmail: "rahul.s@example.com",
-    deliveryAddress: "Flat 402, Sunshine Apts, 5th Cross, HSR Layout, Bengaluru",
+    deliveryAddress:
+      "Flat 402, Sunshine Apts, 5th Cross, HSR Layout, Bengaluru",
     items: [
       { id: 1, name: "Aashirvaad Atta 5kg", price: 240, quantity: 1 },
       { id: 2, name: "Amul Butter 500g", price: 250, quantity: 2 },
@@ -1218,13 +1334,29 @@ const initialOrders: StoredOrder[] = [
     assignedDriverId: 1,
     assignedDriverName: "Akash Kumar",
     timeline: [
-      { status: "NEW", timestamp: "09:45 AM", note: "Order placed via WhatsApp Assistant" },
-      { status: "ACCEPTED", timestamp: "09:47 AM", note: "Accepted by Sharma Kirana" },
-      { status: "PREPARING", timestamp: "09:50 AM", note: "Packed and sealed in eco bag" },
-      { status: "OUT_FOR_DELIVERY", timestamp: "09:58 AM", note: "Handed over to rider Akash" },
+      {
+        status: "NEW",
+        timestamp: "09:45 AM",
+        note: "Order placed via WhatsApp Assistant",
+      },
+      {
+        status: "ACCEPTED",
+        timestamp: "09:47 AM",
+        note: "Accepted by Sharma Kirana",
+      },
+      {
+        status: "PREPARING",
+        timestamp: "09:50 AM",
+        note: "Packed and sealed in eco bag",
+      },
+      {
+        status: "OUT_FOR_DELIVERY",
+        timestamp: "09:58 AM",
+        note: "Handed over to rider Akash",
+      },
     ],
     createdAt: "2026-08-15 09:45 AM",
-    notes: "Leave package with security guard if not available."
+    notes: "Leave package with security guard if not available.",
   },
   {
     id: 2,
@@ -1248,7 +1380,11 @@ const initialOrders: StoredOrder[] = [
     vendorName: "Nair Ayurveda & Pharma",
     timeline: [
       { status: "NEW", timestamp: "10:15 AM", note: "Web checkout completed" },
-      { status: "ACCEPTED", timestamp: "10:18 AM", note: "Prescription verified & accepted" },
+      {
+        status: "ACCEPTED",
+        timestamp: "10:18 AM",
+        note: "Prescription verified & accepted",
+      },
     ],
     createdAt: "2026-08-15 10:15 AM",
   },
@@ -1277,10 +1413,14 @@ const initialOrders: StoredOrder[] = [
     timeline: [
       { status: "NEW", timestamp: "06:30 PM" },
       { status: "OUT_FOR_DELIVERY", timestamp: "06:45 PM" },
-      { status: "DELIVERED", timestamp: "07:05 PM", note: "Delivered to customer directly" },
+      {
+        status: "DELIVERED",
+        timestamp: "07:05 PM",
+        note: "Delivered to customer directly",
+      },
     ],
     createdAt: "2026-08-14 06:30 PM",
-  }
+  },
 ];
 
 const initialCustomers: StoredCustomer[] = [
@@ -1326,16 +1466,136 @@ const initialCustomers: StoredCustomer[] = [
 ];
 
 const initialCategories: StoredCategory[] = [
-  { id: 1, name: "Atta, Rice & Dal", slug: "atta-rice-dal", description: "Fresh staples, pulses, basmati & whole wheat", image: "🌾", type: "product", color: "bg-amber-100 text-amber-800", published: true, orderIndex: 1, subcategories: ["Flour & Atta", "Rice & Poha", "Dals & Pulses"] },
-  { id: 2, name: "Dairy, Bread & Eggs", slug: "dairy-bread-eggs", description: "Farm fresh milk, butter, cheese & artisan bread", image: "🥛", type: "product", color: "bg-blue-100 text-blue-800", published: true, orderIndex: 2, subcategories: ["Milk & Curd", "Butter & Cheese", "Bread & Bakery"] },
-  { id: 3, name: "Fresh Produce & Fruits", slug: "fresh-produce", description: "Organic vegetables, seasonal fruits straight from farms", image: "🍎", type: "product", color: "bg-emerald-100 text-emerald-800", published: true, orderIndex: 3, subcategories: ["Daily Veggies", "Seasonal Fruits", "Exotic Herbs"] },
-  { id: 4, name: "Munchies & Snacks", slug: "munchies-snacks", description: "Chips, namkeen, biscuits & gourmet cookies", image: "🍿", type: "product", color: "bg-orange-100 text-orange-800", published: true, orderIndex: 4, subcategories: ["Chips & Crisps", "Biscuits", "Namkeen & Dry Snacks"] },
-  { id: 5, name: "Cold Drinks & Juices", slug: "cold-drinks-juices", description: "Fresh juices, soft drinks, tender coconut water", image: "🥤", type: "product", color: "bg-sky-100 text-sky-800", published: true, orderIndex: 5, subcategories: ["Fruit Juices", "Soft Drinks", "Energy Drinks"] },
-  { id: 6, name: "Organic & Wellness", slug: "organic-wellness", description: "Pure honey, herbal teas, dry fruits & superfoods", image: "🍯", type: "product", color: "bg-yellow-100 text-yellow-800", published: true, orderIndex: 6, subcategories: ["Pure Honey", "Herbal Supplements", "Dry Fruits"] },
-  { id: 7, name: "Pharmacy & First Aid", slug: "pharmacy", description: "Over the counter medicines, sanitizers & vitamins", image: "💊", type: "product", color: "bg-rose-100 text-rose-800", published: true, orderIndex: 7, subcategories: ["Pain Relief", "First Aid", "Vitamins & Minerals"] },
-  { id: 8, name: "Home & Local Services", slug: "home-services", description: "Electricians, plumbers, deep cleaners & carpenters", image: "🔧", type: "service", color: "bg-indigo-100 text-indigo-800", published: true, orderIndex: 8, subcategories: ["Electrical Fixes", "Plumbing", "Deep Cleaning", "Appliance Repair"] },
-  { id: 9, name: "Workshops & Classes", slug: "workshops-classes", description: "Art & craft workshops, pottery, yoga & wellness", image: "🎨", type: "booking", color: "bg-purple-100 text-purple-800", published: true, orderIndex: 9, subcategories: ["Clay Pottery", "Painting", "Yoga & Meditation"] },
-  { id: 10, name: "Doctor Consultations", slug: "doctor-consultations", description: "General medicine, pediatric, dental & specialists", image: "🩺", type: "booking", color: "bg-teal-100 text-teal-800", published: true, orderIndex: 10, subcategories: ["General Physician", "Pediatrics", "Dental Care", "Orthopedic"] },
+  {
+    id: 1,
+    name: "Atta, Rice & Dal",
+    slug: "atta-rice-dal",
+    description: "Fresh staples, pulses, basmati & whole wheat",
+    image: "🌾",
+    type: "product",
+    color: "bg-amber-100 text-amber-800",
+    published: true,
+    orderIndex: 1,
+    subcategories: ["Flour & Atta", "Rice & Poha", "Dals & Pulses"],
+  },
+  {
+    id: 2,
+    name: "Dairy, Bread & Eggs",
+    slug: "dairy-bread-eggs",
+    description: "Farm fresh milk, butter, cheese & artisan bread",
+    image: "🥛",
+    type: "product",
+    color: "bg-blue-100 text-blue-800",
+    published: true,
+    orderIndex: 2,
+    subcategories: ["Milk & Curd", "Butter & Cheese", "Bread & Bakery"],
+  },
+  {
+    id: 3,
+    name: "Fresh Produce & Fruits",
+    slug: "fresh-produce",
+    description: "Organic vegetables, seasonal fruits straight from farms",
+    image: "🍎",
+    type: "product",
+    color: "bg-emerald-100 text-emerald-800",
+    published: true,
+    orderIndex: 3,
+    subcategories: ["Daily Veggies", "Seasonal Fruits", "Exotic Herbs"],
+  },
+  {
+    id: 4,
+    name: "Munchies & Snacks",
+    slug: "munchies-snacks",
+    description: "Chips, namkeen, biscuits & gourmet cookies",
+    image: "🍿",
+    type: "product",
+    color: "bg-orange-100 text-orange-800",
+    published: true,
+    orderIndex: 4,
+    subcategories: ["Chips & Crisps", "Biscuits", "Namkeen & Dry Snacks"],
+  },
+  {
+    id: 5,
+    name: "Cold Drinks & Juices",
+    slug: "cold-drinks-juices",
+    description: "Fresh juices, soft drinks, tender coconut water",
+    image: "🥤",
+    type: "product",
+    color: "bg-sky-100 text-sky-800",
+    published: true,
+    orderIndex: 5,
+    subcategories: ["Fruit Juices", "Soft Drinks", "Energy Drinks"],
+  },
+  {
+    id: 6,
+    name: "Organic & Wellness",
+    slug: "organic-wellness",
+    description: "Pure honey, herbal teas, dry fruits & superfoods",
+    image: "🍯",
+    type: "product",
+    color: "bg-yellow-100 text-yellow-800",
+    published: true,
+    orderIndex: 6,
+    subcategories: ["Pure Honey", "Herbal Supplements", "Dry Fruits"],
+  },
+  {
+    id: 7,
+    name: "Pharmacy & First Aid",
+    slug: "pharmacy",
+    description: "Over the counter medicines, sanitizers & vitamins",
+    image: "💊",
+    type: "product",
+    color: "bg-rose-100 text-rose-800",
+    published: true,
+    orderIndex: 7,
+    subcategories: ["Pain Relief", "First Aid", "Vitamins & Minerals"],
+  },
+  {
+    id: 8,
+    name: "Home & Local Services",
+    slug: "home-services",
+    description: "Electricians, plumbers, deep cleaners & carpenters",
+    image: "🔧",
+    type: "service",
+    color: "bg-indigo-100 text-indigo-800",
+    published: true,
+    orderIndex: 8,
+    subcategories: [
+      "Electrical Fixes",
+      "Plumbing",
+      "Deep Cleaning",
+      "Appliance Repair",
+    ],
+  },
+  {
+    id: 9,
+    name: "Workshops & Classes",
+    slug: "workshops-classes",
+    description: "Art & craft workshops, pottery, yoga & wellness",
+    image: "🎨",
+    type: "booking",
+    color: "bg-purple-100 text-purple-800",
+    published: true,
+    orderIndex: 9,
+    subcategories: ["Clay Pottery", "Painting", "Yoga & Meditation"],
+  },
+  {
+    id: 10,
+    name: "Doctor Consultations",
+    slug: "doctor-consultations",
+    description: "General medicine, pediatric, dental & specialists",
+    image: "🩺",
+    type: "booking",
+    color: "bg-teal-100 text-teal-800",
+    published: true,
+    orderIndex: 10,
+    subcategories: [
+      "General Physician",
+      "Pediatrics",
+      "Dental Care",
+      "Orthopedic",
+    ],
+  },
 ];
 
 const initialBookings: StoredBooking[] = [
@@ -1352,9 +1612,11 @@ const initialBookings: StoredBooking[] = [
     enrolledCount: 9,
     status: "CONFIRMED",
     published: true,
-    image: "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=500&q=80",
+    image:
+      "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=500&q=80",
     location: "Studio 4B, Indiranagar, Bengaluru",
-    description: "Hands-on pottery on electric wheel, glazing techniques, and take home 2 finished pots.",
+    description:
+      "Hands-on pottery on electric wheel, glazing techniques, and take home 2 finished pots.",
     createdAt: "2026-02-01",
   },
   {
@@ -1370,9 +1632,11 @@ const initialBookings: StoredBooking[] = [
     enrolledCount: 14,
     status: "CONFIRMED",
     published: true,
-    image: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=500&q=80",
+    image:
+      "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=500&q=80",
     location: "EzyHealth Clinic, Koramangala, Bengaluru",
-    description: "Complete clinical examination, vitals review, diagnostic prescriptions & lifestyle guidance.",
+    description:
+      "Complete clinical examination, vitals review, diagnostic prescriptions & lifestyle guidance.",
     createdAt: "2026-02-03",
   },
 ];
@@ -1381,7 +1645,8 @@ const initialServices: StoredService[] = [
   {
     id: 1,
     name: "Complete Home Electrical Repair & Inspection",
-    description: "Wiring inspection, switchboard repair, MCB fixes, appliance point wiring.",
+    description:
+      "Wiring inspection, switchboard repair, MCB fixes, appliance point wiring.",
     category: "Electrical",
     pricePerHour: 299,
     providerName: "Suresh Sharma",
@@ -1390,7 +1655,8 @@ const initialServices: StoredService[] = [
     published: true,
     rating: 4.9,
     totalReviews: 84,
-    image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80",
+    image:
+      "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80",
     duration: "1-2 Hours",
     tags: ["Wiring", "Fan Installation", "Short Circuit Fix"],
     createdAt: "2026-01-15",
@@ -1398,7 +1664,8 @@ const initialServices: StoredService[] = [
   {
     id: 2,
     name: "Emergency Plumbing & Pipe Leakage Fix",
-    description: "Tap repairs, bathroom fittings, drain cleaning, water pump servicing.",
+    description:
+      "Tap repairs, bathroom fittings, drain cleaning, water pump servicing.",
     category: "Plumbing",
     pricePerHour: 249,
     providerName: "Ramesh Verma",
@@ -1407,7 +1674,8 @@ const initialServices: StoredService[] = [
     published: true,
     rating: 4.8,
     totalReviews: 112,
-    image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=500&q=80",
+    image:
+      "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=500&q=80",
     duration: "45 Mins",
     tags: ["Tap Fix", "Drainage", "Pipe Fitting"],
     createdAt: "2026-01-18",
@@ -1419,8 +1687,10 @@ const initialGallery: StoredGalleryItem[] = [
     id: 1,
     title: "Handcrafted Ceramic Vases Showcase",
     category: "Art & Studio",
-    imageUrl: "https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=800&q=80",
-    caption: "Terracotta and porcelain hand-painted vases from our weekend artisan workshop.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=800&q=80",
+    caption:
+      "Terracotta and porcelain hand-painted vases from our weekend artisan workshop.",
     tags: ["Pottery", "Handmade", "Home Decor"],
     published: true,
     uploadedAt: "2026-02-01",
@@ -1429,8 +1699,10 @@ const initialGallery: StoredGalleryItem[] = [
     id: 2,
     title: "Fresh Farm Harvest Day",
     category: "Storefront",
-    imageUrl: "https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=800&q=80",
-    caption: "Daily fresh organic produce arrival at our partner hyper-local hubs.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=800&q=80",
+    caption:
+      "Daily fresh organic produce arrival at our partner hyper-local hubs.",
     tags: ["Fresh", "Organic", "Grocery"],
     published: true,
     uploadedAt: "2026-02-03",
@@ -1442,27 +1714,30 @@ const initialReviews: StoredReview[] = [
     id: 1,
     author: "Rohan Kapoor",
     rating: 5,
-    comment: "Ordered Aashirvaad Atta and dairy at 8:30 AM and got it at my door within 12 minutes! Superb experience.",
+    comment:
+      "Ordered Aashirvaad Atta and dairy at 8:30 AM and got it at my door within 12 minutes! Superb experience.",
     targetType: "product",
     targetName: "Aashirvaad Atta 5kg",
     targetId: 1,
     status: "approved",
     isFeatured: true,
     date: "2026-08-14",
-    reply: "Thank you Rohan! We strive to make local deliveries faster every day."
+    reply:
+      "Thank you Rohan! We strive to make local deliveries faster every day.",
   },
   {
     id: 2,
     author: "Ananya Deshmukh",
     rating: 5,
-    comment: "Attended the Pottery Workshop this weekend. Alka was an incredible mentor. Loved crafting my own ceramic bowl!",
+    comment:
+      "Attended the Pottery Workshop this weekend. Alka was an incredible mentor. Loved crafting my own ceramic bowl!",
     targetType: "service",
     targetName: "Pottery & Clay Art Mastery",
     targetId: 1,
     status: "approved",
     isFeatured: true,
     date: "2026-08-12",
-    reply: "Thank you Ananya! So glad you enjoyed the clay session."
+    reply: "Thank you Ananya! So glad you enjoyed the clay session.",
   },
 ];
 
@@ -1470,9 +1745,11 @@ const initialHeroSlides: StoredHeroSlide[] = [
   {
     id: 1,
     title: "Everything You Need, Delivered in Minutes",
-    subtitle: "Groceries, Fresh Farm Produce, Medicines, Home Services & Workshops right at your doorstep.",
+    subtitle:
+      "Groceries, Fresh Farm Produce, Medicines, Home Services & Workshops right at your doorstep.",
     badge: "⚡ Hyperlocal SuperApp",
-    imageUrl: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&q=80",
+    imageUrl:
+      "https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&q=80",
     buttonText: "Shop Groceries Now",
     buttonLink: "/shop",
     published: true,
@@ -1480,27 +1757,31 @@ const initialHeroSlides: StoredHeroSlide[] = [
   {
     id: 2,
     title: "Expert Home Services on Demand",
-    subtitle: "Trusted electricians, certified plumbers, cleaning specialists & local technicians.",
+    subtitle:
+      "Trusted electricians, certified plumbers, cleaning specialists & local technicians.",
     badge: "🛠️ Verified Professionals",
-    imageUrl: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=1200&q=80",
+    imageUrl:
+      "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=1200&q=80",
     buttonText: "Book a Service",
     buttonLink: "/services",
     published: true,
-  }
+  },
 ];
 
 const initialFaqs: StoredFaq[] = [
   {
     id: 1,
     question: "How fast is delivery on ezy1?",
-    answer: "Most grocery, dairy, and pharmacy orders are fulfilled and delivered within 10 to 25 minutes depending on your distance from the local partner store.",
+    answer:
+      "Most grocery, dairy, and pharmacy orders are fulfilled and delivered within 10 to 25 minutes depending on your distance from the local partner store.",
     category: "Delivery",
     published: true,
   },
   {
     id: 2,
     question: "What payment methods are supported?",
-    answer: "We support UPI (GPay, PhonePe, Paytm), Ezy1 In-App Wallet, Cash on Delivery (COD), and Credit/Debit cards.",
+    answer:
+      "We support UPI (GPay, PhonePe, Paytm), Ezy1 In-App Wallet, Cash on Delivery (COD), and Credit/Debit cards.",
     category: "Payments",
     published: true,
   },
@@ -1540,15 +1821,22 @@ const initialOwnerSettings: OwnerSettings = {
   upiId: "ezy1business@okhdfcbank",
   enableWallet: true,
   enableOnlineCards: true,
-  announcementBarText: "🎉 Super Weekend Offer: Get FREE delivery on all orders above ₹299! Use code: EZYFREE",
+  announcementBarText:
+    "🎉 Super Weekend Offer: Get FREE delivery on all orders above ₹299! Use code: EZYFREE",
   enableAnnouncementBar: true,
   metaTitle: "EZY1 - Hyperlocal Quick Commerce & Local Services Platform",
-  metaDescription: "Instant grocery delivery, local artisans, home repair, verified doctor appointments and swift rides - all in one seamless super-app.",
-  metaKeywords: "quick commerce, grocery delivery, home services, electrician, plumber, doctors, pottery workshops",
-  termsAndConditions: "All sales are subject to local partner availability. Orders once dispatched cannot be cancelled without standard cancellation charges.",
-  privacyPolicy: "We value your privacy. Your personal information, address, and payment credentials are encrypted and never shared with third-party marketers.",
-  returnPolicy: "Perishable grocery items can be returned within 2 hours of delivery if defective. Non-perishables have a 48-hour return window.",
-  cancellationPolicy: "Orders can be cancelled free of charge within 60 seconds of order placement. Workshop bookings are refundable up to 24 hours prior.",
+  metaDescription:
+    "Instant grocery delivery, local artisans, home repair, verified doctor appointments and swift rides - all in one seamless super-app.",
+  metaKeywords:
+    "quick commerce, grocery delivery, home services, electrician, plumber, doctors, pottery workshops",
+  termsAndConditions:
+    "All sales are subject to local partner availability. Orders once dispatched cannot be cancelled without standard cancellation charges.",
+  privacyPolicy:
+    "We value your privacy. Your personal information, address, and payment credentials are encrypted and never shared with third-party marketers.",
+  returnPolicy:
+    "Perishable grocery items can be returned within 2 hours of delivery if defective. Non-perishables have a 48-hour return window.",
+  cancellationPolicy:
+    "Orders can be cancelled free of charge within 60 seconds of order placement. Workshop bookings are refundable up to 24 hours prior.",
   whatsappConnected: true,
   whatsappWebhookStatus: "Connected",
 };
@@ -1595,46 +1883,83 @@ export interface StoreState {
   deleteShop: (id: number) => void;
 
   // Partner Application Methods
-  updateApplicationStatus: (id: number, status: StoredPartnerApplication["status"], notes?: string) => void;
+  updateApplicationStatus: (
+    id: number,
+    status: StoredPartnerApplication["status"],
+    notes?: string,
+  ) => void;
   deleteApplication: (id: number) => void;
 
   // Product Methods
-  addProduct: (product: Omit<StoredProduct, "id" | "createdAt">) => StoredProduct;
+  addProduct: (
+    product: Omit<StoredProduct, "id" | "createdAt">,
+  ) => StoredProduct;
   updateProduct: (id: number, updates: Partial<StoredProduct>) => void;
   deleteProduct: (id: number) => void;
   toggleProductPublish: (id: number) => void;
   bulkUpdateProducts: (ids: number[], updates: Partial<StoredProduct>) => void;
 
   // Service & Specialist Methods
-  addService: (service: Omit<StoredService, "id" | "createdAt">) => StoredService;
+  addService: (
+    service: Omit<StoredService, "id" | "createdAt">,
+  ) => StoredService;
   updateService: (id: number, updates: Partial<StoredService>) => void;
   deleteService: (id: number) => void;
   toggleServicePublish: (id: number) => void;
-  addServiceProvider: (provider: Omit<StoredServiceProvider, "id" | "joinedAt">) => StoredServiceProvider;
-  updateServiceProvider: (id: number, updates: Partial<StoredServiceProvider>) => void;
+  addServiceProvider: (
+    provider: Omit<StoredServiceProvider, "id" | "joinedAt">,
+  ) => StoredServiceProvider;
+  updateServiceProvider: (
+    id: number,
+    updates: Partial<StoredServiceProvider>,
+  ) => void;
 
   // Healthcare Methods
   addDoctor: (doc: Omit<StoredDoctor, "id">) => StoredDoctor;
   updateDoctor: (id: number, updates: Partial<StoredDoctor>) => void;
   deleteDoctor: (id: number) => void;
-  updateHospitalBedCount: (bedId: number, availableBeds: number, occupiedBeds: number) => void;
+  updateHospitalBedCount: (
+    bedId: number,
+    availableBeds: number,
+    occupiedBeds: number,
+  ) => void;
 
   // Transport Methods
-  addTransportListing: (t: Omit<StoredTransportListing, "id">) => StoredTransportListing;
-  updateTransportListing: (id: number, updates: Partial<StoredTransportListing>) => void;
+  addTransportListing: (
+    t: Omit<StoredTransportListing, "id">,
+  ) => StoredTransportListing;
+  updateTransportListing: (
+    id: number,
+    updates: Partial<StoredTransportListing>,
+  ) => void;
   deleteTransportListing: (id: number) => void;
 
   // Bookings Methods
-  addBooking: (booking: Omit<StoredBooking, "id" | "createdAt">) => StoredBooking;
+  addBooking: (
+    booking: Omit<StoredBooking, "id" | "createdAt">,
+  ) => StoredBooking;
   updateBooking: (id: number, updates: Partial<StoredBooking>) => void;
   deleteBooking: (id: number) => void;
   toggleBookingPublish: (id: number) => void;
 
   // Order Methods
-  addOrder: (order: Omit<StoredOrder, "id" | "createdAt" | "orderNumber" | "timeline">) => StoredOrder;
-  updateOrderStatus: (id: number, status: StoredOrder["status"], note?: string) => void;
-  updateOrderPaymentStatus: (id: number, status: StoredOrder["paymentStatus"]) => void;
-  assignDriverToOrder: (orderId: number, driverId: number, driverName: string) => void;
+  addOrder: (
+    order: Omit<StoredOrder, "id" | "createdAt" | "orderNumber" | "timeline">,
+  ) => StoredOrder;
+  updateOrderStatus: (
+    id: number,
+    status: StoredOrder["status"],
+    note?: string,
+  ) => void;
+  updateOrderPaymentStatus: (
+    id: number,
+    status: StoredOrder["paymentStatus"],
+  ) => void;
+  assignDriverToOrder: (
+    orderId: number,
+    driverId: number,
+    driverName: string,
+  ) => void;
   deleteOrder: (id: number) => void;
 
   // Coupons & Deals Methods
@@ -1643,22 +1968,47 @@ export interface StoreState {
   deleteCoupon: (id: number) => void;
 
   // Customer & Support & Enquiry Methods
-  addCustomer: (cust: Omit<StoredCustomer, "id" | "joinedAt">) => StoredCustomer;
+  addCustomer: (
+    cust: Omit<StoredCustomer, "id" | "joinedAt">,
+  ) => StoredCustomer;
   updateCustomer: (id: number, updates: Partial<StoredCustomer>) => void;
   deleteCustomer: (id: number) => void;
-  addSupportTicket: (ticket: Omit<StoredSupportTicket, "id" | "ticketNumber" | "createdAt">) => StoredSupportTicket;
-  updateSupportTicketStatus: (id: number, status: StoredSupportTicket["status"]) => void;
+  addSupportTicket: (
+    ticket: Omit<StoredSupportTicket, "id" | "ticketNumber" | "createdAt">,
+  ) => StoredSupportTicket;
+  updateSupportTicketStatus: (
+    id: number,
+    status: StoredSupportTicket["status"],
+  ) => void;
   replyToSupportTicket: (ticketId: number, text: string) => void;
-  updateDisputeStatus: (id: number, status: StoredDispute["status"], notes?: string) => void;
-  addEnquiry: (enquiry: Omit<StoredEnquiry, "id" | "createdAt">) => StoredEnquiry;
-  updateEnquiryStatus: (id: number, status: StoredEnquiry["status"], notes?: string) => void;
+  updateDisputeStatus: (
+    id: number,
+    status: StoredDispute["status"],
+    notes?: string,
+  ) => void;
+  addEnquiry: (
+    enquiry: Omit<StoredEnquiry, "id" | "createdAt">,
+  ) => StoredEnquiry;
+  updateEnquiryStatus: (
+    id: number,
+    status: StoredEnquiry["status"],
+    notes?: string,
+  ) => void;
   deleteEnquiry: (id: number) => void;
 
   // Delivery Methods
-  addDeliveryPartner: (driver: Omit<StoredDeliveryPartner, "id" | "joinedAt">) => StoredDeliveryPartner;
-  updateDeliveryPartner: (id: number, updates: Partial<StoredDeliveryPartner>) => void;
+  addDeliveryPartner: (
+    driver: Omit<StoredDeliveryPartner, "id" | "joinedAt">,
+  ) => StoredDeliveryPartner;
+  updateDeliveryPartner: (
+    id: number,
+    updates: Partial<StoredDeliveryPartner>,
+  ) => void;
   addDeliveryZone: (zone: Omit<StoredDeliveryZone, "id">) => StoredDeliveryZone;
-  updateDeliveryZone: (id: number, updates: Partial<StoredDeliveryZone>) => void;
+  updateDeliveryZone: (
+    id: number,
+    updates: Partial<StoredDeliveryZone>,
+  ) => void;
 
   // Finance & Refunds Methods
   processRefund: (refundId: number, approve: boolean) => void;
@@ -1669,7 +2019,9 @@ export interface StoreState {
   updateCategory: (id: number, updates: Partial<StoredCategory>) => void;
   deleteCategory: (id: number) => void;
   toggleCategoryPublish: (id: number) => void;
-  addGalleryItem: (item: Omit<StoredGalleryItem, "id" | "uploadedAt">) => StoredGalleryItem;
+  addGalleryItem: (
+    item: Omit<StoredGalleryItem, "id" | "uploadedAt">,
+  ) => StoredGalleryItem;
   deleteGalleryItem: (id: number) => void;
   toggleGalleryPublish: (id: number) => void;
   updateReview: (id: number, updates: Partial<StoredReview>) => void;
@@ -1683,7 +2035,12 @@ export interface StoreState {
   deleteFaq: (id: number) => void;
 
   // Audit Logging
-  logAuditEvent: (action: string, entityType: string, entityId: string | number, details: string) => void;
+  logAuditEvent: (
+    action: string,
+    entityType: string,
+    entityId: string | number,
+    details: string,
+  ) => void;
 
   // Settings & Utilities
   updateSettings: (updates: Partial<OwnerSettings>) => void;
@@ -1718,21 +2075,61 @@ export const useStoreData = create<StoreState>()(
           email: "rajiv@singhania.com",
           phone: "9812345678",
           subject: "Bulk Corporate Gifting Inquiry",
-          message: "Interested in ordering 200 artisanal pottery sets and sweet hampers for Diwali.",
+          message:
+            "Interested in ordering 200 artisanal pottery sets and sweet hampers for Diwali.",
           serviceType: "Bulk Orders",
           status: "new",
           createdAt: "2026-08-14",
         },
       ],
       deliveryPartners: initialDeliveryPartners,
-      deliveryZones: [{ id: 1, name: "Indiranagar Core Zone", city: "Bengaluru", radiusKm: 6, active: true }],
+      deliveryZones: [
+        {
+          id: 1,
+          name: "Indiranagar Core Zone",
+          city: "Bengaluru",
+          radiusKm: 6,
+          active: true,
+        },
+      ],
       transactions: initialTransactions,
       refunds: [
-        { id: 1, refundId: "REF-2026-001", orderNumber: "EZY-2026-0798", customerName: "Sneha Mukherjee", amount: 120, reason: "Damaged packing in transit", status: "PENDING", requestedAt: "2026-08-14" }
+        {
+          id: 1,
+          refundId: "REF-2026-001",
+          orderNumber: "EZY-2026-0798",
+          customerName: "Sneha Mukherjee",
+          amount: 120,
+          reason: "Damaged packing in transit",
+          status: "PENDING",
+          requestedAt: "2026-08-14",
+        },
       ],
       partnerPayouts: [
-        { id: 1, partnerId: 1, partnerName: "Sharma Kirana Store", grossSales: 84500, commissionDeducted: 4225, adjustments: 0, netPayout: 80275, status: "APPROVED", period: "Aug 01 - Aug 10, 2026", payoutDate: "2026-08-12" },
-        { id: 2, partnerId: 2, partnerName: "Nair Ayurveda Pharma", grossSales: 62100, commissionDeducted: 3105, adjustments: 0, netPayout: 58995, status: "PENDING", period: "Aug 01 - Aug 10, 2026", payoutDate: "2026-08-15" }
+        {
+          id: 1,
+          partnerId: 1,
+          partnerName: "Sharma Kirana Store",
+          grossSales: 84500,
+          commissionDeducted: 4225,
+          adjustments: 0,
+          netPayout: 80275,
+          status: "APPROVED",
+          period: "Aug 01 - Aug 10, 2026",
+          payoutDate: "2026-08-12",
+        },
+        {
+          id: 2,
+          partnerId: 2,
+          partnerName: "Nair Ayurveda Pharma",
+          grossSales: 62100,
+          commissionDeducted: 3105,
+          adjustments: 0,
+          netPayout: 58995,
+          status: "PENDING",
+          period: "Aug 01 - Aug 10, 2026",
+          payoutDate: "2026-08-15",
+        },
       ],
       categories: initialCategories,
       gallery: initialGallery,
@@ -1752,30 +2149,58 @@ export const useStoreData = create<StoreState>()(
           joinedAt: new Date().toISOString().split("T")[0],
         };
         set({ shops: [newShop, ...get().shops] });
-        get().logAuditEvent("CREATE_SHOP", "Shop", nextId, `Created shop "${data.businessName}"`);
+        get().logAuditEvent(
+          "CREATE_SHOP",
+          "Shop",
+          nextId,
+          `Created shop "${data.businessName}"`,
+        );
         return newShop;
       },
       updateShop: (id, updates) => {
-        set({ shops: get().shops.map((s) => (s.id === id ? { ...s, ...updates } : s)) });
-        get().logAuditEvent("UPDATE_SHOP", "Shop", id, `Updated shop #${id} settings`);
+        set({
+          shops: get().shops.map((s) =>
+            s.id === id ? { ...s, ...updates } : s,
+          ),
+        });
+        get().logAuditEvent(
+          "UPDATE_SHOP",
+          "Shop",
+          id,
+          `Updated shop #${id} settings`,
+        );
       },
       deleteShop: (id) => {
         const shop = get().shops.find((s) => s.id === id);
         set({ shops: get().shops.filter((s) => s.id !== id) });
-        get().logAuditEvent("DELETE_SHOP", "Shop", id, `Deleted shop "${shop?.businessName}"`);
+        get().logAuditEvent(
+          "DELETE_SHOP",
+          "Shop",
+          id,
+          `Deleted shop "${shop?.businessName}"`,
+        );
       },
 
       // Partner Applications
       updateApplicationStatus: (id, status, notes) => {
         set({
           partnerApplications: get().partnerApplications.map((a) =>
-            a.id === id ? { ...a, status, ...(notes ? { notes } : {}) } : a
+            a.id === id ? { ...a, status, ...(notes ? { notes } : {}) } : a,
           ),
         });
-        get().logAuditEvent("UPDATE_APPLICATION", "PartnerApplication", id, `Application marked as ${status}`);
+        get().logAuditEvent(
+          "UPDATE_APPLICATION",
+          "PartnerApplication",
+          id,
+          `Application marked as ${status}`,
+        );
       },
       deleteApplication: (id) => {
-        set({ partnerApplications: get().partnerApplications.filter((a) => a.id !== id) });
+        set({
+          partnerApplications: get().partnerApplications.filter(
+            (a) => a.id !== id,
+          ),
+        });
       },
 
       // Products
@@ -1787,58 +2212,108 @@ export const useStoreData = create<StoreState>()(
           createdAt: new Date().toISOString().split("T")[0],
         };
         set({ products: [newProduct, ...get().products] });
-        get().logAuditEvent("CREATE_PRODUCT", "Product", nextId, `Added product "${data.name}"`);
+        get().logAuditEvent(
+          "CREATE_PRODUCT",
+          "Product",
+          nextId,
+          `Added product "${data.name}"`,
+        );
         return newProduct;
       },
       updateProduct: (id, updates) => {
-        set({ products: get().products.map((p) => (p.id === id ? { ...p, ...updates } : p)) });
-        get().logAuditEvent("UPDATE_PRODUCT", "Product", id, `Updated product details`);
+        set({
+          products: get().products.map((p) =>
+            p.id === id ? { ...p, ...updates } : p,
+          ),
+        });
+        get().logAuditEvent(
+          "UPDATE_PRODUCT",
+          "Product",
+          id,
+          `Updated product details`,
+        );
       },
       deleteProduct: (id) => {
         const p = get().products.find((item) => item.id === id);
         set({ products: get().products.filter((item) => item.id !== id) });
-        get().logAuditEvent("DELETE_PRODUCT", "Product", id, `Deleted product "${p?.name}"`);
+        get().logAuditEvent(
+          "DELETE_PRODUCT",
+          "Product",
+          id,
+          `Deleted product "${p?.name}"`,
+        );
       },
       toggleProductPublish: (id) => {
         set({
-          products: get().products.map((p) => (p.id === id ? { ...p, published: !p.published } : p)),
+          products: get().products.map((p) =>
+            p.id === id ? { ...p, published: !p.published } : p,
+          ),
         });
       },
       bulkUpdateProducts: (ids, updates) => {
         set({
-          products: get().products.map((p) => (ids.includes(p.id) ? { ...p, ...updates } : p)),
+          products: get().products.map((p) =>
+            ids.includes(p.id) ? { ...p, ...updates } : p,
+          ),
         });
-        get().logAuditEvent("BULK_UPDATE_PRODUCTS", "Product", ids.join(","), `Bulk updated ${ids.length} products`);
+        get().logAuditEvent(
+          "BULK_UPDATE_PRODUCTS",
+          "Product",
+          ids.join(","),
+          `Bulk updated ${ids.length} products`,
+        );
       },
 
       // Services & Specialists
       addService: (data) => {
         const nextId = Math.max(...get().services.map((s) => s.id), 0) + 1;
-        const newSvc: StoredService = { ...data, id: nextId, createdAt: new Date().toISOString().split("T")[0] };
+        const newSvc: StoredService = {
+          ...data,
+          id: nextId,
+          createdAt: new Date().toISOString().split("T")[0],
+        };
         set({ services: [newSvc, ...get().services] });
-        get().logAuditEvent("CREATE_SERVICE", "Service", nextId, `Created service "${data.name}"`);
+        get().logAuditEvent(
+          "CREATE_SERVICE",
+          "Service",
+          nextId,
+          `Created service "${data.name}"`,
+        );
         return newSvc;
       },
       updateService: (id, updates) => {
-        set({ services: get().services.map((s) => (s.id === id ? { ...s, ...updates } : s)) });
+        set({
+          services: get().services.map((s) =>
+            s.id === id ? { ...s, ...updates } : s,
+          ),
+        });
       },
       deleteService: (id) => {
         set({ services: get().services.filter((s) => s.id !== id) });
       },
       toggleServicePublish: (id) => {
         set({
-          services: get().services.map((s) => (s.id === id ? { ...s, published: !s.published } : s)),
+          services: get().services.map((s) =>
+            s.id === id ? { ...s, published: !s.published } : s,
+          ),
         });
       },
       addServiceProvider: (data) => {
-        const nextId = Math.max(...get().serviceProviders.map((sp) => sp.id), 0) + 1;
-        const newSp: StoredServiceProvider = { ...data, id: nextId, joinedAt: new Date().toISOString().split("T")[0] };
+        const nextId =
+          Math.max(...get().serviceProviders.map((sp) => sp.id), 0) + 1;
+        const newSp: StoredServiceProvider = {
+          ...data,
+          id: nextId,
+          joinedAt: new Date().toISOString().split("T")[0],
+        };
         set({ serviceProviders: [newSp, ...get().serviceProviders] });
         return newSp;
       },
       updateServiceProvider: (id, updates) => {
         set({
-          serviceProviders: get().serviceProviders.map((sp) => (sp.id === id ? { ...sp, ...updates } : sp)),
+          serviceProviders: get().serviceProviders.map((sp) =>
+            sp.id === id ? { ...sp, ...updates } : sp,
+          ),
         });
       },
 
@@ -1847,11 +2322,20 @@ export const useStoreData = create<StoreState>()(
         const nextId = Math.max(...get().doctors.map((d) => d.id), 0) + 1;
         const doc: StoredDoctor = { ...data, id: nextId };
         set({ doctors: [doc, ...get().doctors] });
-        get().logAuditEvent("ADD_DOCTOR", "Doctor", nextId, `Added doctor "${data.name}"`);
+        get().logAuditEvent(
+          "ADD_DOCTOR",
+          "Doctor",
+          nextId,
+          `Added doctor "${data.name}"`,
+        );
         return doc;
       },
       updateDoctor: (id, updates) => {
-        set({ doctors: get().doctors.map((d) => (d.id === id ? { ...d, ...updates } : d)) });
+        set({
+          doctors: get().doctors.map((d) =>
+            d.id === id ? { ...d, ...updates } : d,
+          ),
+        });
       },
       deleteDoctor: (id) => {
         set({ doctors: get().doctors.filter((d) => d.id !== id) });
@@ -1861,38 +2345,61 @@ export const useStoreData = create<StoreState>()(
           hospitalBeds: get().hospitalBeds.map((b) =>
             b.id === bedId
               ? { ...b, availableBeds, occupiedBeds, lastUpdated: "Just now" }
-              : b
+              : b,
           ),
         });
-        get().logAuditEvent("UPDATE_BEDS", "HospitalBed", bedId, `Updated available beds to ${availableBeds}`);
+        get().logAuditEvent(
+          "UPDATE_BEDS",
+          "HospitalBed",
+          bedId,
+          `Updated available beds to ${availableBeds}`,
+        );
       },
 
       // Transport
       addTransportListing: (data) => {
-        const nextId = Math.max(...get().transportListings.map((t) => t.id), 0) + 1;
+        const nextId =
+          Math.max(...get().transportListings.map((t) => t.id), 0) + 1;
         const listing: StoredTransportListing = { ...data, id: nextId };
         set({ transportListings: [listing, ...get().transportListings] });
         return listing;
       },
       updateTransportListing: (id, updates) => {
         set({
-          transportListings: get().transportListings.map((t) => (t.id === id ? { ...t, ...updates } : t)),
+          transportListings: get().transportListings.map((t) =>
+            t.id === id ? { ...t, ...updates } : t,
+          ),
         });
       },
       deleteTransportListing: (id) => {
-        set({ transportListings: get().transportListings.filter((t) => t.id !== id) });
+        set({
+          transportListings: get().transportListings.filter((t) => t.id !== id),
+        });
       },
 
       // Bookings
       addBooking: (data) => {
         const nextId = Math.max(...get().bookings.map((b) => b.id), 0) + 1;
-        const newBooking: StoredBooking = { ...data, id: nextId, createdAt: new Date().toISOString().split("T")[0] };
+        const newBooking: StoredBooking = {
+          ...data,
+          id: nextId,
+          createdAt: new Date().toISOString().split("T")[0],
+        };
         set({ bookings: [newBooking, ...get().bookings] });
-        get().logAuditEvent("CREATE_BOOKING", "Booking", nextId, `Created session "${data.title}"`);
+        get().logAuditEvent(
+          "CREATE_BOOKING",
+          "Booking",
+          nextId,
+          `Created session "${data.title}"`,
+        );
         return newBooking;
       },
       updateBooking: (id, updates) => {
-        set({ bookings: get().bookings.map((b) => (b.id === id ? { ...b, ...updates } : b)) });
+        set({
+          bookings: get().bookings.map((b) =>
+            b.id === id ? { ...b, ...updates } : b,
+          ),
+        });
       },
       deleteBooking: (id) => {
         set({ bookings: get().bookings.filter((b) => b.id !== id) });
@@ -1906,11 +2413,25 @@ export const useStoreData = create<StoreState>()(
           ...data,
           id: nextId,
           orderNumber,
-          timeline: [{ status: data.status, timestamp: "Just now", note: "Order initiated" }],
-          createdAt: new Date().toLocaleString("en-US", { dateStyle: "short", timeStyle: "short" }),
+          timeline: [
+            {
+              status: data.status,
+              timestamp: "Just now",
+              note: "Order initiated",
+            },
+          ],
+          createdAt: new Date().toLocaleString("en-US", {
+            dateStyle: "short",
+            timeStyle: "short",
+          }),
         };
         set({ orders: [newOrder, ...get().orders] });
-        get().logAuditEvent("NEW_ORDER", "Order", orderNumber, `New order created for ₹${data.totalAmount}`);
+        get().logAuditEvent(
+          "NEW_ORDER",
+          "Order",
+          orderNumber,
+          `New order created for ₹${data.totalAmount}`,
+        );
         return newOrder;
       },
       updateOrderStatus: (id, status, note) => {
@@ -1919,17 +2440,33 @@ export const useStoreData = create<StoreState>()(
             if (o.id === id) {
               const newTimeline = [
                 ...o.timeline,
-                { status, timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }), note },
+                {
+                  status,
+                  timestamp: new Date().toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }),
+                  note,
+                },
               ];
               return { ...o, status, timeline: newTimeline };
             }
             return o;
           }),
         });
-        get().logAuditEvent("ORDER_STATUS", "Order", id, `Order marked as ${status}`);
+        get().logAuditEvent(
+          "ORDER_STATUS",
+          "Order",
+          id,
+          `Order marked as ${status}`,
+        );
       },
       updateOrderPaymentStatus: (id, paymentStatus) => {
-        set({ orders: get().orders.map((o) => (o.id === id ? { ...o, paymentStatus } : o)) });
+        set({
+          orders: get().orders.map((o) =>
+            o.id === id ? { ...o, paymentStatus } : o,
+          ),
+        });
       },
       assignDriverToOrder: (orderId, driverId, driverName) => {
         set({
@@ -1942,13 +2479,22 @@ export const useStoreData = create<StoreState>()(
                   status: "OUT_FOR_DELIVERY",
                   timeline: [
                     ...o.timeline,
-                    { status: "OUT_FOR_DELIVERY", timestamp: "Just now", note: `Assigned to rider ${driverName}` },
+                    {
+                      status: "OUT_FOR_DELIVERY",
+                      timestamp: "Just now",
+                      note: `Assigned to rider ${driverName}`,
+                    },
                   ],
                 }
-              : o
+              : o,
           ),
         });
-        get().logAuditEvent("ASSIGN_DRIVER", "Order", orderId, `Assigned to rider ${driverName}`);
+        get().logAuditEvent(
+          "ASSIGN_DRIVER",
+          "Order",
+          orderId,
+          `Assigned to rider ${driverName}`,
+        );
       },
       deleteOrder: (id) => {
         set({ orders: get().orders.filter((o) => o.id !== id) });
@@ -1959,11 +2505,20 @@ export const useStoreData = create<StoreState>()(
         const nextId = Math.max(...get().coupons.map((c) => c.id), 0) + 1;
         const coupon: StoredCoupon = { ...data, id: nextId, usedCount: 0 };
         set({ coupons: [coupon, ...get().coupons] });
-        get().logAuditEvent("CREATE_COUPON", "Coupon", data.code, `Created coupon code ${data.code}`);
+        get().logAuditEvent(
+          "CREATE_COUPON",
+          "Coupon",
+          data.code,
+          `Created coupon code ${data.code}`,
+        );
         return coupon;
       },
       updateCoupon: (id, updates) => {
-        set({ coupons: get().coupons.map((c) => (c.id === id ? { ...c, ...updates } : c)) });
+        set({
+          coupons: get().coupons.map((c) =>
+            c.id === id ? { ...c, ...updates } : c,
+          ),
+        });
       },
       deleteCoupon: (id) => {
         set({ coupons: get().coupons.filter((c) => c.id !== id) });
@@ -1972,30 +2527,46 @@ export const useStoreData = create<StoreState>()(
       // Customers & Support
       addCustomer: (data) => {
         const nextId = Math.max(...get().customers.map((c) => c.id), 0) + 1;
-        const customer: StoredCustomer = { ...data, id: nextId, joinedAt: new Date().toISOString().split("T")[0] };
+        const customer: StoredCustomer = {
+          ...data,
+          id: nextId,
+          joinedAt: new Date().toISOString().split("T")[0],
+        };
         set({ customers: [customer, ...get().customers] });
         return customer;
       },
       updateCustomer: (id, updates) => {
-        set({ customers: get().customers.map((c) => (c.id === id ? { ...c, ...updates } : c)) });
+        set({
+          customers: get().customers.map((c) =>
+            c.id === id ? { ...c, ...updates } : c,
+          ),
+        });
       },
       deleteCustomer: (id) => {
         set({ customers: get().customers.filter((c) => c.id !== id) });
       },
       addSupportTicket: (data) => {
-        const nextId = Math.max(...get().supportTickets.map((t) => t.id), 0) + 1;
+        const nextId =
+          Math.max(...get().supportTickets.map((t) => t.id), 0) + 1;
         const ticketNumber = `TCK-${new Date().getFullYear()}-${String(nextId).padStart(3, "0")}`;
         const ticket: StoredSupportTicket = {
           ...data,
           id: nextId,
           ticketNumber,
-          createdAt: new Date().toLocaleString("en-US", { dateStyle: "short", timeStyle: "short" }),
+          createdAt: new Date().toLocaleString("en-US", {
+            dateStyle: "short",
+            timeStyle: "short",
+          }),
         };
         set({ supportTickets: [ticket, ...get().supportTickets] });
         return ticket;
       },
       updateSupportTicketStatus: (id, status) => {
-        set({ supportTickets: get().supportTickets.map((t) => (t.id === id ? { ...t, status } : t)) });
+        set({
+          supportTickets: get().supportTickets.map((t) =>
+            t.id === id ? { ...t, status } : t,
+          ),
+        });
       },
       replyToSupportTicket: (ticketId, text) => {
         set({
@@ -2008,30 +2579,44 @@ export const useStoreData = create<StoreState>()(
                     {
                       sender: "admin",
                       text,
-                      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+                      timestamp: new Date().toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }),
                     },
                   ],
                 }
-              : t
+              : t,
           ),
         });
       },
       updateDisputeStatus: (id, status, notes) => {
         set({
-          disputes: get().disputes.map((d) => (d.id === id ? { ...d, status, ...(notes ? { resolutionNotes: notes } : {}) } : d)),
+          disputes: get().disputes.map((d) =>
+            d.id === id
+              ? { ...d, status, ...(notes ? { resolutionNotes: notes } : {}) }
+              : d,
+          ),
         });
       },
 
       // Delivery
       addDeliveryPartner: (data) => {
-        const nextId = Math.max(...get().deliveryPartners.map((dp) => dp.id), 0) + 1;
-        const partner: StoredDeliveryPartner = { ...data, id: nextId, joinedAt: new Date().toISOString().split("T")[0] };
+        const nextId =
+          Math.max(...get().deliveryPartners.map((dp) => dp.id), 0) + 1;
+        const partner: StoredDeliveryPartner = {
+          ...data,
+          id: nextId,
+          joinedAt: new Date().toISOString().split("T")[0],
+        };
         set({ deliveryPartners: [partner, ...get().deliveryPartners] });
         return partner;
       },
       updateDeliveryPartner: (id, updates) => {
         set({
-          deliveryPartners: get().deliveryPartners.map((dp) => (dp.id === id ? { ...dp, ...updates } : dp)),
+          deliveryPartners: get().deliveryPartners.map((dp) =>
+            dp.id === id ? { ...dp, ...updates } : dp,
+          ),
         });
       },
       addDeliveryZone: (data) => {
@@ -2041,7 +2626,11 @@ export const useStoreData = create<StoreState>()(
         return zone;
       },
       updateDeliveryZone: (id, updates) => {
-        set({ deliveryZones: get().deliveryZones.map((z) => (z.id === id ? { ...z, ...updates } : z)) });
+        set({
+          deliveryZones: get().deliveryZones.map((z) =>
+            z.id === id ? { ...z, ...updates } : z,
+          ),
+        });
       },
 
       // Finance
@@ -2054,38 +2643,67 @@ export const useStoreData = create<StoreState>()(
                   status: approve ? "PROCESSED" : "REJECTED",
                   processedAt: new Date().toISOString().split("T")[0],
                 }
-              : r
+              : r,
           ),
         });
-        get().logAuditEvent("PROCESS_REFUND", "Refund", refundId, approve ? "Refund approved & credited" : "Refund request rejected");
+        get().logAuditEvent(
+          "PROCESS_REFUND",
+          "Refund",
+          refundId,
+          approve ? "Refund approved & credited" : "Refund request rejected",
+        );
       },
       approvePayout: (payoutId) => {
         set({
           partnerPayouts: get().partnerPayouts.map((p) =>
-            p.id === payoutId ? { ...p, status: "PROCESSED", payoutDate: new Date().toISOString().split("T")[0] } : p
+            p.id === payoutId
+              ? {
+                  ...p,
+                  status: "PROCESSED",
+                  payoutDate: new Date().toISOString().split("T")[0],
+                }
+              : p,
           ),
         });
-        get().logAuditEvent("APPROVE_PAYOUT", "PartnerPayout", payoutId, `Payout approved and disbursed`);
+        get().logAuditEvent(
+          "APPROVE_PAYOUT",
+          "PartnerPayout",
+          payoutId,
+          `Payout approved and disbursed`,
+        );
       },
 
       toggleBookingPublish: (id) => {
         set({
-          bookings: get().bookings.map((b) => (b.id === id ? { ...b, published: !b.published } : b)),
+          bookings: get().bookings.map((b) =>
+            b.id === id ? { ...b, published: !b.published } : b,
+          ),
         });
       },
 
       // Enquiries
       addEnquiry: (data) => {
         const nextId = Math.max(...get().enquiries.map((e) => e.id), 0) + 1;
-        const enq: StoredEnquiry = { ...data, id: nextId, createdAt: new Date().toISOString().split("T")[0] };
+        const enq: StoredEnquiry = {
+          ...data,
+          id: nextId,
+          createdAt: new Date().toISOString().split("T")[0],
+        };
         set({ enquiries: [enq, ...get().enquiries] });
-        get().logAuditEvent("CREATE_ENQUIRY", "Enquiry", nextId, `New customer enquiry from ${data.customerName || data.name}`);
+        get().logAuditEvent(
+          "CREATE_ENQUIRY",
+          "Enquiry",
+          nextId,
+          `New customer enquiry from ${data.customerName || data.name}`,
+        );
         return enq;
       },
       updateEnquiryStatus: (id, status, notes) => {
         set({
           enquiries: get().enquiries.map((e) =>
-            e.id === id ? { ...e, status, ...(notes !== undefined ? { notes } : {}) } : e
+            e.id === id
+              ? { ...e, status, ...(notes !== undefined ? { notes } : {}) }
+              : e,
           ),
         });
       },
@@ -2098,23 +2716,38 @@ export const useStoreData = create<StoreState>()(
         const nextId = Math.max(...get().categories.map((c) => c.id), 0) + 1;
         const cat: StoredCategory = { ...data, id: nextId };
         set({ categories: [...get().categories, cat] });
-        get().logAuditEvent("CREATE_CATEGORY", "Category", nextId, `Added category "${data.name}"`);
+        get().logAuditEvent(
+          "CREATE_CATEGORY",
+          "Category",
+          nextId,
+          `Added category "${data.name}"`,
+        );
         return cat;
       },
       updateCategory: (id, updates) => {
-        set({ categories: get().categories.map((c) => (c.id === id ? { ...c, ...updates } : c)) });
+        set({
+          categories: get().categories.map((c) =>
+            c.id === id ? { ...c, ...updates } : c,
+          ),
+        });
       },
       deleteCategory: (id) => {
         set({ categories: get().categories.filter((c) => c.id !== id) });
       },
       toggleCategoryPublish: (id) => {
         set({
-          categories: get().categories.map((c) => (c.id === id ? { ...c, published: !c.published } : c)),
+          categories: get().categories.map((c) =>
+            c.id === id ? { ...c, published: !c.published } : c,
+          ),
         });
       },
       addGalleryItem: (data) => {
         const nextId = Math.max(...get().gallery.map((g) => g.id), 0) + 1;
-        const item: StoredGalleryItem = { ...data, id: nextId, uploadedAt: new Date().toISOString().split("T")[0] };
+        const item: StoredGalleryItem = {
+          ...data,
+          id: nextId,
+          uploadedAt: new Date().toISOString().split("T")[0],
+        };
         set({ gallery: [item, ...get().gallery] });
         return item;
       },
@@ -2123,17 +2756,27 @@ export const useStoreData = create<StoreState>()(
       },
       toggleGalleryPublish: (id) => {
         set({
-          gallery: get().gallery.map((g) => (g.id === id ? { ...g, published: !g.published } : g)),
+          gallery: get().gallery.map((g) =>
+            g.id === id ? { ...g, published: !g.published } : g,
+          ),
         });
       },
       updateReview: (id, updates) => {
-        set({ reviews: get().reviews.map((r) => (r.id === id ? { ...r, ...updates } : r)) });
+        set({
+          reviews: get().reviews.map((r) =>
+            r.id === id ? { ...r, ...updates } : r,
+          ),
+        });
       },
       deleteReview: (id) => {
         set({ reviews: get().reviews.filter((r) => r.id !== id) });
       },
       replyToReview: (id, reply) => {
-        set({ reviews: get().reviews.map((r) => (r.id === id ? { ...r, reply } : r)) });
+        set({
+          reviews: get().reviews.map((r) =>
+            r.id === id ? { ...r, reply } : r,
+          ),
+        });
       },
       addHeroSlide: (data) => {
         const nextId = Math.max(...get().heroSlides.map((s) => s.id), 0) + 1;
@@ -2142,7 +2785,11 @@ export const useStoreData = create<StoreState>()(
         return slide;
       },
       updateHeroSlide: (id, updates) => {
-        set({ heroSlides: get().heroSlides.map((s) => (s.id === id ? { ...s, ...updates } : s)) });
+        set({
+          heroSlides: get().heroSlides.map((s) =>
+            s.id === id ? { ...s, ...updates } : s,
+          ),
+        });
       },
       deleteHeroSlide: (id) => {
         set({ heroSlides: get().heroSlides.filter((s) => s.id !== id) });
@@ -2154,7 +2801,9 @@ export const useStoreData = create<StoreState>()(
         return faq;
       },
       updateFaq: (id, updates) => {
-        set({ faqs: get().faqs.map((f) => (f.id === id ? { ...f, ...updates } : f)) });
+        set({
+          faqs: get().faqs.map((f) => (f.id === id ? { ...f, ...updates } : f)),
+        });
       },
       deleteFaq: (id) => {
         set({ faqs: get().faqs.filter((f) => f.id !== id) });
@@ -2180,7 +2829,12 @@ export const useStoreData = create<StoreState>()(
       // Settings
       updateSettings: (updates) => {
         set({ settings: { ...get().settings, ...updates } });
-        get().logAuditEvent("UPDATE_SETTINGS", "OwnerSettings", "Global", "Updated platform master settings");
+        get().logAuditEvent(
+          "UPDATE_SETTINGS",
+          "OwnerSettings",
+          "Global",
+          "Updated platform master settings",
+        );
       },
 
       // Global Reset & JSON Backup/Restore
@@ -2202,14 +2856,53 @@ export const useStoreData = create<StoreState>()(
           supportTickets: initialSupportTickets,
           disputes: initialDisputes,
           deliveryPartners: initialDeliveryPartners,
-          deliveryZones: [{ id: 1, name: "Indiranagar Core Zone", city: "Bengaluru", radiusKm: 6, active: true }],
+          deliveryZones: [
+            {
+              id: 1,
+              name: "Indiranagar Core Zone",
+              city: "Bengaluru",
+              radiusKm: 6,
+              active: true,
+            },
+          ],
           transactions: initialTransactions,
           refunds: [
-            { id: 1, refundId: "REF-2026-001", orderNumber: "EZY-2026-0798", customerName: "Sneha Mukherjee", amount: 120, reason: "Damaged packing in transit", status: "PENDING", requestedAt: "2026-08-14" }
+            {
+              id: 1,
+              refundId: "REF-2026-001",
+              orderNumber: "EZY-2026-0798",
+              customerName: "Sneha Mukherjee",
+              amount: 120,
+              reason: "Damaged packing in transit",
+              status: "PENDING",
+              requestedAt: "2026-08-14",
+            },
           ],
           partnerPayouts: [
-            { id: 1, partnerId: 1, partnerName: "Sharma Kirana Store", grossSales: 84500, commissionDeducted: 4225, adjustments: 0, netPayout: 80275, status: "APPROVED", period: "Aug 01 - Aug 10, 2026", payoutDate: "2026-08-12" },
-            { id: 2, partnerId: 2, partnerName: "Nair Ayurveda Pharma", grossSales: 62100, commissionDeducted: 3105, adjustments: 0, netPayout: 58995, status: "PENDING", period: "Aug 01 - Aug 10, 2026", payoutDate: "2026-08-15" }
+            {
+              id: 1,
+              partnerId: 1,
+              partnerName: "Sharma Kirana Store",
+              grossSales: 84500,
+              commissionDeducted: 4225,
+              adjustments: 0,
+              netPayout: 80275,
+              status: "APPROVED",
+              period: "Aug 01 - Aug 10, 2026",
+              payoutDate: "2026-08-12",
+            },
+            {
+              id: 2,
+              partnerId: 2,
+              partnerName: "Nair Ayurveda Pharma",
+              grossSales: 62100,
+              commissionDeducted: 3105,
+              adjustments: 0,
+              netPayout: 58995,
+              status: "PENDING",
+              period: "Aug 01 - Aug 10, 2026",
+              payoutDate: "2026-08-15",
+            },
           ],
           categories: initialCategories,
           gallery: initialGallery,
@@ -2255,7 +2948,7 @@ export const useStoreData = create<StoreState>()(
             exportTimestamp: new Date().toISOString(),
           },
           null,
-          2
+          2,
         );
       },
 
@@ -2264,24 +2957,40 @@ export const useStoreData = create<StoreState>()(
           const parsed = JSON.parse(jsonString);
           set({
             ...(parsed.shops ? { shops: parsed.shops } : {}),
-            ...(parsed.partnerApplications ? { partnerApplications: parsed.partnerApplications } : {}),
+            ...(parsed.partnerApplications
+              ? { partnerApplications: parsed.partnerApplications }
+              : {}),
             ...(parsed.products ? { products: parsed.products } : {}),
             ...(parsed.services ? { services: parsed.services } : {}),
             ...(parsed.bookings ? { bookings: parsed.bookings } : {}),
             ...(parsed.doctors ? { doctors: parsed.doctors } : {}),
             ...(parsed.hospitals ? { hospitals: parsed.hospitals } : {}),
-            ...(parsed.hospitalBeds ? { hospitalBeds: parsed.hospitalBeds } : {}),
-            ...(parsed.transportListings ? { transportListings: parsed.transportListings } : {}),
+            ...(parsed.hospitalBeds
+              ? { hospitalBeds: parsed.hospitalBeds }
+              : {}),
+            ...(parsed.transportListings
+              ? { transportListings: parsed.transportListings }
+              : {}),
             ...(parsed.orders ? { orders: parsed.orders } : {}),
             ...(parsed.coupons ? { coupons: parsed.coupons } : {}),
             ...(parsed.customers ? { customers: parsed.customers } : {}),
-            ...(parsed.supportTickets ? { supportTickets: parsed.supportTickets } : {}),
+            ...(parsed.supportTickets
+              ? { supportTickets: parsed.supportTickets }
+              : {}),
             ...(parsed.disputes ? { disputes: parsed.disputes } : {}),
-            ...(parsed.deliveryPartners ? { deliveryPartners: parsed.deliveryPartners } : {}),
-            ...(parsed.deliveryZones ? { deliveryZones: parsed.deliveryZones } : {}),
-            ...(parsed.transactions ? { transactions: parsed.transactions } : {}),
+            ...(parsed.deliveryPartners
+              ? { deliveryPartners: parsed.deliveryPartners }
+              : {}),
+            ...(parsed.deliveryZones
+              ? { deliveryZones: parsed.deliveryZones }
+              : {}),
+            ...(parsed.transactions
+              ? { transactions: parsed.transactions }
+              : {}),
             ...(parsed.refunds ? { refunds: parsed.refunds } : {}),
-            ...(parsed.partnerPayouts ? { partnerPayouts: parsed.partnerPayouts } : {}),
+            ...(parsed.partnerPayouts
+              ? { partnerPayouts: parsed.partnerPayouts }
+              : {}),
             ...(parsed.categories ? { categories: parsed.categories } : {}),
             ...(parsed.gallery ? { gallery: parsed.gallery } : {}),
             ...(parsed.reviews ? { reviews: parsed.reviews } : {}),
@@ -2298,6 +3007,6 @@ export const useStoreData = create<StoreState>()(
     }),
     {
       name: "ezy1_complete_platform_os_v3",
-    }
-  )
+    },
+  ),
 );

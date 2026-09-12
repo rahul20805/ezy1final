@@ -1,6 +1,12 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -18,7 +24,8 @@ import {
   Truck,
   Zap,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { useStoreData } from "../../../../lib/storeData";
 
@@ -27,9 +34,13 @@ export function DeliveryZonesAndCharges() {
 
   // Settings State
   const [minOrder, setMinOrder] = useState(store.settings.minimumOrderAmount);
-  const [freeThreshold, setFreeThreshold] = useState(store.settings.freeDeliveryThreshold);
+  const [freeThreshold, setFreeThreshold] = useState(
+    store.settings.freeDeliveryThreshold,
+  );
   const [stdFee, setStdFee] = useState(store.settings.standardDeliveryFee);
-  const [expressFee, setExpressFee] = useState(store.settings.expressDeliveryFee);
+  const [expressFee, setExpressFee] = useState(
+    store.settings.expressDeliveryFee,
+  );
   const [radius, setRadius] = useState(store.settings.deliveryRadiusKm);
 
   // New Zone Form
@@ -46,7 +57,9 @@ export function DeliveryZonesAndCharges() {
       expressDeliveryFee: Number(expressFee),
       deliveryRadiusKm: Number(radius),
     });
-    toast.success("Delivery fee structure & distance rules saved to live website!");
+    toast.success(
+      "Delivery fee structure & distance rules saved to live website!",
+    );
   };
 
   const handleCreateZone = (e: React.FormEvent) => {
@@ -71,7 +84,8 @@ export function DeliveryZonesAndCharges() {
             Delivery Zones, Charges & Dynamic Rules
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-            Configure base delivery fees, distance-based thresholds, free delivery limits, and geographic hubs.
+            Configure base delivery fees, distance-based thresholds, free
+            delivery limits, and geographic hubs.
           </p>
         </div>
 
@@ -88,39 +102,52 @@ export function DeliveryZonesAndCharges() {
         {/* Left: Fee Structure Config */}
         <Card className="lg:col-span-7 rounded-3xl border-border bg-card shadow-xs">
           <CardHeader>
-            <CardTitle className="text-base font-display font-bold">Delivery Pricing & Minimums</CardTitle>
+            <CardTitle className="text-base font-display font-bold">
+              Delivery Pricing & Minimums
+            </CardTitle>
             <CardDescription className="text-xs">
-              These rules directly calculate delivery charges at customer checkout.
+              These rules directly calculate delivery charges at customer
+              checkout.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Minimum Basket Amount (₹) *</Label>
+                <Label className="text-xs font-semibold">
+                  Minimum Basket Amount (₹) *
+                </Label>
                 <Input
                   type="number"
                   value={minOrder}
                   onChange={(e) => setMinOrder(Number(e.target.value))}
                   className="rounded-xl font-bold font-mono text-sm"
                 />
-                <p className="text-[10px] text-muted-foreground">Orders below this will not be accepted.</p>
+                <p className="text-[10px] text-muted-foreground">
+                  Orders below this will not be accepted.
+                </p>
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Free Delivery Above (₹) *</Label>
+                <Label className="text-xs font-semibold">
+                  Free Delivery Above (₹) *
+                </Label>
                 <Input
                   type="number"
                   value={freeThreshold}
                   onChange={(e) => setFreeThreshold(Number(e.target.value))}
                   className="rounded-xl font-bold font-mono text-sm text-emerald-600"
                 />
-                <p className="text-[10px] text-muted-foreground">Cart total qualifying for zero delivery fee.</p>
+                <p className="text-[10px] text-muted-foreground">
+                  Cart total qualifying for zero delivery fee.
+                </p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Standard Delivery Fee (₹)</Label>
+                <Label className="text-xs font-semibold">
+                  Standard Delivery Fee (₹)
+                </Label>
                 <Input
                   type="number"
                   value={stdFee}
@@ -130,7 +157,9 @@ export function DeliveryZonesAndCharges() {
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Express 10-Min Fee (₹)</Label>
+                <Label className="text-xs font-semibold">
+                  Express 10-Min Fee (₹)
+                </Label>
                 <Input
                   type="number"
                   value={expressFee}
@@ -156,7 +185,9 @@ export function DeliveryZonesAndCharges() {
         <div className="lg:col-span-5 space-y-6">
           <Card className="rounded-3xl border-border bg-card shadow-xs p-5 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-display font-bold text-base">Geographic Delivery Zones</h3>
+              <h3 className="font-display font-bold text-base">
+                Geographic Delivery Zones
+              </h3>
               <Badge variant="outline" className="text-[10px] font-bold">
                 {store.deliveryZones.length} Zones Active
               </Badge>
@@ -172,7 +203,9 @@ export function DeliveryZonesAndCharges() {
                     <MapPin className="w-3.5 h-3.5 text-primary" />
                     <div>
                       <h4 className="font-bold text-foreground">{z.name}</h4>
-                      <span className="text-[10px] text-muted-foreground">{z.city} • Radius: {z.radiusKm} km</span>
+                      <span className="text-[10px] text-muted-foreground">
+                        {z.city} • Radius: {z.radiusKm} km
+                      </span>
                     </div>
                   </div>
                   <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-300 text-[10px] font-bold">
@@ -183,8 +216,13 @@ export function DeliveryZonesAndCharges() {
             </div>
 
             {/* Add Zone Inline */}
-            <form onSubmit={handleCreateZone} className="pt-3 border-t border-border/60 space-y-2.5">
-              <span className="text-xs font-bold text-foreground">Add New Delivery Zone</span>
+            <form
+              onSubmit={handleCreateZone}
+              className="pt-3 border-t border-border/60 space-y-2.5"
+            >
+              <span className="text-xs font-bold text-foreground">
+                Add New Delivery Zone
+              </span>
               <div className="grid grid-cols-2 gap-2">
                 <Input
                   placeholder="Zone name (e.g. Koramangala)"
@@ -200,7 +238,11 @@ export function DeliveryZonesAndCharges() {
                   className="rounded-xl text-xs font-mono"
                 />
               </div>
-              <Button type="submit" size="sm" className="w-full text-xs rounded-xl font-semibold">
+              <Button
+                type="submit"
+                size="sm"
+                className="w-full text-xs rounded-xl font-semibold"
+              >
                 <Plus className="w-3.5 h-3.5 mr-1" /> Add Zone
               </Button>
             </form>

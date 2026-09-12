@@ -5,8 +5,19 @@
   "framework": "vite",
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "www.ezy1.site/:path*",
+      "destination": "https://ezy1.site/:path*",
+      "permanent": true
     }
   ]
 }

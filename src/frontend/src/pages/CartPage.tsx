@@ -1,5 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
@@ -8,8 +14,22 @@ import UserLayout from "../components/UserLayout";
 
 // Temporary mock cart data
 const initialCart = [
-  { id: 1, name: "Aashirvaad Atta 5kg", price: 245, vendor: "Sharma Grocery", quantity: 1, image: "🌾" },
-  { id: 3, name: "Amul Taaza Milk 1L", price: 68, vendor: "Daily Needs", quantity: 2, image: "🥛" },
+  {
+    id: 1,
+    name: "Aashirvaad Atta 5kg",
+    price: 245,
+    vendor: "Sharma Grocery",
+    quantity: 1,
+    image: "🌾",
+  },
+  {
+    id: 3,
+    name: "Amul Taaza Milk 1L",
+    price: 68,
+    vendor: "Daily Needs",
+    quantity: 2,
+    image: "🥛",
+  },
 ];
 
 export default function CartPage() {
@@ -17,16 +37,23 @@ export default function CartPage() {
   const [promoCode, setPromoCode] = useState("");
 
   const updateQuantity = (id: number, delta: number) => {
-    setCart(cart.map(item => {
-      if (item.id === id) {
-        const newQ = Math.max(0, item.quantity + delta);
-        return { ...item, quantity: newQ };
-      }
-      return item;
-    }).filter(item => item.quantity > 0));
+    setCart(
+      cart
+        .map((item) => {
+          if (item.id === id) {
+            const newQ = Math.max(0, item.quantity + delta);
+            return { ...item, quantity: newQ };
+          }
+          return item;
+        })
+        .filter((item) => item.quantity > 0),
+    );
   };
 
-  const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const subtotal = cart.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0,
+  );
   const deliveryFee = subtotal > 0 ? 40 : 0;
   const taxes = subtotal * 0.05;
   const total = subtotal + deliveryFee + taxes;
@@ -43,7 +70,9 @@ export default function CartPage() {
           <div className="text-center py-16 bg-muted/20 rounded-2xl border border-border">
             <ShoppingBag className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
             <h2 className="text-xl font-semibold mb-2">Your cart is empty</h2>
-            <p className="text-muted-foreground mb-6">Looks like you haven't added anything yet.</p>
+            <p className="text-muted-foreground mb-6">
+              Looks like you haven't added anything yet.
+            </p>
             <Button>Continue Shopping</Button>
           </div>
         ) : (
@@ -57,23 +86,33 @@ export default function CartPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold truncate">{item.name}</h3>
-                      <p className="text-xs text-muted-foreground mb-1">Sold by: {item.vendor}</p>
-                      <div className="font-bold text-primary">₹{item.price}</div>
+                      <p className="text-xs text-muted-foreground mb-1">
+                        Sold by: {item.vendor}
+                      </p>
+                      <div className="font-bold text-primary">
+                        ₹{item.price}
+                      </div>
                     </div>
                     <div className="flex items-center gap-3 bg-muted/50 rounded-full p-1 border border-border">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8 rounded-full" 
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-full"
                         onClick={() => updateQuantity(item.id, -1)}
                       >
-                        {item.quantity === 1 ? <Trash2 className="h-4 w-4 text-destructive" /> : <Minus className="h-4 w-4" />}
+                        {item.quantity === 1 ? (
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        ) : (
+                          <Minus className="h-4 w-4" />
+                        )}
                       </Button>
-                      <span className="w-4 text-center font-medium">{item.quantity}</span>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8 rounded-full" 
+                      <span className="w-4 text-center font-medium">
+                        {item.quantity}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-full"
                         onClick={() => updateQuantity(item.id, 1)}
                       >
                         <Plus className="h-4 w-4" />
@@ -91,23 +130,25 @@ export default function CartPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex gap-2">
-                    <Input 
-                      placeholder="Promo Code" 
+                    <Input
+                      placeholder="Promo Code"
                       value={promoCode}
                       onChange={(e) => setPromoCode(e.target.value)}
                     />
                     <Button variant="secondary">Apply</Button>
                   </div>
-                  
+
                   <Separator />
-                  
+
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Subtotal</span>
                       <span>₹{subtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Delivery Fee</span>
+                      <span className="text-muted-foreground">
+                        Delivery Fee
+                      </span>
                       <span>₹{deliveryFee.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">

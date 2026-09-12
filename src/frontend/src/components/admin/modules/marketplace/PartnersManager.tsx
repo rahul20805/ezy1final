@@ -26,9 +26,13 @@ import {
   User,
   UserCheck,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
-import { type PartnerAccount, usePartnerAuth } from "../../../../lib/partnerAuthStore";
+import {
+  type PartnerAccount,
+  usePartnerAuth,
+} from "../../../../lib/partnerAuthStore";
 import { useStoreData } from "../../../../lib/storeData";
 import { ConfirmModal } from "../../../owner/ConfirmModal";
 import { DataTable } from "../../../owner/DataTable";
@@ -38,7 +42,9 @@ export function PartnersManager() {
   const store = useStoreData();
 
   const [isResetPwOpen, setIsResetPwOpen] = useState(false);
-  const [targetPartner, setTargetPartner] = useState<PartnerAccount | null>(null);
+  const [targetPartner, setTargetPartner] = useState<PartnerAccount | null>(
+    null,
+  );
   const [newPassword, setNewPassword] = useState("");
 
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
@@ -59,7 +65,9 @@ export function PartnersManager() {
   const togglePartnerStatus = (partner: PartnerAccount) => {
     const nextStatus = partner.status === "active" ? "suspended" : "active";
     updatePartner(partner.id, { status: nextStatus });
-    toast.success(`Partner ${partner.id} marked as: ${nextStatus.toUpperCase()}`);
+    toast.success(
+      `Partner ${partner.id} marked as: ${nextStatus.toUpperCase()}`,
+    );
   };
 
   return (
@@ -94,8 +102,11 @@ export function PartnersManager() {
         defaultSort="name_asc"
         onSort={(items, sortVal) => {
           const list = [...items];
-          if (sortVal === "id_asc") return list.sort((a, b) => a.id.localeCompare(b.id));
-          return list.sort((a, b) => a.businessName.localeCompare(b.businessName));
+          if (sortVal === "id_asc")
+            return list.sort((a, b) => a.id.localeCompare(b.id));
+          return list.sort((a, b) =>
+            a.businessName.localeCompare(b.businessName),
+          );
         }}
         pageSize={6}
         renderItem={(partner) => (
@@ -121,7 +132,10 @@ export function PartnersManager() {
                       <ShieldCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" />
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Contact: <span className="font-medium text-foreground">{partner.ownerName}</span>
+                      Contact:{" "}
+                      <span className="font-medium text-foreground">
+                        {partner.ownerName}
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -141,11 +155,15 @@ export function PartnersManager() {
               <div className="p-3 rounded-2xl bg-muted/40 border border-border/60 text-xs font-mono space-y-1">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Admin Login ID:</span>
-                  <span className="font-bold text-foreground">{partner.id}</span>
+                  <span className="font-bold text-foreground">
+                    {partner.id}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Password:</span>
-                  <span className="font-bold text-primary">{partner.password}</span>
+                  <span className="font-bold text-primary">
+                    {partner.password}
+                  </span>
                 </div>
               </div>
 
@@ -164,7 +182,9 @@ export function PartnersManager() {
                 </div>
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <UserCheck className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
-                  <span className="truncate font-semibold text-emerald-600">KYC Verified</span>
+                  <span className="truncate font-semibold text-emerald-600">
+                    KYC Verified
+                  </span>
                 </div>
               </div>
 
@@ -179,7 +199,8 @@ export function PartnersManager() {
                   }}
                   className="h-8 px-2.5 text-xs rounded-xl gap-1"
                 >
-                  <RotateCcw className="w-3.5 h-3.5 text-primary" /> Reset Password
+                  <RotateCcw className="w-3.5 h-3.5 text-primary" /> Reset
+                  Password
                 </Button>
 
                 {partner.role !== "super_owner" && (
@@ -188,7 +209,9 @@ export function PartnersManager() {
                     size="sm"
                     onClick={() => togglePartnerStatus(partner)}
                     className={`h-8 px-2.5 text-xs rounded-xl font-semibold ${
-                      partner.status === "active" ? "hover:text-destructive" : "text-emerald-600"
+                      partner.status === "active"
+                        ? "hover:text-destructive"
+                        : "text-emerald-600"
                     }`}
                   >
                     <Power className="w-3.5 h-3.5" />
@@ -206,9 +229,12 @@ export function PartnersManager() {
         <DialogContent className="max-w-sm bg-card border-border shadow-2xl rounded-3xl">
           <form onSubmit={handlePasswordReset}>
             <DialogHeader>
-              <DialogTitle className="text-lg font-display font-bold">Force Password Reset</DialogTitle>
+              <DialogTitle className="text-lg font-display font-bold">
+                Force Password Reset
+              </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                Set a new login password for {targetPartner?.businessName} ({targetPartner?.id}).
+                Set a new login password for {targetPartner?.businessName} (
+                {targetPartner?.id}).
               </DialogDescription>
             </DialogHeader>
 
@@ -227,10 +253,18 @@ export function PartnersManager() {
             </div>
 
             <DialogFooter className="gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsResetPwOpen(false)} className="rounded-xl">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsResetPwOpen(false)}
+                className="rounded-xl"
+              >
                 Cancel
               </Button>
-              <Button type="submit" className="rounded-xl bg-primary text-primary-foreground font-semibold">
+              <Button
+                type="submit"
+                className="rounded-xl bg-primary text-primary-foreground font-semibold"
+              >
                 Update Password
               </Button>
             </DialogFooter>

@@ -1,15 +1,15 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Percent,
-  Plus,
-  Save,
-  ShieldCheck,
-  Tag,
-} from "lucide-react";
+import { Percent, Plus, Save, ShieldCheck, Tag } from "lucide-react";
 import React, { useState } from "react";
 import { toast } from "sonner";
 import { useStoreData } from "../../../../lib/storeData";
@@ -26,14 +26,20 @@ export function CommissionsManager() {
     { category: "Transport & Rides", percent: 7, fixedFee: 5 },
   ]);
 
-  const handleUpdateCommission = (index: number, field: "percent" | "fixedFee", value: number) => {
+  const handleUpdateCommission = (
+    index: number,
+    field: "percent" | "fixedFee",
+    value: number,
+  ) => {
     setCommissions((prev) =>
-      prev.map((c, i) => (i === index ? { ...c, [field]: value } : c))
+      prev.map((c, i) => (i === index ? { ...c, [field]: value } : c)),
     );
   };
 
   const handleSaveRules = () => {
-    toast.success("Platform commission rates updated and applied across all partner settlements!");
+    toast.success(
+      "Platform commission rates updated and applied across all partner settlements!",
+    );
   };
 
   return (
@@ -41,10 +47,12 @@ export function CommissionsManager() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-display font-bold text-foreground flex items-center gap-2">
-            <Percent className="w-5 h-5 text-primary" /> Platform Commission & GST Rules
+            <Percent className="w-5 h-5 text-primary" /> Platform Commission &
+            GST Rules
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-            Configure category-specific take rates, fixed booking fees, and GST tax invoice rules.
+            Configure category-specific take rates, fixed booking fees, and GST
+            tax invoice rules.
           </p>
         </div>
 
@@ -58,9 +66,14 @@ export function CommissionsManager() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {commissions.map((comm, idx) => (
-          <Card key={idx} className="rounded-3xl border-border bg-card p-5 shadow-xs space-y-3">
+          <Card
+            key={idx}
+            className="rounded-3xl border-border bg-card p-5 shadow-xs space-y-3"
+          >
             <div className="flex items-center justify-between">
-              <h3 className="font-display font-bold text-sm text-foreground">{comm.category}</h3>
+              <h3 className="font-display font-bold text-sm text-foreground">
+                {comm.category}
+              </h3>
               <Badge variant="outline" className="text-[10px] font-bold">
                 {comm.percent}% Commission
               </Badge>
@@ -72,7 +85,13 @@ export function CommissionsManager() {
                 <Input
                   type="number"
                   value={comm.percent}
-                  onChange={(e) => handleUpdateCommission(idx, "percent", Number(e.target.value))}
+                  onChange={(e) =>
+                    handleUpdateCommission(
+                      idx,
+                      "percent",
+                      Number(e.target.value),
+                    )
+                  }
                   className="rounded-xl font-bold text-xs"
                 />
               </div>
@@ -81,7 +100,13 @@ export function CommissionsManager() {
                 <Input
                   type="number"
                   value={comm.fixedFee}
-                  onChange={(e) => handleUpdateCommission(idx, "fixedFee", Number(e.target.value))}
+                  onChange={(e) =>
+                    handleUpdateCommission(
+                      idx,
+                      "fixedFee",
+                      Number(e.target.value),
+                    )
+                  }
                   className="rounded-xl font-bold text-xs"
                 />
               </div>

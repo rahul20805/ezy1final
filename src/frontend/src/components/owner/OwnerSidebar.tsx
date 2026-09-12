@@ -26,8 +26,11 @@ import {
   Users,
   Wrench,
 } from "lucide-react";
-import React from "react";
-import { type PartnerAccount, usePartnerAuth } from "../../lib/partnerAuthStore";
+import type React from "react";
+import {
+  type PartnerAccount,
+  usePartnerAuth,
+} from "../../lib/partnerAuthStore";
 import { useStoreData } from "../../lib/storeData";
 
 export type OwnerSectionId =
@@ -49,7 +52,9 @@ interface SidebarItem {
   label: string;
   icon: React.ElementType;
   permissionKey?: keyof PartnerAccount["permissions"];
-  getBadge?: (store: ReturnType<typeof useStoreData.getState>) => string | number | null;
+  getBadge?: (
+    store: ReturnType<typeof useStoreData.getState>,
+  ) => string | number | null;
 }
 
 export const OWNER_SIDEBAR_ITEMS: SidebarItem[] = [
@@ -70,21 +75,27 @@ export const OWNER_SIDEBAR_ITEMS: SidebarItem[] = [
     label: "Classes / Bookings",
     icon: GraduationCap,
     permissionKey: "canManageBookings",
-    getBadge: (s) => s.bookings.filter((b) => b.status === "CONFIRMED" || b.status === "PENDING").length,
+    getBadge: (s) =>
+      s.bookings.filter(
+        (b) => b.status === "CONFIRMED" || b.status === "PENDING",
+      ).length,
   },
   {
     id: "orders",
     label: "Orders",
     icon: ShoppingCart,
     permissionKey: "canManageOrders",
-    getBadge: (s) => s.orders.filter((o) => o.status === "NEW" || o.status === "ACCEPTED").length || null,
+    getBadge: (s) =>
+      s.orders.filter((o) => o.status === "NEW" || o.status === "ACCEPTED")
+        .length || null,
   },
   {
     id: "enquiries",
     label: "Enquiries & Leads",
     icon: MessageSquare,
     permissionKey: "canManageEnquiries",
-    getBadge: (s) => s.enquiries.filter((e) => e.status === "new").length || null,
+    getBadge: (s) =>
+      s.enquiries.filter((e) => e.status === "new").length || null,
   },
   {
     id: "customers",
@@ -112,7 +123,8 @@ export const OWNER_SIDEBAR_ITEMS: SidebarItem[] = [
     label: "Reviews",
     icon: Sparkles,
     permissionKey: "canManageReviews",
-    getBadge: (s) => s.reviews.filter((r) => r.status === "pending").length || null,
+    getBadge: (s) =>
+      s.reviews.filter((r) => r.status === "pending").length || null,
   },
   {
     id: "content",
@@ -181,7 +193,9 @@ export function OwnerSidebar({
               <div className="flex items-center gap-1 mt-0.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-[11px] text-muted-foreground truncate capitalize">
-                  {isSuperOwner ? "Master Owner Portal" : `${currentPartner?.category} Partner`}
+                  {isSuperOwner
+                    ? "Master Owner Portal"
+                    : `${currentPartner?.category} Partner`}
                 </span>
               </div>
             </div>
@@ -201,7 +215,11 @@ export function OwnerSidebar({
           className="hidden sm:flex h-8 w-8 p-0 text-muted-foreground hover:text-foreground rounded-lg"
           title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          {collapsed ? (
+            <ChevronRight className="w-4 h-4" />
+          ) : (
+            <ChevronLeft className="w-4 h-4" />
+          )}
         </Button>
       </div>
 
@@ -229,10 +247,14 @@ export function OwnerSidebar({
             >
               <Icon
                 className={`w-4 h-4 flex-shrink-0 transition-transform ${
-                  isActive ? "text-primary-foreground scale-110" : "text-muted-foreground group-hover:text-foreground"
+                  isActive
+                    ? "text-primary-foreground scale-110"
+                    : "text-muted-foreground group-hover:text-foreground"
                 }`}
               />
-              {!collapsed && <span className="flex-1 text-left truncate">{item.label}</span>}
+              {!collapsed && (
+                <span className="flex-1 text-left truncate">{item.label}</span>
+              )}
               {!collapsed && badgeVal !== null && (
                 <Badge
                   variant={isActive ? "outline" : "secondary"}
@@ -265,7 +287,9 @@ export function OwnerSidebar({
           {!collapsed && <span>View Public Website</span>}
         </a>
 
-        <div className={`flex items-center justify-between pt-2 border-t border-border/60 ${collapsed ? "flex-col gap-2" : ""}`}>
+        <div
+          className={`flex items-center justify-between pt-2 border-t border-border/60 ${collapsed ? "flex-col gap-2" : ""}`}
+        >
           {!collapsed && (
             <div className="min-w-0 pr-2">
               <p className="text-xs font-semibold text-foreground truncate">

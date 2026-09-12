@@ -20,15 +20,9 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Edit2,
-  Eye,
-  EyeOff,
-  FolderTree,
-  Plus,
-  Trash2,
-} from "lucide-react";
-import React, { useState } from "react";
+import { Edit2, Eye, EyeOff, FolderTree, Plus, Trash2 } from "lucide-react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { type StoredCategory, useStoreData } from "../../../lib/storeData";
 import { ConfirmModal } from "../ConfirmModal";
@@ -150,7 +144,8 @@ export function CategoriesSection() {
         defaultSort="order"
         onSort={(items, sortVal) => {
           const list = [...items];
-          if (sortVal === "name_asc") return list.sort((a, b) => a.name.localeCompare(b.name));
+          if (sortVal === "name_asc")
+            return list.sort((a, b) => a.name.localeCompare(b.name));
           return list.sort((a, b) => a.orderIndex - b.orderIndex);
         }}
         onAddNew={openAddDialog}
@@ -158,14 +153,18 @@ export function CategoriesSection() {
         pageSize={8}
         renderItem={(cat) => {
           const productCount = store.products.filter(
-            (p) => p.category.toLowerCase() === cat.name.toLowerCase() || p.categoryIds.includes(cat.id)
+            (p) =>
+              p.category.toLowerCase() === cat.name.toLowerCase() ||
+              p.categoryIds.includes(cat.id),
           ).length;
 
           return (
             <Card
               key={cat.id}
               className={`rounded-2xl border transition-all hover:shadow-md ${
-                cat.published ? "border-border/80 bg-card" : "border-border/50 bg-muted/20 opacity-70"
+                cat.published
+                  ? "border-border/80 bg-card"
+                  : "border-border/50 bg-muted/20 opacity-70"
               }`}
             >
               <CardContent className="p-4 space-y-3">
@@ -178,11 +177,16 @@ export function CategoriesSection() {
                       <h3 className="font-display font-bold text-sm text-foreground line-clamp-1">
                         {cat.name}
                       </h3>
-                      <span className="font-mono text-[10px] text-muted-foreground">/{cat.slug}</span>
+                      <span className="font-mono text-[10px] text-muted-foreground">
+                        /{cat.slug}
+                      </span>
                     </div>
                   </div>
 
-                  <Badge variant="outline" className="text-[10px] uppercase font-bold">
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] uppercase font-bold"
+                  >
                     {cat.type}
                   </Badge>
                 </div>
@@ -192,7 +196,10 @@ export function CategoriesSection() {
                 </p>
 
                 <div className="flex items-center justify-between pt-2 border-t border-border/60">
-                  <Badge variant="secondary" className="text-[10px] font-semibold">
+                  <Badge
+                    variant="secondary"
+                    className="text-[10px] font-semibold"
+                  >
                     {productCount} item(s) listed
                   </Badge>
 
@@ -203,12 +210,18 @@ export function CategoriesSection() {
                       onClick={() => {
                         store.toggleCategoryPublish(cat.id);
                         toast.success(
-                          cat.published ? `Category "${cat.name}" hidden.` : `Category "${cat.name}" published!`
+                          cat.published
+                            ? `Category "${cat.name}" hidden.`
+                            : `Category "${cat.name}" published!`,
                         );
                       }}
                       className="h-8 px-2 text-xs rounded-xl"
                     >
-                      {cat.published ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5 text-emerald-500" />}
+                      {cat.published ? (
+                        <EyeOff className="w-3.5 h-3.5" />
+                      ) : (
+                        <Eye className="w-3.5 h-3.5 text-emerald-500" />
+                      )}
                     </Button>
                     <Button
                       variant="outline"
@@ -259,7 +272,9 @@ export function CategoriesSection() {
                   />
                 </div>
                 <div className="space-y-1 col-span-3">
-                  <Label className="text-xs font-semibold">Category Name *</Label>
+                  <Label className="text-xs font-semibold">
+                    Category Name *
+                  </Label>
                   <Input
                     required
                     placeholder="e.g. Fresh Produce & Fruits"
@@ -271,7 +286,7 @@ export function CategoriesSection() {
                           e.target.value
                             .toLowerCase()
                             .replace(/[^a-z0-9]+/g, "-")
-                            .replace(/^-|-$/g, "")
+                            .replace(/^-|-$/g, ""),
                         );
                       }
                     }}
@@ -292,14 +307,19 @@ export function CategoriesSection() {
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs font-semibold">Scope</Label>
-                  <Select value={type} onValueChange={(val: any) => setType(val)}>
+                  <Select
+                    value={type}
+                    onValueChange={(val: any) => setType(val)}
+                  >
                     <SelectTrigger className="rounded-xl text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="product">Products / Shop</SelectItem>
                       <SelectItem value="service">Services</SelectItem>
-                      <SelectItem value="booking">Classes & Bookings</SelectItem>
+                      <SelectItem value="booking">
+                        Classes & Bookings
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -323,10 +343,18 @@ export function CategoriesSection() {
             </div>
 
             <DialogFooter className="gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-xl">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                className="rounded-xl"
+              >
                 Cancel
               </Button>
-              <Button type="submit" className="rounded-xl bg-primary text-primary-foreground font-semibold">
+              <Button
+                type="submit"
+                className="rounded-xl bg-primary text-primary-foreground font-semibold"
+              >
                 {editingCat ? "Save Changes" : "Create Category"}
               </Button>
             </DialogFooter>

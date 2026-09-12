@@ -1,5 +1,5 @@
-import { useAuth } from "./AuthContext";
 import type { UserRole } from "../types";
+import { useAuth } from "./AuthContext";
 
 const ROLE_STORAGE_KEY = "ezy1_user_role";
 

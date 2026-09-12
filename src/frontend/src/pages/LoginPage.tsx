@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useAuth } from "../lib/AuthContext";
 import { useNavigate } from "@tanstack/react-router";
 import { ArrowRight, Fingerprint, Shield, Smartphone } from "lucide-react";
 import Layout from "../components/Layout";
+import { useAuth } from "../lib/AuthContext";
 import { setCurrentRole } from "../lib/auth";
 
 export default function LoginPage() {

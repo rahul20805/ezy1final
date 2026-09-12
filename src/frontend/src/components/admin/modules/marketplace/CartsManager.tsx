@@ -58,12 +58,16 @@ const initialAbandonedCarts: AbandonedCartItem[] = [
 ];
 
 export function CartsManager() {
-  const [carts, setCarts] = React.useState<AbandonedCartItem[]>(initialAbandonedCarts);
+  const [carts, setCarts] = React.useState<AbandonedCartItem[]>(
+    initialAbandonedCarts,
+  );
 
   const sendRecoveryWhatsApp = (cart: AbandonedCartItem) => {
-    toast.success(`WhatsApp recovery reminder sent to ${cart.customerName} (${cart.phone}) with code "EZYBACK10"!`);
+    toast.success(
+      `WhatsApp recovery reminder sent to ${cart.customerName} (${cart.phone}) with code "EZYBACK10"!`,
+    );
     setCarts((prev) =>
-      prev.map((c) => (c.id === cart.id ? { ...c, status: "In Progress" } : c))
+      prev.map((c) => (c.id === cart.id ? { ...c, status: "In Progress" } : c)),
     );
   };
 
@@ -97,20 +101,28 @@ export function CartsManager() {
         defaultSort="val_desc"
         onSort={(items, sortVal) => {
           const list = [...items];
-          if (sortVal === "val_desc") return list.sort((a, b) => b.totalValue - a.totalValue);
+          if (sortVal === "val_desc")
+            return list.sort((a, b) => b.totalValue - a.totalValue);
           return list.sort((a, b) => b.id - a.id);
         }}
         pageSize={6}
         renderItem={(cart) => (
-          <Card key={cart.id} className="rounded-3xl border-border bg-card p-5 shadow-xs">
+          <Card
+            key={cart.id}
+            className="rounded-3xl border-border bg-card p-5 shadow-xs"
+          >
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold">
                   <ShoppingCart className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="font-display font-bold text-sm text-foreground">{cart.customerName}</h4>
-                  <p className="text-xs text-muted-foreground font-mono">{cart.phone} • Last active: {cart.lastActive}</p>
+                  <h4 className="font-display font-bold text-sm text-foreground">
+                    {cart.customerName}
+                  </h4>
+                  <p className="text-xs text-muted-foreground font-mono">
+                    {cart.phone} • Last active: {cart.lastActive}
+                  </p>
                 </div>
               </div>
 
@@ -119,8 +131,8 @@ export function CartsManager() {
                   cart.status === "Recovered"
                     ? "bg-emerald-500/10 text-emerald-600"
                     : cart.status === "In Progress"
-                    ? "bg-sky-500/10 text-sky-600"
-                    : "bg-amber-500/10 text-amber-600"
+                      ? "bg-sky-500/10 text-sky-600"
+                      : "bg-amber-500/10 text-amber-600"
                 }`}
               >
                 {cart.status}
@@ -128,16 +140,22 @@ export function CartsManager() {
             </div>
 
             <div className="p-3 rounded-2xl bg-muted/40 border border-border/60 text-xs my-3 space-y-1">
-              <span className="text-[10px] text-muted-foreground font-semibold uppercase">Items in Bag:</span>
+              <span className="text-[10px] text-muted-foreground font-semibold uppercase">
+                Items in Bag:
+              </span>
               <ul className="list-disc list-inside text-foreground space-y-0.5">
                 {cart.items.map((it, idx) => (
-                  <li key={idx} className="truncate">{it}</li>
+                  <li key={idx} className="truncate">
+                    {it}
+                  </li>
                 ))}
               </ul>
             </div>
 
             <div className="flex items-center justify-between pt-2 border-t border-border/60">
-              <span className="font-display font-black text-base text-foreground">₹{cart.totalValue}</span>
+              <span className="font-display font-black text-base text-foreground">
+                ₹{cart.totalValue}
+              </span>
               {cart.status !== "Recovered" && (
                 <Button
                   size="sm"

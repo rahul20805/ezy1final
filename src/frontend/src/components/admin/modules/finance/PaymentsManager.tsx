@@ -12,7 +12,10 @@ import {
 } from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
-import { type StoredTransaction, useStoreData } from "../../../../lib/storeData";
+import {
+  type StoredTransaction,
+  useStoreData,
+} from "../../../../lib/storeData";
 import { DataTable } from "../../../owner/DataTable";
 
 export function PaymentsManager() {
@@ -75,39 +78,64 @@ export function PaymentsManager() {
         defaultSort="id_desc"
         onSort={(items, sortVal) => {
           const list = [...items];
-          if (sortVal === "amount_desc") return list.sort((a, b) => b.amount - a.amount);
-          if (sortVal === "amount_asc") return list.sort((a, b) => a.amount - b.amount);
+          if (sortVal === "amount_desc")
+            return list.sort((a, b) => b.amount - a.amount);
+          if (sortVal === "amount_asc")
+            return list.sort((a, b) => a.amount - b.amount);
           return list.sort((a, b) => b.id - a.id);
         }}
         pageSize={6}
         renderItem={(txn) => (
-          <Card key={txn.id} className="rounded-3xl border-border bg-card p-5 shadow-xs">
+          <Card
+            key={txn.id}
+            className="rounded-3xl border-border bg-card p-5 shadow-xs"
+          >
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono font-bold text-sm text-foreground">{txn.transactionId}</span>
+                  <span className="font-mono font-bold text-sm text-foreground">
+                    {txn.transactionId}
+                  </span>
                   <Badge variant="outline" className="text-[10px] font-mono">
                     {txn.orderId}
                   </Badge>
                 </div>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Customer: <span className="font-semibold text-foreground">{txn.customerName}</span> • Gateway: {txn.gateway}
+                  Customer:{" "}
+                  <span className="font-semibold text-foreground">
+                    {txn.customerName}
+                  </span>{" "}
+                  • Gateway: {txn.gateway}
                 </p>
               </div>
 
-              <Badge className={`text-[10px] uppercase font-bold ${getStatusColor(txn.status)}`}>
+              <Badge
+                className={`text-[10px] uppercase font-bold ${getStatusColor(txn.status)}`}
+              >
                 {txn.status}
               </Badge>
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-2xl bg-muted/40 border border-border/60 text-xs my-3">
-              <span className="text-muted-foreground">Mode: <span className="font-bold text-foreground">{txn.paymentMethod}</span></span>
-              <span className="font-mono text-muted-foreground">{txn.date}</span>
+              <span className="text-muted-foreground">
+                Mode:{" "}
+                <span className="font-bold text-foreground">
+                  {txn.paymentMethod}
+                </span>
+              </span>
+              <span className="font-mono text-muted-foreground">
+                {txn.date}
+              </span>
             </div>
 
             <div className="flex items-center justify-between pt-2 border-t border-border/60">
-              <span className="font-display font-black text-base text-foreground">₹{txn.amount}</span>
-              <Badge variant="secondary" className="text-[10px] font-semibold text-emerald-600">
+              <span className="font-display font-black text-base text-foreground">
+                ₹{txn.amount}
+              </span>
+              <Badge
+                variant="secondary"
+                className="text-[10px] font-semibold text-emerald-600"
+              >
                 Verified Gateway Settlement
               </Badge>
             </div>

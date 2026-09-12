@@ -37,7 +37,15 @@ export interface PartnerAccount {
   password: string;
   businessName: string;
   ownerName: string;
-  category: "All" | "Grocery" | "Pharmacy" | "Services" | "Transport" | "Workshops" | "Healthcare" | "System";
+  category:
+    | "All"
+    | "Grocery"
+    | "Pharmacy"
+    | "Services"
+    | "Transport"
+    | "Workshops"
+    | "Healthcare"
+    | "System";
   role: AdminRole;
   phone: string;
   email: string;
@@ -187,13 +195,14 @@ export const DEFAULT_PARTNER_ACCOUNTS: PartnerAccount[] = [
 ];
 
 interface PartnerAuthState {
+  token: string | null;
   currentPartner: PartnerAccount | null;
   partners: PartnerAccount[];
   isAuthenticated: boolean;
-  login: (id: string, password: string) => { success: boolean; error?: string };
+  login: (id: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   addPartner: (partner: PartnerAccount) => void;
-  updatePartner: (id: string, updates: Partial<PartnerAccount>) => void;
+  updatePartner: (id: string, updates: Partial<PartnerAccount>) => Promise<void>;
   deletePartner: (id: string) => void;
   resetPartnersToDefault: () => void;
 }
@@ -201,21 +210,78 @@ interface PartnerAuthState {
 export const usePartnerAuth = create<PartnerAuthState>()(
   persist(
     (set, get) => ({
+      token: null,
       currentPartner: DEFAULT_PARTNER_ACCOUNTS[0], // Default logged in as Super Admin
       partners: DEFAULT_PARTNER_ACCOUNTS,
       isAuthenticated: true,
 
-      login: (id, password) => {
+      login: async (id, password) => {
+        try {
+          const res = await fetch("/api/auth/partner/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: id.trim(), password: password.trim() }),
+          });
+          const data = await res.json();
+          if (data && data.success && data.token) {
+            const partnerData: PartnerAccount = {
+              id: data.user.username || id.trim(),
+              password: "",
+              businessName: data.user.vendor?.businessName || data.user.name,
+              ownerName: data.user.name,
+              category: data.user.vendor?.category || "Grocery",
+              role: data.user.role || (id.trim() === "admin" ? "super_owner" : "partner"),
+              phone: data.user.vendor?.phone || data.user.phone || "",
+              email: data.user.vendor?.email || data.user.email || "",
+              city: data.user.vendor?.city || data.user.city || "",
+              vendorId: data.user.vendorId || (data.user.vendor ? data.user.vendor.id : 0),
+              status: "active",
+              permissions:
+                data.user.role === "super_owner"
+                  ? DEFAULT_PARTNER_ACCOUNTS[0].permissions
+                  : {
+                      canManageShop: true,
+                      canManageServices: true,
+                      canManageBookings: true,
+                      canManageOrders: true,
+                      canManageEnquiries: true,
+                      canManageCustomers: true,
+                      canManageGallery: true,
+                      canManageReviews: true,
+                      canManageWebsiteContent: false,
+                      canManageCategories: false,
+                      canManageOwnerSettings: false,
+                    },
+            };
+            set({ currentPartner: partnerData, token: data.token, isAuthenticated: true });
+            return { success: true };
+          }
+          if (data && data.error) {
+            return { success: false, error: data.error };
+          }
+        } catch (err) {
+          console.warn("Backend API login network fallback to local auth store:", err);
+        }
+
+        // Fallback check against cached partners if offline
         const found = get().partners.find(
-          (p) => p.id.toLowerCase() === id.trim().toLowerCase() && p.password === password.trim()
+          (p) =>
+            p.id.toLowerCase() === id.trim().toLowerCase() &&
+            p.password === password.trim(),
         );
 
         if (!found) {
-          return { success: false, error: "Invalid Admin / Partner ID or Password." };
+          return {
+            success: false,
+            error: "Invalid Admin / Partner ID or Password.",
+          };
         }
 
         if (found.status === "suspended") {
-          return { success: false, error: "This partner account has been suspended by administration." };
+          return {
+            success: false,
+            error: "This partner account has been suspended by administration.",
+          };
         }
 
         set({ currentPartner: found, isAuthenticated: true });
@@ -223,16 +289,42 @@ export const usePartnerAuth = create<PartnerAuthState>()(
       },
 
       logout: () => {
-        set({ currentPartner: null, isAuthenticated: false });
+        set({ currentPartner: null, token: null, isAuthenticated: false });
       },
 
       addPartner: (partner) => {
-        set({ partners: [...get().partners.filter((p) => p.id !== partner.id), partner] });
+        set({
+          partners: [
+            ...get().partners.filter((p) => p.id !== partner.id),
+            partner,
+          ],
+        });
       },
 
-      updatePartner: (id, updates) => {
+      updatePartner: async (id, updates) => {
+        const current = get().partners.find((p) => p.id === id);
+        const vendorId = updates.vendorId || current?.vendorId;
+        const token = get().token;
+
+        if (vendorId && token) {
+          try {
+            await fetch(`/api/vendors/${vendorId}`, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify(updates),
+            });
+          } catch (err) {
+            console.error("Failed to sync vendor update with server API:", err);
+          }
+        }
+
         set({
-          partners: get().partners.map((p) => (p.id === id ? { ...p, ...updates } : p)),
+          partners: get().partners.map((p) =>
+            p.id === id ? { ...p, ...updates } : p,
+          ),
           currentPartner:
             get().currentPartner?.id === id
               ? { ...get().currentPartner!, ...updates }
@@ -243,8 +335,10 @@ export const usePartnerAuth = create<PartnerAuthState>()(
       deletePartner: (id) => {
         set({
           partners: get().partners.filter((p) => p.id !== id),
-          currentPartner: get().currentPartner?.id === id ? null : get().currentPartner,
-          isAuthenticated: get().currentPartner?.id === id ? false : get().isAuthenticated,
+          currentPartner:
+            get().currentPartner?.id === id ? null : get().currentPartner,
+          isAuthenticated:
+            get().currentPartner?.id === id ? false : get().isAuthenticated,
         });
       },
 
@@ -258,6 +352,6 @@ export const usePartnerAuth = create<PartnerAuthState>()(
     }),
     {
       name: "ezy1_partner_auth_v3",
-    }
-  )
+    },
+  ),
 );

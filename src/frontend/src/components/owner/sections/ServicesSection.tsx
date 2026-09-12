@@ -25,7 +25,8 @@ import {
   User,
   Wrench,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { type StoredService, useStoreData } from "../../../lib/storeData";
 import { ConfirmModal } from "../ConfirmModal";
@@ -36,7 +37,9 @@ export function ServicesSection() {
   const store = useStoreData();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingService, setEditingService] = useState<StoredService | null>(null);
+  const [editingService, setEditingService] = useState<StoredService | null>(
+    null,
+  );
 
   // Form State
   const [name, setName] = useState("");
@@ -62,7 +65,9 @@ export function ServicesSection() {
     setIsAvailable(true);
     setPublished(true);
     setDuration("1-2 Hours");
-    setImage("https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80");
+    setImage(
+      "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80",
+    );
     setTagsInput("Wiring, Repair, Emergency");
     setIsDialogOpen(true);
   };
@@ -190,9 +195,12 @@ export function ServicesSection() {
         defaultSort="newest"
         onSort={(items, sortVal) => {
           const list = [...items];
-          if (sortVal === "price_asc") return list.sort((a, b) => a.pricePerHour - b.pricePerHour);
-          if (sortVal === "price_desc") return list.sort((a, b) => b.pricePerHour - a.pricePerHour);
-          if (sortVal === "rating_desc") return list.sort((a, b) => b.rating - a.rating);
+          if (sortVal === "price_asc")
+            return list.sort((a, b) => a.pricePerHour - b.pricePerHour);
+          if (sortVal === "price_desc")
+            return list.sort((a, b) => b.pricePerHour - a.pricePerHour);
+          if (sortVal === "rating_desc")
+            return list.sort((a, b) => b.rating - a.rating);
           return list.sort((a, b) => b.id - a.id);
         }}
         onAddNew={openAddDialog}
@@ -202,7 +210,9 @@ export function ServicesSection() {
           <Card
             key={svc.id}
             className={`rounded-2xl overflow-hidden border transition-all duration-200 hover:shadow-md ${
-              svc.published ? "border-border/80 bg-card" : "border-border/50 bg-muted/20 opacity-80"
+              svc.published
+                ? "border-border/80 bg-card"
+                : "border-border/50 bg-muted/20 opacity-80"
             }`}
           >
             <div className="relative aspect-video bg-muted/60 overflow-hidden group">
@@ -211,7 +221,8 @@ export function ServicesSection() {
                 alt={svc.name}
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = "https://placehold.co/600x400?text=Service";
+                  (e.target as HTMLImageElement).src =
+                    "https://placehold.co/600x400?text=Service";
                 }}
               />
               <div className="absolute top-2.5 left-2.5 flex items-center gap-1">
@@ -223,7 +234,9 @@ export function ServicesSection() {
               <div className="absolute top-2.5 right-2.5">
                 <Badge
                   className={`text-[10px] font-bold ${
-                    svc.isAvailable ? "bg-emerald-500 text-white" : "bg-muted text-muted-foreground"
+                    svc.isAvailable
+                      ? "bg-emerald-500 text-white"
+                      : "bg-muted text-muted-foreground"
                   }`}
                 >
                   {svc.isAvailable ? "Available" : "Unavailable"}
@@ -248,7 +261,9 @@ export function ServicesSection() {
                 </div>
                 <div className="flex items-center gap-1">
                   <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                  <span className="font-semibold text-foreground">{svc.rating}</span>
+                  <span className="font-semibold text-foreground">
+                    {svc.rating}
+                  </span>
                   <span>({svc.totalReviews})</span>
                 </div>
               </div>
@@ -257,7 +272,11 @@ export function ServicesSection() {
               {svc.tags && svc.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                   {svc.tags.map((tag, i) => (
-                    <Badge key={i} variant="secondary" className="text-[10px] px-1.5 py-0 font-normal">
+                    <Badge
+                      key={i}
+                      variant="secondary"
+                      className="text-[10px] px-1.5 py-0 font-normal"
+                    >
                       #{tag}
                     </Badge>
                   ))}
@@ -270,7 +289,9 @@ export function ServicesSection() {
                   <span className="font-display font-black text-lg text-foreground">
                     ₹{svc.pricePerHour}
                   </span>
-                  <span className="text-[10px] text-muted-foreground ml-1">/ hour</span>
+                  <span className="text-[10px] text-muted-foreground ml-1">
+                    / hour
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-1">
@@ -282,12 +303,16 @@ export function ServicesSection() {
                       toast.success(
                         svc.published
                           ? `"${svc.name}" hidden from public website.`
-                          : `"${svc.name}" published live!`
+                          : `"${svc.name}" published live!`,
                       );
                     }}
                     className="h-8 px-2 text-xs rounded-xl"
                   >
-                    {svc.published ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5 text-emerald-500" />}
+                    {svc.published ? (
+                      <EyeOff className="w-3.5 h-3.5" />
+                    ) : (
+                      <Eye className="w-3.5 h-3.5 text-emerald-500" />
+                    )}
                   </Button>
                   <Button
                     variant="outline"
@@ -318,7 +343,9 @@ export function ServicesSection() {
           <form onSubmit={handleSave}>
             <DialogHeader>
               <DialogTitle className="text-xl font-display font-bold">
-                {editingService ? "Edit Service Offering" : "Add New Local Service"}
+                {editingService
+                  ? "Edit Service Offering"
+                  : "Add New Local Service"}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
                 Set rates, specialist assignment, availability and description.
@@ -348,7 +375,9 @@ export function ServicesSection() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold">Rate (₹ / hr) *</Label>
+                  <Label className="text-xs font-semibold">
+                    Rate (₹ / hr) *
+                  </Label>
                   <Input
                     type="number"
                     min={1}
@@ -359,7 +388,9 @@ export function ServicesSection() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold">Estimated Duration</Label>
+                  <Label className="text-xs font-semibold">
+                    Estimated Duration
+                  </Label>
                   <Input
                     placeholder="e.g., 1-2 Hours, 45 Mins"
                     value={duration}
@@ -371,7 +402,9 @@ export function ServicesSection() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold">Assigned Specialist / Provider *</Label>
+                  <Label className="text-xs font-semibold">
+                    Assigned Specialist / Provider *
+                  </Label>
                   <Input
                     required
                     placeholder="e.g., Suresh Sharma / Master Plumbers"
@@ -381,7 +414,9 @@ export function ServicesSection() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold">Tags (comma separated)</Label>
+                  <Label className="text-xs font-semibold">
+                    Tags (comma separated)
+                  </Label>
                   <Input
                     placeholder="Wiring, Fan Fix, Leakage, Drainage"
                     value={tagsInput}
@@ -392,7 +427,9 @@ export function ServicesSection() {
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Service Description & Scope</Label>
+                <Label className="text-xs font-semibold">
+                  Service Description & Scope
+                </Label>
                 <Textarea
                   rows={3}
                   placeholder="Outline what is included, spare parts policy, inspection process..."
@@ -402,20 +439,36 @@ export function ServicesSection() {
                 />
               </div>
 
-              <ImageUploader label="Service Image" value={image} onChange={setImage} previewHeight="h-40" />
+              <ImageUploader
+                label="Service Image"
+                value={image}
+                onChange={setImage}
+                previewHeight="h-40"
+              />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-2xl bg-muted/40 border border-border">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label className="text-xs font-semibold">Instant Availability</Label>
-                    <p className="text-[11px] text-muted-foreground">Ready to take on jobs</p>
+                    <Label className="text-xs font-semibold">
+                      Instant Availability
+                    </Label>
+                    <p className="text-[11px] text-muted-foreground">
+                      Ready to take on jobs
+                    </p>
                   </div>
-                  <Switch checked={isAvailable} onCheckedChange={setIsAvailable} />
+                  <Switch
+                    checked={isAvailable}
+                    onCheckedChange={setIsAvailable}
+                  />
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label className="text-xs font-semibold">Publish Live</Label>
-                    <p className="text-[11px] text-muted-foreground">Visible on public directory</p>
+                    <Label className="text-xs font-semibold">
+                      Publish Live
+                    </Label>
+                    <p className="text-[11px] text-muted-foreground">
+                      Visible on public directory
+                    </p>
                   </div>
                   <Switch checked={published} onCheckedChange={setPublished} />
                 </div>
@@ -423,10 +476,18 @@ export function ServicesSection() {
             </div>
 
             <DialogFooter className="gap-2 pt-2 border-t border-border">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-xl">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                className="rounded-xl"
+              >
                 Cancel
               </Button>
-              <Button type="submit" className="rounded-xl bg-primary text-primary-foreground font-semibold">
+              <Button
+                type="submit"
+                className="rounded-xl bg-primary text-primary-foreground font-semibold"
+              >
                 {editingService ? "Save Changes" : "Create Service"}
               </Button>
             </DialogFooter>

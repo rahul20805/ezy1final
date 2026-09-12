@@ -18,7 +18,8 @@ import {
   SlidersHorizontal,
   X,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 
 interface FilterOption {
   key: string;
@@ -71,8 +72,12 @@ export function DataTable<T extends { id?: number | string }>({
   viewMode = "grid",
 }: DataTableProps<T>) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilters, setActiveFilters] = useState<Record<string, string>>({});
-  const [currentSort, setCurrentSort] = useState<string>(defaultSort || (sortOptions[0]?.value ?? ""));
+  const [activeFilters, setActiveFilters] = useState<Record<string, string>>(
+    {},
+  );
+  const [currentSort, setCurrentSort] = useState<string>(
+    defaultSort || (sortOptions[0]?.value ?? ""),
+  );
   const [currentPage, setCurrentPage] = useState(1);
 
   // 1. Search Filter
@@ -116,7 +121,9 @@ export function DataTable<T extends { id?: number | string }>({
     setCurrentPage(1);
   };
 
-  const hasActiveFilters = searchQuery.trim() !== "" || Object.values(activeFilters).some((v) => v && v !== "all");
+  const hasActiveFilters =
+    searchQuery.trim() !== "" ||
+    Object.values(activeFilters).some((v) => v && v !== "all");
 
   return (
     <div className="space-y-6">
@@ -127,12 +134,17 @@ export function DataTable<T extends { id?: number | string }>({
             <h1 className="text-xl sm:text-2xl font-display font-bold text-foreground tracking-tight">
               {title}
             </h1>
-            <Badge variant="secondary" className="text-xs px-2.5 py-0.5 rounded-full font-semibold">
+            <Badge
+              variant="secondary"
+              className="text-xs px-2.5 py-0.5 rounded-full font-semibold"
+            >
               {totalItems} total
             </Badge>
           </div>
           {description && (
-            <p className="text-xs sm:text-sm text-muted-foreground mt-1">{description}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+              {description}
+            </p>
           )}
         </div>
 
@@ -201,7 +213,10 @@ export function DataTable<T extends { id?: number | string }>({
           {/* Sort Select */}
           {sortOptions.length > 0 && (
             <div className="w-full md:w-48">
-              <Select value={currentSort} onValueChange={(val) => setCurrentSort(val)}>
+              <Select
+                value={currentSort}
+                onValueChange={(val) => setCurrentSort(val)}
+              >
                 <SelectTrigger className="h-9 text-xs rounded-xl border-border bg-background/80">
                   <div className="flex items-center gap-1.5 truncate">
                     <ArrowUpDown className="w-3 h-3 text-muted-foreground flex-shrink-0" />
@@ -231,7 +246,9 @@ export function DataTable<T extends { id?: number | string }>({
           )}
         </div>
 
-        {extraFilters && <div className="pt-2 border-t border-border/60">{extraFilters}</div>}
+        {extraFilters && (
+          <div className="pt-2 border-t border-border/60">{extraFilters}</div>
+        )}
       </div>
 
       {/* Content Rendering */}
@@ -243,7 +260,9 @@ export function DataTable<T extends { id?: number | string }>({
             <div className="w-12 h-12 rounded-2xl bg-muted/60 text-muted-foreground flex items-center justify-center mx-auto mb-3">
               <Search className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-semibold text-foreground">No records found</h3>
+            <h3 className="text-base font-semibold text-foreground">
+              No records found
+            </h3>
             <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
               {hasActiveFilters
                 ? "Try adjusting your search query or filters to find what you are looking for."
@@ -271,11 +290,15 @@ export function DataTable<T extends { id?: number | string }>({
         )
       ) : viewMode === "grid" ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {paginatedItems.map((item, index) => renderItem(item, startIndex + index))}
+          {paginatedItems.map((item, index) =>
+            renderItem(item, startIndex + index),
+          )}
         </div>
       ) : (
         <div className="space-y-3">
-          {paginatedItems.map((item, index) => renderItem(item, startIndex + index))}
+          {paginatedItems.map((item, index) =>
+            renderItem(item, startIndex + index),
+          )}
         </div>
       )}
 
@@ -283,11 +306,17 @@ export function DataTable<T extends { id?: number | string }>({
       {totalPages > 1 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-border/60">
           <p className="text-xs text-muted-foreground">
-            Showing <span className="font-semibold text-foreground">{startIndex + 1}</span> to{" "}
+            Showing{" "}
+            <span className="font-semibold text-foreground">
+              {startIndex + 1}
+            </span>{" "}
+            to{" "}
             <span className="font-semibold text-foreground">
               {Math.min(startIndex + pageSize, totalItems)}
             </span>{" "}
-            of <span className="font-semibold text-foreground">{totalItems}</span> entries
+            of{" "}
+            <span className="font-semibold text-foreground">{totalItems}</span>{" "}
+            entries
           </p>
 
           <div className="flex items-center gap-1">
@@ -315,7 +344,9 @@ export function DataTable<T extends { id?: number | string }>({
                     size="sm"
                     onClick={() => setCurrentPage(pageNum)}
                     className={`w-8 h-8 p-0 text-xs rounded-lg ${
-                      validPage === pageNum ? "font-bold shadow-xs" : "text-muted-foreground"
+                      validPage === pageNum
+                        ? "font-bold shadow-xs"
+                        : "text-muted-foreground"
                     }`}
                   >
                     {pageNum}

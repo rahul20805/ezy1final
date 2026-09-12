@@ -5,10 +5,14 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   Bell,
+  CalendarCheck,
+  Car,
   ChevronLeft,
   ChevronRight,
+  Clock,
   Home,
   LayoutDashboard,
+  MapPin,
   Menu,
   Package,
   Settings,
@@ -16,53 +20,135 @@ import {
   Store,
   TrendingUp,
   User,
-  Car,
-  MapPin,
-  Clock,
   Wrench,
-  CalendarCheck,
 } from "lucide-react";
 import { useState } from "react";
 import { useIsMobile } from "../hooks/use-mobile";
 
 const VENDOR_ITEMS = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/vendor-dashboard", badge: null },
-  { icon: Package, label: "My Listings", href: "/vendor-dashboard", badge: null },
-  { icon: ShoppingCart, label: "Orders", href: "/vendor-dashboard", badge: "3" },
-  { icon: TrendingUp, label: "Earnings", href: "/vendor-dashboard", badge: null },
+  {
+    icon: LayoutDashboard,
+    label: "Dashboard",
+    href: "/vendor-dashboard",
+    badge: null,
+  },
+  {
+    icon: Package,
+    label: "My Listings",
+    href: "/vendor-dashboard",
+    badge: null,
+  },
+  {
+    icon: ShoppingCart,
+    label: "Orders",
+    href: "/vendor-dashboard",
+    badge: "3",
+  },
+  {
+    icon: TrendingUp,
+    label: "Earnings",
+    href: "/vendor-dashboard",
+    badge: null,
+  },
   { icon: Store, label: "My Store", href: "/vendor-dashboard", badge: null },
   { icon: User, label: "Profile", href: "/vendor-dashboard", badge: null },
 ];
 
 const DRIVER_ITEMS = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/driver-dashboard", badge: null },
-  { icon: MapPin, label: "Active Rides", href: "/driver-dashboard", badge: "1" },
-  { icon: Clock, label: "Ride History", href: "/driver-dashboard", badge: null },
-  { icon: TrendingUp, label: "Earnings", href: "/driver-dashboard", badge: null },
+  {
+    icon: LayoutDashboard,
+    label: "Dashboard",
+    href: "/driver-dashboard",
+    badge: null,
+  },
+  {
+    icon: MapPin,
+    label: "Active Rides",
+    href: "/driver-dashboard",
+    badge: "1",
+  },
+  {
+    icon: Clock,
+    label: "Ride History",
+    href: "/driver-dashboard",
+    badge: null,
+  },
+  {
+    icon: TrendingUp,
+    label: "Earnings",
+    href: "/driver-dashboard",
+    badge: null,
+  },
   { icon: Car, label: "Vehicle", href: "/driver-dashboard", badge: null },
   { icon: User, label: "Profile", href: "/driver-dashboard", badge: null },
 ];
 
 const SP_ITEMS = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/service-provider-dashboard", badge: null },
-  { icon: Wrench, label: "My Services", href: "/service-provider-dashboard", badge: null },
-  { icon: CalendarCheck, label: "Requests", href: "/service-provider-dashboard", badge: "2" },
-  { icon: Clock, label: "History", href: "/service-provider-dashboard", badge: null },
-  { icon: TrendingUp, label: "Earnings", href: "/service-provider-dashboard", badge: null },
-  { icon: User, label: "Profile", href: "/service-provider-dashboard", badge: null },
+  {
+    icon: LayoutDashboard,
+    label: "Dashboard",
+    href: "/service-provider-dashboard",
+    badge: null,
+  },
+  {
+    icon: Wrench,
+    label: "My Services",
+    href: "/service-provider-dashboard",
+    badge: null,
+  },
+  {
+    icon: CalendarCheck,
+    label: "Requests",
+    href: "/service-provider-dashboard",
+    badge: "2",
+  },
+  {
+    icon: Clock,
+    label: "History",
+    href: "/service-provider-dashboard",
+    badge: null,
+  },
+  {
+    icon: TrendingUp,
+    label: "Earnings",
+    href: "/service-provider-dashboard",
+    badge: null,
+  },
+  {
+    icon: User,
+    label: "Profile",
+    href: "/service-provider-dashboard",
+    badge: null,
+  },
 ];
 
 function getNavConfig(path: string) {
   if (path.includes("driver")) {
-    return { items: DRIVER_ITEMS, type: "driver", icon: Car, title: "Driver Portal", storeName: "Rajesh (Driver)" };
+    return {
+      items: DRIVER_ITEMS,
+      type: "driver",
+      icon: Car,
+      title: "Driver Portal",
+      storeName: "Rajesh (Driver)",
+    };
   }
   if (path.includes("service-provider")) {
-    return { items: SP_ITEMS, type: "sp", icon: Wrench, title: "SP Portal", storeName: "Suresh Electricals" };
+    return {
+      items: SP_ITEMS,
+      type: "sp",
+      icon: Wrench,
+      title: "SP Portal",
+      storeName: "Suresh Electricals",
+    };
   }
-  return { items: VENDOR_ITEMS, type: "vendor", icon: Store, title: "Partner Portal", storeName: "Sharma Kirana Store" };
+  return {
+    items: VENDOR_ITEMS,
+    type: "vendor",
+    icon: Store,
+    title: "Partner Portal",
+    storeName: "Sharma Kirana Store",
+  };
 }
-
-
 
 const bottomItems = [
   {

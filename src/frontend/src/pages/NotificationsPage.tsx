@@ -1,5 +1,5 @@
-import UserLayout from "../components/UserLayout";
 import { Bell } from "lucide-react";
+import UserLayout from "../components/UserLayout";
 
 export default function NotificationsPage() {
   return (
@@ -9,7 +9,9 @@ export default function NotificationsPage() {
           <Bell className="w-8 h-8 text-primary" />
         </div>
         <h2 className="text-xl font-bold mb-2">No new notifications</h2>
-        <p className="text-muted-foreground text-sm">We'll let you know when something important happens.</p>
+        <p className="text-muted-foreground text-sm">
+          We'll let you know when something important happens.
+        </p>
       </div>
     </UserLayout>
   );

@@ -138,7 +138,13 @@ export interface Testimonial {
   role: string;
 }
 
-export type UserRole = "user" | "customer" | "vendor" | "service_partner" | "admin" | "guest";
+export type UserRole =
+  | "user"
+  | "customer"
+  | "vendor"
+  | "service_partner"
+  | "admin"
+  | "guest";
 
 export interface ProductCategory {
   id: number;
@@ -223,7 +229,15 @@ export interface Order {
   vendorId: number;
   items: CartItem[];
   totalAmount: number;
-  status: "placed" | "confirmed" | "preparing" | "ready" | "outForDelivery" | "delivered" | "cancelled" | "refunded";
+  status:
+    | "placed"
+    | "confirmed"
+    | "preparing"
+    | "ready"
+    | "outForDelivery"
+    | "delivered"
+    | "cancelled"
+    | "refunded";
   deliveryAddress: string;
   createdAt: string;
 }

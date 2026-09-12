@@ -27,14 +27,18 @@ import {
 import React, { useState } from "react";
 import { toast } from "sonner";
 import { usePartnerAuth } from "../../../../lib/partnerAuthStore";
-import { type StoredPartnerApplication, useStoreData } from "../../../../lib/storeData";
+import {
+  type StoredPartnerApplication,
+  useStoreData,
+} from "../../../../lib/storeData";
 import { DataTable } from "../../../owner/DataTable";
 
 export function PartnerApplications() {
   const store = useStoreData();
   const { addPartner } = usePartnerAuth();
 
-  const [selectedApp, setSelectedApp] = useState<StoredPartnerApplication | null>(null);
+  const [selectedApp, setSelectedApp] =
+    useState<StoredPartnerApplication | null>(null);
   const [adminNotes, setAdminNotes] = useState("");
   const [isDetailOpen, setIsDetailOpen] = useState(false);
 
@@ -46,7 +50,11 @@ export function PartnerApplications() {
 
   const handleApprove = (app: StoredPartnerApplication) => {
     // 1. Update application status
-    store.updateApplicationStatus(app.id, "APPROVED", adminNotes || "KYC documents verified & approved.");
+    store.updateApplicationStatus(
+      app.id,
+      "APPROVED",
+      adminNotes || "KYC documents verified & approved.",
+    );
 
     // 2. Generate secure partner credentials
     const generatedId = app.businessName
@@ -72,7 +80,8 @@ export function PartnerApplications() {
       permissions: {
         canManageShop: true,
         canManageServices: app.category === "Services",
-        canManageBookings: app.category === "Workshops" || app.category === "Healthcare",
+        canManageBookings:
+          app.category === "Workshops" || app.category === "Healthcare",
         canManageOrders: true,
         canManageEnquiries: true,
         canManageCustomers: true,
@@ -100,21 +109,32 @@ export function PartnerApplications() {
       openingHours: "08:00 AM - 09:00 PM",
       deliveryRadiusKm: 10,
       verified: true,
-      image: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80",
+      image:
+        "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80",
     });
 
-    toast.success(`Application Approved! Partner Account generated: ID="${generatedId}", Pass="${generatedPassword}"`);
+    toast.success(
+      `Application Approved! Partner Account generated: ID="${generatedId}", Pass="${generatedPassword}"`,
+    );
     setIsDetailOpen(false);
   };
 
   const handleReject = (app: StoredPartnerApplication) => {
-    store.updateApplicationStatus(app.id, "REJECTED", adminNotes || "Application did not meet compliance requirements.");
+    store.updateApplicationStatus(
+      app.id,
+      "REJECTED",
+      adminNotes || "Application did not meet compliance requirements.",
+    );
     toast.error(`Application #${app.id} Rejected.`);
     setIsDetailOpen(false);
   };
 
   const handleRequestInfo = (app: StoredPartnerApplication) => {
-    store.updateApplicationStatus(app.id, "MORE_INFORMATION_REQUIRED", adminNotes || "Please upload updated FSSAI / GST proof.");
+    store.updateApplicationStatus(
+      app.id,
+      "MORE_INFORMATION_REQUIRED",
+      adminNotes || "Please upload updated FSSAI / GST proof.",
+    );
     toast.info(`Requested additional information from applicant.`);
     setIsDetailOpen(false);
   };
@@ -152,7 +172,10 @@ export function PartnerApplications() {
         defaultSort="id_desc"
         onSort={(items, sortVal) => {
           const list = [...items];
-          if (sortVal === "name_asc") return list.sort((a, b) => a.businessName.localeCompare(b.businessName));
+          if (sortVal === "name_asc")
+            return list.sort((a, b) =>
+              a.businessName.localeCompare(b.businessName),
+            );
           return list.sort((a, b) => b.id - a.id);
         }}
         pageSize={6}
@@ -163,21 +186,30 @@ export function PartnerApplications() {
               app.status === "PENDING"
                 ? "border-amber-500/40 bg-amber-500/5"
                 : app.status === "APPROVED"
-                ? "border-emerald-500/30 bg-emerald-500/5"
-                : "border-border bg-card"
+                  ? "border-emerald-500/30 bg-emerald-500/5"
+                  : "border-border bg-card"
             }`}
           >
             <CardContent className="p-5 space-y-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="font-display font-bold text-base text-foreground">{app.businessName}</h3>
-                    <Badge variant="outline" className="text-[10px] uppercase font-bold">
+                    <h3 className="font-display font-bold text-base text-foreground">
+                      {app.businessName}
+                    </h3>
+                    <Badge
+                      variant="outline"
+                      className="text-[10px] uppercase font-bold"
+                    >
                       {app.category}
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Applicant: <span className="font-medium text-foreground">{app.applicantName}</span> • Applied: {app.appliedAt}
+                    Applicant:{" "}
+                    <span className="font-medium text-foreground">
+                      {app.applicantName}
+                    </span>{" "}
+                    • Applied: {app.appliedAt}
                   </p>
                 </div>
 
@@ -186,10 +218,10 @@ export function PartnerApplications() {
                     app.status === "APPROVED"
                       ? "bg-emerald-500/10 text-emerald-600"
                       : app.status === "PENDING"
-                      ? "bg-amber-500/10 text-amber-600"
-                      : app.status === "UNDER_REVIEW"
-                      ? "bg-blue-500/10 text-blue-600"
-                      : "bg-destructive/10 text-destructive"
+                        ? "bg-amber-500/10 text-amber-600"
+                        : app.status === "UNDER_REVIEW"
+                          ? "bg-blue-500/10 text-blue-600"
+                          : "bg-destructive/10 text-destructive"
                   }`}
                 >
                   {app.status.replace(/_/g, " ")}
@@ -211,13 +243,16 @@ export function PartnerApplications() {
                 </div>
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <FileText className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                  <span className="truncate">{app.documentsSubmitted.length} Document(s) attached</span>
+                  <span className="truncate">
+                    {app.documentsSubmitted.length} Document(s) attached
+                  </span>
                 </div>
               </div>
 
               {app.notes && (
                 <div className="p-2.5 rounded-xl bg-muted/40 border border-border/60 text-xs text-muted-foreground">
-                  <span className="font-semibold text-foreground">Notes:</span> {app.notes}
+                  <span className="font-semibold text-foreground">Notes:</span>{" "}
+                  {app.notes}
                 </div>
               )}
 
@@ -238,7 +273,8 @@ export function PartnerApplications() {
                       onClick={() => handleApprove(app)}
                       className="h-8 px-3 text-xs rounded-xl bg-primary text-primary-foreground font-semibold gap-1 shadow-xs"
                     >
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Approve & Activate
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Approve &
+                      Activate
                     </Button>
                   </div>
                 )}
@@ -258,16 +294,23 @@ export function PartnerApplications() {
                   Review Application #{selectedApp.id}
                 </DialogTitle>
                 <DialogDescription className="text-xs text-muted-foreground">
-                  {selectedApp.businessName} • {selectedApp.applicantName} ({selectedApp.category})
+                  {selectedApp.businessName} • {selectedApp.applicantName} (
+                  {selectedApp.category})
                 </DialogDescription>
               </DialogHeader>
 
               <div className="space-y-4 py-3 text-xs">
                 <div className="p-3.5 rounded-2xl bg-muted/40 border border-border space-y-2">
-                  <h4 className="font-bold text-foreground">Submitted Compliance Documents:</h4>
+                  <h4 className="font-bold text-foreground">
+                    Submitted Compliance Documents:
+                  </h4>
                   <div className="flex flex-wrap gap-2">
                     {selectedApp.documentsSubmitted.map((doc, idx) => (
-                      <Badge key={idx} variant="secondary" className="text-xs px-2.5 py-1 rounded-xl font-mono">
+                      <Badge
+                        key={idx}
+                        variant="secondary"
+                        className="text-xs px-2.5 py-1 rounded-xl font-mono"
+                      >
                         📄 {doc}
                       </Badge>
                     ))}
@@ -275,7 +318,9 @@ export function PartnerApplications() {
                 </div>
 
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Admin Verification Notes / Feedback</Label>
+                  <Label className="text-xs font-semibold">
+                    Admin Verification Notes / Feedback
+                  </Label>
                   <Textarea
                     rows={3}
                     value={adminNotes}
@@ -310,7 +355,8 @@ export function PartnerApplications() {
                     onClick={() => handleApprove(selectedApp)}
                     className="rounded-xl text-xs bg-primary text-primary-foreground font-semibold"
                   >
-                    <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Approve & Create Account
+                    <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Approve &
+                    Create Account
                   </Button>
                 </div>
               </DialogFooter>

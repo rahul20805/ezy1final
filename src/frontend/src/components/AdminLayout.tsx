@@ -4,25 +4,25 @@ import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
+  BarChart,
   Bell,
+  Car,
   ChevronLeft,
   ChevronRight,
+  CreditCard,
+  HeartPulse,
   Home,
   LayoutDashboard,
+  Megaphone,
   Menu,
+  MessageSquare,
   Package,
   Settings,
+  ShieldCheck,
   ShoppingCart,
   Store,
   Users,
-  Car,
-  HeartPulse,
   Wrench,
-  CreditCard,
-  MessageSquare,
-  ShieldCheck,
-  BarChart,
-  Megaphone,
 } from "lucide-react";
 import { useState } from "react";
 import { useIsMobile } from "../hooks/use-mobile";
@@ -30,15 +30,29 @@ import { useIsMobile } from "../hooks/use-mobile";
 const ADMIN_ITEMS = [
   { icon: LayoutDashboard, label: "Overview", href: "/admin" },
   { icon: Users, label: "Users", href: "/admin?tab=users" },
-  { icon: Store, label: "Vendors & Partners", href: "/admin?tab=vendors", badge: "5" },
+  {
+    icon: Store,
+    label: "Vendors & Partners",
+    href: "/admin?tab=vendors",
+    badge: "5",
+  },
   { icon: Package, label: "Products & Categories", href: "/admin?tab=catalog" },
   { icon: ShoppingCart, label: "Orders & Bookings", href: "/admin?tab=orders" },
   { icon: HeartPulse, label: "Healthcare", href: "/admin?tab=healthcare" },
   { icon: Car, label: "Transport & Vehicles", href: "/admin?tab=transport" },
   { icon: Wrench, label: "Workers & Services", href: "/admin?tab=services" },
   { icon: CreditCard, label: "Payments", href: "/admin?tab=payments" },
-  { icon: MessageSquare, label: "Reviews & Complaints", href: "/admin?tab=feedback" },
-  { icon: ShieldCheck, label: "Verification", href: "/admin?tab=verification", badge: "3" },
+  {
+    icon: MessageSquare,
+    label: "Reviews & Complaints",
+    href: "/admin?tab=feedback",
+  },
+  {
+    icon: ShieldCheck,
+    label: "Verification",
+    href: "/admin?tab=verification",
+    badge: "3",
+  },
   { icon: BarChart, label: "Reports", href: "/admin?tab=reports" },
   { icon: Megaphone, label: "Promotions", href: "/admin?tab=promotions" },
   { icon: Settings, label: "Platform Settings", href: "/admin?tab=settings" },
@@ -52,7 +66,9 @@ function AdminSidebarContent({
   onLinkClick?: () => void;
 }) {
   const routerState = useRouterState();
-  const searchParams = new URLSearchParams(routerState.location.search as string);
+  const searchParams = new URLSearchParams(
+    routerState.location.search as string,
+  );
   const currentTab = searchParams.get("tab") || "overview";
 
   return (
@@ -135,7 +151,10 @@ function AdminSidebarContent({
   );
 }
 
-export default function AdminLayout({ children, title }: { children: React.ReactNode, title?: string }) {
+export default function AdminLayout({
+  children,
+  title,
+}: { children: React.ReactNode; title?: string }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -156,9 +175,9 @@ export default function AdminLayout({ children, title }: { children: React.React
             data-ocid="admin_sidebar.collapse_toggle"
           >
             {collapsed ? (
-               <ChevronRight className="w-3 h-3 text-muted-foreground" />
+              <ChevronRight className="w-3 h-3 text-muted-foreground" />
             ) : (
-               <ChevronLeft className="w-3 h-3 text-muted-foreground" />
+              <ChevronLeft className="w-3 h-3 text-muted-foreground" />
             )}
           </button>
         </aside>
@@ -204,7 +223,10 @@ export default function AdminLayout({ children, title }: { children: React.React
           )}
 
           <div className="ml-auto flex items-center gap-2">
-            <Badge variant="outline" className="hidden sm:flex text-xs gap-1 bg-destructive/10 text-destructive border-destructive/20">
+            <Badge
+              variant="outline"
+              className="hidden sm:flex text-xs gap-1 bg-destructive/10 text-destructive border-destructive/20"
+            >
               <ShieldCheck className="w-3 h-3" />
               Super Admin Mode
             </Badge>

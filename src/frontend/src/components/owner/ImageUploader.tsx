@@ -1,8 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Image as ImageIcon, Link as LinkIcon, Trash2, UploadCloud, X } from "lucide-react";
-import React, { useState } from "react";
+import {
+  Image as ImageIcon,
+  Link as LinkIcon,
+  Trash2,
+  UploadCloud,
+  X,
+} from "lucide-react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 interface ImageUploaderProps {
@@ -70,7 +77,9 @@ export function ImageUploader({
 
   return (
     <div className="space-y-2">
-      {label && <Label className="text-xs font-semibold text-foreground">{label}</Label>}
+      {label && (
+        <Label className="text-xs font-semibold text-foreground">{label}</Label>
+      )}
 
       {actualValue ? (
         <div className="relative rounded-2xl overflow-hidden border border-border group bg-muted/20">
@@ -79,7 +88,8 @@ export function ImageUploader({
             alt="Uploaded Preview"
             className={`w-full ${previewHeight} object-cover transition-transform duration-300 group-hover:scale-105`}
             onError={(e) => {
-              (e.target as HTMLImageElement).src = "https://placehold.co/600x400?text=Invalid+Image+URL";
+              (e.target as HTMLImageElement).src =
+                "https://placehold.co/600x400?text=Invalid+Image+URL";
             }}
           />
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">

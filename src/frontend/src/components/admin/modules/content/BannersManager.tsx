@@ -20,7 +20,8 @@ import {
   Sparkles,
   Trash2,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { type StoredHeroSlide, useStoreData } from "../../../../lib/storeData";
 import { ConfirmModal } from "../../../owner/ConfirmModal";
@@ -31,7 +32,9 @@ export function BannersManager() {
   const store = useStoreData();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingBanner, setEditingBanner] = useState<StoredHeroSlide | null>(null);
+  const [editingBanner, setEditingBanner] = useState<StoredHeroSlide | null>(
+    null,
+  );
 
   // Form State
   const [title, setTitle] = useState("");
@@ -80,7 +83,9 @@ export function BannersManager() {
         title: title.trim(),
         subtitle: subtitle.trim(),
         badge: badge.trim(),
-        imageUrl: imageUrl || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&q=80",
+        imageUrl:
+          imageUrl ||
+          "https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&q=80",
         buttonText: buttonText.trim() || "Explore",
         buttonLink: buttonLink.trim() || "/shop",
         published,
@@ -91,7 +96,9 @@ export function BannersManager() {
         title: title.trim(),
         subtitle: subtitle.trim(),
         badge: badge.trim(),
-        imageUrl: imageUrl || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&q=80",
+        imageUrl:
+          imageUrl ||
+          "https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&q=80",
         buttonText: buttonText.trim() || "Explore",
         buttonLink: buttonLink.trim() || "/shop",
         published,
@@ -118,17 +125,23 @@ export function BannersManager() {
         data={store.heroSlides}
         searchPlaceholder="Search banner title, subtitle..."
         searchFilter={(item, query) =>
-          item.title.toLowerCase().includes(query) || item.subtitle.toLowerCase().includes(query)
+          item.title.toLowerCase().includes(query) ||
+          item.subtitle.toLowerCase().includes(query)
         }
         filterOptions={[]}
         sortOptions={[{ label: "Banner Title (A-Z)", value: "title_asc" }]}
         defaultSort="title_asc"
-        onSort={(items) => [...items].sort((a, b) => a.title.localeCompare(b.title))}
+        onSort={(items) =>
+          [...items].sort((a, b) => a.title.localeCompare(b.title))
+        }
         onAddNew={openAddDialog}
         addNewLabel="Add Banner"
         pageSize={6}
         renderItem={(banner) => (
-          <Card key={banner.id} className="rounded-3xl border-border bg-card overflow-hidden shadow-xs">
+          <Card
+            key={banner.id}
+            className="rounded-3xl border-border bg-card overflow-hidden shadow-xs"
+          >
             <div className="aspect-[21/9] bg-muted/30 relative overflow-hidden">
               <img
                 src={banner.imageUrl}
@@ -141,8 +154,12 @@ export function BannersManager() {
                     {banner.badge}
                   </Badge>
                 )}
-                <h3 className="font-display font-black text-base line-clamp-1">{banner.title}</h3>
-                <p className="text-xs text-white/80 line-clamp-1">{banner.subtitle}</p>
+                <h3 className="font-display font-black text-base line-clamp-1">
+                  {banner.title}
+                </h3>
+                <p className="text-xs text-white/80 line-clamp-1">
+                  {banner.subtitle}
+                </p>
               </div>
             </div>
 
@@ -183,17 +200,22 @@ export function BannersManager() {
           <form onSubmit={handleSave}>
             <DialogHeader>
               <DialogTitle className="text-xl font-display font-bold">
-                {editingBanner ? "Edit Promotional Banner" : "Add Hero Banner Slide"}
+                {editingBanner
+                  ? "Edit Promotional Banner"
+                  : "Add Hero Banner Slide"}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                Set headline title, subtitle, CTA text, destination URL, and high-res graphic.
+                Set headline title, subtitle, CTA text, destination URL, and
+                high-res graphic.
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-3.5 py-3">
               <div className="grid grid-cols-3 gap-3">
                 <div className="space-y-1 col-span-2">
-                  <Label className="text-xs font-semibold">Banner Heading *</Label>
+                  <Label className="text-xs font-semibold">
+                    Banner Heading *
+                  </Label>
                   <Input
                     required
                     placeholder="Everything You Need, Delivered in Minutes"
@@ -214,7 +236,9 @@ export function BannersManager() {
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Subtitle Description</Label>
+                <Label className="text-xs font-semibold">
+                  Subtitle Description
+                </Label>
                 <Input
                   placeholder="Fresh groceries, pharmacy, doctors and artisan workshops..."
                   value={subtitle}
@@ -225,7 +249,9 @@ export function BannersManager() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">CTA Button Text</Label>
+                  <Label className="text-xs font-semibold">
+                    CTA Button Text
+                  </Label>
                   <Input
                     value={buttonText}
                     onChange={(e) => setButtonText(e.target.value)}
@@ -233,7 +259,9 @@ export function BannersManager() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">CTA Link Destination</Label>
+                  <Label className="text-xs font-semibold">
+                    CTA Link Destination
+                  </Label>
                   <Input
                     value={buttonLink}
                     onChange={(e) => setButtonLink(e.target.value)}
@@ -244,15 +272,27 @@ export function BannersManager() {
 
               <div className="space-y-1">
                 <Label className="text-xs font-semibold">Banner Graphic</Label>
-                <ImageUploader currentImage={imageUrl} onImageChange={setImageUrl} label="Slide Image" />
+                <ImageUploader
+                  currentImage={imageUrl}
+                  onImageChange={setImageUrl}
+                  label="Slide Image"
+                />
               </div>
             </div>
 
             <DialogFooter className="gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-xl">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                className="rounded-xl"
+              >
                 Cancel
               </Button>
-              <Button type="submit" className="rounded-xl bg-primary text-primary-foreground font-semibold">
+              <Button
+                type="submit"
+                className="rounded-xl bg-primary text-primary-foreground font-semibold"
+              >
                 {editingBanner ? "Save Changes" : "Create Slide"}
               </Button>
             </DialogFooter>

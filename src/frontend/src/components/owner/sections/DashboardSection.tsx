@@ -30,13 +30,22 @@ export function DashboardSection({ onNavigateSection }: DashboardSectionProps) {
   const store = useStoreData();
   const { currentPartner } = usePartnerAuth();
 
-  const totalRevenue = store.orders.reduce((sum, o) => (o.paymentStatus === "paid" ? sum + o.totalAmount : sum), 0);
+  const totalRevenue = store.orders.reduce(
+    (sum, o) => (o.paymentStatus === "paid" ? sum + o.totalAmount : sum),
+    0,
+  );
   const totalOrdersCount = store.orders.length;
   const totalProductsCount = store.products.length;
   const totalCustomersCount = store.customers.length;
-  const activeBookingsCount = store.bookings.filter((b) => b.status === "CONFIRMED" || b.status === "PENDING").length;
-  const pendingOrdersCount = store.orders.filter((o) => o.status === "NEW" || o.status === "ACCEPTED").length;
-  const newEnquiriesCount = store.enquiries.filter((e) => e.status === "new").length;
+  const activeBookingsCount = store.bookings.filter(
+    (b) => b.status === "CONFIRMED" || b.status === "PENDING",
+  ).length;
+  const pendingOrdersCount = store.orders.filter(
+    (o) => o.status === "NEW" || o.status === "ACCEPTED",
+  ).length;
+  const newEnquiriesCount = store.enquiries.filter(
+    (e) => e.status === "new",
+  ).length;
 
   const kpis = [
     {
@@ -45,7 +54,8 @@ export function DashboardSection({ onNavigateSection }: DashboardSectionProps) {
       change: "+18.4% this month",
       isPositive: true,
       icon: DollarSign,
-      color: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+      color:
+        "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
     },
     {
       title: "Total Orders",
@@ -53,7 +63,8 @@ export function DashboardSection({ onNavigateSection }: DashboardSectionProps) {
       change: `${pendingOrdersCount} pending fulfillment`,
       isPositive: true,
       icon: ShoppingCart,
-      color: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
+      color:
+        "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
     },
     {
       title: "Live Inventory Items",
@@ -61,7 +72,8 @@ export function DashboardSection({ onNavigateSection }: DashboardSectionProps) {
       change: `${store.products.filter((p) => !p.inStock).length} out of stock`,
       isPositive: store.products.filter((p) => !p.inStock).length === 0,
       icon: Package,
-      color: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
+      color:
+        "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
     },
     {
       title: "Registered Customers",
@@ -69,7 +81,8 @@ export function DashboardSection({ onNavigateSection }: DashboardSectionProps) {
       change: "+12 new this week",
       isPositive: true,
       icon: Users,
-      color: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20",
+      color:
+        "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20",
     },
   ];
 
@@ -83,14 +96,23 @@ export function DashboardSection({ onNavigateSection }: DashboardSectionProps) {
               Live Business Overview
             </Badge>
             <span className="text-xs text-muted-foreground">
-              {new Date().toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric", year: "numeric" })}
+              {new Date().toLocaleDateString("en-US", {
+                weekday: "long",
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-display font-black text-foreground mt-2">
             Welcome back, {currentPartner?.ownerName || "Store Owner"}! 👋
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-xl">
-            Here is what is happening in <span className="font-semibold text-foreground">{currentPartner?.businessName || store.settings.brandName}</span> today. All changes save live and sync with your public store.
+            Here is what is happening in{" "}
+            <span className="font-semibold text-foreground">
+              {currentPartner?.businessName || store.settings.brandName}
+            </span>{" "}
+            today. All changes save live and sync with your public store.
           </p>
         </div>
 
@@ -118,23 +140,34 @@ export function DashboardSection({ onNavigateSection }: DashboardSectionProps) {
         {kpis.map((kpi, index) => {
           const Icon = kpi.icon;
           return (
-            <Card key={index} className="rounded-2xl border-border/80 shadow-xs hover:border-primary/40 transition-colors">
+            <Card
+              key={index}
+              className="rounded-2xl border-border/80 shadow-xs hover:border-primary/40 transition-colors"
+            >
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-muted-foreground">{kpi.title}</span>
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${kpi.color}`}>
+                  <span className="text-xs font-medium text-muted-foreground">
+                    {kpi.title}
+                  </span>
+                  <div
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center border ${kpi.color}`}
+                  >
                     <Icon className="w-4 h-4" />
                   </div>
                 </div>
                 <div className="mt-3">
-                  <h3 className="text-2xl font-display font-black text-foreground">{kpi.value}</h3>
+                  <h3 className="text-2xl font-display font-black text-foreground">
+                    {kpi.value}
+                  </h3>
                   <div className="flex items-center gap-1 mt-1">
                     {kpi.isPositive ? (
                       <ArrowUpRight className="w-3.5 h-3.5 text-emerald-500" />
                     ) : (
                       <ArrowDownRight className="w-3.5 h-3.5 text-amber-500" />
                     )}
-                    <span className="text-[11px] text-muted-foreground">{kpi.change}</span>
+                    <span className="text-[11px] text-muted-foreground">
+                      {kpi.change}
+                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -148,7 +181,9 @@ export function DashboardSection({ onNavigateSection }: DashboardSectionProps) {
         {/* Recent Orders Overview */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-display font-bold text-foreground">Recent Orders</h3>
+            <h3 className="text-base font-display font-bold text-foreground">
+              Recent Orders
+            </h3>
             <Button
               variant="link"
               size="sm"
@@ -169,24 +204,28 @@ export function DashboardSection({ onNavigateSection }: DashboardSectionProps) {
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-foreground">{order.orderNumber}</span>
+                    <span className="font-mono text-xs font-bold text-foreground">
+                      {order.orderNumber}
+                    </span>
                     <Badge
                       variant="outline"
                       className={`text-[10px] uppercase font-bold px-2 py-0 rounded-md ${
                         order.status === "DELIVERED"
                           ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
                           : order.status === "OUT_FOR_DELIVERY"
-                          ? "bg-blue-500/10 text-blue-600 border-blue-500/20"
-                          : order.status === "ACCEPTED" || order.status === "READY"
-                          ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
-                          : "bg-purple-500/10 text-purple-600 border-purple-500/20"
+                            ? "bg-blue-500/10 text-blue-600 border-blue-500/20"
+                            : order.status === "ACCEPTED" ||
+                                order.status === "READY"
+                              ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                              : "bg-purple-500/10 text-purple-600 border-purple-500/20"
                       }`}
                     >
                       {order.status.replace(/_/g, " ")}
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {order.customerName} • {order.items.length} item(s) • {order.paymentMethod}
+                    {order.customerName} • {order.items.length} item(s) •{" "}
+                    {order.paymentMethod}
                   </p>
                 </div>
 
@@ -210,7 +249,9 @@ export function DashboardSection({ onNavigateSection }: DashboardSectionProps) {
 
         {/* Quick Management Shortcuts */}
         <div className="space-y-4">
-          <h3 className="text-base font-display font-bold text-foreground">Management Shortcuts</h3>
+          <h3 className="text-base font-display font-bold text-foreground">
+            Management Shortcuts
+          </h3>
 
           <div className="space-y-2.5">
             <button
@@ -231,7 +272,9 @@ export function DashboardSection({ onNavigateSection }: DashboardSectionProps) {
                   </p>
                 </div>
               </div>
-              <span className="text-xs text-muted-foreground group-hover:translate-x-0.5 transition-transform">→</span>
+              <span className="text-xs text-muted-foreground group-hover:translate-x-0.5 transition-transform">
+                →
+              </span>
             </button>
 
             <button
@@ -252,7 +295,9 @@ export function DashboardSection({ onNavigateSection }: DashboardSectionProps) {
                   </p>
                 </div>
               </div>
-              <span className="text-xs text-muted-foreground group-hover:translate-x-0.5 transition-transform">→</span>
+              <span className="text-xs text-muted-foreground group-hover:translate-x-0.5 transition-transform">
+                →
+              </span>
             </button>
 
             <button
@@ -273,7 +318,9 @@ export function DashboardSection({ onNavigateSection }: DashboardSectionProps) {
                   </p>
                 </div>
               </div>
-              <span className="text-xs text-muted-foreground group-hover:translate-x-0.5 transition-transform">→</span>
+              <span className="text-xs text-muted-foreground group-hover:translate-x-0.5 transition-transform">
+                →
+              </span>
             </button>
 
             <button
@@ -294,7 +341,9 @@ export function DashboardSection({ onNavigateSection }: DashboardSectionProps) {
                   </p>
                 </div>
               </div>
-              <span className="text-xs text-muted-foreground group-hover:translate-x-0.5 transition-transform">→</span>
+              <span className="text-xs text-muted-foreground group-hover:translate-x-0.5 transition-transform">
+                →
+              </span>
             </button>
           </div>
         </div>

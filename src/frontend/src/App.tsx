@@ -189,11 +189,7 @@ const serviceProviderDashboardRoute = createRoute({
 const partnerOnboardingRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/partner-onboarding",
-  component: () => (
-    <VendorRoute>
-      <PartnerOnboardingPage />
-    </VendorRoute>
-  ),
+  component: () => <PartnerOnboardingPage />,
 });
 
 const adminRoute = createRoute({
