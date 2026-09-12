@@ -23,6 +23,7 @@ import { MOCK_WALLET_BALANCE } from "../mock-data";
 
 import { useLocationStore } from "../lib/locationStore";
 import { LocationModal } from "./location/LocationModal";
+import { NAVAEIN_URL } from "../config/links";
 
 const navLinks = [
   { label: "Shop", href: "/shop" },
@@ -638,6 +639,15 @@ export default function Layout({ children }: LayoutProps) {
                   >
                     Partner & Merchant Portal
                   </Link>
+                </li>
+                <li>
+                  <a
+                    href={NAVAEIN_URL}
+                    className="text-sm text-muted-foreground hover:text-orange-500 transition-colors flex items-center gap-1.5"
+                  >
+                    <span>NavaeIn — Art • Craft</span>
+                    <span className="text-[10px] text-orange-500 font-bold">↗</span>
+                  </a>
                 </li>
               </ul>
             </div>

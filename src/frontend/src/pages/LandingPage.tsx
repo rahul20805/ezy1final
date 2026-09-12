@@ -19,10 +19,14 @@ import {
   Truck,
   UtensilsCrossed,
   Zap,
+  ExternalLink,
+  Palette,
+  Sparkles,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import Layout from "../components/Layout";
 import { busRoutes, doctors, testimonials } from "../mock-data";
+import { NAVAEIN_URL } from "../config/links";
 
 /* ────────────────────────────────────────────────
  * Data
@@ -490,6 +494,118 @@ export default function LandingPage() {
               );
             })}
           </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════
+          NAVAEIN — ART • CRAFT • PRODUCTS (Separate Website)
+      ═══════════════════════════════════════════ */}
+      <section
+        id="navaein"
+        className="py-14 bg-gradient-to-b from-amber-50/60 via-orange-50/40 to-background dark:from-stone-950 dark:via-stone-900/50 dark:to-background border-y border-orange-100/80 dark:border-stone-800/80 relative overflow-hidden"
+        data-ocid="landing.navaein_section"
+      >
+        <div className="container px-4">
+          <RevealSection>
+            {/* The entire card is a clickable anchor pointing directly to NAVAEIN_URL in the same tab */}
+            <a
+              href={NAVAEIN_URL}
+              data-ocid="landing.navaein_card_link"
+              className="group block relative rounded-3xl overflow-hidden bg-white dark:bg-stone-900 border border-amber-200/80 dark:border-stone-800 shadow-md hover:shadow-2xl hover:border-orange-500/50 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer text-inherit no-underline"
+            >
+              {/* Decorative warm ambient glow */}
+              <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-orange-400/15 via-amber-300/10 to-transparent rounded-full blur-3xl pointer-events-none group-hover:scale-110 transition-transform duration-700" />
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 items-center">
+                {/* Left content (7 columns on desktop) */}
+                <div className="p-6 sm:p-10 lg:p-12 lg:col-span-7 flex flex-col justify-between space-y-6">
+                  <div>
+                    {/* Brand Badges */}
+                    <div className="flex items-center gap-2 flex-wrap mb-4">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
+                        <Sparkles className="w-3.5 h-3.5 text-orange-500" />
+                        Featured Independent Brand
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">
+                        External Website ↗
+                      </span>
+                    </div>
+
+                    {/* Logo & Title */}
+                    <div className="flex items-center gap-3.5 mb-2">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform duration-300 shrink-0">
+                        <Palette className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h2 className="font-display font-black text-3xl sm:text-4xl text-stone-900 dark:text-white tracking-tight group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                          NavaeIn
+                        </h2>
+                        <p className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-orange-600 dark:text-orange-400">
+                          Art • Craft • Products
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Description */}
+                    <p className="text-sm sm:text-base text-stone-600 dark:text-stone-300 leading-relaxed max-w-xl mt-3">
+                      Discover authentic handcrafted ceramics, bespoke terracotta sculptures, studio workshop masterclasses, and curated artisan creations. Explore the complete craft collection directly on the official NavaeIn platform.
+                    </p>
+
+                    {/* Feature tags */}
+                    <div className="flex flex-wrap gap-2 pt-4 text-xs font-medium text-stone-600 dark:text-stone-300">
+                      <span className="px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/60">
+                        🏺 Studio Pottery
+                      </span>
+                      <span className="px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/60">
+                        🎨 Handmade Artifacts
+                      </span>
+                      <span className="px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/60">
+                        ✨ Master Workshops
+                      </span>
+                      <span className="px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/60">
+                        🌿 100% Eco-Crafted
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* CTAs */}
+                  <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                    <span className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-orange-600 group-hover:bg-orange-700 text-white font-bold text-sm shadow-md group-hover:shadow-lg transition-all">
+                      <span>Explore NavaeIn</span>
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </span>
+
+                    <span className="inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/60 text-stone-800 dark:text-stone-200 font-semibold text-sm hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors">
+                      <ExternalLink className="w-4 h-4 text-orange-600" />
+                      <span>Visit Shop Now</span>
+                    </span>
+
+                    <span className="text-[11px] text-stone-400 dark:text-stone-500 sm:ml-2 text-center sm:text-left font-mono">
+                      navaein.ezy1.site
+                    </span>
+                  </div>
+                </div>
+
+                {/* Right Image Showcase (5 columns on desktop) */}
+                <div className="lg:col-span-5 h-64 sm:h-80 lg:h-full min-h-[280px] lg:min-h-[380px] relative overflow-hidden bg-stone-100 dark:bg-stone-800">
+                  <img
+                    src="https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=1000&q=85"
+                    alt="NavaeIn Handcrafted Ceramic Art and Pottery"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-stone-950/70 via-stone-950/20 to-transparent lg:bg-gradient-to-r lg:from-white dark:lg:from-stone-900 lg:via-transparent lg:to-transparent" />
+
+                  {/* Floating live indicator badge */}
+                  <div className="absolute bottom-4 right-4 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md px-3.5 py-2 rounded-2xl shadow-lg border border-white/20 flex items-center gap-2">
+                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-xs font-bold text-stone-900 dark:text-white">
+                      Live on navaein.ezy1.site
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </a>
+          </RevealSection>
         </div>
       </section>
 

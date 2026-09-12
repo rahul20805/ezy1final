@@ -40,6 +40,7 @@ const HomeServicesPage = lazy(() => import("./pages/HomeServicesPage"));
 const VendorStorefrontPage = lazy(() => import("./pages/VendorStorefrontPage"));
 const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
+import { NAVAEIN_URL } from "./config/links";
 
 function PageLoader() {
   return (
@@ -240,6 +241,21 @@ const settingsRoute = createRoute({
   ),
 });
 
+const navaeRedirectRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/store/navae",
+  component: () => {
+    if (typeof window !== "undefined") {
+      window.location.href = NAVAEIN_URL;
+    }
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 text-center">
+        <p className="text-sm font-medium">Redirecting to NavaeIn ({NAVAEIN_URL})...</p>
+      </div>
+    );
+  },
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
@@ -263,6 +279,7 @@ const routeTree = rootRoute.addChildren([
   vendorStorefrontRoute,
   notificationsRoute,
   settingsRoute,
+  navaeRedirectRoute,
 ]);
 
 const router = createRouter({ routeTree });
