@@ -588,7 +588,7 @@ export function ServerDataTable<T extends { id?: number | string }>({
           {items.map((item, index) => {
             const isSelected = item.id !== undefined && selectedIds.has(item.id);
             return (
-              <div key={item.id ?? index} className="relative group">
+              <div key={item.id ?? index} className="relative group min-w-0 overflow-hidden">
                 {renderItem(item, index, isSelected, () => {
                   if (item.id !== undefined) toggleSelect(item.id);
                 })}

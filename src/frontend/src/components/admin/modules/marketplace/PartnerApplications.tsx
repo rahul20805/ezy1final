@@ -123,16 +123,16 @@ export function PartnerApplications() {
             >
               <CardContent className="p-5 space-y-4">
                 <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-display font-bold text-base text-foreground">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-display font-bold text-base text-foreground break-words">
                         {app.businessName}
                       </h3>
-                      <Badge variant="outline" className="text-[10px] uppercase font-bold">
+                      <Badge variant="outline" className="text-[10px] uppercase font-bold shrink-0">
                         {app.category}
                       </Badge>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">
+                    <p className="text-xs text-muted-foreground mt-0.5 break-words">
                       Applicant:{" "}
                       <span className="font-medium text-foreground">
                         {applicant}
@@ -142,7 +142,7 @@ export function PartnerApplications() {
                   </div>
 
                   <Badge
-                    className={`text-[10px] uppercase font-bold ${
+                    className={`text-[10px] uppercase font-bold shrink-0 ${
                       app.status === "APPROVED"
                         ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
                         : app.status === "PENDING"
@@ -155,19 +155,19 @@ export function PartnerApplications() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <div className="flex items-center gap-1.5 text-muted-foreground min-w-0">
                     <Phone className="w-3.5 h-3.5 text-primary flex-shrink-0" />
                     <span className="truncate">{app.phone}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <div className="flex items-center gap-1.5 text-muted-foreground min-w-0">
                     <Mail className="w-3.5 h-3.5 text-primary flex-shrink-0" />
                     <span className="truncate">{app.email}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <div className="flex items-center gap-1.5 text-muted-foreground min-w-0">
                     <MapPin className="w-3.5 h-3.5 text-primary flex-shrink-0" />
                     <span className="truncate">{app.city || "India"}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <div className="flex items-center gap-1.5 text-muted-foreground min-w-0">
                     <FileCheck className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
                     <span className="truncate font-semibold text-emerald-600">
                       ID & Tax Verified
@@ -175,7 +175,7 @@ export function PartnerApplications() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-2 border-t border-border/60">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between pt-2 border-t border-border/60 gap-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -186,7 +186,7 @@ export function PartnerApplications() {
                   </Button>
 
                   {app.status === "PENDING" && (
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       <Button
                         size="sm"
                         onClick={() => handleUpdateStatus(app.id, "APPROVED")}

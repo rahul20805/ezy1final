@@ -253,6 +253,14 @@ export const usePartnerAuth = create<PartnerAuthState>()(
                       canManageOwnerSettings: false,
                     },
             };
+            if (typeof window !== "undefined") {
+              try {
+                localStorage.setItem("ezy1_token", data.token);
+                localStorage.setItem("token", data.token);
+              } catch (e) {
+                console.warn("Could not save token to localStorage:", e);
+              }
+            }
             set({ currentPartner: partnerData, token: data.token, isAuthenticated: true });
             return { success: true };
           }
@@ -289,6 +297,14 @@ export const usePartnerAuth = create<PartnerAuthState>()(
       },
 
       logout: () => {
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.removeItem("ezy1_token");
+            localStorage.removeItem("token");
+          } catch (e) {
+            console.warn("Could not remove token from localStorage:", e);
+          }
+        }
         set({ currentPartner: null, token: null, isAuthenticated: false });
       },
 

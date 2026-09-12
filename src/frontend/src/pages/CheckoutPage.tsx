@@ -14,13 +14,16 @@ import Layout from "../components/Layout";
 import { useAuth } from "../lib/AuthContext";
 
 import { useCartStore } from "../lib/cartStore";
+import { useLocationStore, LocationData } from "../lib/locationStore";
+import { LocationModal } from "../components/location/LocationModal";
+import { toast } from "sonner";
 
 export default function CheckoutPage() {
   const { isAuthenticated, identity } = useAuth();
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [selectedAddress, setSelectedAddress] = useState<string>(
-    "Home - 123 Main St, Bengaluru",
-  );
+  const { currentLocation, savedAddresses, setLocation } = useLocationStore();
+  const [selectedLocation, setSelectedLocation] = useState<LocationData>(currentLocation);
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<string>("UPI");
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -31,25 +34,32 @@ export default function CheckoutPage() {
 
   const handlePayment = async () => {
     setIsProcessing(true);
-    // Simulate Mock Payment Gateway & API request
     try {
-      await fetch("/api/orders", {
+      const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: identity ? identity.getPrincipal().toText() : "guest-user",
-          vendorId: Object.values(items)[0]?.product?.vendorId || 1, // simplified assumption
+          vendorId: Object.values(items)[0]?.product?.vendorId || 1,
           totalAmount: toPay,
+          deliveryAddress: selectedLocation.formattedAddress || "Bengaluru",
+          location: selectedLocation,
         }),
       });
-      // Simulate network delay
+
+      if (!res.ok) {
+        throw new Error("Failed to place order");
+      }
+
       setTimeout(() => {
         clearCart();
         setStep(3);
         setIsProcessing(false);
-      }, 1500);
+        toast.success("Order confirmed successfully!");
+      }, 1000);
     } catch (err) {
-      alert("Payment failed");
+      console.error("Payment or order error:", err);
+      toast.error("Payment processing failed. Please try again.");
       setIsProcessing(false);
     }
   };
@@ -92,42 +102,95 @@ export default function CheckoutPage() {
 
                 {step === 1 ? (
                   <div className="space-y-3">
-                    <div className="p-3 border rounded-xl border-primary bg-primary/5 flex items-start gap-3 cursor-pointer">
-                      <input type="radio" checked className="mt-1" readOnly />
-                      <div>
-                        <p className="font-semibold text-sm">
-                          Home{" "}
-                          <Badge className="ml-2 text-[10px] bg-primary/20 text-primary hover:bg-primary/30">
-                            Default
+                    {/* Active Selected Location Card */}
+                    <div className="p-4 border-2 rounded-2xl border-primary bg-primary/5 flex items-start gap-3">
+                      <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-bold text-sm text-foreground">
+                            {selectedLocation.locality || selectedLocation.city || "Selected Address"}
+                          </span>
+                          <Badge className="text-[10px] bg-primary text-primary-foreground">
+                            Active Delivery Location
                           </Badge>
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          123 Main St, Indiranagar, Bengaluru, KA 560038
-                        </p>
-                      </div>
-                    </div>
-                    <div className="p-3 border rounded-xl border-border hover:border-primary/50 flex items-start gap-3 cursor-pointer">
-                      <input type="radio" className="mt-1" readOnly />
-                      <div>
-                        <p className="font-semibold text-sm">Office</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Tech Park, Whitefield, Bengaluru, KA 560066
+                          {selectedLocation.source && (
+                            <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                              {selectedLocation.source}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1.5 break-words">
+                          {selectedLocation.formattedAddress}
                         </p>
                       </div>
                     </div>
-                    <Button
-                      className="mt-4 w-full sm:w-auto"
-                      onClick={() => setStep(2)}
-                    >
-                      Deliver Here
-                    </Button>
+
+                    {/* Saved Addresses List (if more exist) */}
+                    {savedAddresses.filter(
+                      (a) => a.formattedAddress !== selectedLocation.formattedAddress
+                    ).length > 0 && (
+                      <div className="space-y-2 pt-2">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                          Or Choose From Saved Locations
+                        </p>
+                        <div className="space-y-2">
+                          {savedAddresses
+                            .filter((a) => a.formattedAddress !== selectedLocation.formattedAddress)
+                            .map((addr, idx) => (
+                              <div
+                                key={idx}
+                                onClick={() => setSelectedLocation(addr)}
+                                className="p-3 border rounded-xl border-border hover:border-primary/60 transition-colors flex items-center justify-between gap-3 cursor-pointer text-xs"
+                              >
+                                <div className="min-w-0 flex-1">
+                                  <span className="font-semibold text-foreground">
+                                    {addr.locality || addr.city || "Saved Address"}
+                                  </span>
+                                  <p className="text-muted-foreground truncate text-[11px] mt-0.5">
+                                    {addr.formattedAddress}
+                                  </p>
+                                </div>
+                                <Button variant="outline" size="sm" className="text-xs h-7">
+                                  Select
+                                </Button>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex flex-col sm:flex-row items-center gap-2.5 pt-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setIsLocationModalOpen(true)}
+                        className="w-full sm:w-auto text-xs gap-1.5"
+                      >
+                        <MapPin className="h-3.5 w-3.5 text-primary" />
+                        <span>Change / Search on Map</span>
+                      </Button>
+                      <Button
+                        className="w-full sm:w-auto text-xs"
+                        onClick={() => setStep(2)}
+                      >
+                        Deliver Here & Continue to Payment
+                      </Button>
+                    </div>
+
+                    <LocationModal
+                      open={isLocationModalOpen}
+                      onOpenChange={setIsLocationModalOpen}
+                      onSelectLocation={(loc) => setSelectedLocation(loc)}
+                    />
                   </div>
                 ) : (
                   <div className="pl-11 flex justify-between items-center">
-                    <div>
-                      <p className="text-sm font-semibold">Home</p>
-                      <p className="text-xs text-muted-foreground">
-                        123 Main St, Indiranagar...
+                    <div className="min-w-0 flex-1 pr-3">
+                      <p className="text-sm font-semibold truncate">
+                        {selectedLocation.locality || selectedLocation.city || "Delivery Address"}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {selectedLocation.formattedAddress}
                       </p>
                     </div>
                     <Button

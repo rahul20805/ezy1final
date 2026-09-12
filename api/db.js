@@ -1413,13 +1413,33 @@ export function getOrders(filter = {}) {
 export function createOrder(data) {
   const db = getDb();
   const nextId = db.orders.length ? Math.max(...db.orders.map((o) => o.id)) + 1 : 1001;
+
+  const loc = data.location || {
+    addressLine1: data.deliveryAddress || "Standard Address",
+    addressLine2: "",
+    locality: "",
+    city: "Bengaluru",
+    district: "",
+    state: "",
+    pincode: "",
+    country: "India",
+    latitude: null,
+    longitude: null,
+    formattedAddress: data.deliveryAddress || "",
+    source: "manual",
+    accuracy: null,
+  };
+
+  const deliveryAddress = data.deliveryAddress || loc.formattedAddress || "";
+
   const newOrder = {
     id: nextId,
     orderNumber: `EZ-${new Date().getFullYear()}-${nextId}`,
     userId: Number(data.userId) || 1,
     customerName: data.customerName || "Valued Customer",
     customerPhone: data.customerPhone || "",
-    deliveryAddress: data.deliveryAddress || "",
+    deliveryAddress,
+    location: loc,
     vendorId: Number(data.vendorId) || 1,
     vendorName: data.vendorName || "Ezy1 Partner",
     totalAmount: Number(data.totalAmount) || 0,

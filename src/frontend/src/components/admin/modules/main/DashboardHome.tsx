@@ -34,7 +34,7 @@ import {
   Wrench,
   Zap,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useStoreData } from "../../../../lib/storeData";
 import type { AdminSectionId } from "../../AdminSidebar";
 
@@ -80,52 +80,63 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
     };
   }, []);
 
-  // Server-Side Precomputed Aggregates with local fallbacks
-  const totalRevenue = serverStats?.overview?.totalRevenue ?? store.orders.reduce(
-    (acc, o) => acc + (o.paymentStatus === "paid" ? o.totalAmount : 0),
+  // Safe array extractors
+  const orders = store?.orders || [];
+  const shops = store?.shops || [];
+  const partnerApplications = store?.partnerApplications || [];
+  const products = store?.products || [];
+  const bookings = store?.bookings || [];
+  const services = store?.services || [];
+  const hospitalBeds = store?.hospitalBeds || [];
+  const customers = store?.customers || [];
+
+  // Server-Side Precomputed Aggregates with safe local fallbacks
+  const rawRevenue = serverStats?.overview?.totalRevenue ?? orders.reduce(
+    (acc: number, o: any) => acc + (o?.paymentStatus === "paid" ? (Number(o?.totalAmount) || 0) : 0),
     0,
   );
-  const platformCommission = serverStats?.overview?.platformCommission ?? Math.round(totalRevenue * 0.05);
-  const partnerPayoutsTotal = serverStats?.overview?.partnerPayouts ?? (totalRevenue - platformCommission);
+  const totalRevenue = Number(rawRevenue) || 0;
+  const platformCommission = Number(serverStats?.overview?.platformCommission) || Math.round(totalRevenue * 0.05);
+  const partnerPayoutsTotal = Number(serverStats?.overview?.partnerPayouts) || (totalRevenue - platformCommission);
 
-  const totalOrders = serverStats?.overview?.totalOrders ?? store.orders.length;
-  const pendingOrders = store.orders.filter(
-    (o) =>
-      o.status === "NEW" || o.status === "ACCEPTED" || o.status === "PREPARING",
+  const totalOrders = Number(serverStats?.overview?.totalOrders) || orders.length;
+  const pendingOrders = orders.filter(
+    (o: any) =>
+      o?.status === "NEW" || o?.status === "ACCEPTED" || o?.status === "PREPARING",
   ).length;
-  const outForDelivery = store.orders.filter(
-    (o) => o.status === "OUT_FOR_DELIVERY",
+  const outForDelivery = orders.filter(
+    (o: any) => o?.status === "OUT_FOR_DELIVERY",
   ).length;
-  const deliveredOrders = serverStats?.overview?.deliveredOrders ?? store.orders.filter(
-    (o) => o.status === "DELIVERED",
+  const deliveredOrders = Number(serverStats?.overview?.deliveredOrders) || orders.filter(
+    (o: any) => o?.status === "DELIVERED",
   ).length;
-  const cancelledOrders = store.orders.filter(
-    (o) => o.status === "CANCELLED",
-  ).length;
-
-  const totalCustomers = store.customers.length;
-  const activePartners = serverStats?.overview?.activeVendors ?? store.shops.filter(
-    (s) => s.status === "active",
-  ).length;
-  const pendingApplications = serverStats?.overview?.pendingApplications ?? store.partnerApplications.filter(
-    (a) => a.status === "PENDING" || a.status === "UNDER_REVIEW",
+  const cancelledOrders = orders.filter(
+    (o: any) => o?.status === "CANCELLED",
   ).length;
 
-  const totalProducts = serverStats?.overview?.totalProducts ?? store.products.length;
-  const activeProducts = store.products.filter(
-    (p) => p.published && p.inStock,
+  const totalCustomers = customers.length;
+  const activePartners = Number(serverStats?.overview?.activeVendors) || shops.filter(
+    (s: any) => s?.status === "active",
   ).length;
-  const outOfStockProducts = store.products.filter(
-    (p) => !p.inStock || p.stockCount === 0,
-  ).length;
-
-  const totalBookings = store.bookings.length;
-  const activeServices = serverStats?.overview?.activeServices ?? store.services.filter(
-    (s) => s.published && s.isAvailable,
+  const pendingApplications = Number(serverStats?.overview?.pendingApplications) || partnerApplications.filter(
+    (a: any) => a?.status === "PENDING" || a?.status === "UNDER_REVIEW",
   ).length;
 
-  const availableBeds = serverStats?.overview?.totalAvailableBeds ?? store.hospitalBeds.reduce(
-    (acc, b) => acc + b.availableBeds,
+  const totalProducts = Number(serverStats?.overview?.totalProducts) || products.length;
+  const activeProducts = products.filter(
+    (p: any) => p?.published && p?.inStock,
+  ).length;
+  const outOfStockProducts = products.filter(
+    (p: any) => !p?.inStock || p?.stockCount === 0,
+  ).length;
+
+  const totalBookings = bookings.length;
+  const activeServices = Number(serverStats?.overview?.activeServices) || services.filter(
+    (s: any) => s?.published && s?.isAvailable,
+  ).length;
+
+  const availableBeds = Number(serverStats?.overview?.totalAvailableBeds) || hospitalBeds.reduce(
+    (acc: number, b: any) => acc + (Number(b?.availableBeds) || 0),
     0,
   );
 

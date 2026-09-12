@@ -86,7 +86,7 @@ export function PartnerVerification() {
               </Badge>
             </div>
 
-            <div className="flex items-center justify-between pt-2 border-t border-border/60">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between pt-2 border-t border-border/60 gap-2">
               <span className="text-[11px] text-muted-foreground">
                 Status: Operational
               </span>

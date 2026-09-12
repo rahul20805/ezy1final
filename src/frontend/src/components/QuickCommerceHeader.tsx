@@ -2,9 +2,18 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Clock, MapPin, Search } from "lucide-react";
 import { useState } from "react";
+import { useLocationStore } from "../lib/locationStore";
+import { LocationModal } from "./location/LocationModal";
 
 export function QuickCommerceHeader() {
   const [search, setSearch] = useState("");
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const { currentLocation } = useLocationStore();
+
+  const locationDisplay =
+    [currentLocation.locality, currentLocation.city].filter(Boolean).join(", ") ||
+    currentLocation.formattedAddress ||
+    "Set Location";
 
   return (
     <div className="bg-gradient-to-r from-primary to-[#ff8c42] p-4 sm:p-8 rounded-b-3xl sm:rounded-3xl shadow-md text-primary-foreground relative overflow-hidden mb-6">
@@ -18,15 +27,20 @@ export function QuickCommerceHeader() {
                 Everything you need, one place.
               </h1>
             </div>
-            <div className="flex items-center gap-1 mt-2 opacity-90 text-sm font-medium">
-              <MapPin className="w-4 h-4" />
+            <button
+              type="button"
+              onClick={() => setIsLocationModalOpen(true)}
+              className="flex items-center gap-1.5 mt-2 opacity-95 text-sm font-medium hover:opacity-100 transition-opacity cursor-pointer group text-left"
+              title="Click to change your delivery location"
+            >
+              <MapPin className="w-4 h-4 text-white shrink-0 group-hover:scale-110 transition-transform" />
               <span>
                 Delivering to{" "}
-                <strong className="font-bold border-b border-dashed">
-                  Indiranagar, Bengaluru
+                <strong className="font-bold border-b border-dashed border-white/60 group-hover:border-white">
+                  {locationDisplay}
                 </strong>
               </span>
-            </div>
+            </button>
           </div>
         </div>
 
@@ -40,6 +54,11 @@ export function QuickCommerceHeader() {
           />
         </div>
       </div>
+
+      <LocationModal
+        open={isLocationModalOpen}
+        onOpenChange={setIsLocationModalOpen}
+      />
     </div>
   );
 }

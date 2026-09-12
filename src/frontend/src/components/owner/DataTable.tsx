@@ -289,16 +289,20 @@ export function DataTable<T extends { id?: number | string }>({
           </div>
         )
       ) : viewMode === "grid" ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {paginatedItems.map((item, index) =>
-            renderItem(item, startIndex + index),
-          )}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {paginatedItems.map((item, index) => (
+            <div key={index} className="min-w-0 overflow-hidden">
+              {renderItem(item, startIndex + index)}
+            </div>
+          ))}
         </div>
       ) : (
         <div className="space-y-3">
-          {paginatedItems.map((item, index) =>
-            renderItem(item, startIndex + index),
-          )}
+          {paginatedItems.map((item, index) => (
+            <div key={index} className="min-w-0 overflow-hidden">
+              {renderItem(item, startIndex + index)}
+            </div>
+          ))}
         </div>
       )}
 

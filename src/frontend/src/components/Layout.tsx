@@ -21,6 +21,9 @@ import { setCurrentRole } from "../lib/auth";
 import { useStoreData } from "../lib/storeData";
 import { MOCK_WALLET_BALANCE } from "../mock-data";
 
+import { useLocationStore } from "../lib/locationStore";
+import { LocationModal } from "./location/LocationModal";
+
 const navLinks = [
   { label: "Shop", href: "/shop" },
   { label: "Services", href: "/services" },
@@ -37,6 +40,7 @@ export default function Layout({ children }: LayoutProps) {
   const store = useStoreData();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [locationDropdown, setLocationDropdown] = useState(false);
+  const { currentLocation } = useLocationStore();
   const [waMessages, setWaMessages] = useState<
     { from: "bot" | "user"; text: string }[]
   >([
@@ -131,79 +135,24 @@ export default function Layout({ children }: LayoutProps) {
           {/* Right actions */}
           <div className="flex items-center gap-2">
             {/* Location pill */}
-            <Sheet open={locationDropdown} onOpenChange={setLocationDropdown}>
-              <SheetTrigger asChild>
-                <button
-                  type="button"
-                  className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-full bg-muted text-xs text-muted-foreground hover:bg-primary/10 hover:text-primary transition-smooth border border-border"
-                  data-ocid="nav.location_toggle"
-                >
-                  <MapPin className="w-3 h-3" />
-                  <span>Srinagar, Jammu & Kashmir</span>
-                  <ChevronDown className="w-3 h-3" />
-                </button>
-              </SheetTrigger>
-              <SheetContent side="top" className="h-auto">
-                <div className="container py-6">
-                  <h2 className="text-xl font-bold mb-4">
-                    Choose your location
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <Button
-                      variant="outline"
-                      className="justify-start gap-2 h-auto py-3"
-                      onClick={() => {
-                        if (navigator.geolocation) {
-                          navigator.geolocation.getCurrentPosition(
-                            (position) => {
-                              alert(
-                                `Detected location: Lat ${position.coords.latitude}, Lng ${position.coords.longitude}`,
-                              );
-                              setLocationDropdown(false);
-                            },
-                            () => alert("Location permission denied."),
-                          );
-                        }
-                      }}
-                    >
-                      <MapPin className="w-5 h-5 text-primary" />
-                      <div className="text-left">
-                        <div className="font-semibold">
-                          Use My Current Location
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          Using GPS
-                        </div>
-                      </div>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="justify-start gap-2 h-auto py-3"
-                    >
-                      <Search className="w-5 h-5 text-muted-foreground" />
-                      <div className="text-left">
-                        <div className="font-semibold">Search Location</div>
-                        <div className="text-xs text-muted-foreground">
-                          Enter city or pincode
-                        </div>
-                      </div>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="justify-start gap-2 h-auto py-3"
-                    >
-                      <MapPin className="w-5 h-5 text-muted-foreground" />
-                      <div className="text-left">
-                        <div className="font-semibold">Choose on Map</div>
-                        <div className="text-xs text-muted-foreground">
-                          Pinpoint exactly
-                        </div>
-                      </div>
-                    </Button>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
+            <button
+              type="button"
+              onClick={() => setLocationDropdown(true)}
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted text-xs text-muted-foreground hover:bg-primary/10 hover:text-primary transition-smooth border border-border max-w-[210px]"
+              data-ocid="nav.location_toggle"
+              title={currentLocation.formattedAddress}
+            >
+              <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
+              <span className="truncate font-medium">
+                {currentLocation.locality || currentLocation.city || "Select Location"}
+              </span>
+              <ChevronDown className="w-3 h-3 shrink-0" />
+            </button>
+
+            <LocationModal
+              open={locationDropdown}
+              onOpenChange={setLocationDropdown}
+            />
 
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
@@ -299,13 +248,23 @@ export default function Layout({ children }: LayoutProps) {
                     </div>
 
                     {/* Location */}
-                    <div className="flex items-center gap-2 px-4 py-3 bg-muted/40 border-b border-border">
-                      <MapPin className="w-4 h-4 text-primary" />
-                      <span className="text-sm text-foreground font-medium">
-                        Bengaluru
-                      </span>
-                      <ChevronDown className="w-3.5 h-3.5 text-muted-foreground ml-auto" />
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMobileOpen(false);
+                        setLocationDropdown(true);
+                      }}
+                      className="flex items-center gap-2.5 px-4 py-3 bg-muted/40 border-b border-border text-left hover:bg-muted/70 transition-colors w-full cursor-pointer"
+                    >
+                      <MapPin className="w-4 h-4 text-primary shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] uppercase font-semibold text-muted-foreground">Deliver To</p>
+                        <p className="text-sm text-foreground font-medium truncate">
+                          {currentLocation.locality || currentLocation.city || "Select Location"}
+                        </p>
+                      </div>
+                      <ChevronDown className="w-3.5 h-3.5 text-muted-foreground ml-auto shrink-0" />
+                    </button>
 
                     {/* Nav links */}
                     <nav

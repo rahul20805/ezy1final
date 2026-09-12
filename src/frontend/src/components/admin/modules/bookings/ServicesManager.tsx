@@ -420,12 +420,12 @@ export function ServicesManager() {
       </Dialog>
 
       <ConfirmModal
-        open={deleteConfirmId !== null}
-        onOpenChange={(open) => !open && setDeleteConfirmId(null)}
+        isOpen={deleteConfirmId !== null}
+        onClose={() => setDeleteConfirmId(null)}
         title="Delete Service"
         description="Are you sure you want to permanently remove this service listing?"
-        confirmLabel="Delete"
-        variant="destructive"
+        confirmText="Delete"
+        isDestructive={true}
         onConfirm={handleDelete}
       />
     </div>

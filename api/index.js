@@ -1,4 +1,5 @@
 import { getAuthUser, hashPassword, signJwt, verifyPassword } from "./auth.js";
+import { reverseGeocode, searchAddress } from "./location.js";
 import {
   bulkUpdateVendors,
   createOrder,
@@ -130,6 +131,50 @@ export default async function handler(req, res) {
         uptime: process.uptime(),
         timestamp: new Date().toISOString(),
       });
+    }
+
+    // ----------------------------------------------------
+    // LOCATION, GEOCODING & REVERSE LOOKUP (Zero Mock)
+    // ----------------------------------------------------
+    if (pathname === "/location/reverse" && method === "GET") {
+      const { lat, lng } = query;
+      if (!lat || !lng) {
+        return sendJson(res, 400, {
+          success: false,
+          error: "Latitude and longitude query parameters are required.",
+          code: "MISSING_COORDINATES",
+        });
+      }
+      try {
+        const location = await reverseGeocode(lat, lng);
+        return sendJson(res, 200, { success: true, location });
+      } catch (err) {
+        console.error("Reverse geocoding error:", err.message);
+        return sendJson(res, 500, {
+          success: false,
+          error: err.message || "Failed to reverse geocode coordinates.",
+          code: "GEOCODE_FAILED",
+        });
+      }
+    }
+
+    if (pathname === "/location/search" && method === "GET") {
+      const { query: q, q: queryAlias } = query;
+      const searchQuery = q || queryAlias || "";
+      if (!searchQuery) {
+        return sendJson(res, 200, { success: true, results: [] });
+      }
+      try {
+        const results = await searchAddress(searchQuery);
+        return sendJson(res, 200, { success: true, results });
+      } catch (err) {
+        console.error("Address search error:", err.message);
+        return sendJson(res, 500, {
+          success: false,
+          error: err.message || "Failed to search addresses.",
+          code: "SEARCH_FAILED",
+        });
+      }
     }
 
     // ----------------------------------------------------
