@@ -9,6 +9,9 @@ async function runTests() {
   console.log("🚀 EZY1 PRODUCTION AUTH & NOTIFICATION SYSTEM TEST SUITE");
   console.log("========================================================\n");
 
+  process.env.NODE_ENV = "test";
+  process.env.ENABLE_TEST_OTP = "true";
+
   // 1. Initialize Test Express App
   const app = express();
   app.locals.verifyJwt = verifyJwt;

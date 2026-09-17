@@ -1,4 +1,5 @@
 import express from "express";
+import crypto from "crypto";
 import { openDb } from "./db.js";
 import {
   sendOtp,
@@ -1063,6 +1064,169 @@ router.post("/orders", async (req, res) => {
     res.json(order);
   } catch (error) {
     res.status(400).json({ error: "Failed to place order" });
+  }
+});
+
+// ==========================================
+// 3.1 PAYMENTS INTEGRATION (RAZORPAY & GATEWAYS)
+// ==========================================
+
+// Create Razorpay Order
+router.post("/payments/create-razorpay-order", async (req, res) => {
+  try {
+    const { amount, currency = "INR", receipt = `rcpt_${Date.now()}`, notes = {} } = req.body;
+    const keyId = process.env.RAZORPAY_KEY_ID || process.env.VITE_PAYMENT_KEY_ID;
+    const keySecret = process.env.RAZORPAY_KEY_SECRET || process.env.VITE_PAYMENT_SECRET;
+
+    if (!keyId || !keySecret) {
+      return res.status(503).json({
+        error: "Razorpay credentials not configured. Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in .env."
+      });
+    }
+
+    const auth = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
+    const amountInPaise = Math.round(Number(amount) * 100);
+
+    const rzpRes = await fetch("https://api.razorpay.com/v1/orders", {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${auth}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        amount: amountInPaise,
+        currency,
+        receipt,
+        notes
+      })
+    });
+
+    const rzpData = await rzpRes.json();
+    if (!rzpRes.ok) {
+      return res.status(rzpRes.status).json({
+        error: rzpData.error?.description || "Razorpay order creation failed"
+      });
+    }
+
+    res.json({
+      success: true,
+      orderId: rzpData.id,
+      amount: rzpData.amount,
+      currency: rzpData.currency,
+      keyId
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Failed to initiate payment" });
+  }
+});
+
+// Verify Razorpay Payment Signature
+router.post("/payments/verify", async (req, res) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId, userId } = req.body;
+    const keySecret = process.env.RAZORPAY_KEY_SECRET || process.env.VITE_PAYMENT_SECRET;
+
+    if (!keySecret) {
+      return res.status(503).json({ error: "Razorpay secret not configured." });
+    }
+
+    const generatedSignature = crypto
+      .createHmac("sha256", keySecret)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest("hex");
+
+    if (generatedSignature !== razorpay_signature) {
+      return res.status(400).json({ success: false, error: "Invalid payment signature verification failed." });
+    }
+
+    // Payment genuine and verified! Update order status if orderId provided
+    const db = await openDb();
+    if (orderId) {
+      await db.run("UPDATE orders SET status = 'CONFIRMED' WHERE id = ?", [orderId]);
+    }
+
+    if (userId) {
+      triggerNotificationEvent({
+        userId,
+        type: EVENT_TYPES.PAYMENT_RECEIVED,
+        customTitle: "Payment Successful 💳",
+        customMessage: `Payment of ref #${razorpay_payment_id.slice(-6)} verified successfully!`,
+        priority: "NORMAL"
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Payment verified successfully",
+      paymentId: razorpay_payment_id
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Payment verification error" });
+  }
+});
+
+// ==========================================
+// 3.2 AI CONCIERGE & ASSISTANT (OPENAI ENGINE)
+// ==========================================
+router.post("/ai/assistant", async (req, res) => {
+  try {
+    const { message, history = [] } = req.body;
+    const apiKey = process.env.OPENAI_API_KEY || process.env.VITE_AI_API_KEY;
+    const model = process.env.OPENAI_MODEL || process.env.VITE_AI_MODEL || "gpt-4o";
+
+    if (!apiKey) {
+      return res.status(503).json({
+        error: "OpenAI API Key not configured. Please set OPENAI_API_KEY in .env."
+      });
+    }
+
+    if (!message) {
+      return res.status(400).json({ error: "Message is required." });
+    }
+
+    const systemPrompt = `You are the friendly, intelligent AI concierge for EZY1 (Everything You Need, One Platform - https://ezy1.site).
+EZY1 offers:
+1. Quick Commerce & Grocery delivery (Sharma Kirana, Fresh Veggies, Fruits, Sweets, Cafe, Paan, Sexual Wellness).
+2. Healthcare: Hospitals, Doctor Appointments, Bed Availability, Home Healthcare & Diagnostics.
+3. Transport: Share Ride, Parcel Courier, Bus Tickets, Travel Booking & Stays/Hotels.
+4. Merchant & Partner Ecosystem: Dedicated portals for Groceries, Restaurants, Hospitals, Pharmacies, and Service Providers.
+Be helpful, concise, courteous, and provide accurate navigation instructions to customers.`;
+
+    const messages = [
+      { role: "system", content: systemPrompt },
+      ...history.slice(-6),
+      { role: "user", content: message }
+    ];
+
+    const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature: 0.7,
+        max_tokens: 500
+      })
+    });
+
+    const openaiData = await openaiRes.json();
+    if (!openaiRes.ok) {
+      return res.status(openaiRes.status).json({
+        error: openaiData.error?.message || "OpenAI completion failed"
+      });
+    }
+
+    const reply = openaiData.choices?.[0]?.message?.content || "How else may I help you on EZY1?";
+    res.json({
+      success: true,
+      reply,
+      model: openaiData.model
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message || "AI Assistant error" });
   }
 });
 

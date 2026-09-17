@@ -26,7 +26,16 @@ export class SmsProviderError extends Error {
  * @returns {Promise<{ success: boolean, messageId?: string, provider: string }>}
  */
 export async function dispatchOtpSms({ phone, otp }) {
-  const provider = (process.env.OTP_PROVIDER || "").toLowerCase().trim();
+  const configuredProvider = (process.env.OTP_PROVIDER || process.env.SMS_PROVIDER || "").toLowerCase().trim();
+  let provider = configuredProvider;
+  if (!provider) {
+    if (process.env.MSG91_AUTH_KEY || process.env.SMS_API_KEY) provider = "msg91";
+    else if (process.env.FAST2SMS_API_KEY) provider = "fast2sms";
+    else if (process.env.TWILIO_ACCOUNT_SID) provider = "twilio";
+    else if (process.env.WHATSAPP_TOKEN) provider = "whatsapp";
+    else if (process.env.TEXTLOCAL_API_KEY) provider = "textlocal";
+  }
+
   const isProduction = process.env.NODE_ENV === "production";
   const isTestAllowed = !isProduction && (process.env.ENABLE_TEST_OTP === "true" || process.env.NODE_ENV === "test" || !provider);
 
@@ -77,14 +86,17 @@ export async function dispatchOtpSms({ phone, otp }) {
 
   // 2. MSG91 Gateway (India DLT Compliant OTP API)
   if (provider === "msg91") {
-    const authKey = process.env.MSG91_AUTH_KEY || process.env.OTP_API_KEY;
+    const authKey = process.env.MSG91_AUTH_KEY || process.env.SMS_API_KEY || process.env.OTP_API_KEY;
     const templateId = process.env.MSG91_TEMPLATE_ID || process.env.OTP_TEMPLATE_ID;
 
-    if (!authKey || !templateId) {
-      throw new SmsProviderError("MSG91 configuration missing. Required: MSG91_AUTH_KEY and MSG91_TEMPLATE_ID", "msg91");
+    if (!authKey) {
+      throw new SmsProviderError("MSG91 configuration missing. Required: MSG91_AUTH_KEY or SMS_API_KEY", "msg91");
     }
 
-    const msg91Url = `https://control.msg91.com/api/v5/otp?template_id=${encodeURIComponent(templateId)}&mobile=${encodeURIComponent(fullE164.replace("+", ""))}&authkey=${encodeURIComponent(authKey)}&otp=${encodeURIComponent(otp)}`;
+    let msg91Url = `https://control.msg91.com/api/v5/otp?mobile=${encodeURIComponent(fullE164.replace("+", ""))}&authkey=${encodeURIComponent(authKey)}&otp=${encodeURIComponent(otp)}`;
+    if (templateId) {
+      msg91Url += `&template_id=${encodeURIComponent(templateId)}`;
+    }
     const res = await fetch(msg91Url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -95,7 +107,7 @@ export async function dispatchOtpSms({ phone, otp }) {
       throw new SmsProviderError(data.message || "MSG91 OTP dispatch failed", "msg91", res.status);
     }
 
-    return { success: true, messageId: data.message, provider: "msg91" };
+    return { success: true, messageId: data.request_id || data.message || "msg91_sent", provider: "msg91" };
   }
 
   // 3. Fast2SMS Gateway (India High-Speed OTP Route)

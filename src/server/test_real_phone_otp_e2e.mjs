@@ -125,7 +125,14 @@ async function runOtpTestSuite() {
   console.log("\n--- 8. Production Security Enclosure (Demo OTP Disabled) ---");
   process.env.NODE_ENV = "production";
   process.env.ENABLE_TEST_OTP = "false";
+  const savedOtpProv = process.env.OTP_PROVIDER;
+  const savedSmsProv = process.env.SMS_PROVIDER;
+  const savedSmsKey = process.env.SMS_API_KEY;
+  const savedMsg91Key = process.env.MSG91_AUTH_KEY;
   delete process.env.OTP_PROVIDER;
+  delete process.env.SMS_PROVIDER;
+  delete process.env.SMS_API_KEY;
+  delete process.env.MSG91_AUTH_KEY;
 
   const prodPhone = "9999999998";
   await db.run("DELETE FROM otps WHERE phone = ?", [prodPhone]);
@@ -159,6 +166,10 @@ async function runOtpTestSuite() {
   // Restore test env
   process.env.NODE_ENV = "test";
   process.env.ENABLE_TEST_OTP = "true";
+  if (savedOtpProv) process.env.OTP_PROVIDER = savedOtpProv;
+  if (savedSmsProv) process.env.SMS_PROVIDER = savedSmsProv;
+  if (savedSmsKey) process.env.SMS_API_KEY = savedSmsKey;
+  if (savedMsg91Key) process.env.MSG91_AUTH_KEY = savedMsg91Key;
 
   console.log("\n===============================================================");
   console.log(`📊 TEST RESULTS: ${passed} PASSED, ${failed} FAILED`);
