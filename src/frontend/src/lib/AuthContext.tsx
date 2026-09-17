@@ -125,24 +125,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { success: false };
   };
 
-  // Fallback compatibility for legacy login
+  // Navigate directly to standard phone OTP login
   const login = async () => {
-    if (authClient) {
-      await new Promise<void>((resolve, reject) => {
-        authClient.login({
-          identityProvider: "https://identity.ic0.app",
-          onSuccess: () => {
-            setIsAuthenticated(true);
-            setIdentity(authClient.getIdentity());
-            setCurrentRole("user");
-            resolve();
-          },
-          onError: reject,
-        });
-      });
-    } else {
-      window.location.href = "/login";
-    }
+    window.location.href = "/login";
   };
 
   const logout = async () => {

@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Bell,
   Bot,
@@ -78,10 +78,10 @@ export default function Layout({ children }: LayoutProps) {
     },
   ]);
   const isMobile = useIsMobile();
-  const { isAuthenticated, user, login, logout } = useAuth();
-  const handleLogin = async () => {
-    await login();
-    setCurrentRole("user");
+  const { isAuthenticated, user, logout } = useAuth();
+  const navigate = useNavigate();
+  const handleLogin = () => {
+    navigate({ to: "/login" });
   };
 
   const handleLogout = () => {
