@@ -13,8 +13,11 @@ import {
   COSMETICS_ITEMS,
   DIGITAL_SERVICES,
   POPULAR_LOCAL_SHOPS_DATA,
+  HOSPITALS_DATA,
+  LAB_PACKAGES,
   type CatalogItem 
 } from "../ecosystem-data";
+import { doctors, workers } from "../mock-data";
 import { useCartStore } from "../lib/cartStore";
 import { useRequireAuth } from "../components/AuthPromptModal";
 import { useLocationStore } from "../lib/locationStore";
@@ -104,6 +107,7 @@ export default function LandingPage() {
   const { requireAuth } = useRequireAuth();
 
   const [homeSearch, setHomeSearch] = useState("");
+  const [searchCategory, setSearchCategory] = useState<string>("all");
   const [activeBannerIdx, setActiveBannerIdx] = useState(0);
 
   // Real backend states
@@ -150,11 +154,48 @@ export default function LandingPage() {
     e.preventDefault();
     const trimmed = homeSearch.trim();
     if (trimmed) {
-      navigate({ to: "/search", search: { q: trimmed } });
+      navigate({ to: "/search", search: { q: trimmed, category: searchCategory } });
     } else {
       navigate({ to: "/search" });
     }
   };
+
+  // Live Homepage Universal Search Engine across all entities
+  const liveSearchResults = useMemo(() => {
+    const q = homeSearch.trim().toLowerCase();
+    if (!q) return null;
+
+    const calcScore = (text: string) => {
+      const clean = (text || "").toLowerCase();
+      if (clean === q) return 100;
+      if (clean.startsWith(q)) return 75;
+      if (clean.includes(q)) return 50;
+      return 0;
+    };
+
+    const products = (searchCategory === "all" || searchCategory === "products" || searchCategory === "food")
+      ? CATALOG_ITEMS.filter((p) => calcScore(p.name) > 0 || calcScore(p.description) > 0 || p.tags.some((t) => calcScore(t) > 0)).slice(0, 10)
+      : [];
+
+    const docs = (searchCategory === "all" || searchCategory === "doctors")
+      ? doctors.filter((d) => calcScore(d.name) > 0 || calcScore(d.specialty) > 0 || calcScore(d.hospital) > 0).slice(0, 8)
+      : [];
+
+    const hospitals = (searchCategory === "all" || searchCategory === "hospitals")
+      ? HOSPITALS_DATA.filter((h) => calcScore(h.name) > 0 || calcScore(h.address) > 0 || h.departments.some((dept) => calcScore(dept) > 0)).slice(0, 6)
+      : [];
+
+    const services = (searchCategory === "all" || searchCategory === "services")
+      ? workers.filter((w) => calcScore(w.name) > 0 || calcScore(w.category) > 0).slice(0, 8)
+      : [];
+
+    const spots = (searchCategory === "all" || searchCategory === "spots")
+      ? FAMOUS_LOCAL_SPOTS.filter((s) => calcScore(s.name) > 0 || calcScore(s.tagline) > 0 || calcScore(s.city) > 0).slice(0, 6)
+      : [];
+
+    const total = products.length + docs.length + hospitals.length + services.length + spots.length;
+    return { products, doctors: docs, hospitals, services, spots, total };
+  }, [homeSearch, searchCategory]);
 
   const handleAddToCart = (product: CatalogItem) => {
     const numId = Math.abs(product.id.split("").reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 0));
@@ -320,8 +361,259 @@ export default function LandingPage() {
                 Search
               </Button>
             </form>
+
+            {/* Scrollable Search Category Filters */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pt-1 pb-0.5 scrollbar-none text-xs">
+              <span className="text-muted-foreground font-semibold text-[11px] shrink-0 mr-1">
+                Search In:
+              </span>
+              {[
+                { id: "all", label: "All Pages", icon: "🌐" },
+                { id: "products", label: "Groceries & Shop", icon: "🛒" },
+                { id: "doctors", label: "Doctors", icon: "🩺" },
+                { id: "hospitals", label: "Hospitals & Beds", icon: "🏥" },
+                { id: "services", label: "Home Services", icon: "🔧" },
+                { id: "food", label: "Food & Dining", icon: "🍔" },
+                { id: "spots", label: "Local Famous", icon: "🧭" },
+              ].map((sc) => (
+                <button
+                  key={sc.id}
+                  type="button"
+                  onClick={() => setSearchCategory(sc.id)}
+                  className={`flex items-center gap-1 px-3 py-1 rounded-xl font-bold whitespace-nowrap transition-colors shrink-0 ${
+                    searchCategory === sc.id
+                      ? "bg-primary text-primary-foreground shadow-xs"
+                      : "bg-muted/70 hover:bg-muted text-foreground/80 hover:text-foreground border border-border/50"
+                  }`}
+                >
+                  <span>{sc.icon}</span>
+                  <span>{sc.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
+
+        {/* ========================================================= */}
+        {/* LIVE HOMEPAGE UNIVERSAL SEARCH RESULTS (Scrollable All)   */}
+        {/* ========================================================= */}
+        {liveSearchResults && (
+          <section className="container max-w-7xl mx-auto pt-6 pb-2 px-4 sm:px-6 animate-in fade-in duration-200">
+            <div className="p-5 sm:p-6 rounded-3xl bg-card border-2 border-primary/30 shadow-md space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/80 pb-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-primary text-primary-foreground font-bold text-xs">
+                      Universal Search Preview
+                    </Badge>
+                    <span className="text-xs text-muted-foreground font-semibold">
+                      {liveSearchResults.total} results found for "{homeSearch}"
+                    </span>
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-display font-extrabold text-foreground mt-1">
+                    Instant Results Across All Pages
+                  </h3>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setHomeSearch("")}
+                    className="rounded-xl text-xs font-semibold"
+                  >
+                    Clear Results
+                  </Button>
+                  <Button
+                    size="sm"
+                    asChild
+                    className="rounded-xl text-xs font-bold bg-primary text-primary-foreground shadow-sm"
+                  >
+                    <Link to="/search" search={{ q: homeSearch, category: searchCategory }}>
+                      View Full Search Page →
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+
+              {liveSearchResults.total === 0 ? (
+                <div className="text-center py-10 text-muted-foreground space-y-2">
+                  <p className="text-sm font-semibold">No results matching "{homeSearch}" in this category.</p>
+                  <p className="text-xs">Try selecting "All Pages" or check spelling.</p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {/* Products Scrollable Row */}
+                  {liveSearchResults.products.length > 0 && (
+                    <div className="space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-bold font-display text-foreground flex items-center gap-2">
+                          <ShoppingBag className="w-4 h-4 text-primary" />
+                          Products & Groceries ({liveSearchResults.products.length})
+                        </h4>
+                        <Link to="/search" search={{ q: homeSearch, category: "products" }} className="text-xs font-semibold text-primary hover:underline">
+                          See all products →
+                        </Link>
+                      </div>
+                      <ScrollableRow className="py-1">
+                        {liveSearchResults.products.map((p) => (
+                          <div
+                            key={p.id}
+                            className="flex-shrink-0 w-56 sm:w-60 p-3 rounded-2xl bg-background border border-border/80 hover:border-primary/40 transition-all flex flex-col justify-between"
+                          >
+                            <div className="flex items-start gap-2.5">
+                              <img src={p.image} alt={p.name} className="w-14 h-14 rounded-xl object-cover bg-muted shrink-0" />
+                              <div className="min-w-0 flex-1">
+                                <h5 className="text-xs font-bold text-foreground truncate">{p.name}</h5>
+                                <p className="text-[10px] text-muted-foreground truncate">{p.unit}</p>
+                                <span className="text-xs font-extrabold text-foreground mt-1 inline-block">₹{p.price}</span>
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              onClick={() => handleAddToCart(p)}
+                              className="w-full mt-3 h-7 rounded-xl text-xs font-bold bg-primary text-primary-foreground shadow-xs gap-1"
+                            >
+                              <Plus className="w-3 h-3" />
+                              <span>Add</span>
+                            </Button>
+                          </div>
+                        ))}
+                      </ScrollableRow>
+                    </div>
+                  )}
+
+                  {/* Doctors Scrollable Row */}
+                  {liveSearchResults.doctors.length > 0 && (
+                    <div className="space-y-2.5 pt-2">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-bold font-display text-foreground flex items-center gap-2">
+                          <Stethoscope className="w-4 h-4 text-cyan-600" />
+                          Doctors & Specialists ({liveSearchResults.doctors.length})
+                        </h4>
+                        <Link to="/doctors" className="text-xs font-semibold text-primary hover:underline">
+                          View all doctors →
+                        </Link>
+                      </div>
+                      <ScrollableRow className="py-1">
+                        {liveSearchResults.doctors.map((d) => (
+                          <div
+                            key={d.id}
+                            className="flex-shrink-0 w-64 sm:w-72 p-3.5 rounded-2xl bg-background border border-border/80 hover:border-cyan-500/40 transition-all flex items-center justify-between gap-3"
+                          >
+                            <div className="min-w-0 flex-1">
+                              <h5 className="text-xs font-bold text-foreground truncate">{d.name}</h5>
+                              <p className="text-[11px] text-primary font-semibold truncate">{d.specialty}</p>
+                              <p className="text-[10px] text-muted-foreground truncate">{d.hospital} • ₹{d.fee}</p>
+                            </div>
+                            <Button size="sm" asChild className="rounded-xl text-xs font-bold shrink-0 h-8">
+                              <Link to="/doctors">Book</Link>
+                            </Button>
+                          </div>
+                        ))}
+                      </ScrollableRow>
+                    </div>
+                  )}
+
+                  {/* Hospitals Scrollable Row */}
+                  {liveSearchResults.hospitals.length > 0 && (
+                    <div className="space-y-2.5 pt-2">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-bold font-display text-foreground flex items-center gap-2">
+                          <Building2 className="w-4 h-4 text-rose-600" />
+                          Hospitals & ICU Beds ({liveSearchResults.hospitals.length})
+                        </h4>
+                        <Link to="/hospitals" className="text-xs font-semibold text-primary hover:underline">
+                          Check all beds →
+                        </Link>
+                      </div>
+                      <ScrollableRow className="py-1">
+                        {liveSearchResults.hospitals.map((h) => (
+                          <div
+                            key={h.id}
+                            className="flex-shrink-0 w-64 sm:w-72 p-3.5 rounded-2xl bg-background border border-border/80 hover:border-rose-500/40 transition-all flex items-center justify-between gap-3"
+                          >
+                            <div className="min-w-0 flex-1">
+                              <h5 className="text-xs font-bold text-foreground truncate">{h.name}</h5>
+                              <p className="text-[11px] text-emerald-600 font-bold">{h.availableBeds.icu} ICU Beds Available</p>
+                              <p className="text-[10px] text-muted-foreground truncate">{h.address}</p>
+                            </div>
+                            <Button size="sm" variant="outline" asChild className="rounded-xl text-xs font-bold shrink-0 h-8">
+                              <Link to="/hospitals">Beds</Link>
+                            </Button>
+                          </div>
+                        ))}
+                      </ScrollableRow>
+                    </div>
+                  )}
+
+                  {/* Home Services Scrollable Row */}
+                  {liveSearchResults.services.length > 0 && (
+                    <div className="space-y-2.5 pt-2">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-bold font-display text-foreground flex items-center gap-2">
+                          <Wrench className="w-4 h-4 text-blue-600" />
+                          Home Services & Repairs ({liveSearchResults.services.length})
+                        </h4>
+                        <Link to="/services" className="text-xs font-semibold text-primary hover:underline">
+                          View all services →
+                        </Link>
+                      </div>
+                      <ScrollableRow className="py-1">
+                        {liveSearchResults.services.map((s) => (
+                          <div
+                            key={s.id}
+                            className="flex-shrink-0 w-56 sm:w-64 p-3.5 rounded-2xl bg-background border border-border/80 hover:border-blue-500/40 transition-all flex flex-col justify-between"
+                          >
+                            <div>
+                              <h5 className="text-xs font-bold text-foreground truncate">{s.name}</h5>
+                              <p className="text-[11px] text-primary font-semibold">{s.category}</p>
+                              <p className="text-[10px] text-muted-foreground mt-0.5">₹{s.pricePerHour}/visit • {s.rating} ★</p>
+                            </div>
+                            <Button size="sm" asChild className="w-full mt-2 h-7 rounded-xl text-xs font-bold">
+                              <Link to="/services">Book</Link>
+                            </Button>
+                          </div>
+                        ))}
+                      </ScrollableRow>
+                    </div>
+                  )}
+
+                  {/* Local Spots Scrollable Row */}
+                  {liveSearchResults.spots.length > 0 && (
+                    <div className="space-y-2.5 pt-2">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-bold font-display text-foreground flex items-center gap-2">
+                          <Compass className="w-4 h-4 text-purple-600" />
+                          Local Spots & Food ({liveSearchResults.spots.length})
+                        </h4>
+                        <Link to="/famous" className="text-xs font-semibold text-primary hover:underline">
+                          Explore city →
+                        </Link>
+                      </div>
+                      <ScrollableRow className="py-1">
+                        {liveSearchResults.spots.map((sp) => (
+                          <div
+                            key={sp.id}
+                            className="flex-shrink-0 w-56 sm:w-64 p-3.5 rounded-2xl bg-background border border-border/80 hover:border-purple-500/40 transition-all flex flex-col justify-between"
+                          >
+                            <div>
+                              <h5 className="text-xs font-bold text-foreground truncate">{sp.name}</h5>
+                              <p className="text-[10px] text-muted-foreground line-clamp-2 mt-0.5">{sp.tagline}</p>
+                            </div>
+                            <Button size="sm" variant="outline" asChild className="w-full mt-2 h-7 rounded-xl text-xs font-bold">
+                              <Link to="/famous">View</Link>
+                            </Button>
+                          </div>
+                        ))}
+                      </ScrollableRow>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* ========================================================= */}
         {/* 2. MAIN SERVICE CATEGORY ROW (Horizontally Scrollable)    */}

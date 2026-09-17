@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Layout from "../components/Layout";
 import { doctors as mockDoctors } from "../mock-data";
+import { RelatedPagesBar } from "../components/RelatedPagesBar";
 import { useRequireAuth } from "../components/AuthPromptModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -70,6 +71,7 @@ export default function DoctorsPage() {
 
   return (
     <Layout>
+      <RelatedPagesBar domain="healthcare" activeId="doctors" />
       <div className="min-h-screen bg-background pb-24">
         {/* Header */}
         <div className="border-b border-border bg-card/60 backdrop-blur-md">

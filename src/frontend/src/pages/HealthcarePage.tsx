@@ -35,6 +35,7 @@ import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import UserLayout from "../components/UserLayout";
+import { RelatedPagesBar } from "../components/RelatedPagesBar";
 import { doctors, appointments as initialAppointments } from "../mock-data";
 import type { Appointment, Doctor } from "../types";
 
@@ -651,6 +652,7 @@ export default function HealthcarePage() {
 
   return (
     <UserLayout title="Healthcare">
+      <RelatedPagesBar domain="healthcare" activeId="pharmacy" className="mb-4 rounded-xl" />
       {/* Floating Emergency SOS on mobile */}
       <div className="fixed bottom-6 right-4 z-50 md:hidden">
         <EmergencySOSButton />

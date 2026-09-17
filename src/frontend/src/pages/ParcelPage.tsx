@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Layout from "../components/Layout";
+import { RelatedPagesBar } from "../components/RelatedPagesBar";
 import { useRequireAuth } from "../components/AuthPromptModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,6 +47,7 @@ export default function ParcelPage() {
 
   return (
     <Layout>
+      <RelatedPagesBar domain="transport" activeId="parcel" />
       <div className="min-h-screen bg-background pb-24">
         {/* Header */}
         <div className="border-b border-border bg-card/60 backdrop-blur-md">

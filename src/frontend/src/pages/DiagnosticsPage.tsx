@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Layout from "../components/Layout";
 import { LAB_PACKAGES, type LabPackage } from "../ecosystem-data";
+import { RelatedPagesBar } from "../components/RelatedPagesBar";
 import { useRequireAuth } from "../components/AuthPromptModal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +34,7 @@ export default function DiagnosticsPage() {
 
   return (
     <Layout>
+      <RelatedPagesBar domain="healthcare" activeId="diagnostics" />
       <div className="min-h-screen bg-background pb-24">
         {/* Header */}
         <div className="border-b border-border bg-card/60 backdrop-blur-md">

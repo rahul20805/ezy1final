@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Layout from "../components/Layout";
+import { RelatedPagesBar } from "../components/RelatedPagesBar";
 import { FAMOUS_LOCAL_SPOTS, type FamousLocalSpot } from "../ecosystem-data";
 import { vendors } from "../mock-data";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,7 @@ export default function LocalFamousPage() {
 
   return (
     <Layout>
+      <RelatedPagesBar domain="local" activeId="famous" />
       <div className="min-h-screen bg-background pb-24">
         {/* Header */}
         <div className="border-b border-border bg-card/60 backdrop-blur-md">

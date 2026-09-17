@@ -5,6 +5,7 @@ import { ProductCard } from "../components/ProductCard";
 import { QuickCommerceHeader } from "../components/QuickCommerceHeader";
 import { StickyCartBar } from "../components/StickyCartBar";
 import UserLayout from "../components/UserLayout";
+import { RelatedPagesBar } from "../components/RelatedPagesBar";
 import { useCategories, useProducts } from "../lib/backend-hooks";
 
 export default function CommercePage() {
@@ -26,6 +27,7 @@ export default function CommercePage() {
 
   return (
     <UserLayout>
+      <RelatedPagesBar domain="shopping" activeId="quick" className="mb-4 rounded-xl" />
       <div className="container pb-24 max-w-5xl">
         <QuickCommerceHeader />
 

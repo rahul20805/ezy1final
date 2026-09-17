@@ -52,8 +52,19 @@ export default function OmniSearchPage() {
     return "";
   };
 
+  const getInitialTab = (): CategoryTab => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const cat = params.get("category") as CategoryTab;
+      if (cat && ["all", "products", "doctors", "hospitals", "services", "shops", "spots"].includes(cat)) {
+        return cat;
+      }
+    }
+    return "all";
+  };
+
   const [query, setQuery] = useState(getInitialQuery);
-  const [activeTab, setActiveTab] = useState<CategoryTab>("all");
+  const [activeTab, setActiveTab] = useState<CategoryTab>(getInitialTab);
   const [sortBy, setSortBy] = useState<SortOption>("relevant");
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
@@ -61,11 +72,16 @@ export default function OmniSearchPage() {
 
   const { addItem } = useCartStore();
 
-  // Keep query in sync if URL changes (e.g. from navbar search)
+  // Keep query and category in sync if URL changes (e.g. from navbar search or back/forward)
   useEffect(() => {
     const handleLocationChange = () => {
-      const q = new URLSearchParams(window.location.search).get("q") || "";
+      const params = new URLSearchParams(window.location.search);
+      const q = params.get("q") || "";
+      const cat = params.get("category") as CategoryTab;
       setQuery(q);
+      if (cat && ["all", "products", "doctors", "hospitals", "services", "shops", "spots"].includes(cat)) {
+        setActiveTab(cat);
+      }
     };
     window.addEventListener("popstate", handleLocationChange);
     return () => window.removeEventListener("popstate", handleLocationChange);

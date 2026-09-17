@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { Link, useParams } from "@tanstack/react-router";
 import Layout from "../components/Layout";
+import { RelatedPagesBar } from "../components/RelatedPagesBar";
 import { SUPER_CATEGORIES, CATALOG_ITEMS, type CatalogItem } from "../ecosystem-data";
 import { useCartStore } from "../lib/cartStore";
 import { useRequireAuth } from "../components/AuthPromptModal";
@@ -84,6 +85,7 @@ export default function CategoryDetailPage() {
 
   return (
     <Layout>
+      <RelatedPagesBar domain="shopping" activeId={currentCat.id} />
       <div className="min-h-screen bg-background pb-24">
         {/* Category Hero Header */}
         <div className="border-b border-border bg-card/60 backdrop-blur-md sticky top-16 z-20">

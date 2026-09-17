@@ -7,6 +7,7 @@ import { CheckCircle2, MapPin, Search, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import { workers } from "../mock-data";
+import { RelatedPagesBar } from "../components/RelatedPagesBar";
 
 export default function HomeServicesPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -52,6 +53,7 @@ export default function HomeServicesPage() {
 
   return (
     <Layout>
+      <RelatedPagesBar domain="services" activeId="services" />
       <div className="container py-8 max-w-5xl">
         <div className="mb-8">
           <Badge className="mb-2 bg-primary/10 text-primary border-primary/20">

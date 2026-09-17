@@ -22,6 +22,7 @@ import {
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import UserLayout from "../components/UserLayout";
+import { RelatedPagesBar } from "../components/RelatedPagesBar";
 import { busRoutes, rides } from "../mock-data";
 import type { BusRoute, RideRequest } from "../types";
 
@@ -682,6 +683,7 @@ function RideHistoryTab() {
 export default function TransportPage() {
   return (
     <UserLayout title="Transport">
+      <RelatedPagesBar domain="transport" activeId="rides" className="mb-4 rounded-xl" />
       <div className="space-y-6" data-ocid="transport.page">
         {/* Page header */}
         <div className="bg-card rounded-2xl p-5 border border-border shadow-subtle">

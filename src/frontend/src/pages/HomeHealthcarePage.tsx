@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Layout from "../components/Layout";
+import { RelatedPagesBar } from "../components/RelatedPagesBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -112,6 +113,7 @@ export default function HomeHealthcarePage() {
 
   return (
     <Layout>
+      <RelatedPagesBar domain="healthcare" activeId="home-doctor" />
       <div className="min-h-screen bg-background pb-20">
         {/* Header Hero */}
         <div className="bg-gradient-to-r from-teal-500/15 via-background to-cyan-500/10 border-b border-border py-8 px-4 sm:px-6">

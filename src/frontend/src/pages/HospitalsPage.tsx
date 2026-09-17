@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Layout from "../components/Layout";
 import { HOSPITALS_DATA, type HospitalFacility } from "../ecosystem-data";
+import { RelatedPagesBar } from "../components/RelatedPagesBar";
 import { useRequireAuth } from "../components/AuthPromptModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -78,6 +79,7 @@ export default function HospitalsPage() {
 
   return (
     <Layout>
+      <RelatedPagesBar domain="healthcare" activeId="hospitals" />
       <div className="min-h-screen bg-background pb-24">
         {/* Emergency SOS Banner */}
         <div className="bg-red-600 text-white py-3 px-4 shadow-md">
