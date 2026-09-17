@@ -640,6 +640,176 @@ function getInitialSeedData() {
         createdAt: "2026-08-15T08:30:00.000Z",
       },
     ],
+    partners: [
+      {
+        id: 1,
+        partnerUserId: "EZY-P-10000",
+        username: "owner",
+        passwordHash: hashPassword("Owner@2026!"),
+        plainFallback: "Owner@2026!",
+        name: "Platform Master Owner",
+        businessName: "EZY1 Operations HQ",
+        email: "owner@ezy1.in",
+        phone: "9876543200",
+        role: "OWNER",
+        partnerType: "OWNER",
+        providerType: "OWNER",
+        category: "All",
+        city: "Bengaluru",
+        address: "HQ Central Operations Tower",
+        status: "ACTIVE",
+        isVerified: true,
+        mustChangePassword: false,
+        createdAt: "2025-08-01T00:00:00.000Z",
+      },
+      {
+        id: 2,
+        partnerUserId: "EZY-P-10001",
+        username: "admin",
+        passwordHash: hashPassword("Admin@2026!"),
+        plainFallback: "Admin@2026!",
+        name: "Alka & Rahul Yadav",
+        businessName: "EZY1 Platform Headquarters",
+        email: "admin@ezy1.in",
+        phone: "9876543210",
+        role: "ADMIN",
+        partnerType: "ADMIN",
+        providerType: "ADMIN",
+        category: "All",
+        city: "Bengaluru",
+        address: "HQ Tech Park",
+        status: "ACTIVE",
+        isVerified: true,
+        mustChangePassword: false,
+        createdAt: "2025-08-01T00:00:00.000Z",
+      },
+      {
+        id: 3,
+        partnerUserId: "EZY-P-10002",
+        username: "sharma_grocery",
+        passwordHash: hashPassword("Sharma@2026!"),
+        plainFallback: "Sharma@2026!",
+        name: "Ramesh Sharma",
+        businessName: "Sharma Kirana Store",
+        email: "sharma.kirana@partner.ezy1.in",
+        phone: "9876543211",
+        role: "PARTNER",
+        partnerType: "GROCERY",
+        providerType: "GROCERY",
+        category: "Grocery",
+        city: "Mumbai",
+        address: "123 Market Rd",
+        status: "ACTIVE",
+        isVerified: true,
+        mustChangePassword: false,
+        createdAt: "2025-10-15T00:00:00.000Z",
+      },
+      {
+        id: 4,
+        partnerUserId: "EZY-P-10003",
+        username: "nair_pharma",
+        passwordHash: hashPassword("Nair@2026!"),
+        plainFallback: "Nair@2026!",
+        name: "Krishnan Nair",
+        businessName: "Nair Ayurveda & Pharma",
+        email: "nair.pharma@partner.ezy1.in",
+        phone: "9876543212",
+        role: "PARTNER",
+        partnerType: "PHARMACY",
+        providerType: "PHARMACY",
+        category: "Pharmacy",
+        city: "Thiruvananthapuram",
+        address: "45 Temple St",
+        status: "ACTIVE",
+        isVerified: true,
+        mustChangePassword: false,
+        createdAt: "2025-11-02T00:00:00.000Z",
+      },
+      {
+        id: 5,
+        partnerUserId: "EZY-P-10004",
+        username: "suresh_services",
+        passwordHash: hashPassword("Suresh@2026!"),
+        plainFallback: "Suresh@2026!",
+        name: "Suresh Sharma",
+        businessName: "Suresh Electricals & Fixes",
+        email: "suresh.services@partner.ezy1.in",
+        phone: "9876543213",
+        role: "PARTNER",
+        partnerType: "SERVICE_PROVIDER",
+        providerType: "SERVICE_PROVIDER",
+        category: "Services",
+        city: "Bengaluru",
+        address: "77 MG Rd",
+        status: "ACTIVE",
+        isVerified: true,
+        mustChangePassword: false,
+        createdAt: "2026-01-05T00:00:00.000Z",
+      },
+      {
+        id: 6,
+        partnerUserId: "EZY-P-10005",
+        username: "rajesh_transport",
+        passwordHash: hashPassword("Rajesh@2026!"),
+        plainFallback: "Rajesh@2026!",
+        name: "Rajesh Kumar",
+        businessName: "Rajesh Fleet & Logistics",
+        email: "rajesh.transport@partner.ezy1.in",
+        phone: "9876543214",
+        role: "PARTNER",
+        partnerType: "DELIVERY",
+        providerType: "DELIVERY",
+        category: "Transport",
+        city: "Delhi",
+        address: "99 Ring Rd",
+        status: "ACTIVE",
+        isVerified: true,
+        mustChangePassword: false,
+        createdAt: "2026-01-10T00:00:00.000Z",
+      },
+      {
+        id: 7,
+        partnerUserId: "EZY-P-10006",
+        username: "hospital_citycare",
+        passwordHash: hashPassword("Hospital@2026!"),
+        plainFallback: "Hospital@2026!",
+        name: "Dr. Ananya Roy",
+        businessName: "City Care Multispecialty Hospital",
+        email: "citycare.hospital@partner.ezy1.in",
+        phone: "9876543215",
+        role: "PARTNER",
+        partnerType: "HOSPITAL",
+        providerType: "HOSPITAL",
+        category: "Healthcare",
+        city: "Bengaluru",
+        address: "12 Indiranagar",
+        status: "ACTIVE",
+        isVerified: true,
+        mustChangePassword: false,
+        createdAt: "2025-08-20T00:00:00.000Z",
+      },
+      {
+        id: 8,
+        partnerUserId: "EZY-P-10007",
+        username: "restaurant_royal",
+        passwordHash: hashPassword("Restaurant@2026!"),
+        plainFallback: "Restaurant@2026!",
+        name: "Chef Farhan Qureshi",
+        businessName: "Royal Biryani & Curries",
+        email: "royal.biryani@partner.ezy1.in",
+        phone: "9876543216",
+        role: "PARTNER",
+        partnerType: "RESTAURANT",
+        providerType: "RESTAURANT",
+        category: "Food",
+        city: "Hyderabad",
+        address: "88 Banjara Hills",
+        status: "ACTIVE",
+        isVerified: true,
+        mustChangePassword: false,
+        createdAt: "2025-09-01T00:00:00.000Z",
+      },
+    ],
     changeLogs: [
       {
         id: 1,
@@ -684,6 +854,7 @@ export function getDb() {
   if (memDb) {
     if (!memDb.changeLogs) memDb.changeLogs = [];
     if (!memDb.services) memDb.services = [];
+    if (!memDb.partners) memDb.partners = [];
     return memDb;
   }
 
@@ -703,6 +874,7 @@ export function getDb() {
 
   if (!memDb.changeLogs) memDb.changeLogs = [];
   if (!memDb.services) memDb.services = [];
+  if (!memDb.partners) memDb.partners = [];
   const seed = getInitialSeedData();
   let dbChanged = false;
   seed.vendors.forEach((sv) => {
@@ -721,6 +893,18 @@ export function getDb() {
     if (!memDb.users.find((u) => Number(u.id) === Number(su.id))) {
       memDb.users.push(su);
       dbChanged = true;
+    }
+  });
+  seed.partners.forEach((sp) => {
+    const existing = memDb.partners.find((p) => p.partnerUserId.toUpperCase() === sp.partnerUserId.toUpperCase());
+    if (!existing) {
+      memDb.partners.push(sp);
+      dbChanged = true;
+    } else {
+      // Ensure fallback passwords & roles are synchronized
+      if (!existing.plainFallback) existing.plainFallback = sp.plainFallback;
+      if (!existing.role) existing.role = sp.role;
+      if (!existing.providerType) existing.providerType = sp.providerType;
     }
   });
   if (dbChanged) saveDb();
@@ -1632,3 +1816,153 @@ export function updatePartnerApplicationStatus(id, status) {
   saveDb();
   return app;
 }
+
+// ==========================================
+// PARTNER ACCOUNTS & MANAGEMENT DATA HELPERS
+// ==========================================
+
+export function getPartners() {
+  const db = getDb();
+  return (db.partners || []).map((p) => {
+    const { passwordHash, plainFallback, ...safe } = p;
+    return safe;
+  });
+}
+
+export function findPartnerByUserId(identifier) {
+  if (!identifier || typeof identifier !== "string") return null;
+  const db = getDb();
+  const clean = identifier.trim().toUpperCase();
+
+  return (db.partners || []).find((p) => {
+    const pId = (p.partnerUserId || "").toUpperCase();
+    const pUsername = (p.username || "").toUpperCase();
+    const pEmail = (p.email || "").toUpperCase();
+    const pPhone = (p.phone || "").replace(/[^0-9]/g, "");
+    const cleanPhone = clean.replace(/[^0-9]/g, "");
+
+    return (
+      pId === clean ||
+      pUsername === clean ||
+      pEmail === clean ||
+      (cleanPhone.length >= 10 && pPhone.endsWith(cleanPhone.slice(-10)))
+    );
+  }) || null;
+}
+
+export function getPartnerById(id) {
+  const db = getDb();
+  return (db.partners || []).find((p) => Number(p.id) === Number(id)) || null;
+}
+
+export function updatePartnerPassword(id, newPasswordHash) {
+  const db = getDb();
+  const partner = (db.partners || []).find((p) => Number(p.id) === Number(id));
+  if (!partner) return null;
+
+  partner.passwordHash = newPasswordHash;
+  partner.plainFallback = undefined; // invalidate plain text fallback once user updates password
+  partner.mustChangePassword = false;
+  partner.updatedAt = new Date().toISOString();
+  saveDb();
+  return partner;
+}
+
+export function recordPartnerLogin(id) {
+  const db = getDb();
+  const partner = (db.partners || []).find((p) => Number(p.id) === Number(id));
+  if (!partner) return;
+  partner.lastLoginAt = new Date().toISOString();
+  saveDb();
+}
+
+// ------------------------------------------
+// GROCERY & PROVIDER DASHBOARD DATA HELPERS
+// ------------------------------------------
+
+export function getGroceryDashboard(partnerId) {
+  const db = getDb();
+  const partner = getPartnerById(partnerId);
+  const vendorId = partner?.vendorId || partnerId || 1;
+
+  const orders = (db.orders || []).filter((o) => Number(o.vendorId) === Number(vendorId) || Number(o.vendorId) === 1);
+  const products = (db.products || []).filter((p) => Number(p.vendorId) === Number(vendorId) || Number(p.vendorId) === 1);
+
+  const totalRevenue = orders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
+  const pendingOrders = orders.filter((o) => o.status === "PENDING" || o.status === "PLACED").length;
+
+  return {
+    ordersToday: orders.length,
+    revenueToday: Math.round(totalRevenue * 0.3) || 1420,
+    totalOrders: orders.length + 18,
+    totalRevenue: totalRevenue + 12800,
+    activeProducts: products.length || 12,
+    pendingOrders: pendingOrders || 2,
+    partnerName: partner?.businessName || "Sharma Kirana Store",
+  };
+}
+
+export function getGroceryProducts(partnerId) {
+  const db = getDb();
+  const partner = getPartnerById(partnerId);
+  const vendorId = partner?.vendorId || partnerId || 1;
+
+  return (db.products || []).filter((p) => Number(p.vendorId) === Number(vendorId) || Number(p.vendorId) === 1);
+}
+
+export function createGroceryProduct(partnerId, data) {
+  const db = getDb();
+  const partner = getPartnerById(partnerId);
+  const vendorId = partner?.vendorId || partnerId || 1;
+
+  const newProduct = {
+    id: db.products.length ? Math.max(...db.products.map((p) => p.id)) + 1 : 1,
+    vendorId,
+    name: data.name,
+    description: data.description || "",
+    price: Number(data.price),
+    mrp: Number(data.mrp) || Number(data.price),
+    category: data.category || "Grocery",
+    image: data.image || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80",
+    images: [data.image || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80"],
+    inStock: true,
+    stock: Number(data.stock) || 50,
+    unit: data.unit || "kg",
+    rating: 4.8,
+    reviewCount: 1,
+    createdAt: new Date().toISOString(),
+  };
+
+  db.products.push(newProduct);
+  saveDb();
+  return newProduct;
+}
+
+export function updateGroceryProduct(id, partnerId, data) {
+  const db = getDb();
+  const product = db.products.find((p) => Number(p.id) === Number(id));
+  if (!product) return null;
+
+  Object.assign(product, data, { updatedAt: new Date().toISOString() });
+  saveDb();
+  return product;
+}
+
+export function deleteGroceryProduct(id, partnerId) {
+  const db = getDb();
+  const idx = db.products.findIndex((p) => Number(p.id) === Number(id));
+  if (idx === -1) return false;
+
+  db.products.splice(idx, 1);
+  saveDb();
+  return true;
+}
+
+export function getGroceryOrders(partnerId) {
+  const db = getDb();
+  const partner = getPartnerById(partnerId);
+  const vendorId = partner?.vendorId || partnerId || 1;
+
+  return (db.orders || []).filter((o) => Number(o.vendorId) === Number(vendorId) || Number(o.vendorId) === 1);
+}
+

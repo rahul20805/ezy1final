@@ -1,4 +1,4 @@
-﻿/**
+/**
  * EZY1 — Unified Partner Dashboard Page
  * Auto-routes the authenticated partner to their specific service portal
  * based on providerType stored in the JWT / partnerAuthStore.
@@ -24,8 +24,13 @@ export default function PartnerDashboardPage() {
   const pt = (currentPartner.providerType || currentPartner.partnerType || "GROCERY").toUpperCase();
   const role = (currentPartner.role || "").toUpperCase();
 
+  // Owners get owner control centre
+  if (role === "OWNER" || role === "SUPER_OWNER" || pt === "OWNER") {
+    return <Navigate to="/owner" />;
+  }
+
   // Admins get admin console
-  if (role === "ADMIN" || role === "SUPER_ADMIN" || role === "SUPER_OWNER" || pt === "ADMIN") {
+  if (role === "ADMIN" || role === "SUPER_ADMIN" || pt === "ADMIN") {
     return <AdminPartnerPortal />;
   }
 

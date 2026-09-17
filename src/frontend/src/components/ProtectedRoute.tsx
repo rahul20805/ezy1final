@@ -101,16 +101,22 @@ export function ServiceProviderRoute({ children }: { children: React.ReactNode }
   return <ProviderRoute allowedTypes={["SERVICE_PROVIDER"]}>{children}</ProviderRoute>;
 }
 
+export function OwnerRoute({ children }: { children: React.ReactNode }) {
+  return <ProviderRoute allowedTypes={["OWNER", "SUPER_OWNER"]} redirectTo="/partner-login?portal=owner">{children}</ProviderRoute>;
+}
+
 export function AdminRoute({ children }: { children: React.ReactNode }) {
-  return <ProviderRoute allowedTypes={["ADMIN"]}>{children}</ProviderRoute>;
+  return <ProviderRoute allowedTypes={["ADMIN", "SUPER_ADMIN"]} redirectTo="/partner-login?portal=admin">{children}</ProviderRoute>;
 }
 
 export function ProviderRoute({
   children,
   allowedTypes,
+  redirectTo = "/partner-login",
 }: {
   children: React.ReactNode;
   allowedTypes: string[];
+  redirectTo?: string;
 }) {
   const { isAuthenticated, currentPartner, fetchMe } = usePartnerAuth();
   const [checking, setChecking] = useState(true);
@@ -137,7 +143,7 @@ export function ProviderRoute({
 
   const token = getPartnerToken();
   if (!isAuthenticated || !token || !currentPartner) {
-    return <Navigate to="/partner-login" />;
+    return <Navigate to={redirectTo} />;
   }
 
   // Check if partner is authorized for this provider module

@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { getAuthUser, hashPassword, signJwt, verifyPassword } from "./auth.js";
+import { getAuthUser, hashPassword, signJwt, verifyJwt, verifyPassword } from "./auth.js";
 import { reverseGeocode, searchAddress } from "./location.js";
 import { dispatchOtpSms } from "../src/server/src/smsProvider.js";
 import {
@@ -39,6 +39,18 @@ import {
   updateProduct,
   updateService,
   updateVendor,
+  // Partner & Provider Operations
+  findPartnerByUserId,
+  getPartnerById,
+  updatePartnerPassword,
+  recordPartnerLogin,
+  getPartners,
+  getGroceryDashboard,
+  getGroceryProducts,
+  createGroceryProduct,
+  updateGroceryProduct,
+  deleteGroceryProduct,
+  getGroceryOrders,
 } from "./db.js";
 
 // Helper to set CORS headers
@@ -1105,6 +1117,241 @@ Be helpful, concise, courteous, and provide accurate navigation instructions to 
       const updated = updatePartnerApplicationStatus(appId, body.status);
       if (!updated) return sendJson(res, 404, { success: false, error: "Application not found." });
       return sendJson(res, 200, { success: true, application: updated });
+    }
+
+    // ----------------------------------------------------
+    // 8. PARTNER AUTHENTICATION & SESSIONS
+    // ----------------------------------------------------
+    if ((pathname === "/partner/auth/login" || pathname === "/auth/partner/login") && method === "POST") {
+      const body = await parseBody(req);
+      const identifier = body.partnerUserId || body.username || body.userId || body.email || body.phone;
+      const password = body.password;
+
+      if (!identifier || !password) {
+        return sendJson(res, 400, {
+          success: false,
+          error: "Partner ID / Username and password are required.",
+          code: "MISSING_CREDENTIALS",
+        });
+      }
+
+      const partner = findPartnerByUserId(identifier);
+      if (!partner) {
+        return sendJson(res, 401, {
+          success: false,
+          error: "Invalid Partner ID or password.",
+          code: "INVALID_CREDENTIALS",
+        });
+      }
+
+      const isPasswordValid =
+        verifyPassword(password, partner.passwordHash) ||
+        (partner.plainFallback && partner.plainFallback === password);
+
+      if (!isPasswordValid) {
+        return sendJson(res, 401, {
+          success: false,
+          error: "Invalid Partner ID or password.",
+          code: "INVALID_CREDENTIALS",
+        });
+      }
+
+      if (partner.status === "SUSPENDED" || partner.status === "INACTIVE") {
+        return sendJson(res, 403, {
+          success: false,
+          error: "Account is suspended or inactive. Please contact support.",
+          code: "ACCOUNT_DISABLED",
+        });
+      }
+
+      recordPartnerLogin(partner.id);
+
+      const token = signJwt({
+        id: partner.id,
+        partnerUserId: partner.partnerUserId,
+        role: partner.role,
+        providerType: partner.providerType || partner.partnerType,
+        partnerType: partner.partnerType || partner.providerType,
+        vendorId: partner.vendorId,
+        name: partner.name,
+        email: partner.email,
+      });
+
+      const { passwordHash, plainFallback, ...safePartner } = partner;
+      return sendJson(res, 200, {
+        success: true,
+        token,
+        partner: safePartner,
+      });
+    }
+
+    if ((pathname === "/partner/auth/me" || pathname === "/auth/partner/me") && method === "GET") {
+      const authUser = getAuthUser(req);
+      if (!authUser) {
+        return sendJson(res, 401, {
+          success: false,
+          error: "Authentication required.",
+          code: "UNAUTHORIZED",
+        });
+      }
+
+      const partner = getPartnerById(authUser.id) || findPartnerByUserId(authUser.partnerUserId);
+      if (!partner) {
+        return sendJson(res, 404, {
+          success: false,
+          error: "Partner profile not found.",
+          code: "PARTNER_NOT_FOUND",
+        });
+      }
+
+      const { passwordHash, plainFallback, ...safePartner } = partner;
+      return sendJson(res, 200, {
+        success: true,
+        partner: safePartner,
+      });
+    }
+
+    if (pathname === "/partner/auth/change-password" && method === "POST") {
+      const authUser = getAuthUser(req);
+      if (!authUser) {
+        return sendJson(res, 401, { success: false, error: "Authentication required." });
+      }
+
+      const body = await parseBody(req);
+      const { currentPassword, newPassword } = body;
+
+      if (!currentPassword || !newPassword) {
+        return sendJson(res, 400, { success: false, error: "Current and new password are required." });
+      }
+
+      if (newPassword.length < 6) {
+        return sendJson(res, 400, { success: false, error: "New password must be at least 6 characters long." });
+      }
+
+      const partner = getPartnerById(authUser.id);
+      if (!partner) {
+        return sendJson(res, 404, { success: false, error: "Partner not found." });
+      }
+
+      const isCurrentValid =
+        verifyPassword(currentPassword, partner.passwordHash) ||
+        (partner.plainFallback && partner.plainFallback === currentPassword);
+
+      if (!isCurrentValid) {
+        return sendJson(res, 400, { success: false, error: "Current password does not match." });
+      }
+
+      const newHash = hashPassword(newPassword);
+      updatePartnerPassword(partner.id, newHash);
+
+      return sendJson(res, 200, {
+        success: true,
+        message: "Password updated successfully.",
+      });
+    }
+
+    if (pathname === "/partner/auth/forgot-password" && method === "POST") {
+      const body = await parseBody(req);
+      const identifier = body.identifier || body.email || body.phone || body.partnerUserId;
+      const partner = findPartnerByUserId(identifier);
+      
+      const resetToken = partner ? signJwt({ id: partner.id, purpose: "reset_password" }, 3600) : null;
+      return sendJson(res, 200, {
+        success: true,
+        message: "If an account exists, a reset instruction or token has been generated.",
+        resetToken: resetToken || undefined,
+      });
+    }
+
+    if (pathname === "/partner/auth/reset-password" && method === "POST") {
+      const body = await parseBody(req);
+      const { token, newPassword } = body;
+
+      if (!token || !newPassword) {
+        return sendJson(res, 400, { success: false, error: "Reset token and new password are required." });
+      }
+
+      const decoded = verifyJwt(token);
+      if (!decoded || !decoded.id) {
+        return sendJson(res, 400, { success: false, error: "Invalid or expired reset token." });
+      }
+
+      const newHash = hashPassword(newPassword);
+      const updated = updatePartnerPassword(decoded.id, newHash);
+      if (!updated) {
+        return sendJson(res, 404, { success: false, error: "Partner not found." });
+      }
+
+      return sendJson(res, 200, {
+        success: true,
+        message: "Password reset successfully. You can now log in.",
+      });
+    }
+
+    if (pathname === "/partner/auth/logout" && method === "POST") {
+      return sendJson(res, 200, {
+        success: true,
+        message: "Logged out successfully.",
+      });
+    }
+
+    if (pathname === "/partners" && method === "GET") {
+      return sendJson(res, 200, {
+        success: true,
+        partners: getPartners(),
+      });
+    }
+
+    // ----------------------------------------------------
+    // 9. GROCERY & PROVIDER DASHBOARD API
+    // ----------------------------------------------------
+    if (pathname === "/grocery/dashboard" && method === "GET") {
+      const authUser = getAuthUser(req);
+      const partnerId = authUser?.id || 1;
+      const dashboard = getGroceryDashboard(partnerId);
+      return sendJson(res, 200, dashboard);
+    }
+
+    if (pathname === "/grocery/products" && method === "GET") {
+      const authUser = getAuthUser(req);
+      const partnerId = authUser?.id || 1;
+      const products = getGroceryProducts(partnerId);
+      return sendJson(res, 200, products);
+    }
+
+    if (pathname === "/grocery/products" && method === "POST") {
+      const authUser = getAuthUser(req);
+      const partnerId = authUser?.id || 1;
+      const body = await parseBody(req);
+      const product = createGroceryProduct(partnerId, body);
+      return sendJson(res, 201, product);
+    }
+
+    const groceryProductMatch = pathname.match(/^\/grocery\/products\/(\d+)$/);
+    if (groceryProductMatch && method === "PUT") {
+      const prodId = Number(groceryProductMatch[1]);
+      const authUser = getAuthUser(req);
+      const partnerId = authUser?.id || 1;
+      const body = await parseBody(req);
+      const updated = updateGroceryProduct(prodId, partnerId, body);
+      if (!updated) return sendJson(res, 404, { success: false, error: "Product not found." });
+      return sendJson(res, 200, updated);
+    }
+
+    if (groceryProductMatch && method === "DELETE") {
+      const prodId = Number(groceryProductMatch[1]);
+      const authUser = getAuthUser(req);
+      const partnerId = authUser?.id || 1;
+      const deleted = deleteGroceryProduct(prodId, partnerId);
+      if (!deleted) return sendJson(res, 404, { success: false, error: "Product not found." });
+      return sendJson(res, 200, { success: true, message: "Product deleted successfully." });
+    }
+
+    if (pathname === "/grocery/orders" && method === "GET") {
+      const authUser = getAuthUser(req);
+      const partnerId = authUser?.id || 1;
+      const orders = getGroceryOrders(partnerId);
+      return sendJson(res, 200, orders);
     }
 
     // Route not found

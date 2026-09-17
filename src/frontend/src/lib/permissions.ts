@@ -1,4 +1,4 @@
-﻿/**
+/**
  * EZY1 Provider Types, Permission Definitions, and RBAC Helpers
  */
 
@@ -13,6 +13,8 @@ export type ProviderType =
   | string;
 
 export const PROVIDER_LABELS: Record<string, string> = {
+  OWNER: "Platform Master Owner",
+  SUPER_OWNER: "Platform Master Owner",
   GROCERY: "Grocery & Retail Partner",
   VENDOR: "Grocery & Retail Partner",
   HOSPITAL: "Hospital & Healthcare Partner",
@@ -25,6 +27,8 @@ export const PROVIDER_LABELS: Record<string, string> = {
 };
 
 export const PROVIDER_DEFAULT_DASHBOARDS: Record<string, string> = {
+  OWNER: "/owner",
+  SUPER_OWNER: "/owner",
   GROCERY: "/partner-dashboard",
   VENDOR: "/partner-dashboard",
   FRUIT: "/partner-dashboard",
@@ -58,8 +62,8 @@ export function hasProviderAccess(
   if (!partner) return false;
 
   const role = (partner.role || "").toUpperCase();
-  if (role === "ADMIN" || role === "SUPER_ADMIN" || role === "SUPER_OWNER") {
-    return true; // Admins have platform-wide access
+  if (role === "ADMIN" || role === "SUPER_ADMIN" || role === "SUPER_OWNER" || role === "OWNER") {
+    return true; // Admins and Owners have platform-wide access
   }
 
   const currentType = (partner.providerType || partner.partnerType || "GROCERY").toUpperCase();

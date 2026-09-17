@@ -138,6 +138,49 @@ export default function AdminPage() {
     );
   }
 
+  const role = (currentPartner.role || "").toUpperCase();
+  const isAdmin =
+    role === "ADMIN" ||
+    role === "SUPER_ADMIN" ||
+    role === "SUPER_OWNER" ||
+    (currentPartner.providerType || "").toUpperCase() === "ADMIN";
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-muted/40 flex items-center justify-center p-6">
+        <div className="max-w-md w-full p-8 rounded-3xl bg-card border border-border text-center shadow-xl space-y-4">
+          <div className="w-12 h-12 rounded-2xl bg-destructive/10 text-destructive flex items-center justify-center mx-auto">
+            <Lock className="w-6 h-6" />
+          </div>
+          <h2 className="text-2xl font-display font-bold">
+            Access Restricted
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            Your partner account ({currentPartner.partnerUserId}) does not have Platform Administrator privileges.
+          </p>
+          <div className="flex gap-3 mt-4">
+            <Button
+              onClick={() => navigate({ to: "/partner-dashboard" })}
+              className="flex-1 rounded-xl bg-primary text-primary-foreground font-semibold"
+            >
+              Partner Portal
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                logout();
+                navigate({ to: "/partner-login" });
+              }}
+              className="flex-1 rounded-xl"
+            >
+              Sign In as Admin
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const renderActiveSection = () => {
     switch (currentSection) {
       // 1. Main

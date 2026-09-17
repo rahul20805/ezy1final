@@ -16,6 +16,7 @@ import {
   PharmacyRoute,
   DeliveryRoute,
   ServiceProviderRoute,
+  OwnerRoute,
 } from "./components/ProtectedRoute";
 import { AuthPromptProvider } from "./components/AuthPromptModal";
 
@@ -108,6 +109,12 @@ const loginRoute = createRoute({
 const partnerLoginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/partner-login",
+  component: () => <PartnerLoginPage />,
+});
+
+const partnerAliasRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/partner",
   component: () => <PartnerLoginPage />,
 });
 
@@ -411,9 +418,9 @@ const ownerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/owner",
   component: () => (
-    <PartnerRoute>
+    <OwnerRoute>
       <OwnerPortalPage />
-    </PartnerRoute>
+    </OwnerRoute>
   ),
 });
 
@@ -422,7 +429,7 @@ const vendorDashboardRoute = createRoute({
   path: "/vendor-dashboard",
   component: () => (
     <VendorRoute>
-      <OwnerPortalPage />
+      <VendorDashboardPage />
     </VendorRoute>
   ),
 });
@@ -432,7 +439,7 @@ const driverDashboardRoute = createRoute({
   path: "/driver-dashboard",
   component: () => (
     <DeliveryRoute>
-      <OwnerPortalPage />
+      <DriverDashboardPage />
     </DeliveryRoute>
   ),
 });
@@ -442,7 +449,7 @@ const serviceProviderDashboardRoute = createRoute({
   path: "/service-provider-dashboard",
   component: () => (
     <ServiceProviderRoute>
-      <OwnerPortalPage />
+      <ServiceProviderDashboardPage />
     </ServiceProviderRoute>
   ),
 });
@@ -452,7 +459,7 @@ const hospitalDashboardRoute = createRoute({
   path: "/hospital-dashboard",
   component: () => (
     <HospitalRoute>
-      <OwnerPortalPage />
+      <PartnerDashboardPage />
     </HospitalRoute>
   ),
 });
@@ -462,7 +469,7 @@ const pharmacyDashboardRoute = createRoute({
   path: "/pharmacy-dashboard",
   component: () => (
     <PharmacyRoute>
-      <OwnerPortalPage />
+      <PartnerDashboardPage />
     </PharmacyRoute>
   ),
 });
@@ -478,7 +485,7 @@ const adminRoute = createRoute({
   path: "/admin",
   component: () => (
     <AdminRoute>
-      <OwnerPortalPage />
+      <AdminPage />
     </AdminRoute>
   ),
 });
@@ -502,6 +509,7 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
   partnerLoginRoute,
+  partnerAliasRoute,
   partnerDashboardRoute,
   ownerRoute,
   dashboardRoute,
