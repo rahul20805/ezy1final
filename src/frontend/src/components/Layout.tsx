@@ -41,7 +41,6 @@ import { useCartStore } from "../lib/cartStore";
 import { useLocationStore } from "../lib/locationStore";
 import { LocationModal } from "./location/LocationModal";
 import { NAVAEIN_URL } from "../config/links";
-import { NavaeInPopup } from "./NavaeInPopup";
 import { NavaeInBottomAd } from "./NavaeInBottomAd";
 
 const navLinks = [
@@ -969,9 +968,6 @@ export default function Layout({ children }: LayoutProps) {
           </div>
         </div>
       </footer>
-
-      {/* NavaeIN Promotional Modal (Single System with 24h Frequency Control) */}
-      <NavaeInPopup />
     </div>
   );
 }
