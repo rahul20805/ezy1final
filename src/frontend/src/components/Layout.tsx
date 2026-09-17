@@ -41,6 +41,8 @@ import { useCartStore } from "../lib/cartStore";
 import { useLocationStore } from "../lib/locationStore";
 import { LocationModal } from "./location/LocationModal";
 import { NAVAEIN_URL } from "../config/links";
+import { NavaeInPopup } from "./NavaeInPopup";
+import { NavaeInBottomAd } from "./NavaeInBottomAd";
 
 const navLinks = [
   { label: "All Services", href: "/dashboard" },
@@ -61,6 +63,7 @@ export default function Layout({ children }: LayoutProps) {
   const { currentLocation } = useLocationStore();
   const { unreadCount } = useNotificationStore();
   const { totalItems } = useCartStore();
+  const [navSearchQuery, setNavSearchQuery] = useState("");
   const [waMessages, setWaMessages] = useState<
     { from: "bot" | "user"; text: string }[]
   >([
@@ -140,18 +143,52 @@ export default function Layout({ children }: LayoutProps) {
             </nav>
           )}
 
-          {/* Global Search */}
+          {/* Global Search (Active & Functional with Exact Result & Sorting) */}
           {!isMobile && (
-            <div className="flex-1 max-w-md mx-4 relative hidden lg:block">
-              <Link to="/search" className="block relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <div className="flex-1 max-w-md mx-3 relative hidden md:block">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const trimmed = navSearchQuery.trim();
+                  if (trimmed) {
+                    navigate({ to: "/search", search: { q: trimmed } });
+                  } else {
+                    navigate({ to: "/search" });
+                  }
+                }}
+                className="relative flex items-center"
+              >
+                <button
+                  type="submit"
+                  aria-label="Search"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+                >
+                  <Search className="w-4 h-4" />
+                </button>
                 <input
                   type="text"
-                  readOnly
+                  value={navSearchQuery}
+                  onChange={(e) => setNavSearchQuery(e.target.value)}
                   placeholder="Search products, food, doctors, services & more..."
-                  className="w-full h-9 pl-9 pr-4 rounded-full bg-muted/50 border border-transparent hover:border-primary/40 cursor-pointer focus:border-primary focus:bg-background transition-smooth text-xs outline-none"
+                  className="w-full h-9 pl-9 pr-14 rounded-full bg-muted/60 border border-border/60 hover:border-primary/50 focus:border-primary focus:bg-background transition-smooth text-xs outline-none text-foreground placeholder:text-muted-foreground"
                 />
-              </Link>
+                {navSearchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setNavSearchQuery("")}
+                    className="absolute right-9 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-xs p-1"
+                    title="Clear search"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 px-2.5 py-0.5 rounded-full bg-primary text-primary-foreground font-semibold text-[11px] hover:bg-primary/90 transition-colors shadow-xs cursor-pointer"
+                >
+                  Go
+                </button>
+              </form>
             </div>
           )}
 
@@ -387,6 +424,38 @@ export default function Layout({ children }: LayoutProps) {
                       </div>
                       <ChevronDown className="w-3.5 h-3.5 text-muted-foreground ml-auto shrink-0" />
                     </button>
+
+                    {/* Mobile Quick Search Form */}
+                    <div className="p-3 border-b border-border bg-muted/20">
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          setMobileOpen(false);
+                          const trimmed = navSearchQuery.trim();
+                          if (trimmed) {
+                            navigate({ to: "/search", search: { q: trimmed } });
+                          } else {
+                            navigate({ to: "/search" });
+                          }
+                        }}
+                        className="relative flex items-center"
+                      >
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <input
+                          type="text"
+                          value={navSearchQuery}
+                          onChange={(e) => setNavSearchQuery(e.target.value)}
+                          placeholder="Search products, services, doctors..."
+                          className="w-full h-9 pl-9 pr-12 rounded-xl bg-background border border-border text-xs outline-none text-foreground placeholder:text-muted-foreground"
+                        />
+                        <button
+                          type="submit"
+                          className="absolute right-1 top-1/2 -translate-y-1/2 px-2 py-0.5 rounded-lg bg-primary text-primary-foreground text-[10px] font-bold"
+                        >
+                          Go
+                        </button>
+                      </form>
+                    </div>
 
                     {/* Nav links */}
                     <nav
@@ -764,6 +833,9 @@ export default function Layout({ children }: LayoutProps) {
         </Sheet>
       </div>
 
+      {/* Persistent NavaeIN Bottom Promotional Placement (Above Footer) */}
+      <NavaeInBottomAd />
+
       {/* Footer */}
       <footer className="bg-card border-t border-border mt-auto">
         <div className="container px-4 py-10">
@@ -897,6 +969,9 @@ export default function Layout({ children }: LayoutProps) {
           </div>
         </div>
       </footer>
+
+      {/* NavaeIN Promotional Modal (Single System with 24h Frequency Control) */}
+      <NavaeInPopup />
     </div>
   );
 }

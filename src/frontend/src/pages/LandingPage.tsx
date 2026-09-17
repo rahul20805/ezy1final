@@ -148,7 +148,10 @@ export default function LandingPage() {
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (homeSearch.trim()) {
+    const trimmed = homeSearch.trim();
+    if (trimmed) {
+      navigate({ to: "/search", search: { q: trimmed } });
+    } else {
       navigate({ to: "/search" });
     }
   };

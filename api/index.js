@@ -186,7 +186,189 @@ export default async function handler(req, res) {
     }
 
     // ----------------------------------------------------
-    // 2. AUTHENTICATION & PHONE NUMBER OTP FLOW (REAL SMS GATEWAY)
+    // UNIFIED SEARCH ENGINE (MULTI-ENTITY SEARCH, EXACT MATCH, SORTING)
+    // ----------------------------------------------------
+    if (pathname === "/search" && method === "GET") {
+      const q = (query.q || query.query || "").trim();
+      const category = (query.category || "all").toLowerCase();
+      const sort = (query.sort || "relevant").toLowerCase();
+      const qLower = q.toLowerCase();
+
+      // 1. Products & Groceries
+      let productsList = [];
+      try {
+        const allProducts = getProducts({ limit: 100 });
+        const items = Array.isArray(allProducts) ? allProducts : (allProducts.items || []);
+        productsList = items.map((p) => ({
+          id: p.id,
+          name: p.name,
+          description: p.description || "",
+          price: Number(p.price) || 0,
+          mrp: Number(p.mrp) || Number(p.price) || 0,
+          category: p.category || "General",
+          image: (Array.isArray(p.images) && p.images[0]) ? p.images[0] : (p.image || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=300"),
+          rating: Number(p.rating) || 4.5,
+          vendorId: p.vendorId || 1,
+          inStock: p.inStock !== false,
+          unit: p.unit || "1 unit",
+          type: "product",
+        }));
+      } catch (e) {
+        console.error("Failed to query products for search", e);
+      }
+
+      // 2. Doctors
+      let doctorsList = [];
+      try {
+        const healthcare = getVendors({ limit: 100, category: "Healthcare" });
+        const items = Array.isArray(healthcare) ? healthcare : (healthcare.items || []);
+        doctorsList = items.map((v) => ({
+          id: v.id,
+          name: v.doctorName || v.ownerName || v.businessName,
+          specialty: v.specialization || (v.departments ? v.departments.split(",")[0].trim() : "General Physician"),
+          hospital: v.businessName,
+          city: v.city || "Bengaluru",
+          fee: Number(v.consultationFee) || 500,
+          rating: Number(v.rating) || 4.8,
+          experience: v.experienceYears || 10,
+          available: v.available !== false,
+          phone: v.phone || "+91 98765 43210",
+          type: "doctor",
+        }));
+      } catch (e) {
+        console.error("Failed to query doctors for search", e);
+      }
+
+      // 3. Hospitals & Emergency Beds
+      let hospitalsList = [];
+      try {
+        const healthcare = getVendors({ limit: 100, category: "Healthcare" });
+        const items = Array.isArray(healthcare) ? healthcare : (healthcare.items || []);
+        hospitalsList = items.map((h) => ({
+          id: h.id,
+          name: h.businessName,
+          address: h.address || (h.city ? `${h.city}, Karnataka` : "Bengaluru"),
+          city: h.city || "Bengaluru",
+          totalBeds: h.totalBeds || 120,
+          availableBeds: h.availableBeds || { general: 15, icu: 4, oxygen: 8 },
+          icuBedsAvailable: h.icuBedsAvailable || 4,
+          phone: h.emergencyPhone || h.phone || "+91 80 2345 6789",
+          rating: Number(h.rating) || 4.7,
+          departments: h.departments ? h.departments.split(",").map((d) => d.trim()) : ["Emergency", "ICU", "Cardiology"],
+          type: "hospital",
+        }));
+      } catch (e) {
+        console.error("Failed to query hospitals for search", e);
+      }
+
+      // 4. Services & Technicians
+      let servicesList = [];
+      try {
+        const services = getServices({ limit: 100 });
+        const items = Array.isArray(services) ? services : (services.items || []);
+        servicesList = items.map((s) => ({
+          id: s.id,
+          name: s.name,
+          category: s.category || "Home Services",
+          description: s.description || "",
+          price: Number(s.price) || 299,
+          pricePerHour: Number(s.price) || 299,
+          rating: Number(s.rating) || 4.8,
+          providerName: s.providerName || "Verified Professional",
+          type: "service",
+        }));
+      } catch (e) {
+        console.error("Failed to query services for search", e);
+      }
+
+      // 5. Shops & Partners
+      let shopsList = [];
+      try {
+        const vendors = getVendors({ limit: 100 });
+        const items = Array.isArray(vendors) ? vendors : (vendors.items || []);
+        shopsList = items.map((v) => ({
+          id: v.id,
+          name: v.businessName,
+          category: v.category || "Retail",
+          city: v.city || "Bengaluru",
+          address: v.address || "",
+          rating: Number(v.rating) || 4.6,
+          phone: v.phone || "",
+          type: "shop",
+        }));
+      } catch (e) {
+        console.error("Failed to query shops for search", e);
+      }
+
+      // Exact-match and relevance scorer
+      function filterAndScore(items, textGetter) {
+        if (!qLower) return items.map((item) => ({ item, score: 1 }));
+        const scored = [];
+        for (const item of items) {
+          const text = textGetter(item).toLowerCase();
+          if (text === qLower) {
+            scored.push({ item, score: 100 }); // Exact match
+          } else if (text.startsWith(qLower)) {
+            scored.push({ item, score: 75 }); // Starts with query
+          } else if (text.includes(qLower)) {
+            scored.push({ item, score: 50 }); // Contains substring
+          } else {
+            const words = qLower.split(/\s+/).filter(Boolean);
+            const matches = words.filter((w) => text.includes(w)).length;
+            if (matches > 0) {
+              scored.push({ item, score: matches * 10 });
+            }
+          }
+        }
+        return scored;
+      }
+
+      let scoredProducts = filterAndScore(productsList, (p) => `${p.name} ${p.description} ${p.category}`);
+      let scoredDoctors = filterAndScore(doctorsList, (d) => `${d.name} ${d.specialty} ${d.hospital} ${d.city}`);
+      let scoredHospitals = filterAndScore(hospitalsList, (h) => `${h.name} ${h.address} ${(h.departments || []).join(" ")}`);
+      let scoredServices = filterAndScore(servicesList, (s) => `${s.name} ${s.category} ${s.description}`);
+      let scoredShops = filterAndScore(shopsList, (sh) => `${sh.name} ${sh.category} ${sh.city}`);
+
+      function applySort(scoredList, priceGetter, ratingGetter, nameGetter) {
+        let list = [...scoredList];
+        if (sort === "price_asc") {
+          list.sort((a, b) => (priceGetter(a.item) || 0) - (priceGetter(b.item) || 0));
+        } else if (sort === "price_desc") {
+          list.sort((a, b) => (priceGetter(b.item) || 0) - (priceGetter(a.item) || 0));
+        } else if (sort === "rating") {
+          list.sort((a, b) => (ratingGetter(b.item) || 0) - (ratingGetter(a.item) || 0));
+        } else if (sort === "name_asc") {
+          list.sort((a, b) => nameGetter(a.item).localeCompare(nameGetter(b.item)));
+        } else {
+          // Default: highest relevance score first
+          list.sort((a, b) => b.score - a.score);
+        }
+        return list.map((entry) => entry.item);
+      }
+
+      const sortedProducts = applySort(scoredProducts, (p) => p.price, (p) => p.rating, (p) => p.name);
+      const sortedDoctors = applySort(scoredDoctors, (d) => d.fee, (d) => d.rating, (d) => d.name);
+      const sortedHospitals = applySort(scoredHospitals, () => 0, (h) => h.rating, (h) => h.name);
+      const sortedServices = applySort(scoredServices, (s) => s.price, (s) => s.rating, (s) => s.name);
+      const sortedShops = applySort(scoredShops, () => 0, (sh) => sh.rating, (sh) => sh.name);
+
+      const totalCount = sortedProducts.length + sortedDoctors.length + sortedHospitals.length + sortedServices.length + sortedShops.length;
+
+      return sendJson(res, 200, {
+        success: true,
+        query: q,
+        sort,
+        category,
+        total: totalCount,
+        results: {
+          products: sortedProducts,
+          doctors: sortedDoctors,
+          hospitals: sortedHospitals,
+          services: sortedServices,
+          shops: sortedShops,
+        },
+      });
+    }
     // ----------------------------------------------------
 
     // 2.1 Send Real Phone OTP

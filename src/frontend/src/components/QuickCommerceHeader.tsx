@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Clock, MapPin, Search } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { useLocationStore } from "../lib/locationStore";
 import { LocationModal } from "./location/LocationModal";
 
@@ -9,6 +10,7 @@ export function QuickCommerceHeader() {
   const [search, setSearch] = useState("");
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const { currentLocation } = useLocationStore();
+  const navigate = useNavigate();
 
   const locationDisplay =
     [currentLocation.locality, currentLocation.city].filter(Boolean).join(", ") ||
@@ -44,15 +46,32 @@ export function QuickCommerceHeader() {
           </div>
         </div>
 
-        <div className="relative max-w-3xl mt-4">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const trimmed = search.trim();
+            if (trimmed) {
+              navigate({ to: "/search", search: { q: trimmed } });
+            } else {
+              navigate({ to: "/search" });
+            }
+          }}
+          className="relative max-w-3xl mt-4"
+        >
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground" />
           <Input
             placeholder="Search groceries, doctors, restaurants, electricians..."
-            className="pl-14 h-14 bg-white text-foreground border-0 shadow-lg rounded-xl font-medium text-lg placeholder:text-muted-foreground/70 focus-visible:ring-4 focus-visible:ring-primary/20"
+            className="pl-14 pr-24 h-14 bg-white text-foreground border-0 shadow-lg rounded-xl font-medium text-lg placeholder:text-muted-foreground/70 focus-visible:ring-4 focus-visible:ring-primary/20"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-        </div>
+          <button
+            type="submit"
+            className="absolute right-3 top-1/2 -translate-y-1/2 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-bold text-sm shadow-md hover:bg-primary/90 transition-colors cursor-pointer"
+          >
+            Search
+          </button>
+        </form>
       </div>
 
       <LocationModal

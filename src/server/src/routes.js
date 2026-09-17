@@ -981,6 +981,149 @@ router.post("/vendors", async (req, res) => {
   } catch (error) {
     res.status(400).json({ error: "Failed to register vendor" });
   }
+// Unified Global Search (Products, Doctors, Hospitals, Services, Shops)
+router.get("/search", async (req, res) => {
+  try {
+    const q = (req.query.q || req.query.query || "").trim();
+    const category = (req.query.category || "all").toLowerCase();
+    const sort = (req.query.sort || "relevant").toLowerCase();
+    const db = await openDb();
+
+    let products = [];
+    let vendors = [];
+
+    if (q) {
+      products = await db.all(
+        "SELECT * FROM products WHERE name LIKE ? OR description LIKE ? OR category LIKE ?",
+        [`%${q}%`, `%${q}%`, `%${q}%`]
+      );
+      vendors = await db.all(
+        "SELECT * FROM vendors WHERE businessName LIKE ? OR category LIKE ? OR city LIKE ?",
+        [`%${q}%`, `%${q}%`, `%${q}%`]
+      );
+    } else {
+      products = await db.all("SELECT * FROM products LIMIT 50");
+      vendors = await db.all("SELECT * FROM vendors LIMIT 50");
+    }
+
+    const qLower = q.toLowerCase();
+    const mappedProducts = products.map((p) => ({
+      id: p.id,
+      name: p.name,
+      description: p.description || "",
+      price: Number(p.price) || 0,
+      mrp: Number(p.mrp) || Number(p.price) || 0,
+      category: p.category || "General",
+      image: p.image || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=300",
+      rating: Number(p.rating) || 4.5,
+      vendorId: p.vendorId || 1,
+      inStock: p.available !== 0,
+      type: "product"
+    }));
+
+    const doctorsList = vendors
+      .filter((v) => (v.category || "").toLowerCase().includes("health") || (v.category || "").toLowerCase().includes("doctor"))
+      .map((v) => ({
+        id: v.id,
+        name: v.businessName,
+        specialty: v.category || "General Physician",
+        hospital: v.businessName,
+        city: v.city || "Bengaluru",
+        fee: 500,
+        rating: Number(v.rating) || 4.8,
+        experience: 10,
+        available: true,
+        phone: v.phone || "+91 98765 43210",
+        type: "doctor"
+      }));
+
+    const hospitalsList = vendors
+      .filter((v) => (v.category || "").toLowerCase().includes("hospital") || (v.category || "").toLowerCase().includes("health"))
+      .map((h) => ({
+        id: h.id,
+        name: h.businessName,
+        address: h.address || `${h.city || "Bengaluru"}, Karnataka`,
+        city: h.city || "Bengaluru",
+        totalBeds: 120,
+        availableBeds: { general: 15, icu: 4, oxygen: 8 },
+        icuBedsAvailable: 4,
+        phone: h.phone || "+91 80 2345 6789",
+        rating: Number(h.rating) || 4.7,
+        departments: ["Emergency", "ICU", "Cardiology"],
+        type: "hospital"
+      }));
+
+    const servicesList = vendors
+      .filter((v) => (v.category || "").toLowerCase().includes("service") || (v.category || "").toLowerCase().includes("repair"))
+      .map((s) => ({
+        id: s.id,
+        name: s.businessName,
+        category: s.category || "Home Services",
+        description: s.address || "",
+        price: 299,
+        pricePerHour: 299,
+        rating: Number(s.rating) || 4.8,
+        providerName: "Verified Professional",
+        type: "service"
+      }));
+
+    const shopsList = vendors.map((v) => ({
+      id: v.id,
+      name: v.businessName,
+      category: v.category || "Retail",
+      city: v.city || "Bengaluru",
+      address: v.address || "",
+      rating: Number(v.rating) || 4.6,
+      phone: v.phone || "",
+      type: "shop"
+    }));
+
+    function applySort(list, priceGetter, ratingGetter, nameGetter) {
+      const copy = [...list];
+      if (sort === "price_asc") {
+        copy.sort((a, b) => priceGetter(a) - priceGetter(b));
+      } else if (sort === "price_desc") {
+        copy.sort((a, b) => priceGetter(b) - priceGetter(a));
+      } else if (sort === "rating") {
+        copy.sort((a, b) => ratingGetter(b) - ratingGetter(a));
+      } else if (sort === "name_asc") {
+        copy.sort((a, b) => nameGetter(a).localeCompare(nameGetter(b)));
+      } else {
+        // Relevant: exact match prioritized
+        copy.sort((a, b) => {
+          const aExact = nameGetter(a).toLowerCase() === qLower;
+          const bExact = nameGetter(b).toLowerCase() === qLower;
+          if (aExact && !bExact) return -1;
+          if (!aExact && bExact) return 1;
+          return 0;
+        });
+      }
+      return copy;
+    }
+
+    const sortedProducts = applySort(mappedProducts, (p) => p.price, (p) => p.rating, (p) => p.name);
+    const sortedDoctors = applySort(doctorsList, (d) => d.fee, (d) => d.rating, (d) => d.name);
+    const sortedHospitals = applySort(hospitalsList, () => 0, (h) => h.rating, (h) => h.name);
+    const sortedServices = applySort(servicesList, (s) => s.price, (s) => s.rating, (s) => s.name);
+    const sortedShops = applySort(shopsList, () => 0, (s) => s.rating, (s) => s.name);
+
+    res.json({
+      success: true,
+      query: q,
+      sort,
+      category,
+      total: sortedProducts.length + sortedDoctors.length + sortedHospitals.length + sortedServices.length + sortedShops.length,
+      results: {
+        products: sortedProducts,
+        doctors: sortedDoctors,
+        hospitals: sortedHospitals,
+        services: sortedServices,
+        shops: sortedShops,
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message || "Search failed" });
+  }
 });
 
 // Products
