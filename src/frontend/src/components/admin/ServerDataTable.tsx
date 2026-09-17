@@ -218,7 +218,9 @@ export function ServerDataTable<T extends { id?: number | string }>({
       // Attach token if present
       const token =
         typeof window !== "undefined"
-          ? localStorage.getItem("ezy1_token") || localStorage.getItem("token")
+          ? localStorage.getItem("ezy1_partner_token") ||
+            localStorage.getItem("ezy1_token") ||
+            localStorage.getItem("token")
           : null;
 
       const headers: Record<string, string> = {

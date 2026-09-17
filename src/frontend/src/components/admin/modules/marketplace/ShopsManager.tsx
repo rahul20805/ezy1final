@@ -119,7 +119,7 @@ export function ShopsManager() {
 
     const token =
       typeof window !== "undefined"
-        ? localStorage.getItem("ezy1_token") || localStorage.getItem("token")
+        ? localStorage.getItem("ezy1_partner_token") || localStorage.getItem("ezy1_token") || localStorage.getItem("token")
         : null;
 
     try {
@@ -186,7 +186,7 @@ export function ShopsManager() {
     const nextStatus = shop.status === "suspended" ? "approved" : "suspended";
     const token =
       typeof window !== "undefined"
-        ? localStorage.getItem("ezy1_token") || localStorage.getItem("token")
+        ? localStorage.getItem("ezy1_partner_token") || localStorage.getItem("ezy1_token") || localStorage.getItem("token")
         : null;
 
     try {
@@ -211,7 +211,7 @@ export function ShopsManager() {
   const handleBulkAction = async (selectedIds: (string | number)[], action: string) => {
     const token =
       typeof window !== "undefined"
-        ? localStorage.getItem("ezy1_token") || localStorage.getItem("token")
+        ? localStorage.getItem("ezy1_partner_token") || localStorage.getItem("ezy1_token") || localStorage.getItem("token")
         : null;
 
     const res = await fetch("/api/admin/vendors/bulk-action", {
