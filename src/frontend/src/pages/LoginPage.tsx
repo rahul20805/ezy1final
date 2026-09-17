@@ -16,28 +16,66 @@ import {
   Shield,
   Smartphone,
   CheckCircle2,
+  XCircle,
   Lock,
+  User,
+  Eye,
+  EyeOff,
   RefreshCw,
   Sparkles,
-  Store,
   ChevronLeft,
+  KeyRound,
+  UserPlus,
+  LogIn,
 } from "lucide-react";
 import { FaGoogle } from "react-icons/fa";
 import Layout from "../components/Layout";
 import { useAuth } from "../lib/AuthContext";
+import { checkUsernameAvailability } from "../lib/api";
 import { toast } from "sonner";
 
 export default function LoginPage() {
-  const { sendPhoneOtp, verifyPhoneOtp, signInWithGoogle, isAuthenticated } = useAuth();
+  const {
+    signInWithPassword,
+    signUp,
+    sendPhoneOtp,
+    verifyPhoneOtp,
+    signInWithGoogle,
+    isAuthenticated,
+  } = useAuth();
   const navigate = useNavigate();
 
-  // State
-  const [step, setStep] = useState<"PHONE" | "OTP">("PHONE");
+  // Auth Modes: "SIGNIN" (Username+Password), "SIGNUP" (Register), "OTP" (Phone OTP fallback)
+  const [mode, setMode] = useState<"SIGNIN" | "SIGNUP" | "OTP">("SIGNIN");
+
+  // Sign In State
+  const [loginUsername, setLoginUsername] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+
+  // Sign Up State
+  const [regName, setRegName] = useState("");
+  const [regUsername, setRegUsername] = useState("");
+  const [regPassword, setRegPassword] = useState("");
+  const [regConfirmPassword, setRegConfirmPassword] = useState("");
+  const [regPhone, setRegPhone] = useState("");
+  const [showRegPassword, setShowRegPassword] = useState(false);
+  const [showRegConfirmPassword, setShowRegConfirmPassword] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState<{
+    checking: boolean;
+    available?: boolean;
+    message?: string;
+  }>({ checking: false });
+
+  // OTP Fallback State
+  const [otpStep, setOtpStep] = useState<"PHONE" | "OTP">("PHONE");
   const [phone, setPhone] = useState("");
-  const [name, setName] = useState("");
+  const [otpName, setOtpName] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [isLoading, setIsLoading] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+
+  // Global Loading State
+  const [isLoading, setIsLoading] = useState(false);
 
   // Google Modal State
   const [googleModalOpen, setGoogleModalOpen] = useState(false);
@@ -51,7 +89,7 @@ export default function LoginPage() {
     }
   }, [isAuthenticated, navigate]);
 
-  // Resend Cooldown Countdown Timer
+  // Resend Cooldown Countdown Timer for OTP
   useEffect(() => {
     if (cooldown <= 0) return;
     const interval = setInterval(() => {
@@ -60,11 +98,120 @@ export default function LoginPage() {
     return () => clearInterval(interval);
   }, [cooldown]);
 
-  // Handle Step 1: Send OTP
-  const handleSendOtp = async (e?: React.FormEvent, customPhone?: string) => {
+  // Debounced live check for username availability during signup
+  useEffect(() => {
+    const cleanU = regUsername.trim().toLowerCase();
+    if (cleanU.length < 3) {
+      setUsernameStatus({ checking: false });
+      return;
+    }
+
+    if (!/^[a-zA-Z0-9_]{3,25}$/.test(cleanU)) {
+      setUsernameStatus({
+        checking: false,
+        available: false,
+        message: "Use 3-25 letters, numbers, or _",
+      });
+      return;
+    }
+
+    setUsernameStatus({ checking: true });
+    const timer = setTimeout(async () => {
+      try {
+        const res = await checkUsernameAvailability(cleanU);
+        setUsernameStatus({
+          checking: false,
+          available: res.available,
+          message: res.message,
+        });
+      } catch {
+        setUsernameStatus({ checking: false });
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [regUsername]);
+
+  // Handle Sign In (Returning User)
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!loginUsername.trim()) {
+      toast.error("Please enter your Username or Mobile number");
+      return;
+    }
+    if (!loginPassword) {
+      toast.error("Please enter your Password");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const res = await signInWithPassword(loginUsername.trim(), loginPassword);
+      if (res.success) {
+        toast.success(`Welcome back, ${res.user?.name || loginUsername}! 👋`);
+        navigate({ to: "/dashboard" });
+      } else {
+        toast.error(res.error || "Invalid credentials. Please try again.");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to sign in. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle Sign Up (First Time User)
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!regName.trim()) {
+      toast.error("Please enter your full name");
+      return;
+    }
+    const cleanUsername = regUsername.trim().toLowerCase();
+    if (cleanUsername.length < 3) {
+      toast.error("Username must be at least 3 characters");
+      return;
+    }
+    if (usernameStatus.available === false) {
+      toast.error(usernameStatus.message || "Please choose an available username");
+      return;
+    }
+    if (regPassword.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+    if (regPassword !== regConfirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const res = await signUp({
+        name: regName.trim(),
+        username: cleanUsername,
+        password: regPassword,
+        confirmPassword: regConfirmPassword,
+        phone: regPhone.trim(),
+      });
+
+      if (res.success) {
+        toast.success(`Account created! Welcome to Ezy1, ${res.user?.name}! 🎉`);
+        navigate({ to: "/dashboard" });
+      } else {
+        toast.error(res.error || "Registration failed. Please try again.");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "An unexpected error occurred during registration.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle Step 1: Send OTP (Phone Fallback)
+  const handleSendOtp = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    const targetPhone = customPhone || phone;
-    const cleanPhone = targetPhone.replace(/[^0-9]/g, "");
+    const cleanPhone = phone.replace(/[^0-9]/g, "");
 
     if (cleanPhone.length < 10) {
       toast.error("Please enter a valid 10-digit mobile number");
@@ -72,12 +219,11 @@ export default function LoginPage() {
     }
 
     setIsLoading(true);
-
     try {
       const res = await sendPhoneOtp(cleanPhone);
       toast.success(res.message || "OTP sent successfully!");
       setPhone(cleanPhone);
-      setStep("OTP");
+      setOtpStep("OTP");
       setCooldown(30);
       setOtp(["", "", "", "", "", ""]);
     } catch (err: any) {
@@ -98,7 +244,7 @@ export default function LoginPage() {
 
     setIsLoading(true);
     try {
-      const res = await verifyPhoneOtp(phone, fullOtp, name);
+      const res = await verifyPhoneOtp(phone, fullOtp, otpName);
       if (res.success) {
         toast.success(`Welcome back, ${res.user?.name || "Customer"}! 🎉`);
         navigate({ to: "/dashboard" });
@@ -112,10 +258,8 @@ export default function LoginPage() {
     }
   };
 
-  // Handle OTP digit changes
   const handleOtpChange = (index: number, value: string) => {
     if (value.length > 1) {
-      // Handle paste of entire OTP
       const pasted = value.replace(/[^0-9]/g, "").slice(0, 6);
       if (pasted.length > 0) {
         const newOtp = [...otp];
@@ -134,7 +278,6 @@ export default function LoginPage() {
     newOtp[index] = digit;
     setOtp(newOtp);
 
-    // Auto-advance focus to next input
     if (digit && index < 5) {
       document.getElementById(`otp-input-${index + 1}`)?.focus();
     }
@@ -146,7 +289,7 @@ export default function LoginPage() {
     }
   };
 
-  // Google Login Submit
+  // Google Sign-In Mock / Modal
   const handleGoogleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!googleEmail || !googleEmail.includes("@")) {
@@ -175,306 +318,594 @@ export default function LoginPage() {
     }
   };
 
-  // Quick One-Click Demo Login
-  const handleQuickDemoLogin = (demoPhone: string, demoName: string) => {
-    setPhone(demoPhone);
-    setName(demoName);
-    handleSendOtp(undefined, demoPhone);
-  };
-
   return (
     <Layout>
       <div className="min-h-[calc(100vh-8rem)] bg-gradient-to-b from-background via-muted/20 to-background flex items-center justify-center p-4 sm:p-6">
         <div className="w-full max-w-md space-y-6">
           {/* Header Brand */}
           <div className="text-center space-y-2">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary shadow-elevated mb-1">
-              <span className="text-primary-foreground font-display font-black text-2xl tracking-tight">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-600 shadow-elevated mb-1">
+              <span className="text-white font-display font-black text-2xl tracking-tight">
                 e1
               </span>
             </div>
             <h1 className="font-display font-bold text-2xl sm:text-3xl text-foreground">
-              Welcome to ezy<span className="text-primary">1</span>
+              Welcome to ezy<span className="text-emerald-600">1</span>
             </h1>
             <p className="text-muted-foreground text-xs sm:text-sm">
               Instant Groceries, Healthcare, Bus Tracking & On-Demand Services
             </p>
           </div>
 
-          <Card className="shadow-elevated border-border overflow-hidden bg-card/95 backdrop-blur-xs">
-            <div className="h-1 bg-gradient-to-r from-primary via-orange-500 to-amber-500 w-full" />
-            <CardContent className="p-6 space-y-5">
-              {step === "PHONE" ? (
-                /* Step 1: Mobile Phone Input */
-                <form onSubmit={handleSendOtp} className="space-y-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Mobile Phone Number
-                    </label>
-                    <div className="flex gap-2">
-                      <div className="flex items-center justify-center px-3 py-2 bg-muted rounded-lg border border-border text-sm font-semibold text-foreground shrink-0">
-                        🇮🇳 +91
-                      </div>
-                      <Input
-                        type="tel"
-                        placeholder="Enter 10-digit number"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        className="h-11 text-base font-medium tracking-wide"
-                        maxLength={10}
-                        autoFocus
-                      />
-                    </div>
-                  </div>
+          {/* Blinkit-Style Clean Tab Switcher */}
+          <div className="flex bg-muted p-1 rounded-xl border border-border">
+            <button
+              type="button"
+              onClick={() => setMode("SIGNIN")}
+              className={`flex-1 py-2.5 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                mode === "SIGNIN"
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              Sign In
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("SIGNUP")}
+              className={`flex-1 py-2.5 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                mode === "SIGNUP"
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+              New Account
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMode("OTP");
+                setOtpStep("PHONE");
+              }}
+              className={`flex-1 py-2.5 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                mode === "OTP"
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Smartphone className="w-3.5 h-3.5" />
+              Mobile OTP
+            </button>
+          </div>
 
+          <Card className="shadow-elevated border-border overflow-hidden bg-card/95 backdrop-blur-xs">
+            <div className="h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 w-full" />
+            <CardContent className="p-6 space-y-5">
+              {/* MODE 1: RETURNING USER - SIGN IN */}
+              {mode === "SIGNIN" && (
+                <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Your Name <span className="text-muted-foreground/60 font-normal">(Optional for new customers)</span>
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                      <User className="w-3.5 h-3.5 text-muted-foreground" />
+                      Username / Mobile Number
                     </label>
                     <Input
                       type="text"
-                      placeholder="e.g. Rahul Sharma"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="h-10 text-sm"
+                      placeholder="e.g. rahul_yadav or 9876543210"
+                      value={loginUsername}
+                      onChange={(e) => setLoginUsername(e.target.value)}
+                      className="h-11 text-base font-medium"
+                      autoFocus
                     />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                        <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+                        Password
+                      </label>
+                    </div>
+                    <div className="relative">
+                      <Input
+                        type={showLoginPassword ? "text" : "password"}
+                        placeholder="Enter your password"
+                        value={loginPassword}
+                        onChange={(e) => setLoginPassword(e.target.value)}
+                        className="h-11 text-base font-medium pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowLoginPassword(!showLoginPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
+                        tabIndex={-1}
+                      >
+                        {showLoginPassword ? (
+                          <EyeOff className="w-4 h-4" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
                   </div>
 
                   <Button
                     type="submit"
-                    className="w-full h-11 bg-primary text-primary-foreground hover:bg-primary/90 gap-2 font-semibold text-sm shadow-sm"
-                    disabled={isLoading || phone.replace(/[^0-9]/g, "").length < 10}
+                    className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white gap-2 font-semibold text-sm shadow-sm"
+                    disabled={isLoading || !loginUsername.trim() || !loginPassword}
                   >
                     {isLoading ? (
                       <>
                         <RefreshCw className="w-4 h-4 animate-spin" />
-                        Sending Security Code...
+                        Authenticating...
                       </>
                     ) : (
                       <>
-                        <Smartphone className="w-4 h-4" />
-                        Get Verification Code (OTP)
+                        <LogIn className="w-4 h-4" />
+                        Sign In
                         <ArrowRight className="w-4 h-4 ml-auto" />
                       </>
                     )}
                   </Button>
 
-                  {/* Fast One-Click Demo Account Chip */}
+                  {/* Switch to Sign Up */}
+                  <div className="text-center pt-2">
+                    <p className="text-xs text-muted-foreground">
+                      Don't have an account yet?{" "}
+                      <button
+                        type="button"
+                        onClick={() => setMode("SIGNUP")}
+                        className="font-semibold text-emerald-600 hover:underline"
+                      >
+                        Create an Account
+                      </button>
+                    </p>
+                  </div>
+
+                  {/* Quick Test Demo Account */}
                   <div className="pt-2 border-t border-border/60">
                     <p className="text-[11px] text-muted-foreground mb-2 flex items-center gap-1 font-medium">
-                      <Sparkles className="w-3.5 h-3.5 text-primary" />
-                      Quick Test / Demo Customer:
+                      <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                      Quick Test Account:
                     </p>
                     <button
                       type="button"
-                      onClick={() => handleQuickDemoLogin("9876543210", "Rahul Sharma")}
-                      className="w-full flex items-center justify-between p-2.5 rounded-lg border border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors text-xs text-foreground cursor-pointer"
+                      onClick={() => {
+                        setLoginUsername("sharma_grocery");
+                        setLoginPassword("partner123");
+                      }}
+                      className="w-full flex items-center justify-between p-2.5 rounded-lg border border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10 transition-colors text-xs text-foreground cursor-pointer"
                     >
                       <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                        <span className="font-semibold">+91 9876543210</span>
-                        <span className="text-muted-foreground">(Rahul Sharma)</span>
+                        <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                        <span className="font-semibold">sharma_grocery</span>
+                        <span className="text-muted-foreground">(Password: partner123)</span>
                       </div>
                       <Badge variant="outline" className="text-[10px] bg-background">
-                        OTP: 123456
+                        Click to Fill
                       </Badge>
                     </button>
                   </div>
-
-                  {/* Divider */}
-                  <div className="relative my-4">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t border-border" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-card px-2 text-muted-foreground font-medium">Or continue with</span>
-                    </div>
-                  </div>
-
-                  {/* Google OAuth Button */}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full h-11 gap-2.5 font-medium border-border hover:bg-muted"
-                    onClick={() => setGoogleModalOpen(true)}
-                  >
-                    <FaGoogle className="w-4 h-4 text-rose-500" />
-                    Sign in with Google
-                  </Button>
                 </form>
-              ) : (
-                /* Step 2: 6-Digit OTP Verification */
-                <form onSubmit={handleVerifyOtp} className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <button
-                      type="button"
-                      onClick={() => setStep("PHONE")}
-                      className="inline-flex items-center gap-1 text-xs text-primary hover:underline font-medium"
-                    >
-                      <ChevronLeft className="w-3.5 h-3.5" />
-                      Change number
-                    </button>
-                    <span className="text-xs text-muted-foreground font-medium">
-                      Code sent to +91 {phone.length >= 10 ? `${phone.slice(-10, -5)} ${phone.slice(-5)}` : phone}
-                    </span>
+              )}
+
+              {/* MODE 2: FIRST-TIME USER - SIGN UP */}
+              {mode === "SIGNUP" && (
+                <form onSubmit={handleSignUp} className="space-y-3.5">
+                  {/* Full Name */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Full Name
+                    </label>
+                    <Input
+                      type="text"
+                      placeholder="e.g. Rahul Yadav"
+                      value={regName}
+                      onChange={(e) => setRegName(e.target.value)}
+                      className="h-10 text-sm font-medium"
+                      autoFocus
+                    />
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground text-center block">
-                      Enter 6-Digit Verification Code
+                  {/* Create Username */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        Create Username
+                      </label>
+                      {usernameStatus.checking && (
+                        <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                          <RefreshCw className="w-3 h-3 animate-spin" />
+                          Checking...
+                        </span>
+                      )}
+                      {!usernameStatus.checking && usernameStatus.available === true && (
+                        <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3" />
+                          Available
+                        </span>
+                      )}
+                      {!usernameStatus.checking && usernameStatus.available === false && (
+                        <span className="text-[11px] text-rose-500 font-semibold flex items-center gap-1">
+                          <XCircle className="w-3 h-3" />
+                          {usernameStatus.message || "Taken"}
+                        </span>
+                      )}
+                    </div>
+                    <Input
+                      type="text"
+                      placeholder="e.g. rahul_yadav"
+                      value={regUsername}
+                      onChange={(e) => setRegUsername(e.target.value.toLowerCase())}
+                      className={`h-10 text-sm font-medium ${
+                        usernameStatus.available === true
+                          ? "border-emerald-500 focus-visible:ring-emerald-500/20"
+                          : usernameStatus.available === false
+                          ? "border-rose-500 focus-visible:ring-rose-500/20"
+                          : ""
+                      }`}
+                    />
+                    <p className="text-[10px] text-muted-foreground">
+                      Only letters, numbers, and underscores (3-25 chars)
+                    </p>
+                  </div>
+
+                  {/* Create Password */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Create Password
                     </label>
-                    <div className="flex justify-between gap-1.5 sm:gap-2">
-                      {otp.map((digit, index) => (
-                        <input
-                          key={index}
-                          id={`otp-input-${index}`}
-                          type="text"
-                          inputMode="numeric"
-                          pattern="[0-9]*"
-                          maxLength={1}
-                          value={digit}
-                          onChange={(e) => handleOtpChange(index, e.target.value)}
-                          onKeyDown={(e) => handleKeyDown(index, e)}
-                          className="w-11 h-12 text-center text-xl font-bold rounded-lg border border-border bg-background focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                          autoFocus={index === 0}
-                        />
-                      ))}
+                    <div className="relative">
+                      <Input
+                        type={showRegPassword ? "text" : "password"}
+                        placeholder="At least 6 characters"
+                        value={regPassword}
+                        onChange={(e) => setRegPassword(e.target.value)}
+                        className="h-10 text-sm font-medium pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowRegPassword(!showRegPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
+                        tabIndex={-1}
+                      >
+                        {showRegPassword ? (
+                          <EyeOff className="w-4 h-4" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Confirm Password */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        Confirm Password
+                      </label>
+                      {regConfirmPassword && (
+                        regPassword === regConfirmPassword ? (
+                          <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3" />
+                            Passwords match
+                          </span>
+                        ) : (
+                          <span className="text-[11px] text-rose-500 font-semibold flex items-center gap-1">
+                            <XCircle className="w-3 h-3" />
+                            Does not match
+                          </span>
+                        )
+                      )}
+                    </div>
+                    <div className="relative">
+                      <Input
+                        type={showRegConfirmPassword ? "text" : "password"}
+                        placeholder="Re-enter password"
+                        value={regConfirmPassword}
+                        onChange={(e) => setRegConfirmPassword(e.target.value)}
+                        className="h-10 text-sm font-medium pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowRegConfirmPassword(!showRegConfirmPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
+                        tabIndex={-1}
+                      >
+                        {showRegConfirmPassword ? (
+                          <EyeOff className="w-4 h-4" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Mobile Number (Optional) */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Mobile Number <span className="text-muted-foreground/60 font-normal">(Optional for delivery updates)</span>
+                    </label>
+                    <div className="flex gap-2">
+                      <div className="flex items-center justify-center px-2.5 py-1 bg-muted rounded-lg border border-border text-xs font-semibold text-foreground shrink-0">
+                        🇮🇳 +91
+                      </div>
+                      <Input
+                        type="tel"
+                        placeholder="10-digit number"
+                        value={regPhone}
+                        onChange={(e) => setRegPhone(e.target.value)}
+                        className="h-10 text-sm font-medium"
+                        maxLength={10}
+                      />
                     </div>
                   </div>
 
                   <Button
                     type="submit"
-                    className="w-full h-11 bg-primary text-primary-foreground hover:bg-primary/90 gap-2 font-semibold text-sm shadow-sm"
-                    disabled={isLoading || otp.join("").length !== 6}
+                    className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white gap-2 font-semibold text-sm shadow-sm mt-2"
+                    disabled={
+                      isLoading ||
+                      !regName.trim() ||
+                      regUsername.trim().length < 3 ||
+                      usernameStatus.available === false ||
+                      regPassword.length < 6 ||
+                      regPassword !== regConfirmPassword
+                    }
                   >
                     {isLoading ? (
                       <>
                         <RefreshCw className="w-4 h-4 animate-spin" />
-                        Verifying Secure Token...
+                        Creating Account...
                       </>
                     ) : (
                       <>
-                        <CheckCircle2 className="w-4 h-4" />
-                        Verify & Access EZY1
+                        <UserPlus className="w-4 h-4" />
+                        Create Account
+                        <ArrowRight className="w-4 h-4 ml-auto" />
                       </>
                     )}
                   </Button>
 
-                  {/* Resend Cooldown */}
+                  {/* Switch back to Sign In */}
                   <div className="text-center pt-1">
-                    {cooldown > 0 ? (
-                      <p className="text-xs text-muted-foreground">
-                        Resend code in <span className="font-bold text-foreground">{cooldown}s</span>
-                      </p>
-                    ) : (
+                    <p className="text-xs text-muted-foreground">
+                      Already have an account?{" "}
                       <button
                         type="button"
-                        onClick={() => handleSendOtp(undefined, phone)}
-                        className="text-xs text-primary font-semibold hover:underline inline-flex items-center gap-1"
-                        disabled={isLoading}
+                        onClick={() => setMode("SIGNIN")}
+                        className="font-semibold text-emerald-600 hover:underline"
                       >
-                        <RefreshCw className="w-3 h-3" />
-                        Resend OTP Code
+                        Sign In here
                       </button>
-                    )}
+                    </p>
                   </div>
                 </form>
               )}
 
-              {/* Trust Badges */}
-              <div className="grid grid-cols-3 gap-2 pt-3 border-t border-border text-center">
-                <div className="flex flex-col items-center gap-1 p-2 rounded-lg bg-muted/40">
-                  <Shield className="w-3.5 h-3.5 text-primary" />
-                  <span className="text-[10px] font-medium text-muted-foreground">256-Bit SSL</span>
+              {/* MODE 3: PHONE OTP FALLBACK */}
+              {mode === "OTP" && (
+                <div>
+                  {otpStep === "PHONE" ? (
+                    <form onSubmit={handleSendOtp} className="space-y-4">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          Mobile Phone Number
+                        </label>
+                        <div className="flex gap-2">
+                          <div className="flex items-center justify-center px-3 py-2 bg-muted rounded-lg border border-border text-sm font-semibold text-foreground shrink-0">
+                            🇮🇳 +91
+                          </div>
+                          <Input
+                            type="tel"
+                            placeholder="Enter 10-digit number"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            className="h-11 text-base font-medium tracking-wide"
+                            maxLength={10}
+                            autoFocus
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          Your Name <span className="text-muted-foreground/60 font-normal">(Optional for new customers)</span>
+                        </label>
+                        <Input
+                          type="text"
+                          placeholder="e.g. Rahul Sharma"
+                          value={otpName}
+                          onChange={(e) => setOtpName(e.target.value)}
+                          className="h-10 text-sm"
+                        />
+                      </div>
+
+                      <Button
+                        type="submit"
+                        className="w-full h-11 bg-emerald-600 text-white hover:bg-emerald-700 gap-2 font-semibold text-sm shadow-sm"
+                        disabled={isLoading || phone.replace(/[^0-9]/g, "").length < 10}
+                      >
+                        {isLoading ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 animate-spin" />
+                            Sending Security Code...
+                          </>
+                        ) : (
+                          <>
+                            <Smartphone className="w-4 h-4" />
+                            Get Verification Code (OTP)
+                            <ArrowRight className="w-4 h-4 ml-auto" />
+                          </>
+                        )}
+                      </Button>
+                    </form>
+                  ) : (
+                    <form onSubmit={handleVerifyOtp} className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <button
+                          type="button"
+                          onClick={() => setOtpStep("PHONE")}
+                          className="inline-flex items-center gap-1 text-xs text-emerald-600 hover:underline font-medium"
+                        >
+                          <ChevronLeft className="w-3.5 h-3.5" />
+                          Change number
+                        </button>
+                        <span className="text-xs text-muted-foreground font-medium">
+                          Code sent to +91 {phone.length >= 10 ? `${phone.slice(-10, -5)} ${phone.slice(-5)}` : phone}
+                        </span>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground text-center block">
+                          Enter 6-Digit Verification Code
+                        </label>
+                        <div className="flex justify-between gap-1.5 sm:gap-2">
+                          {otp.map((digit, index) => (
+                            <input
+                              key={index}
+                              id={`otp-input-${index}`}
+                              type="text"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              maxLength={1}
+                              value={digit}
+                              onChange={(e) => handleOtpChange(index, e.target.value)}
+                              onKeyDown={(e) => handleKeyDown(index, e)}
+                              className="w-11 h-12 text-center text-xl font-bold rounded-lg border border-border bg-background focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
+                              autoFocus={index === 0}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      <Button
+                        type="submit"
+                        className="w-full h-11 bg-emerald-600 text-white hover:bg-emerald-700 gap-2 font-semibold text-sm shadow-sm"
+                        disabled={isLoading || otp.join("").length !== 6}
+                      >
+                        {isLoading ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 animate-spin" />
+                            Verifying...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle2 className="w-4 h-4" />
+                            Verify & Enter Ezy1
+                            <ArrowRight className="w-4 h-4 ml-auto" />
+                          </>
+                        )}
+                      </Button>
+
+                      <div className="text-center pt-2">
+                        {cooldown > 0 ? (
+                          <span className="text-xs text-muted-foreground">
+                            Resend code in {cooldown}s
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleSendOtp()}
+                            className="text-xs text-emerald-600 hover:underline font-semibold"
+                          >
+                            Resend OTP Code
+                          </button>
+                        )}
+                      </div>
+                    </form>
+                  )}
                 </div>
-                <div className="flex flex-col items-center gap-1 p-2 rounded-lg bg-muted/40">
-                  <Lock className="w-3.5 h-3.5 text-primary" />
-                  <span className="text-[10px] font-medium text-muted-foreground">Zero Password</span>
+              )}
+
+              {/* Alternative Divider & Google OAuth */}
+              <div className="relative my-3">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-border" />
                 </div>
-                <div className="flex flex-col items-center gap-1 p-2 rounded-lg bg-muted/40">
-                  <Smartphone className="w-3.5 h-3.5 text-primary" />
-                  <span className="text-[10px] font-medium text-muted-foreground">Instant OTP</span>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground font-medium">Or continue with</span>
                 </div>
               </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full h-10 gap-2.5 font-medium border-border hover:bg-muted text-xs"
+                onClick={() => setGoogleModalOpen(true)}
+              >
+                <FaGoogle className="w-3.5 h-3.5 text-rose-500" />
+                Sign in with Google
+              </Button>
             </CardContent>
           </Card>
 
-          {/* Partner & Merchant Redirect Notice */}
-          <div className="p-3.5 rounded-xl bg-card border border-border text-center space-y-1 shadow-xs">
-            <p className="text-xs text-muted-foreground">
-              Are you a merchant, store owner, or delivery fleet partner?
-            </p>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-xs font-semibold text-primary hover:text-primary gap-1.5 h-8"
-              onClick={() => navigate({ to: "/partner-login" })}
-            >
-              <Store className="w-3.5 h-3.5" />
-              Go to Partner & Merchant Portal →
-            </Button>
+          {/* Security & Partner Links Footer */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground px-2">
+            <div className="flex items-center gap-1.5">
+              <Shield className="w-3.5 h-3.5 text-emerald-600" />
+              <span>256-bit SSL Secure Auth</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <a
+                href="/partner-login"
+                className="font-medium hover:text-foreground hover:underline transition-colors"
+              >
+                Merchant Login
+              </a>
+              <span>•</span>
+              <a
+                href="/admin"
+                className="font-medium hover:text-foreground hover:underline transition-colors"
+              >
+                Admin Console
+              </a>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Google OAuth Interactive Dialog */}
+      {/* Google Login Simulation Dialog */}
       <Dialog open={googleModalOpen} onOpenChange={setGoogleModalOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg">
-              <FaGoogle className="text-rose-500 w-5 h-5" />
+            <DialogTitle className="flex items-center gap-2">
+              <FaGoogle className="w-5 h-5 text-rose-500" />
               Sign in with Google
             </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground">
-              Connect your Google account for single-click customer login.
+            <DialogDescription>
+              Connect your Google profile to sign in instantly without password.
             </DialogDescription>
           </DialogHeader>
-
           <form onSubmit={handleGoogleSubmit} className="space-y-4 pt-2">
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-muted-foreground">Google Email Address</label>
+            <div className="space-y-2">
+              <label className="text-xs font-semibold">Google Account Email</label>
               <Input
                 type="email"
-                placeholder="you@gmail.com"
+                placeholder="your.name@gmail.com"
                 value={googleEmail}
                 onChange={(e) => setGoogleEmail(e.target.value)}
                 required
-                autoFocus
               />
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-muted-foreground">Full Name</label>
+            <div className="space-y-2">
+              <label className="text-xs font-semibold">Your Display Name</label>
               <Input
                 type="text"
-                placeholder="Your Name"
+                placeholder="Rahul Yadav"
                 value={googleName}
                 onChange={(e) => setGoogleName(e.target.value)}
               />
             </div>
-
-            {/* Quick Demo Pre-fill */}
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setGoogleEmail("rahul.sharma@gmail.com");
-                  setGoogleName("Rahul Sharma");
-                }}
-                className="text-[11px] px-2.5 py-1 bg-muted hover:bg-muted/80 rounded-md text-muted-foreground"
-              >
-                Fill rahul.sharma@gmail.com
-              </button>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-2">
-              <Button type="button" variant="outline" onClick={() => setGoogleModalOpen(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" className="bg-primary text-primary-foreground gap-2" disabled={isLoading}>
-                {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <FaGoogle className="w-3.5 h-3.5" />}
-                Authorize & Login
-              </Button>
-            </div>
+            <Button
+              type="submit"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+              disabled={isLoading}
+            >
+              Continue to Ezy1
+            </Button>
           </form>
         </DialogContent>
       </Dialog>

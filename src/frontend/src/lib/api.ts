@@ -137,6 +137,44 @@ export async function verifyOtpCode(phone: string, otp: string, name?: string): 
   return data;
 }
 
+export async function loginWithPassword(username: string, password: string): Promise<AuthResponse> {
+  const data = await apiRequest<AuthResponse>("/api/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ username, password }),
+  });
+  if (data.token && data.user) {
+    setAuthToken(data.token);
+    setStoredUser(data.user);
+  }
+  return data;
+}
+
+export async function registerAccount(payload: {
+  name: string;
+  username: string;
+  password: string;
+  confirmPassword?: string;
+  phone?: string;
+  email?: string;
+}): Promise<AuthResponse> {
+  const data = await apiRequest<AuthResponse>("/api/auth/register", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  if (data.token && data.user) {
+    setAuthToken(data.token);
+    setStoredUser(data.user);
+  }
+  return data;
+}
+
+export async function checkUsernameAvailability(username: string): Promise<{ available: boolean; message?: string }> {
+  return apiRequest<{ available: boolean; message?: string }>(
+    `/api/auth/check-username?username=${encodeURIComponent(username)}`
+  );
+}
+
+
 export async function loginWithGoogle(payload: {
   email?: string;
   name?: string;

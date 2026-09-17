@@ -648,7 +648,127 @@ Be helpful, concise, courteous, and provide accurate navigation instructions to 
     }
 
     // ----------------------------------------------------
-    // 2.5 PARTNER PORTAL CREDENTIAL LOGIN
+    // 2.4 USERNAME AVAILABILITY CHECK & REGISTRATION (Blinkit Flow)
+    // ----------------------------------------------------
+    if (pathname === "/auth/check-username" && method === "GET") {
+      const u = (query.username || "").trim().toLowerCase();
+      if (!u || u.length < 3) {
+        return sendJson(res, 200, {
+          available: false,
+          message: "Username must be at least 3 characters.",
+        });
+      }
+      if (!/^[a-zA-Z0-9_]{3,25}$/.test(u)) {
+        return sendJson(res, 200, {
+          available: false,
+          message: "Only letters, numbers, and underscores are allowed (3-25 chars).",
+        });
+      }
+      const existing = findUserByUsername(u);
+      if (existing) {
+        return sendJson(res, 200, {
+          available: false,
+          message: "Username is already taken.",
+        });
+      }
+      return sendJson(res, 200, {
+        available: true,
+        message: "Username is available!",
+      });
+    }
+
+    if (pathname === "/auth/register" && method === "POST") {
+      const body = await parseBody(req);
+      const { name, username, password, confirmPassword, phone, email } = body;
+
+      if (!name || !name.trim()) {
+        return sendJson(res, 400, {
+          success: false,
+          error: "Full name is required.",
+          code: "MISSING_NAME",
+        });
+      }
+
+      const cleanUsername = (username || "").trim().toLowerCase();
+      if (!cleanUsername || cleanUsername.length < 3 || cleanUsername.length > 25) {
+        return sendJson(res, 400, {
+          success: false,
+          error: "Username must be between 3 and 25 characters.",
+          code: "INVALID_USERNAME",
+        });
+      }
+
+      if (!/^[a-zA-Z0-9_]+$/.test(cleanUsername)) {
+        return sendJson(res, 400, {
+          success: false,
+          error: "Username can only contain letters, numbers, and underscores.",
+          code: "INVALID_USERNAME_CHARS",
+        });
+      }
+
+      const existingUser = findUserByUsername(cleanUsername);
+      if (existingUser) {
+        return sendJson(res, 409, {
+          success: false,
+          error: "This username is already taken. Please choose another.",
+          code: "USERNAME_EXISTS",
+        });
+      }
+
+      if (!password || password.length < 6) {
+        return sendJson(res, 400, {
+          success: false,
+          error: "Password must be at least 6 characters.",
+          code: "PASSWORD_TOO_SHORT",
+        });
+      }
+
+      if (confirmPassword !== undefined && password !== confirmPassword) {
+        return sendJson(res, 400, {
+          success: false,
+          error: "Passwords do not match.",
+          code: "PASSWORD_MISMATCH",
+        });
+      }
+
+      const cleanPhone = phone ? String(phone).replace(/[^0-9]/g, "").slice(-10) : "";
+      const cleanEmail = email ? String(email).trim().toLowerCase() : `${cleanUsername}@ezy1.site`;
+
+      const newUser = createUser({
+        name: name.trim(),
+        username: cleanUsername,
+        password,
+        phone: cleanPhone,
+        email: cleanEmail,
+        role: "CUSTOMER",
+        vendorId: 0,
+      });
+
+      const token = signJwt({
+        id: newUser.id,
+        username: newUser.username,
+        role: newUser.role,
+        vendorId: 0,
+      });
+
+      return sendJson(res, 201, {
+        success: true,
+        message: "Account created successfully! Welcome to Ezy1.",
+        token,
+        user: {
+          id: newUser.id,
+          username: newUser.username,
+          name: newUser.name,
+          email: newUser.email,
+          phone: newUser.phone,
+          role: newUser.role,
+          vendorId: 0,
+        },
+      });
+    }
+
+    // ----------------------------------------------------
+    // 2.5 CREDENTIAL LOGIN (User, Partner & Admin)
     // ----------------------------------------------------
     if ((pathname === "/auth/login" || pathname === "/auth/partner/login") && method === "POST") {
       const body = await parseBody(req);
@@ -657,16 +777,16 @@ Be helpful, concise, courteous, and provide accurate navigation instructions to 
       if (!username || !password) {
         return sendJson(res, 400, {
           success: false,
-          error: "Please provide both Partner ID / Username and Password.",
+          error: "Please provide both Username / Mobile and Password.",
           code: "MISSING_CREDENTIALS",
         });
       }
 
-      const user = findUserByUsername(username) || findUserByEmail(username);
+      const user = findUserByUsername(username) || findUserByEmail(username) || findUserByPhone(username);
       if (!user) {
         return sendJson(res, 401, {
           success: false,
-          error: "Invalid Partner ID or Password.",
+          error: "Invalid Username, Mobile, or Password.",
           code: "INVALID_CREDENTIALS",
         });
       }
@@ -675,7 +795,7 @@ Be helpful, concise, courteous, and provide accurate navigation instructions to 
       if (!isMatch) {
         return sendJson(res, 401, {
           success: false,
-          error: "Invalid Partner ID or Password.",
+          error: "Invalid Username, Mobile, or Password.",
           code: "INVALID_CREDENTIALS",
         });
       }

@@ -12,6 +12,8 @@ import {
   requestOtp as apiRequestOtp,
   verifyOtpCode as apiVerifyOtpCode,
   loginWithGoogle as apiLoginWithGoogle,
+  loginWithPassword,
+  registerAccount,
   fetchCurrentUser,
   logoutCustomer,
 } from "./api";
@@ -23,6 +25,8 @@ interface AuthContextType {
   user: UserProfile | null;
   token: string | null;
   identity: Identity | null;
+  signInWithPassword: (username: string, password: string) => Promise<{ success: boolean; user?: UserProfile; error?: string }>;
+  signUp: (payload: { name: string; username: string; password: string; confirmPassword?: string; phone?: string; email?: string }) => Promise<{ success: boolean; user?: UserProfile; error?: string }>;
   sendPhoneOtp: (phone: string) => Promise<{ success: boolean; message?: string; debugOtp?: string }>;
   verifyPhoneOtp: (phone: string, otp: string, name?: string) => Promise<{ success: boolean; user?: UserProfile }>;
   signInWithGoogle: (payload: { email?: string; name?: string; googleId?: string; avatar?: string; phone?: string }) => Promise<{ success: boolean; user?: UserProfile }>;
@@ -87,6 +91,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       closeSseConnection();
     };
   }, []);
+
+  const signInWithPassword = async (username: string, password: string) => {
+    try {
+      const res = await loginWithPassword(username, password);
+      if (res.token && res.user) {
+        setToken(res.token);
+        setUser(res.user);
+        setIsAuthenticated(true);
+        setCurrentRole((res.user.role?.toLowerCase() as any) || "customer");
+        initSseConnection();
+        return { success: true, user: res.user };
+      }
+      return { success: false, error: res.message || "Failed to sign in" };
+    } catch (err: any) {
+      return { success: false, error: err.message || "Invalid credentials" };
+    }
+  };
+
+  const signUp = async (payload: {
+    name: string;
+    username: string;
+    password: string;
+    confirmPassword?: string;
+    phone?: string;
+    email?: string;
+  }) => {
+    try {
+      const res = await registerAccount(payload);
+      if (res.token && res.user) {
+        setToken(res.token);
+        setUser(res.user);
+        setIsAuthenticated(true);
+        setCurrentRole((res.user.role?.toLowerCase() as any) || "customer");
+        initSseConnection();
+        return { success: true, user: res.user };
+      }
+      return { success: false, error: res.message || "Registration failed" };
+    } catch (err: any) {
+      return { success: false, error: err.message || "Failed to create account" };
+    }
+  };
 
   const sendPhoneOtp = async (phone: string) => {
     const res = await apiRequestOtp(phone);
@@ -153,6 +198,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         token,
         identity,
+        signInWithPassword,
+        signUp,
         sendPhoneOtp,
         verifyPhoneOtp,
         signInWithGoogle,
