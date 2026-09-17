@@ -21,7 +21,7 @@ export default function CommercePage() {
   const safeCategories = categories || [];
 
   const displayedProducts = selectedCategory
-    ? safeProducts.filter((p) => p.categoryIds.includes(selectedCategory))
+    ? safeProducts.filter((p) => Array.isArray(p.categoryIds) && p.categoryIds.includes(selectedCategory))
     : safeProducts;
 
   return (

@@ -331,7 +331,7 @@ export default function AdminPage() {
           </div>
 
           <div className="flex items-center gap-2.5">
-            {/* Active Account Switcher */}
+            {/* Authenticated Account Profile Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -341,8 +341,8 @@ export default function AdminPage() {
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-500" />
                   <span className="truncate max-w-[120px] sm:max-w-[160px] font-semibold">
-                    {currentPartner.ownerName.split(" ")[0]} (
-                    {currentPartner.id})
+                    {(currentPartner?.ownerName || currentPartner?.businessName || "Partner").split(" ")[0]} (
+                    {currentPartner?.partnerUserId || currentPartner?.id})
                   </span>
                   <ChevronDown className="w-3 h-3 text-muted-foreground" />
                 </Button>
@@ -352,46 +352,22 @@ export default function AdminPage() {
                 className="w-64 bg-card border-border rounded-2xl p-1.5 shadow-xl"
               >
                 <DropdownMenuLabel className="text-xs text-muted-foreground">
-                  Switch Active Admin / Partner
+                  Authenticated Session
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {partners.map((p) => (
-                  <DropdownMenuItem
-                    key={p.id}
-                    onClick={() => {
-                      login(p.id, p.password);
-                      toast.success(
-                        `Switched active view to: ${p.businessName}`,
-                      );
-                    }}
-                    className={`rounded-xl text-xs flex items-center justify-between p-2 cursor-pointer ${
-                      currentPartner.id === p.id
-                        ? "bg-primary/10 font-bold text-primary"
-                        : ""
-                    }`}
-                  >
-                    <div>
-                      <p className="font-medium text-foreground">
-                        {p.businessName}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground font-mono">
-                        ID: {p.id}
-                      </p>
-                    </div>
-                    {currentPartner.id === p.id && (
-                      <span className="text-xs">✓</span>
-                    )}
-                  </DropdownMenuItem>
-                ))}
+                <div className="p-2 space-y-1">
+                  <p className="font-semibold text-xs text-foreground">{currentPartner?.businessName}</p>
+                  <p className="text-[11px] font-mono text-muted-foreground">User ID: {currentPartner?.partnerUserId || currentPartner?.id}</p>
+                  <Badge className="text-[9px] uppercase font-bold bg-primary/10 text-primary">{currentPartner?.role || "PARTNER"}</Badge>
+                </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => {
                     logout();
                     navigate({ to: "/partner-login" });
                   }}
-                  className="rounded-xl text-xs text-destructive cursor-pointer"
+                  className="rounded-xl text-xs text-destructive cursor-pointer font-medium"
                 >
-                  Log out of control center
+                  Log out of Partner Control Center
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

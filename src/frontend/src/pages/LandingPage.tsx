@@ -1,1386 +1,1521 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Link } from "@tanstack/react-router";
-import {
-  AlertTriangle,
-  ArrowRight,
-  Bus,
-  Car,
-  CheckCircle,
-  Clock,
-  Globe,
-  Landmark,
-  MapPin,
-  ShoppingBag,
-  Star,
-  Stethoscope,
-  Store,
-  Truck,
-  UtensilsCrossed,
-  Zap,
-  ExternalLink,
-  Palette,
-  Sparkles,
-} from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
 import Layout from "../components/Layout";
-import { busRoutes, doctors, testimonials } from "../mock-data";
-import { NAVAEIN_URL } from "../config/links";
-
-/* ────────────────────────────────────────────────
- * Data
- * ──────────────────────────────────────────────── */
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  Zap,
+import { 
+  SUPER_CATEGORIES, 
+  CATALOG_ITEMS, 
+  FAMOUS_LOCAL_SPOTS, 
+  SHOP_BY_CATEGORY_TILES,
+  POPULAR_FOOD_ITEMS,
+  SWEETS_ITEMS,
+  FASHION_ITEMS,
+  JEWELLERY_ITEMS,
+  COSMETICS_ITEMS,
+  DIGITAL_SERVICES,
+  POPULAR_LOCAL_SHOPS_DATA,
+  type CatalogItem 
+} from "../ecosystem-data";
+import { useCartStore } from "../lib/cartStore";
+import { useRequireAuth } from "../components/AuthPromptModal";
+import { useLocationStore } from "../lib/locationStore";
+import { useAuth } from "../lib/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { toast } from "sonner";
+import {
+  Search,
   MapPin,
+  Clock,
+  Star,
+  Plus,
+  Minus,
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
+  Zap,
   ShoppingBag,
-  Globe,
-  UtensilsCrossed,
-  Landmark,
   Stethoscope,
+  UtensilsCrossed,
+  Car,
+  Package,
+  Building2,
+  Tag,
+  ShieldCheck,
+  Flame,
+  Heart,
+  RotateCcw,
+  Compass,
   Bus,
-};
+  BedDouble,
+  PhoneCall,
+  Activity,
+  Wrench,
+  CheckCircle2,
+  Copy,
+  ArrowRight
+} from "lucide-react";
 
-const services = [
-  {
-    id: 1,
-    icon: "Zap",
-    name: "Recharge & Bills",
-    desc: "Mobile top-ups, DTH, electricity, water & more",
-    color: "primary",
-    trending: true,
-    path: "/dashboard/wallet",
-  },
-  {
-    id: 2,
-    icon: "MapPin",
-    name: "Travel & Transport",
-    desc: "Book flights, buses, trains, and hotels easily",
-    color: "secondary",
-    trending: true,
-    path: "/dashboard/transport",
-  },
-  {
-    id: 3,
-    icon: "Stethoscope",
-    name: "Healthcare",
-    desc: "Book doctors, order medicines, emergency access",
-    color: "accent",
-    trending: false,
-    path: "/dashboard/healthcare",
-  },
-  {
-    id: 4,
-    icon: "ShoppingBag",
-    name: "Quick Commerce",
-    desc: "Groceries, electronics, fashion and beauty",
-    color: "primary",
-    trending: false,
-    path: "/shop",
-  },
-  {
-    id: 5,
-    icon: "UtensilsCrossed",
-    name: "Home Services",
-    desc: "Maids, plumbers, electricians, repair, beauty",
-    color: "secondary",
-    trending: true,
-    path: "/services",
-  },
-];
+/** Reusable Horizontal Scrollable Carousel with Arrow Nav */
+function ScrollableRow({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const scroll = (direction: "left" | "right") => {
+    if (containerRef.current) {
+      const offset = direction === "left" ? -340 : 340;
+      containerRef.current.scrollBy({ left: offset, behavior: "smooth" });
+    }
+  };
 
-const partnerPaths = [
-  {
-    icon: Store,
-    title: "Shop Owner",
-    desc: "List your kirana, pharmacy, or restaurant. Reach thousands of local customers instantly.",
-    badge: "Most Popular",
-  },
-  {
-    icon: Car,
-    title: "Driver Partner",
-    desc: "Drive autos, bikes, or cabs. Set your own hours, earn daily payouts.",
-    badge: "₹0 Joining Fee",
-  },
-  {
-    icon: Truck,
-    title: "Service Provider",
-    desc: "Offer plumbing, electrical, cleaning, tutoring, or any local service.",
-    badge: "New Opportunity",
-  },
-];
-
-const onboardingSteps = [
-  {
-    step: "1",
-    label: "Register",
-    desc: "Fill a simple form with your business details",
-  },
-  {
-    step: "2",
-    label: "Verify",
-    desc: "Upload Aadhaar & GST for instant verification",
-  },
-  {
-    step: "3",
-    label: "Go Live",
-    desc: "Start receiving orders within 24 hours",
-  },
-];
-
-const appFeatures = [
-  { emoji: "📍", label: "Hyperlocal Map" },
-  { emoji: "💊", label: "Medicine Delivery" },
-  { emoji: "🚌", label: "Bus Booking" },
-  { emoji: "💳", label: "Ezy1 Wallet" },
-  { emoji: "🤖", label: "AI Assistant" },
-  { emoji: "🛒", label: "Local Shopping" },
-];
-
-/* ────────────────────────────────────────────────
- * Scroll-reveal hook
- * ──────────────────────────────────────────────── */
-function useScrollReveal() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          obs.disconnect();
-        }
-      },
-      { threshold: 0.12 },
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  return { ref, visible };
-}
-
-/* ────────────────────────────────────────────────
- * Sub-components
- * ──────────────────────────────────────────────── */
-function StarRating({ rating }: { rating: number }) {
   return (
-    <span className="flex gap-0.5">
-      {[1, 2, 3, 4, 5].map((n) => (
-        <Star
-          key={n}
-          className={`w-3.5 h-3.5 ${n <= Math.round(rating) ? "text-primary fill-primary" : "text-muted-foreground"}`}
-        />
-      ))}
-    </span>
-  );
-}
-
-function RevealSection({
-  children,
-  className = "",
-}: { children: React.ReactNode; className?: string }) {
-  const { ref, visible } = useScrollReveal();
-  return (
-    <div
-      ref={ref}
-      className={`transition-all duration-700 ease-out ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"} ${className}`}
-    >
-      {children}
+    <div className="relative group/scroll">
+      <button
+        type="button"
+        aria-label="Scroll left"
+        onClick={() => scroll("left")}
+        className="hidden md:flex absolute -left-3.5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-card/95 backdrop-blur-md border border-border shadow-md items-center justify-center text-foreground hover:bg-muted opacity-0 group-hover/scroll:opacity-100 transition-opacity"
+      >
+        <ChevronLeft className="w-5 h-5" />
+      </button>
+      <div
+        ref={containerRef}
+        className={`flex gap-3 sm:gap-4 overflow-x-auto scroll-smooth pb-3 pt-1 px-1 -mx-1 scrollbar-none ${className}`}
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
+        {children}
+      </div>
+      <button
+        type="button"
+        aria-label="Scroll right"
+        onClick={() => scroll("right")}
+        className="hidden md:flex absolute -right-3.5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-card/95 backdrop-blur-md border border-border shadow-md items-center justify-center text-foreground hover:bg-muted opacity-0 group-hover/scroll:opacity-100 transition-opacity"
+      >
+        <ChevronRight className="w-5 h-5" />
+      </button>
     </div>
   );
 }
 
-/* ────────────────────────────────────────────────
- * Main component
- * ──────────────────────────────────────────────── */
 export default function LandingPage() {
-  const scrollTo = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  const navigate = useNavigate();
+  const { currentLocation } = useLocationStore();
+  const { isAuthenticated, user } = useAuth();
+  const { items, addItem, updateQuantity, removeItem } = useCartStore();
+  const { requireAuth } = useRequireAuth();
+
+  const [homeSearch, setHomeSearch] = useState("");
+  const [activeBannerIdx, setActiveBannerIdx] = useState(0);
+
+  // Real backend states
+  const [hospitalData, setHospitalData] = useState<any>(null);
+  const [stays, setStays] = useState<any[]>([]);
+  const [tours, setTours] = useState<any[]>([]);
+  const [explorePlaces, setExplorePlaces] = useState<any[]>([]);
+  const [buses, setBuses] = useState<any[]>([]);
+  const [sharedRides, setSharedRides] = useState<any[]>([]);
+  const [homeHealth, setHomeHealth] = useState<any[]>([]);
+  const [recentItems, setRecentItems] = useState<any[]>([]);
+
+  // Fetch real data on mount
+  useEffect(() => {
+    async function loadRealData() {
+      try {
+        const [hosp, st, tr, exp, bs, rd, hh, rc] = await Promise.all([
+          fetch("/api/hospitals/availability").then((r) => r.json()).catch(() => null),
+          fetch("/api/stays").then((r) => r.json()).catch(() => []),
+          fetch("/api/travel").then((r) => r.json()).catch(() => []),
+          fetch("/api/explore").then((r) => r.json()).catch(() => []),
+          fetch("/api/buses").then((r) => r.json()).catch(() => []),
+          fetch("/api/rides/shared").then((r) => r.json()).catch(() => []),
+          fetch("/api/healthcare/home").then((r) => r.json()).catch(() => []),
+          fetch("/api/user/recent-items").then((r) => r.json()).catch(() => []),
+        ]);
+
+        if (hosp) setHospitalData(hosp);
+        if (Array.isArray(st)) setStays(st);
+        if (Array.isArray(tr)) setTours(tr);
+        if (Array.isArray(exp)) setExplorePlaces(exp);
+        if (Array.isArray(bs)) setBuses(bs);
+        if (Array.isArray(rd)) setSharedRides(rd);
+        if (Array.isArray(hh)) setHomeHealth(hh);
+        if (Array.isArray(rc)) setRecentItems(rc);
+      } catch (e) {
+        console.error("Failed to load ecosystem data", e);
+      }
+    }
+    loadRealData();
+  }, []);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (homeSearch.trim()) {
+      navigate({ to: "/search" });
+    }
   };
+
+  const handleAddToCart = (product: CatalogItem) => {
+    const numId = Math.abs(product.id.split("").reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 0));
+    addItem({
+      id: numId,
+      vendorId: 1,
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      mrp: product.mrp || product.price,
+      images: [product.image],
+      category: product.categoryId,
+      categoryIds: [1],
+      inStock: true,
+      stockCount: 50,
+      isAvailable: true,
+      rating: product.rating,
+      totalReviews: product.reviewCount,
+    });
+    toast.success(`Added ${product.name} to cart`);
+  };
+
+  const copyCoupon = (code: string) => {
+    navigator.clipboard.writeText(code);
+    toast.success(`Coupon ${code} copied to clipboard!`);
+  };
+
+  const handleAddItemToCart = (item: {
+    id: string;
+    name: string;
+    price: number;
+    originalPrice?: number;
+    image: string;
+    category?: string;
+  }) => {
+    const numId = Math.abs(item.id.split("").reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 0));
+    addItem({
+      id: numId,
+      vendorId: 1,
+      name: item.name,
+      description: item.name,
+      price: item.price,
+      mrp: item.originalPrice || item.price,
+      images: [item.image],
+      category: item.category || "general",
+      categoryIds: [1],
+      inStock: true,
+      stockCount: 50,
+      isAvailable: true,
+      rating: 4.8,
+      totalReviews: 120,
+    });
+    toast.success(`Added ${item.name} to cart!`);
+  };
+
+  const [selectedFashionGender, setSelectedFashionGender] = useState<"Women" | "Men" | "Kids">("Women");
+
+  const filteredFashion = useMemo(() => {
+    return FASHION_ITEMS.filter((f) => f.gender === selectedFashionGender);
+  }, [selectedFashionGender]);
+
+  // Static/Catalog Datasets
+  const quickPicks = useMemo(() => CATALOG_ITEMS.slice(0, 8), []);
+  const freshProduce = useMemo(() => CATALOG_ITEMS.filter((i) => i.categoryId === "fruits" || i.categoryId === "vegetables"), []);
+  const popularRestaurants = useMemo(() => CATALOG_ITEMS.filter((i) => i.categoryId === "restaurants" || i.categoryId === "cafe"), []);
+
+  // Promotional Banners
+  const PROMO_BANNERS = [
+    {
+      id: "b1",
+      badge: "⚡ 15-MIN EXPRESS",
+      title: "Grocery & Daily Fresh Produce Delivered in 15 Mins",
+      subtitle: "Zero delivery fee on your first 3 orders above ₹199.",
+      cta: "Shop Essentials",
+      link: "/category/grocery",
+      gradient: "from-emerald-600 via-teal-700 to-emerald-900",
+      icon: "🥦",
+    },
+    {
+      id: "b2",
+      badge: "🏨 EZY STAY EXCLUSIVE",
+      title: "Get Flat 20% Off on Verified Hotels & Homestays",
+      subtitle: "Instant booking confirmation with zero cancellation penalties.",
+      cta: "Explore Stays",
+      link: "/stays",
+      gradient: "from-amber-600 via-orange-600 to-red-800",
+      icon: "🏨",
+    },
+    {
+      id: "b3",
+      badge: "🏥 24/7 HEALTHCARE",
+      title: "Verified Hospital Bed Vacancy & Doctor at Home",
+      subtitle: "Check live ICU/General beds & book certified specialists to your doorstep.",
+      cta: "Check Bed Status",
+      link: "/hospitals",
+      gradient: "from-rose-600 via-red-600 to-red-900",
+      icon: "🩺",
+    },
+    {
+      id: "b4",
+      badge: "🚌 INTERCITY TRAVEL",
+      title: "Book State Volvo Buses & Verified Carpools",
+      subtitle: "Digital QR tickets with zero convenience charges & live GPS tracking.",
+      cta: "Book Tickets",
+      link: "/bus",
+      gradient: "from-blue-600 via-indigo-700 to-blue-900",
+      icon: "🚌",
+    },
+  ];
 
   return (
     <Layout>
-      {/* ═══════════════════════════════════════════
-          HERO — full-screen gradient
-      ═══════════════════════════════════════════ */}
-      <section
-        id="hero"
-        data-ocid="landing.hero_section"
-        className="relative min-h-screen flex items-center overflow-hidden"
-        style={{
-          background:
-            "linear-gradient(135deg, oklch(0.62 0.24 71) 0%, oklch(0.52 0.21 188) 100%)",
-        }}
-      >
-        {/* Decorative blobs */}
-        <div
-          className="absolute top-16 right-0 w-96 h-96 rounded-full opacity-20 blur-3xl"
-          style={{ background: "oklch(0.9 0.15 56)" }}
-        />
-        <div
-          className="absolute bottom-0 left-0 w-80 h-80 rounded-full opacity-15 blur-3xl"
-          style={{ background: "oklch(0.3 0.18 262)" }}
-        />
-
-        <div className="relative container px-4 py-20 md:py-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            {/* Left: copy */}
-            <div>
-              <Badge
-                className="mb-6 text-sm px-4 py-1.5 border-0"
-                style={{ background: "rgba(255,255,255,0.2)", color: "white" }}
-              >
-                🇮🇳 India's Everything App
-              </Badge>
-              <h1
-                className="font-display font-black text-5xl md:text-6xl lg:text-7xl leading-[1.04] mb-6"
-                style={{ color: "white" }}
-              >
-                One App.
-                <br />
-                Every Service.
-                <br />
-                <span style={{ color: "oklch(0.95 0.08 56)" }}>Anywhere.</span>
-              </h1>
-              <p
-                className="text-lg md:text-xl leading-relaxed mb-8 max-w-md"
-                style={{ color: "rgba(255,255,255,0.85)" }}
-              >
-                From cities to villages — Ezy1 connects everything. Groceries,
-                doctors, buses, local shops — all in your pocket.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3 mb-8">
-                <Link to="/login" data-ocid="landing.hero_explore_button">
-                  <Button
-                    size="lg"
-                    className="h-13 px-8 text-base gap-2 w-full sm:w-auto font-semibold"
-                    style={{
-                      background: "oklch(0.62 0.24 71)",
-                      color: "white",
-                      boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
-                    }}
-                  >
-                    Explore Services <ArrowRight className="w-4 h-4" />
-                  </Button>
-                </Link>
-                <Link
-                  to="/partner-login"
-                  data-ocid="landing.hero_partner_button"
-                >
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="h-13 px-8 text-base gap-2 w-full sm:w-auto font-semibold"
-                    style={{
-                      borderColor: "rgba(255,255,255,0.5)",
-                      color: "white",
-                      background: "rgba(255,255,255,0.12)",
-                    }}
-                  >
-                    Partner With Us
-                  </Button>
-                </Link>
-              </div>
-              <div className="flex flex-wrap gap-4">
-                {[
-                  "5M+ Users",
-                  "500+ Cities",
-                  "50K+ Partners",
-                  "4.8★ Rated",
-                ].map((t) => (
-                  <span
-                    key={t}
-                    className="flex items-center gap-1.5 text-sm font-medium"
-                    style={{ color: "rgba(255,255,255,0.85)" }}
-                  >
-                    <CheckCircle
-                      className="w-4 h-4"
-                      style={{ color: "oklch(0.95 0.08 56)" }}
-                    />
-                    {t}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Right: floating app mockup */}
-            <div className="flex justify-center md:justify-end">
-              <div className="relative w-72 md:w-80">
-                {/* Phone frame */}
-                <div
-                  className="relative bg-card rounded-[2.5rem] shadow-2xl border-4 border-white/30 overflow-hidden"
-                  style={{ boxShadow: "0 32px 80px rgba(0,0,0,0.35)" }}
-                >
-                  {/* Status bar */}
-                  <div
-                    className="h-10 flex items-center justify-between px-5"
-                    style={{ background: "oklch(0.62 0.24 71)" }}
-                  >
-                    <span className="text-xs text-white font-medium">9:41</span>
-                    <div className="w-20 h-5 bg-black rounded-full mx-auto" />
-                    <span className="text-xs text-white font-medium">📶</span>
-                  </div>
-                  {/* Header */}
-                  <div className="px-4 py-3 border-b border-border flex items-center justify-between bg-card">
-                    <span className="font-display font-black text-lg text-foreground">
-                      ezy<span className="text-primary">1</span>
+      <div className="min-h-screen bg-background pb-32">
+        {/* ========================================================= */}
+        {/* 1. TOP STICKY BAR: LOCATION SELECTOR + LARGE SEARCH + USER */}
+        {/* ========================================================= */}
+        <div className="bg-card/95 backdrop-blur-md border-b border-border py-3 px-4 sm:px-6 sticky top-16 z-30 shadow-xs">
+          <div className="container max-w-7xl mx-auto space-y-2.5">
+            <div className="flex items-center justify-between gap-3">
+              {/* Location Selector */}
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                  <MapPin className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-foreground truncate">
+                      Delivery Location:
                     </span>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <MapPin className="w-3 h-3 text-primary" />
-                      Bengaluru
-                    </div>
+                    <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-[9px] font-bold px-1.5 py-0">
+                      ⚡ 15 MINS
+                    </Badge>
                   </div>
-                  {/* Content */}
-                  <div className="p-4 bg-background space-y-3">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                      Quick Access
-                    </p>
-                    <div className="grid grid-cols-3 gap-2">
-                      {appFeatures.map((f) => (
-                        <div
-                          key={f.label}
-                          className="flex flex-col items-center gap-1 p-2 bg-card rounded-xl border border-border hover:border-primary/30 transition-smooth cursor-pointer"
-                        >
-                          <span className="text-xl">{f.emoji}</span>
-                          <span className="text-[10px] text-center text-muted-foreground leading-tight font-medium">
-                            {f.label}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                    {/* Mini map card */}
-                    <div className="bg-secondary/10 border border-secondary/20 rounded-xl p-3">
-                      <p className="text-xs font-semibold text-secondary mb-2">
-                        Near You
-                      </p>
-                      {["Sharma Kirana · 0.3 km", "Apollo Clinic · 0.8 km"].map(
-                        (item) => (
-                          <div
-                            key={item}
-                            className="flex items-center gap-2 text-[11px] text-foreground py-0.5"
-                          >
-                            <div className="w-1.5 h-1.5 rounded-full bg-secondary flex-shrink-0" />
-                            {item}
-                          </div>
-                        ),
-                      )}
-                    </div>
-                  </div>
-                  {/* Bottom nav */}
-                  <div
-                    className="grid grid-cols-4 border-t border-border"
-                    style={{ background: "oklch(0.99 0.01 56)" }}
-                  >
-                    {(["🏠", "🗺️", "💊", "👤"] as const).map((e, i) => (
-                      <div
-                        key={e}
-                        className={`flex items-center justify-center py-3 text-lg ${i === 0 ? "border-t-2 border-primary" : ""}`}
-                      >
-                        {e}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Floating badges */}
-                <div
-                  className="absolute -left-8 top-16 bg-card rounded-2xl px-3 py-2 shadow-elevated border border-border animate-bounce"
-                  style={{ animationDuration: "3s" }}
-                >
-                  <p className="text-xs font-bold text-foreground">
-                    🎉 Live Orders
-                  </p>
-                  <p className="text-[10px] text-muted-foreground">
-                    2.3L+ today
-                  </p>
-                </div>
-                <div
-                  className="absolute -right-6 bottom-24 bg-card rounded-2xl px-3 py-2 shadow-elevated border border-border animate-bounce"
-                  style={{ animationDuration: "4s", animationDelay: "1s" }}
-                >
-                  <p className="text-xs font-bold text-secondary">
-                    📍 Detected
-                  </p>
-                  <p className="text-[10px] text-muted-foreground">
-                    Bengaluru, KA
+                  <p className="text-[11px] text-muted-foreground truncate max-w-xs sm:max-w-md">
+                    {currentLocation.formattedAddress || "Indiranagar, Bengaluru, Karnataka"}
                   </p>
                 </div>
               </div>
+
+              {/* User/Greeting */}
+              <div className="text-right flex-shrink-0 hidden sm:block">
+                <span className="text-xs font-semibold text-foreground">
+                  {isAuthenticated ? `Hi, ${user?.name || "Customer"} 👋` : "Welcome to EZY1 👋"}
+                </span>
+                <p className="text-[10px] text-primary font-bold">Local Super-App for Everything</p>
+              </div>
             </div>
+
+            {/* Large Search Bar */}
+            <form onSubmit={handleSearchSubmit} className="relative w-full">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                value={homeSearch}
+                onChange={(e) => setHomeSearch(e.target.value)}
+                placeholder='Search "Atta", "Dolo 650", "Biryani", "Cardiologist", "Hotel Stay", "Volvo Bus", "Electrician"...'
+                className="pl-11 pr-24 h-12 rounded-2xl bg-muted/40 border-border text-sm font-medium focus:bg-background transition-all shadow-inner"
+              />
+              <Button
+                type="submit"
+                size="sm"
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 rounded-xl px-4 text-xs font-bold bg-primary text-primary-foreground shadow-sm"
+              >
+                Search
+              </Button>
+            </form>
           </div>
         </div>
 
-        {/* Scroll indicator */}
-        <button
-          type="button"
-          onClick={() => scrollTo("services")}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 cursor-pointer"
-          style={{ color: "rgba(255,255,255,0.7)" }}
-          data-ocid="landing.hero_scroll_down"
-          aria-label="Scroll to services"
-        >
-          <span className="text-xs font-medium">Scroll down</span>
-          <div className="w-5 h-8 border-2 border-white/40 rounded-full flex items-start justify-center pt-1">
-            <div className="w-1.5 h-2.5 bg-white/60 rounded-full animate-bounce" />
-          </div>
-        </button>
-      </section>
-
-      {/* ═══════════════════════════════════════════
-          SERVICES ECOSYSTEM
-      ═══════════════════════════════════════════ */}
-      <section
-        id="services"
-        className="bg-muted/30 py-20"
-        data-ocid="landing.services_section"
-      >
-        <div className="container px-4">
-          <RevealSection className="text-center mb-12">
-            <Badge variant="outline" className="mb-3">
-              Services Ecosystem
-            </Badge>
-            <h2 className="font-display font-bold text-3xl md:text-4xl text-foreground mb-3">
-              Everything You Need, In One Place
+        {/* ========================================================= */}
+        {/* 2. MAIN SERVICE CATEGORY ROW (Horizontally Scrollable)    */}
+        {/* ========================================================= */}
+        <section className="container max-w-7xl mx-auto pt-6 pb-4 px-4 sm:px-6">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-primary" />
+              All Major Services
             </h2>
-            <p className="text-muted-foreground max-w-lg mx-auto">
-              From recharge to doctors, groceries to buses — 50+ service
-              categories designed for India.
-            </p>
-          </RevealSection>
+            <Link to="/search" className="text-xs font-semibold text-primary hover:underline">
+              Universal Search →
+            </Link>
+          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-            {services.map((svc, i) => {
-              const Icon = iconMap[svc.icon] ?? Zap;
-              const colorClass: Record<string, string> = {
-                primary: "bg-primary/10 text-primary border-primary/20",
-                secondary: "bg-secondary/10 text-secondary border-secondary/20",
-                accent: "bg-accent/10 text-accent border-accent/20",
-              };
+          <ScrollableRow className="py-2">
+            {SUPER_CATEGORIES.map((cat) => (
+              <Link
+                key={cat.id}
+                to={cat.route as any}
+                className="flex flex-col items-center flex-shrink-0 w-20 sm:w-24 p-2.5 rounded-2xl bg-card border border-border/80 hover:border-primary/50 hover:shadow-subtle hover:-translate-y-0.5 transition-all text-center group"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-muted/50 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                  {cat.icon}
+                </div>
+                <span className="text-xs font-bold text-foreground mt-2 line-clamp-1 group-hover:text-primary transition-colors">
+                  {cat.name}
+                </span>
+                <span className="text-[9px] text-muted-foreground truncate w-full mt-0.5">
+                  {cat.badge || cat.group}
+                </span>
+              </Link>
+            ))}
+          </ScrollableRow>
+        </section>
+
+        {/* ========================================================= */}
+        {/* 3. PROMOTIONAL BANNERS CAROUSEL                           */}
+        {/* ========================================================= */}
+        <section className="container max-w-7xl mx-auto py-3 px-4 sm:px-6">
+          <div className="relative rounded-3xl overflow-hidden shadow-sm border border-border/40">
+            <div className={`p-6 sm:p-8 bg-gradient-to-r ${PROMO_BANNERS[activeBannerIdx].gradient} text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 transition-all duration-500`}>
+              <div className="space-y-2 max-w-xl">
+                <Badge className="bg-white/20 text-white border-white/30 text-[10px] font-bold backdrop-blur-sm">
+                  {PROMO_BANNERS[activeBannerIdx].badge}
+                </Badge>
+                <h3 className="text-xl sm:text-2xl font-display font-black leading-snug">
+                  {PROMO_BANNERS[activeBannerIdx].title}
+                </h3>
+                <p className="text-xs sm:text-sm text-white/90">
+                  {PROMO_BANNERS[activeBannerIdx].subtitle}
+                </p>
+                <div className="pt-2">
+                  <Button asChild className="rounded-xl font-bold text-xs bg-white text-black hover:bg-white/90 shadow-md">
+                    <Link to={PROMO_BANNERS[activeBannerIdx].link as any}>
+                      {PROMO_BANNERS[activeBannerIdx].cta} →
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+
+              <div className="text-6xl sm:text-7xl opacity-90 hidden sm:block">
+                {PROMO_BANNERS[activeBannerIdx].icon}
+              </div>
+            </div>
+
+            {/* Carousel Dots */}
+            <div className="absolute bottom-3 right-4 flex items-center gap-1.5 z-10">
+              {PROMO_BANNERS.map((_, i) => (
+                <button
+                  key={i}
+                  aria-label={`Go to slide ${i + 1}`}
+                  onClick={() => setActiveBannerIdx(i)}
+                  className={`h-1.5 rounded-full transition-all ${
+                    activeBannerIdx === i ? "w-6 bg-white" : "w-1.5 bg-white/50"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ========================================================= */}
+        {/* 3B. 🛍️ SHOP BY CATEGORY (Dense Grid of Daily Essentials)  */}
+        {/* ========================================================= */}
+        <section className="container max-w-7xl mx-auto py-5 px-4 sm:px-6">
+          <div className="flex items-center justify-between mb-3.5">
+            <div>
+              <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
+                <span className="text-xl">🛍️</span>
+                Shop by Category
+              </h2>
+              <p className="text-xs text-muted-foreground">Fast delivery across daily groceries, farm fresh, electronics & lifestyle</p>
+            </div>
+            <Link to={"/category/grocery" as any} className="text-xs font-semibold text-primary hover:underline">
+              All Categories →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2.5 sm:gap-3">
+            {SHOP_BY_CATEGORY_TILES.map((cat) => (
+              <Link
+                key={cat.id}
+                to={cat.route as any}
+                className="group p-3 rounded-2xl border border-border/80 bg-card hover:border-primary/40 transition-all duration-200 hover:-translate-y-1 hover:shadow-subtle flex flex-col items-center text-center relative overflow-hidden"
+              >
+                {cat.badge && (
+                  <span className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-full text-[8px] font-extrabold uppercase bg-primary text-primary-foreground shadow-xs">
+                    {cat.badge}
+                  </span>
+                )}
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-2 group-hover:scale-110 transition-transform bg-muted/40">
+                  {cat.emoji}
+                </div>
+                <span className="text-xs font-bold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+                  {cat.name}
+                </span>
+                <span className="text-[10px] text-muted-foreground mt-0.5 font-medium">Explore →</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* ========================================================= */}
+        {/* 4. ⚡ QUICK COMMERCE (15-Min Delivery Essentials)         */}
+        {/* ========================================================= */}
+        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
+                <Zap className="w-5 h-5 text-amber-500 fill-amber-500" />
+                Quick Commerce — Delivered in 15 Mins
+              </h2>
+              <p className="text-xs text-muted-foreground">Kitchen staples, dairy, beverages & instant snacks</p>
+            </div>
+            <Link to={"/category/grocery" as any} className="text-xs font-semibold text-primary hover:underline">
+              See All →
+            </Link>
+          </div>
+
+          <ScrollableRow>
+            {quickPicks.map((item) => {
+              const numId = Math.abs(item.id.split("").reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 0));
+              const cartItem = items[numId];
+
               return (
-                <RevealSection key={svc.id}>
-                  <Link
-                    to={svc.path}
-                    data-ocid={`landing.service_card.${i + 1}`}
-                  >
-                    <Card className="hover:shadow-elevated hover:-translate-y-1.5 transition-smooth cursor-pointer border-border h-full group relative overflow-hidden">
-                      {svc.trending && (
-                        <div className="absolute top-3 right-3">
-                          <Badge className="text-[10px] px-1.5 py-0 bg-primary/10 text-primary border-primary/20">
-                            🔥 Trending
-                          </Badge>
+                <Card key={item.id} className="w-44 sm:w-48 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col">
+                  <div className="relative aspect-square w-full bg-muted/20">
+                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" loading="lazy" />
+                    <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md bg-emerald-600 text-white text-[9px] font-bold">
+                      {item.deliveryMinutes}m
+                    </span>
+                  </div>
+                  <CardContent className="p-3 flex-1 flex flex-col">
+                    <h4 className="font-bold text-xs text-foreground line-clamp-1 mb-0.5">{item.name}</h4>
+                    <span className="text-[11px] text-muted-foreground mb-2">{item.unit}</span>
+                    <div className="mt-auto flex items-center justify-between pt-1 border-t border-border">
+                      <span className="font-bold text-sm text-foreground">₹{item.price}</span>
+                      {cartItem ? (
+                        <div className="flex items-center gap-1.5 bg-primary text-primary-foreground rounded-lg px-1.5 py-0.5 text-xs">
+                          <button onClick={() => (cartItem.quantity > 1 ? updateQuantity(numId, cartItem.quantity - 1) : removeItem(numId))}>
+                            <Minus className="w-3 h-3" />
+                          </button>
+                          <span className="font-bold">{cartItem.quantity}</span>
+                          <button onClick={() => updateQuantity(numId, cartItem.quantity + 1)}>
+                            <Plus className="w-3 h-3" />
+                          </button>
                         </div>
+                      ) : (
+                        <Button size="sm" onClick={() => handleAddToCart(item)} className="h-7 px-3 rounded-lg text-xs font-bold bg-primary text-primary-foreground">
+                          Add
+                        </Button>
                       )}
-                      <CardContent className="p-5">
-                        <div
-                          className={`w-12 h-12 rounded-xl border flex items-center justify-center mb-4 transition-smooth group-hover:scale-110 ${colorClass[svc.color]}`}
-                        >
-                          <Icon className="w-6 h-6" />
-                        </div>
-                        <div className="font-display font-bold text-foreground mb-1 text-base">
-                          {svc.name}
-                        </div>
-                        <div className="text-xs text-muted-foreground leading-relaxed">
-                          {svc.desc}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                </RevealSection>
+                    </div>
+                  </CardContent>
+                </Card>
               );
             })}
-          </div>
-        </div>
-      </section>
+          </ScrollableRow>
+        </section>
 
-      {/* ═══════════════════════════════════════════
-          NAVAEIN — ART • CRAFT • PRODUCTS (Separate Website)
-      ═══════════════════════════════════════════ */}
-      <section
-        id="navaein"
-        className="py-14 bg-gradient-to-b from-amber-50/60 via-orange-50/40 to-background dark:from-stone-950 dark:via-stone-900/50 dark:to-background border-y border-orange-100/80 dark:border-stone-800/80 relative overflow-hidden"
-        data-ocid="landing.navaein_section"
-      >
-        <div className="container px-4">
-          <RevealSection>
-            {/* The entire card is a clickable anchor pointing directly to NAVAEIN_URL in the same tab */}
-            <a
-              href={NAVAEIN_URL}
-              data-ocid="landing.navaein_card_link"
-              className="group block relative rounded-3xl overflow-hidden bg-white dark:bg-stone-900 border border-amber-200/80 dark:border-stone-800 shadow-md hover:shadow-2xl hover:border-orange-500/50 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer text-inherit no-underline"
-            >
-              {/* Decorative warm ambient glow */}
-              <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-orange-400/15 via-amber-300/10 to-transparent rounded-full blur-3xl pointer-events-none group-hover:scale-110 transition-transform duration-700" />
-
-              <div className="grid grid-cols-1 lg:grid-cols-12 items-center">
-                {/* Left content (7 columns on desktop) */}
-                <div className="p-6 sm:p-10 lg:p-12 lg:col-span-7 flex flex-col justify-between space-y-6">
-                  <div>
-                    {/* Brand Badges */}
-                    <div className="flex items-center gap-2 flex-wrap mb-4">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
-                        <Sparkles className="w-3.5 h-3.5 text-orange-500" />
-                        Featured Independent Brand
-                      </span>
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">
-                        External Website ↗
-                      </span>
-                    </div>
-
-                    {/* Logo & Title */}
-                    <div className="flex items-center gap-3.5 mb-2">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform duration-300 shrink-0">
-                        <Palette className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h2 className="font-display font-black text-3xl sm:text-4xl text-stone-900 dark:text-white tracking-tight group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
-                          NavaeIn
-                        </h2>
-                        <p className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-orange-600 dark:text-orange-400">
-                          Art • Craft • Products
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Description */}
-                    <p className="text-sm sm:text-base text-stone-600 dark:text-stone-300 leading-relaxed max-w-xl mt-3">
-                      Discover authentic handcrafted ceramics, bespoke terracotta sculptures, studio workshop masterclasses, and curated artisan creations. Explore the complete craft collection directly on the official NavaeIn platform.
-                    </p>
-
-                    {/* Feature tags */}
-                    <div className="flex flex-wrap gap-2 pt-4 text-xs font-medium text-stone-600 dark:text-stone-300">
-                      <span className="px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/60">
-                        🏺 Studio Pottery
-                      </span>
-                      <span className="px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/60">
-                        🎨 Handmade Artifacts
-                      </span>
-                      <span className="px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/60">
-                        ✨ Master Workshops
-                      </span>
-                      <span className="px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/60">
-                        🌿 100% Eco-Crafted
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* CTAs */}
-                  <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                    <span className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-orange-600 group-hover:bg-orange-700 text-white font-bold text-sm shadow-md group-hover:shadow-lg transition-all">
-                      <span>Explore NavaeIn</span>
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </span>
-
-                    <span className="inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/60 text-stone-800 dark:text-stone-200 font-semibold text-sm hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors">
-                      <ExternalLink className="w-4 h-4 text-orange-600" />
-                      <span>Visit Shop Now</span>
-                    </span>
-
-                    <span className="text-[11px] text-stone-400 dark:text-stone-500 sm:ml-2 text-center sm:text-left font-mono">
-                      navaein.ezy1.site
-                    </span>
-                  </div>
-                </div>
-
-                {/* Right Image Showcase (5 columns on desktop) */}
-                <div className="lg:col-span-5 h-64 sm:h-80 lg:h-full min-h-[280px] lg:min-h-[380px] relative overflow-hidden bg-stone-100 dark:bg-stone-800">
-                  <img
-                    src="https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=1000&q=85"
-                    alt="NavaeIn Handcrafted Ceramic Art and Pottery"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-stone-950/70 via-stone-950/20 to-transparent lg:bg-gradient-to-r lg:from-white dark:lg:from-stone-900 lg:via-transparent lg:to-transparent" />
-
-                  {/* Floating live indicator badge */}
-                  <div className="absolute bottom-4 right-4 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md px-3.5 py-2 rounded-2xl shadow-lg border border-white/20 flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-xs font-bold text-stone-900 dark:text-white">
-                      Live on navaein.ezy1.site
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </a>
-          </RevealSection>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════
-          HYPERLOCAL EXPERIENCE
-      ═══════════════════════════════════════════ */}
-      <section
-        id="hyperlocal"
-        className="bg-background py-20"
-        data-ocid="landing.hyperlocal_section"
-      >
-        <div className="container px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-14 items-center">
-            {/* Left copy */}
-            <RevealSection>
-              <Badge className="bg-secondary/10 text-secondary border-secondary/20 mb-4">
-                Hyperlocal Experience
-              </Badge>
-              <h2 className="font-display font-bold text-3xl md:text-4xl text-foreground mb-5">
-                Services Where You Are
+        {/* ========================================================= */}
+        {/* 5. 🍔 POPULAR RESTAURANTS & FOOD                          */}
+        {/* ========================================================= */}
+        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
+                <UtensilsCrossed className="w-5 h-5 text-orange-500" />
+                Restaurants & Local Kitchens Near You
               </h2>
-              <p className="text-muted-foreground leading-relaxed mb-6">
-                Ezy1 auto-detects your location and surfaces the most relevant
-                hyperlocal services — whether you're in South Mumbai, a small UP
-                town, or a Rajasthan village.
-              </p>
-              <ul className="space-y-3 mb-8">
-                {[
-                  "Kirana stores delivering within 30 minutes",
-                  "Village milk delivery at your doorstep by 7 AM",
-                  "Local dhabas with live menu and delivery",
-                  "Supports 12 Indian regional languages",
-                ].map((pt) => (
-                  <li
-                    key={pt}
-                    className="flex items-start gap-3 text-sm text-foreground"
-                  >
-                    <CheckCircle className="w-4 h-4 text-secondary mt-0.5 flex-shrink-0" />
-                    <span>{pt}</span>
-                  </li>
-                ))}
-              </ul>
-              <Button
-                className="gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/90"
-                onClick={() => scrollTo("hero")}
-                data-ocid="landing.hyperlocal_cta_button"
-              >
-                Explore Near You <ArrowRight className="w-4 h-4" />
-              </Button>
-            </RevealSection>
-
-            {/* Right: mock location card */}
-            <RevealSection>
-              <div className="bg-card rounded-2xl p-5 border border-border shadow-elevated">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                      <MapPin className="w-4 h-4 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">
-                        Bengaluru, KA
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Auto-detected · 2 min ago
-                      </p>
-                    </div>
-                  </div>
-                  <Badge className="bg-secondary/10 text-secondary border-secondary/20 text-xs">
-                    ● Live
-                  </Badge>
-                </div>
-
-                {/* Grid map visual */}
-                <div className="bg-muted/40 rounded-xl h-44 relative overflow-hidden mb-4 border border-border">
-                  <div
-                    className="absolute inset-0 opacity-10"
-                    style={{
-                      backgroundImage:
-                        "repeating-linear-gradient(0deg,transparent,transparent 20px,currentColor 20px,currentColor 21px),repeating-linear-gradient(90deg,transparent,transparent 20px,currentColor 20px,currentColor 21px)",
-                      backgroundSize: "21px 21px",
-                    }}
-                  />
-                  {[
-                    {
-                      top: "22%",
-                      left: "28%",
-                      label: "Kirana Store",
-                      color: "bg-primary",
-                    },
-                    {
-                      top: "52%",
-                      left: "58%",
-                      label: "Doctor",
-                      color: "bg-secondary",
-                    },
-                    {
-                      top: "68%",
-                      left: "22%",
-                      label: "Bus Stop",
-                      color: "bg-accent",
-                    },
-                  ].map(({ top, left, label, color }) => (
-                    <div
-                      key={label}
-                      className="absolute flex flex-col items-center"
-                      style={{ top, left }}
-                    >
-                      <div
-                        className={`w-6 h-6 ${color} rounded-full flex items-center justify-center shadow-sm`}
-                      >
-                        <MapPin className="w-3 h-3 text-white" />
-                      </div>
-                      <div className="mt-1 bg-card text-[10px] px-2 py-0.5 rounded-full border border-border shadow-sm font-semibold text-foreground whitespace-nowrap">
-                        {label}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Service list */}
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                  Nearby Services
-                </p>
-                <div className="space-y-2">
-                  {[
-                    {
-                      icon: ShoppingBag,
-                      name: "Sharma Kirana Store",
-                      dist: "0.3 km",
-                      tag: "Open",
-                      tagColor: "bg-secondary/10 text-secondary",
-                    },
-                    {
-                      icon: Stethoscope,
-                      name: "Dr. Priya Sharma",
-                      dist: "1.2 km",
-                      tag: "Clinic",
-                      tagColor: "bg-primary/10 text-primary",
-                    },
-                    {
-                      icon: Bus,
-                      name: "KSRTC Bus Stand",
-                      dist: "0.8 km",
-                      tag: "Bus Stop",
-                      tagColor: "bg-accent/10 text-accent",
-                    },
-                  ].map(({ icon: Icon, name, dist, tag, tagColor }) => (
-                    <div
-                      key={name}
-                      className="flex items-center justify-between py-2 border-b border-border last:border-0"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Icon className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm text-foreground font-medium">
-                          {name}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">
-                          {dist}
-                        </span>
-                        <Badge
-                          className={`text-[10px] px-1.5 py-0 border-0 ${tagColor}`}
-                        >
-                          {tag}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </RevealSection>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════
-          HEALTHCARE PREVIEW
-      ═══════════════════════════════════════════ */}
-      <section
-        id="healthcare"
-        className="bg-muted/30 py-20"
-        data-ocid="landing.healthcare_section"
-      >
-        <div className="container px-4">
-          <RevealSection className="text-center mb-12">
-            <Badge className="bg-primary/10 text-primary border-primary/20 mb-3">
-              Healthcare
-            </Badge>
-            <h2 className="font-display font-bold text-3xl md:text-4xl text-foreground mb-3">
-              Your Health, Our Priority
-            </h2>
-            <p className="text-muted-foreground max-w-lg mx-auto">
-              Book certified doctors, order medicines, and access emergency care
-              — all from your phone.
-            </p>
-          </RevealSection>
-
-          {/* Emergency SOS */}
-          <RevealSection className="max-w-2xl mx-auto mb-10">
-            <div className="flex items-center gap-4 bg-destructive/10 border border-destructive/30 rounded-2xl p-5">
-              <div className="w-12 h-12 rounded-full bg-destructive flex items-center justify-center flex-shrink-0 animate-pulse">
-                <AlertTriangle className="w-6 h-6 text-destructive-foreground" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-display font-bold text-destructive text-lg">
-                  Emergency SOS
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  One tap to reach nearest ambulance, emergency contacts, and
-                  hospital ER.
-                </p>
-              </div>
-              <Link to="/login" data-ocid="landing.sos_button">
-                <Button className="bg-destructive text-destructive-foreground hover:bg-destructive/90 flex-shrink-0">
-                  SOS
-                </Button>
-              </Link>
+              <p className="text-xs text-muted-foreground">Authentic biryani, North Indian combos, freshly brewed coffee</p>
             </div>
-          </RevealSection>
-
-          {/* Doctor cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {doctors.slice(0, 3).map((doc, i) => (
-              <RevealSection key={doc.id}>
-                <Card
-                  className="border-border hover:shadow-elevated transition-smooth h-full"
-                  data-ocid={`landing.doctor_card.${i + 1}`}
-                >
-                  <CardContent className="p-5">
-                    <div className="flex items-start gap-3 mb-4">
-                      <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
-                        <span className="font-display font-black text-primary text-lg">
-                          {doc.name.split(" ")[1]?.[0] ?? "D"}
-                        </span>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-display font-bold text-foreground text-sm leading-tight">
-                          {doc.name}
-                        </p>
-                        <p className="text-xs text-secondary font-medium mt-0.5">
-                          {doc.specialty}
-                        </p>
-                        <div className="flex items-center gap-1.5 mt-1">
-                          <StarRating rating={doc.rating} />
-                          <span className="text-xs text-muted-foreground">
-                            {doc.rating} · {doc.experience} yrs
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex gap-2">
-                        <Badge className="bg-secondary/10 text-secondary border-secondary/20 text-xs">
-                          Clinic
-                        </Badge>
-                        <Badge className="bg-accent/10 text-accent border-accent/20 text-xs">
-                          Home Visit
-                        </Badge>
-                      </div>
-                      <span className="text-sm font-bold text-primary">
-                        ₹{doc.fee}
-                      </span>
-                    </div>
-                    <Link
-                      to="/login"
-                      data-ocid={`landing.doctor_book_button.${i + 1}`}
-                    >
-                      <Button
-                        size="sm"
-                        className="w-full bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20"
-                      >
-                        Book Now
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
-              </RevealSection>
-            ))}
+            <Link to={"/category/restaurants" as any} className="text-xs font-semibold text-primary hover:underline">
+              View Menu →
+            </Link>
           </div>
-        </div>
-      </section>
 
-      {/* ═══════════════════════════════════════════
-          TRANSPORT PREVIEW
-      ═══════════════════════════════════════════ */}
-      <section
-        id="transport"
-        className="bg-background py-20"
-        data-ocid="landing.transport_section"
-      >
-        <div className="container px-4">
-          <RevealSection className="text-center mb-12">
-            <Badge className="bg-secondary/10 text-secondary border-secondary/20 mb-3">
-              Transport
-            </Badge>
-            <h2 className="font-display font-bold text-3xl md:text-4xl text-foreground mb-3">
-              Move Smarter Across India
-            </h2>
-            <p className="text-muted-foreground max-w-lg mx-auto">
-              Book buses, share rides, and track live journeys — state buses to
-              city autos, all connected.
-            </p>
-          </RevealSection>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Bus schedule table */}
-            <RevealSection>
-              <Card
-                className="border-border overflow-hidden"
-                data-ocid="landing.transport_bus_table"
-              >
-                <div className="flex items-center gap-3 px-5 py-4 border-b border-border bg-secondary/5">
-                  <div className="w-9 h-9 rounded-xl bg-secondary/10 flex items-center justify-center">
-                    <Bus className="w-5 h-5 text-secondary" />
-                  </div>
+          <ScrollableRow>
+            {popularRestaurants.map((dish) => (
+              <Card key={dish.id} className="w-64 sm:w-72 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col">
+                <div className="relative aspect-video w-full">
+                  <img src={dish.image} alt={dish.name} className="w-full h-full object-cover" loading="lazy" />
+                  <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-black/70 text-white text-[10px] font-bold backdrop-blur-sm">
+                    {dish.cuisine || "Specialty"}
+                  </span>
+                  <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-black/60 text-amber-400 text-[10px] font-bold backdrop-blur-sm">
+                    ★ {dish.rating}
+                  </span>
+                </div>
+                <CardContent className="p-4 flex-1 flex flex-col justify-between">
                   <div>
-                    <p className="font-display font-bold text-foreground">
-                      State Bus Booking
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Live seat availability
-                    </p>
+                    <h4 className="font-bold text-sm text-foreground line-clamp-1 mb-1">{dish.name}</h4>
+                    <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{dish.description}</p>
                   </div>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-border bg-muted/30">
-                        <th className="text-left px-4 py-2.5 text-xs font-semibold text-muted-foreground">
-                          Route
-                        </th>
-                        <th className="text-left px-4 py-2.5 text-xs font-semibold text-muted-foreground">
-                          Dep
-                        </th>
-                        <th className="text-left px-4 py-2.5 text-xs font-semibold text-muted-foreground">
-                          Arr
-                        </th>
-                        <th className="text-right px-4 py-2.5 text-xs font-semibold text-muted-foreground">
-                          Fare
-                        </th>
-                        <th className="px-4 py-2.5" />
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {busRoutes.slice(0, 3).map((route, i) => (
-                        <tr
-                          key={route.id}
-                          className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors"
-                          data-ocid={`landing.bus_row.${i + 1}`}
-                        >
-                          <td className="px-4 py-3">
-                            <p className="font-semibold text-foreground text-xs">
-                              {route.from} → {route.to}
-                            </p>
-                            <p className="text-[10px] text-muted-foreground">
-                              {route.operator}
-                            </p>
-                          </td>
-                          <td className="px-4 py-3 text-xs text-foreground font-medium">
-                            <div className="flex items-center gap-1">
-                              <Clock className="w-3 h-3 text-muted-foreground" />
-                              {route.departure}
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 text-xs text-muted-foreground">
-                            {route.arrival}
-                          </td>
-                          <td className="px-4 py-3 text-right">
-                            <span className="font-bold text-primary text-sm">
-                              ₹{route.fare}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3">
-                            <Link
-                              to="/login"
-                              data-ocid={`landing.bus_book_button.${i + 1}`}
-                            >
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="text-xs h-7 px-2.5 border-secondary/30 text-secondary hover:bg-secondary/10"
-                              >
-                                Book
-                              </Button>
-                            </Link>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </Card>
-            </RevealSection>
-
-            {/* Ride sharing card */}
-            <RevealSection>
-              <Card
-                className="border-border h-full"
-                data-ocid="landing.transport_ride_card"
-              >
-                <CardContent className="p-5">
-                  <div className="flex items-center gap-3 mb-5">
-                    <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-                      <Car className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-display font-bold text-foreground">
-                        Ride Sharing
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Autos, bikes & cabs near you
-                      </p>
-                    </div>
-                    <Badge className="ml-auto bg-secondary/10 text-secondary border-secondary/20 text-xs">
-                      ● Live
-                    </Badge>
-                  </div>
-                  {/* Fare cards */}
-                  <div className="grid grid-cols-3 gap-3 mb-5">
-                    {[
-                      {
-                        type: "Auto",
-                        emoji: "🛺",
-                        fare: "₹50+",
-                        time: "2 min",
-                      },
-                      { type: "Bike", emoji: "🏍️", fare: "₹30+", time: "3 min" },
-                      {
-                        type: "Cab",
-                        emoji: "🚗",
-                        fare: "₹120+",
-                        time: "5 min",
-                      },
-                    ].map(({ type, emoji, fare, time }) => (
-                      <div
-                        key={type}
-                        className="bg-muted/40 rounded-xl p-3 text-center border border-border hover:border-primary/30 transition-smooth cursor-pointer"
-                      >
-                        <p className="text-2xl mb-1">{emoji}</p>
-                        <p className="font-display font-bold text-sm text-foreground">
-                          {type}
-                        </p>
-                        <p className="text-xs text-primary font-semibold">
-                          {fare}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground">
-                          {time} away
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                  {/* Estimated route */}
-                  <div className="bg-muted/30 rounded-xl p-4 border border-border">
-                    <p className="text-xs font-semibold text-muted-foreground mb-2">
-                      Sample Estimate
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <div className="flex flex-col items-center gap-1">
-                        <div className="w-2.5 h-2.5 rounded-full bg-primary" />
-                        <div className="w-0.5 h-6 bg-border" />
-                        <div className="w-2.5 h-2.5 rounded-full bg-secondary" />
-                      </div>
-                      <div className="space-y-2">
-                        <p className="text-xs font-medium text-foreground">
-                          Indiranagar
-                        </p>
-                        <p className="text-xs font-medium text-foreground">
-                          Whitefield · 18 km
-                        </p>
-                      </div>
-                      <div className="ml-auto text-right">
-                        <p className="font-display font-black text-xl text-primary">
-                          ₹220
-                        </p>
-                        <p className="text-[10px] text-muted-foreground">
-                          Cab estimate
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <Link
-                    to="/login"
-                    className="block mt-4"
-                    data-ocid="landing.ride_book_button"
-                  >
-                    <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 gap-2">
-                      Book a Ride <ArrowRight className="w-4 h-4" />
+                  <div className="pt-2 border-t border-border flex items-center justify-between">
+                    <span className="font-bold text-base text-foreground">₹{dish.price}</span>
+                    <Button size="sm" onClick={() => handleAddToCart(dish)} className="h-8 rounded-xl px-4 text-xs font-bold bg-primary text-primary-foreground">
+                      Order Food
                     </Button>
-                  </Link>
+                  </div>
                 </CardContent>
               </Card>
-            </RevealSection>
+            ))}
+          </ScrollableRow>
+        </section>
+
+        {/* ========================================================= */}
+        {/* 6. 🥦 FRESH PRODUCE / GROCERY HARVEST                     */}
+        {/* ========================================================= */}
+        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
+                <span className="text-xl">🥦</span>
+                Fresh Fruits & Daily Harvest
+              </h2>
+              <p className="text-xs text-muted-foreground">Handpicked farm-fresh greens, bananas, apples & tomatoes</p>
+            </div>
+            <Link to={"/category/fruits" as any} className="text-xs font-semibold text-primary hover:underline">
+              View Produce →
+            </Link>
           </div>
-        </div>
-      </section>
 
-      {/* ═══════════════════════════════════════════
-          PARTNER WITH US
-      ═══════════════════════════════════════════ */}
-      <section
-        id="partner"
-        className="py-20"
-        data-ocid="landing.partner_section"
-        style={{ background: "oklch(0.3 0.18 262)" }}
-      >
-        <div className="container px-4">
-          <RevealSection className="text-center mb-12">
-            <Badge
-              className="mb-3 text-sm border-0"
-              style={{ background: "rgba(255,255,255,0.15)", color: "white" }}
-            >
-              Partner With Us
-            </Badge>
-            <h2
-              className="font-display font-bold text-3xl md:text-4xl mb-3"
-              style={{ color: "white" }}
-            >
-              Grow Your Business with Ezy1
-            </h2>
-            <p
-              className="max-w-lg mx-auto text-lg"
-              style={{ color: "rgba(255,255,255,0.75)" }}
-            >
-              Join 50,000+ vendors, drivers, and service providers earning more
-              every day.
-            </p>
-          </RevealSection>
+          <ScrollableRow>
+            {freshProduce.map((item) => {
+              const numId = Math.abs(item.id.split("").reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 0));
+              const cartItem = items[numId];
 
-          {/* Onboarding paths */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-14">
-            {partnerPaths.map(({ icon: Icon, title, desc, badge }, i) => (
-              <RevealSection key={title}>
-                <Card
-                  className="border-0 h-full"
-                  style={{
-                    background: "rgba(255,255,255,0.1)",
-                    backdropFilter: "blur(8px)",
-                  }}
-                  data-ocid={`landing.partner_card.${i + 1}`}
-                >
-                  <CardContent className="p-6">
-                    <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
-                      style={{ background: "rgba(255,255,255,0.15)" }}
-                    >
-                      <Icon className="w-6 h-6" style={{ color: "white" }} />
+              return (
+                <Card key={item.id} className="w-44 sm:w-48 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-subtle transition-smooth flex flex-col">
+                  <div className="relative aspect-square w-full bg-muted/20">
+                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" loading="lazy" />
+                    {item.freshnessScore && (
+                      <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-emerald-600 text-white text-[9px] font-bold">
+                        {item.freshnessScore}% Fresh
+                      </span>
+                    )}
+                  </div>
+                  <CardContent className="p-3 flex-1 flex flex-col">
+                    <h4 className="font-bold text-xs text-foreground line-clamp-1 mb-0.5">{item.name}</h4>
+                    <span className="text-[11px] text-muted-foreground mb-2">{item.unit}</span>
+                    <div className="mt-auto flex items-center justify-between pt-1 border-t border-border">
+                      <span className="font-bold text-sm text-foreground">₹{item.price}</span>
+                      {cartItem ? (
+                        <div className="flex items-center gap-1 bg-primary text-primary-foreground rounded-lg px-1.5 py-0.5 text-xs">
+                          <button onClick={() => (cartItem.quantity > 1 ? updateQuantity(numId, cartItem.quantity - 1) : removeItem(numId))}>
+                            <Minus className="w-3 h-3" />
+                          </button>
+                          <span className="font-bold">{cartItem.quantity}</span>
+                          <button onClick={() => updateQuantity(numId, cartItem.quantity + 1)}>
+                            <Plus className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ) : (
+                        <Button size="sm" onClick={() => handleAddToCart(item)} className="h-7 px-3 rounded-lg text-xs font-bold bg-primary text-primary-foreground">
+                          Add
+                        </Button>
+                      )}
                     </div>
-                    <Badge
-                      className="mb-3 text-xs border-0"
-                      style={{
-                        background: "oklch(0.62 0.24 71)",
-                        color: "white",
-                      }}
-                    >
-                      {badge}
-                    </Badge>
-                    <h3
-                      className="font-display font-bold text-xl mb-2"
-                      style={{ color: "white" }}
-                    >
-                      {title}
-                    </h3>
-                    <p
-                      className="text-sm mb-5 leading-relaxed"
-                      style={{ color: "rgba(255,255,255,0.7)" }}
-                    >
-                      {desc}
-                    </p>
-                    <Link
-                      to="/partner-login"
-                      data-ocid={`landing.partner_register_button.${i + 1}`}
-                    >
-                      <Button
-                        className="w-full border-0 gap-2"
-                        style={{
-                          background: "oklch(0.62 0.24 71)",
-                          color: "white",
-                        }}
-                      >
-                        Register Now <ArrowRight className="w-4 h-4" />
-                      </Button>
-                    </Link>
                   </CardContent>
                 </Card>
-              </RevealSection>
-            ))}
-          </div>
+              );
+            })}
+          </ScrollableRow>
+        </section>
 
-          {/* 3-step timeline */}
-          <RevealSection>
-            <div className="max-w-3xl mx-auto">
-              <p
-                className="text-center text-sm font-semibold mb-8 uppercase tracking-wider"
-                style={{ color: "rgba(255,255,255,0.6)" }}
-              >
-                Simple 3-Step Onboarding
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 relative">
-                {onboardingSteps.map(({ step, label, desc }, i) => (
-                  <div
-                    key={step}
-                    className="flex flex-col items-center text-center relative"
-                  >
-                    {i < onboardingSteps.length - 1 && (
-                      <div
-                        className="hidden sm:block absolute top-6 left-1/2 w-full h-0.5"
-                        style={{ background: "rgba(255,255,255,0.2)" }}
-                      />
-                    )}
-                    <div
-                      className="relative w-12 h-12 rounded-full flex items-center justify-center mb-3 font-display font-black text-xl z-10"
-                      style={{
-                        background: "oklch(0.62 0.24 71)",
-                        color: "white",
-                      }}
-                    >
-                      {step}
-                    </div>
-                    <p
-                      className="font-display font-bold text-base mb-1"
-                      style={{ color: "white" }}
-                    >
-                      {label}
-                    </p>
-                    <p
-                      className="text-sm"
-                      style={{ color: "rgba(255,255,255,0.65)" }}
-                    >
-                      {desc}
-                    </p>
-                  </div>
-                ))}
+        {/* ========================================================= */}
+        {/* 7. 🏥 HEALTHCARE HUB: BEDS + DOCTOR AT HOME + EMERGENCY   */}
+        {/* ========================================================= */}
+        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+          <div className="p-6 rounded-3xl bg-gradient-to-r from-red-500/10 via-card to-teal-500/10 border border-border space-y-6">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-red-500/15 text-red-600 border-red-500/20 font-bold text-xs">
+                    24/7 Verified Healthcare & SOS
+                  </Badge>
+                  <span className="text-xs text-muted-foreground font-semibold">
+                    Live Bed Telemetry • Certified Doctors • Home Care
+                  </span>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-display font-black text-foreground">
+                  Hospital Beds, Doctor at Home & Emergency Response
+                </h3>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button size="sm" asChild className="rounded-xl font-bold text-xs bg-red-600 text-white hover:bg-red-700">
+                  <a href="tel:108"><PhoneCall className="w-3.5 h-3.5 mr-1" /> 108 Ambulance</a>
+                </Button>
+                <Button size="sm" variant="outline" asChild className="rounded-xl font-bold text-xs border-red-500/30 text-red-600">
+                  <a href="tel:102">102 Maternity</a>
+                </Button>
               </div>
             </div>
-          </RevealSection>
-        </div>
-      </section>
 
-      {/* ═══════════════════════════════════════════
-          TESTIMONIALS
-      ═══════════════════════════════════════════ */}
-      <section
-        id="testimonials"
-        className="bg-muted/30 py-20"
-        data-ocid="landing.testimonials_section"
-      >
-        <div className="container px-4">
-          <RevealSection className="text-center mb-12">
-            <h2 className="font-display font-bold text-3xl md:text-4xl text-foreground mb-3">
-              Trusted by Millions
-            </h2>
-            <p className="text-muted-foreground">
-              Real stories from real Indians using Ezy1 every day
-            </p>
-          </RevealSection>
+            {/* Live Bed Availability Grid (Real verified statuses: Available / Limited / Full) */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {hospitalData?.capacitySummary?.map((cap: any, i: number) => (
+                <div key={i} className="p-4 rounded-2xl bg-card border border-border flex items-center justify-between shadow-xs">
+                  <div>
+                    <span className="text-xs font-bold text-foreground block">{cap.name}</span>
+                    <span className="text-[11px] text-muted-foreground">Last updated: {cap.lastUpdated}</span>
+                  </div>
+                  <div className="text-right">
+                    <Badge
+                      className={`text-xs font-bold px-2 py-0.5 ${
+                        cap.status === "Available"
+                          ? "bg-emerald-500/15 text-emerald-600 border-emerald-500/20"
+                          : cap.status === "Limited"
+                          ? "bg-amber-500/15 text-amber-600 border-amber-500/20"
+                          : "bg-red-500/15 text-red-600 border-red-500/20"
+                      }`}
+                    >
+                      {cap.status} ({cap.available}/{cap.total})
+                    </Badge>
+                  </div>
+                </div>
+              )) || (
+                <div className="col-span-3 text-center text-xs text-muted-foreground py-2">
+                  Checking verified hospital capacity...
+                </div>
+              )}
+            </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {testimonials.slice(0, 4).map((t, i) => (
-              <RevealSection key={t.id}>
-                <Card
-                  className="border-border hover:shadow-elevated transition-smooth h-full"
-                  data-ocid={`landing.testimonial.${i + 1}`}
-                >
-                  <CardContent className="p-5">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
-                        <span className="font-display font-black text-primary">
-                          {t.name[0]}
-                        </span>
+            {/* Quick Access Healthcare Actions */}
+            <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-border/80">
+              <Button size="sm" asChild className="rounded-xl font-bold text-xs bg-primary text-primary-foreground">
+                <Link to="/hospitals">Check All Hospital Beds</Link>
+              </Button>
+              <Button size="sm" variant="outline" asChild className="rounded-xl font-bold text-xs">
+                <Link to="/home-healthcare">Book Doctor at Home</Link>
+              </Button>
+              <Button size="sm" variant="outline" asChild className="rounded-xl font-bold text-xs">
+                <Link to="/doctors">Find Specialist Doctor</Link>
+              </Button>
+              <Button size="sm" variant="outline" asChild className="rounded-xl font-bold text-xs">
+                <Link to="/diagnostics">Book Lab Tests at Home</Link>
+              </Button>
+              <Button size="sm" variant="outline" asChild className="rounded-xl font-bold text-xs">
+                <Link to={"/category/pharmacy" as any}>Order Medicines (15 mins)</Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* ========================================================= */}
+        {/* 8. 🏨 HOTELS & ACCOMMODATION (EZY Stay)                   */}
+        {/* ========================================================= */}
+        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
+                <Building2 className="w-5 h-5 text-amber-500" />
+                Hotels & Stay (EZY Stay)
+              </h2>
+              <p className="text-xs text-muted-foreground">Verified budget & premium hotels, resorts, homestays, and hostels</p>
+            </div>
+            <Link to="/stays" className="text-xs font-semibold text-primary hover:underline">
+              View All Stays →
+            </Link>
+          </div>
+
+          <ScrollableRow>
+            {stays.map((hotel) => (
+              <Card key={hotel.id} className="w-72 sm:w-80 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col">
+                <div className="relative aspect-video w-full bg-muted">
+                  <img src={hotel.image} alt={hotel.name} className="w-full h-full object-cover" loading="lazy" />
+                  <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-black/70 text-white text-[10px] font-bold uppercase backdrop-blur-sm">
+                    {hotel.type}
+                  </span>
+                  <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-black/60 text-amber-400 text-[10px] font-bold backdrop-blur-sm">
+                    ★ {hotel.rating}
+                  </span>
+                </div>
+                <CardContent className="p-4 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h4 className="font-bold text-sm text-foreground line-clamp-1">{hotel.name}</h4>
+                    <p className="text-xs text-muted-foreground line-clamp-1 mb-2">{hotel.address}</p>
+                    <span className="text-[10px] text-emerald-600 font-semibold block">{hotel.availableRooms} rooms available</span>
+                  </div>
+                  <div className="mt-3 pt-2 border-t border-border flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] text-muted-foreground block">per night</span>
+                      <span className="font-black text-base text-foreground">₹{hotel.pricePerNight}</span>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => requireAuth(() => navigate({ to: "/stays" }))}
+                      className="rounded-xl font-bold text-xs bg-primary text-primary-foreground h-8 px-3.5"
+                    >
+                      Book Stay
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </ScrollableRow>
+        </section>
+
+        {/* ========================================================= */}
+        {/* 9. ✈️ TRAVEL & PACKAGES (EZY Travel)                      */}
+        {/* ========================================================= */}
+        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
+                <Compass className="w-5 h-5 text-sky-500" />
+                Tours & Travel Packages (EZY Travel)
+              </h2>
+              <p className="text-xs text-muted-foreground">Certified local agencies, weekend getaways & sightseeing packages</p>
+            </div>
+            <Link to="/travel" className="text-xs font-semibold text-primary hover:underline">
+              See All Tours →
+            </Link>
+          </div>
+
+          <ScrollableRow>
+            {tours.map((tour) => (
+              <Card key={tour.id} className="w-72 sm:w-80 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col">
+                <div className="relative aspect-video w-full bg-muted">
+                  <img src={tour.image} alt={tour.title} className="w-full h-full object-cover" loading="lazy" />
+                  <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-black/70 text-white text-[10px] font-bold backdrop-blur-sm">
+                    {tour.duration}
+                  </span>
+                  <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-sky-600 text-white text-[10px] font-bold">
+                    ★ {tour.rating}
+                  </span>
+                </div>
+                <CardContent className="p-4 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h4 className="font-bold text-sm text-foreground line-clamp-1">{tour.title}</h4>
+                    <p className="text-xs text-muted-foreground line-clamp-1 mb-1">{tour.agencyName} • {tour.destination}</p>
+                    <p className="text-[11px] text-muted-foreground line-clamp-1">{tour.includedAmenities}</p>
+                  </div>
+                  <div className="mt-3 pt-2 border-t border-border flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] text-muted-foreground block">per person</span>
+                      <span className="font-black text-base text-foreground">₹{tour.price}</span>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => requireAuth(() => navigate({ to: "/travel" }))}
+                      className="rounded-xl font-bold text-xs bg-primary text-primary-foreground h-8 px-3.5"
+                    >
+                      Book Tour
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </ScrollableRow>
+        </section>
+
+        {/* ========================================================= */}
+        {/* 10. 🚌 REGIONAL BUS & TRANSPORT (EZY Bus)                 */}
+        {/* ========================================================= */}
+        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
+                <Bus className="w-5 h-5 text-blue-600" />
+                Regional Buses & Live Schedules (EZY Bus)
+              </h2>
+              <p className="text-xs text-muted-foreground">State carriers & AC Volvos with seat booking and live running status</p>
+            </div>
+            <Link to="/bus" className="text-xs font-semibold text-primary hover:underline">
+              Search Routes →
+            </Link>
+          </div>
+
+          <ScrollableRow>
+            {buses.map((bus) => (
+              <Card key={bus.id} className="w-72 sm:w-80 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-subtle transition-smooth flex flex-col">
+                <CardContent className="p-4 flex-1 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-xs text-foreground truncate">{bus.operatorName}</span>
+                      <Badge variant="outline" className="text-[9px] font-bold uppercase">
+                        {bus.busType.replace("_", " ")}
+                      </Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between py-2 border-y border-border text-center">
+                      <div>
+                        <span className="font-black text-sm text-foreground block">{bus.departureTime}</span>
+                        <span className="text-[10px] text-muted-foreground">{bus.sourceCity}</span>
                       </div>
-                      <div className="min-w-0">
-                        <p className="font-semibold text-sm text-foreground truncate">
-                          {t.name}
-                        </p>
-                        <div className="flex items-center gap-1.5">
-                          <MapPin className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                          <p className="text-xs text-muted-foreground truncate">
-                            {t.city}
-                          </p>
-                          <Badge
-                            variant="outline"
-                            className="text-[10px] px-1 py-0 flex-shrink-0"
-                          >
-                            {t.role}
-                          </Badge>
-                        </div>
+                      <div className="text-[9px] text-muted-foreground">
+                        <span>{bus.duration}</span>
+                        <div className="w-12 h-0.5 bg-border my-0.5" />
+                        <span className="text-emerald-600 font-bold">{bus.runningStatus}</span>
+                      </div>
+                      <div>
+                        <span className="font-black text-sm text-foreground block">{bus.arrivalTime}</span>
+                        <span className="text-[10px] text-muted-foreground">{bus.destinationCity}</span>
                       </div>
                     </div>
-                    <StarRating rating={t.rating} />
-                    <p className="mt-3 text-sm text-foreground leading-relaxed">
-                      "{t.text}"
-                    </p>
-                  </CardContent>
-                </Card>
-              </RevealSection>
+
+                    <span className="text-[10px] text-sky-600 font-semibold block">{bus.availableSeats} seats left</span>
+                  </div>
+
+                  <div className="mt-3 pt-2 border-t border-border flex items-center justify-between">
+                    <span className="font-black text-base text-foreground">₹{bus.fare}</span>
+                    <Button
+                      size="sm"
+                      onClick={() => requireAuth(() => navigate({ to: "/bus" }))}
+                      className="rounded-xl font-bold text-xs bg-primary text-primary-foreground h-8 px-3.5"
+                    >
+                      Select Seats
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </ScrollableRow>
+        </section>
+
+        {/* ========================================================= */}
+        {/* 11. 🚗 EZY RIDE & SHARE RIDE                              */}
+        {/* ========================================================= */}
+        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* EZY Ride Card */}
+            <div className="p-6 rounded-3xl bg-card border border-border shadow-xs hover:shadow-subtle transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center mb-3">
+                  <Car className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg font-bold font-display text-foreground">
+                  EZY Ride — Bike, Auto & Cabs
+                </h3>
+                <p className="text-xs text-muted-foreground mt-1 mb-4">
+                  Zero surge pricing, vetted drivers, and rapid 3-min pickups across town.
+                </p>
+                <div className="flex items-center gap-3 text-xs font-semibold text-foreground py-2 border-y border-border">
+                  <span>🏍️ Bike ₹40</span>
+                  <span>🛺 Auto ₹65</span>
+                  <span>🚗 Cab ₹120</span>
+                </div>
+              </div>
+              <Button asChild className="mt-5 rounded-xl font-bold text-xs bg-primary text-primary-foreground w-full">
+                <Link to="/dashboard/transport">Book Instant Ride</Link>
+              </Button>
+            </div>
+
+            {/* EZY Share Ride Card */}
+            <div className="p-6 rounded-3xl bg-card border border-border shadow-xs hover:shadow-subtle transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center mb-3">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg font-bold font-display text-foreground">
+                  EZY Share Ride — Verified Carpool
+                </h3>
+                <p className="text-xs text-muted-foreground mt-1 mb-4">
+                  Split fuel costs and commute with verified corporate members. Save up to 60%.
+                </p>
+                <div className="flex items-center gap-3 text-xs font-semibold text-foreground py-2 border-y border-border">
+                  <span>📍 Tech Park Carpools</span>
+                  <span>₹110 - ₹130 / seat</span>
+                </div>
+              </div>
+              <Button asChild variant="outline" className="mt-5 rounded-xl font-bold text-xs border-primary text-primary hover:bg-primary/5 w-full">
+                <Link to="/share-ride">Find & Share Rides</Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* ========================================================= */}
+        {/* 12. 📦 EZY PARCEL & 🛠️ LOCAL HOME SERVICES                */}
+        {/* ========================================================= */}
+        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* EZY Parcel */}
+            <div className="p-6 rounded-3xl bg-card border border-border shadow-xs flex flex-col justify-between">
+              <div className="space-y-2">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                  <Package className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg font-bold font-display text-foreground">
+                  EZY Parcel — Local City Courier
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Send lunch boxes, keys, documents or packages anywhere in town in 30-45 mins.
+                </p>
+                <div className="text-xs text-foreground font-semibold py-1">
+                  📦 Up to 3 kg: ₹65 • 💼 Up to 10 kg: ₹110
+                </div>
+              </div>
+              <Button asChild variant="outline" className="mt-4 rounded-xl font-bold text-xs w-full">
+                <Link to="/parcel">Send a Package Now</Link>
+              </Button>
+            </div>
+
+            {/* Local Services */}
+            <div className="p-6 rounded-3xl bg-card border border-border shadow-xs flex flex-col justify-between">
+              <div className="space-y-2">
+                <div className="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
+                  <Wrench className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg font-bold font-display text-foreground">
+                  Home Services & Repairs
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Electricians, plumbers, AC service, deep cleaning and carpentry with 30-day warranty.
+                </p>
+                <div className="text-xs text-foreground font-semibold py-1">
+                  ⚡ Verified technicians from ₹199
+                </div>
+              </div>
+              <Button asChild className="mt-4 rounded-xl font-bold text-xs bg-primary text-primary-foreground w-full">
+                <Link to={"/services" as any}>Book Home Service</Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* ========================================================= */}
+        {/* 13. 📍 LOCAL & FAMOUS NEAR YOU                            */}
+        {/* ========================================================= */}
+        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
+                <span className="text-xl">📍</span>
+                Famous & Popular in Your City
+              </h2>
+              <p className="text-xs text-muted-foreground">Legendary heritage eateries, gardens & iconic local spots</p>
+            </div>
+            <Link to="/famous" className="text-xs font-semibold text-primary hover:underline">
+              Explore All →
+            </Link>
+          </div>
+
+          <ScrollableRow>
+            {FAMOUS_LOCAL_SPOTS.map((spot) => (
+              <div key={spot.id} className="w-64 sm:w-72 flex-shrink-0 p-3.5 rounded-2xl border border-border bg-card hover:shadow-subtle transition-smooth flex items-center gap-3">
+                <img src={spot.image} alt={spot.name} className="w-16 h-16 rounded-xl object-cover bg-muted flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <span className="text-[9px] font-bold text-primary uppercase block truncate">{spot.tagline}</span>
+                  <h4 className="font-bold text-xs text-foreground truncate">{spot.name}</h4>
+                  <p className="text-[10px] text-muted-foreground truncate">{spot.address}</p>
+                  <div className="flex items-center gap-2 mt-1 text-[11px]">
+                    <span className="font-bold text-amber-500">★ {spot.rating}</span>
+                    <Link to="/famous" className="text-primary hover:underline ml-auto font-medium text-[10px]">
+                      Details →
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </ScrollableRow>
+        </section>
+
+        {/* ========================================================= */}
+        {/* 14. 🎁 OFFERS & DEALS (Copyable Coupon Codes)             */}
+        {/* ========================================================= */}
+        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
+                <Tag className="w-5 h-5 text-purple-500" />
+                Offers, Coupons & Deals
+              </h2>
+              <p className="text-xs text-muted-foreground">1-click discount codes applicable on grocery, food, stays & rides</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5">
+            {[
+              { code: "EZYFIRST", discount: "Flat ₹100 OFF", desc: "Valid on first grocery/food order above ₹299", color: "border-purple-500/30 bg-purple-500/5" },
+              { code: "STAY500", discount: "₹500 OFF", desc: "Valid on all hotel & resort bookings above ₹2,000", color: "border-amber-500/30 bg-amber-500/5" },
+              { code: "HEALTH20", discount: "Flat 20% OFF", desc: "Valid on lab checkup packages & doctor visits", color: "border-rose-500/30 bg-rose-500/5" },
+              { code: "RIDEFREE", discount: "₹50 Cashback", desc: "Valid on your first EZY Share Ride or auto trip", color: "border-emerald-500/30 bg-emerald-500/5" },
+            ].map((coupon) => (
+              <div key={coupon.code} className={`p-4 rounded-2xl border ${coupon.color} flex flex-col justify-between shadow-xs`}>
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-mono font-black text-sm text-foreground">{coupon.code}</span>
+                    <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] font-bold">
+                      {coupon.discount}
+                    </Badge>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground line-clamp-2">{coupon.desc}</p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => copyCoupon(coupon.code)}
+                  className="mt-3 h-8 text-xs font-bold rounded-xl w-full"
+                >
+                  <Copy className="w-3 h-3 mr-1" /> Copy Code
+                </Button>
+              </div>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ═══════════════════════════════════════════
-          FOOTER CTA
-      ═══════════════════════════════════════════ */}
-      <section
-        className="py-20"
-        data-ocid="landing.footer_cta_section"
-        style={{
-          background:
-            "linear-gradient(135deg, oklch(0.62 0.24 71) 0%, oklch(0.52 0.21 188) 100%)",
-        }}
-      >
-        <div className="container px-4 text-center">
-          <RevealSection>
-            <p
-              className="text-sm font-semibold mb-4 uppercase tracking-widest"
-              style={{ color: "rgba(255,255,255,0.65)" }}
-            >
-              Start Today — It's Free
-            </p>
-            <h2
-              className="font-display font-black text-4xl md:text-5xl lg:text-6xl mb-4 leading-tight"
-              style={{ color: "white" }}
-            >
-              Join the Future of Services with Ezy1
-            </h2>
-            <p
-              className="text-lg mb-10 max-w-md mx-auto"
-              style={{ color: "rgba(255,255,255,0.8)" }}
-            >
-              One app for every service, every Indian, everywhere.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/login" data-ocid="landing.footer_cta_login_button">
-                <Button
-                  size="lg"
-                  className="h-13 px-10 text-base font-semibold gap-2 w-full sm:w-auto"
-                  style={{
-                    background: "white",
-                    color: "oklch(0.62 0.24 71)",
-                    boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
-                  }}
-                >
-                  Login / Sign Up <ArrowRight className="w-4 h-4" />
-                </Button>
-              </Link>
-              <Link
-                to="/partner-login"
-                data-ocid="landing.footer_cta_partner_button"
-              >
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="h-13 px-10 text-base font-semibold gap-2 w-full sm:w-auto"
-                  style={{
-                    borderColor: "rgba(255,255,255,0.5)",
-                    color: "white",
-                    background: "rgba(255,255,255,0.12)",
-                  }}
-                >
-                  Partner Login
-                </Button>
-              </Link>
+        {/* ========================================================= */}
+        {/* 15. 🔄 BUY AGAIN / RECENTLY ORDERED (If Available)        */}
+        {/* ========================================================= */}
+        {recentItems.length > 0 && (
+          <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
+                  <RotateCcw className="w-5 h-5 text-primary" />
+                  Buy Again / Recently Viewed
+                </h2>
+                <p className="text-xs text-muted-foreground">Quick 1-click reorder of your regular staples</p>
+              </div>
             </div>
-            <p
-              className="mt-6 text-sm"
-              style={{ color: "rgba(255,255,255,0.55)" }}
-            >
-              No credit card needed · Available in 12 Indian languages · Works
-              on 2G/3G
-            </p>
-          </RevealSection>
-        </div>
-      </section>
+
+            <ScrollableRow>
+              {recentItems.map((prod) => (
+                <Card key={prod.id} className="w-44 sm:w-48 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden flex flex-col">
+                  <div className="aspect-square w-full bg-muted/20">
+                    <img src={prod.image} alt={prod.name} className="w-full h-full object-cover" loading="lazy" />
+                  </div>
+                  <CardContent className="p-3 flex-1 flex flex-col justify-between">
+                    <div>
+                      <h4 className="font-bold text-xs text-foreground line-clamp-1">{prod.name}</h4>
+                      <span className="text-[11px] text-muted-foreground">₹{prod.price}</span>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => handleAddToCart(prod)}
+                      className="mt-2 h-7 rounded-lg text-xs font-bold bg-primary text-primary-foreground w-full"
+                    >
+                      Reorder
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </ScrollableRow>
+          </section>
+        )}
+
+        {/* ========================================================= */}
+        {/* 15B. 🍛 POPULAR FOOD (Dishes from Top City Restaurants)    */}
+        {/* ========================================================= */}
+        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
+                <span className="text-xl">🍛</span>
+                Popular Food Near You
+              </h2>
+              <p className="text-xs text-muted-foreground">Bestselling biryanis, gravies, momos, pizzas & regional thalis</p>
+            </div>
+            <Link to={"/category/restaurants" as any} className="text-xs font-semibold text-primary hover:underline">
+              Explore All Food →
+            </Link>
+          </div>
+
+          <ScrollableRow>
+            {POPULAR_FOOD_ITEMS.map((dish) => (
+              <Card key={dish.id} className="w-56 sm:w-64 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col group">
+                <div className="relative aspect-video w-full bg-muted/20 overflow-hidden">
+                  <img src={dish.image} alt={dish.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                  {dish.badge && (
+                    <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-amber-500 text-black text-[9px] font-extrabold tracking-wide uppercase shadow-xs">
+                      {dish.badge}
+                    </span>
+                  )}
+                  <span className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded-md bg-black/70 backdrop-blur-xs text-white text-[10px] font-bold">
+                    {dish.deliveryTime}
+                  </span>
+                  <div className="absolute bottom-2 left-2">
+                    <span className={`inline-block w-4 h-4 border-2 rounded-xs flex items-center justify-center bg-card/90 ${dish.isVeg ? 'border-emerald-600' : 'border-rose-600'}`}>
+                      <span className={`w-2 h-2 rounded-full ${dish.isVeg ? 'bg-emerald-600' : 'bg-rose-600'}`} />
+                    </span>
+                  </div>
+                </div>
+                <CardContent className="p-3.5 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h4 className="font-bold text-xs sm:text-sm text-foreground line-clamp-1 mb-0.5">{dish.name}</h4>
+                    <p className="text-[11px] text-muted-foreground line-clamp-1">{dish.restaurant}</p>
+                    <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                      <span className="inline-flex items-center text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 px-1.5 py-0.2 rounded-md">
+                        ★ {dish.rating}
+                      </span>
+                      {dish.tags.slice(0, 2).map((t) => (
+                        <span key={t} className="text-[10px] text-muted-foreground bg-muted/60 px-1.5 py-0.2 rounded-md">
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between pt-2 border-t border-border">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="font-extrabold text-sm text-foreground">₹{dish.price}</span>
+                      {dish.originalPrice && (
+                        <span className="text-[10px] line-through text-muted-foreground">₹{dish.originalPrice}</span>
+                      )}
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => handleAddItemToCart({ id: dish.id, name: dish.name, price: dish.price, originalPrice: dish.originalPrice, image: dish.image, category: "food" })}
+                      className="h-7 px-3 rounded-lg text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90"
+                    >
+                      Add +
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </ScrollableRow>
+        </section>
+
+        {/* ========================================================= */}
+        {/* 15C. 🍰 SWEETS & DESSERTS (Halwai & Modern Bakeries)       */}
+        {/* ========================================================= */}
+        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
+                <span className="text-xl">🍰</span>
+                Sweets, Desserts & Bakeries
+              </h2>
+              <p className="text-xs text-muted-foreground">Desi ghee mithai, truffle cakes, kulfi & royal rabri</p>
+            </div>
+            <Link to={"/category/dairy-bakery" as any} className="text-xs font-semibold text-primary hover:underline">
+              See All Sweets →
+            </Link>
+          </div>
+
+          <ScrollableRow>
+            {SWEETS_ITEMS.map((sweet) => (
+              <Card key={sweet.id} className="w-52 sm:w-56 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col group">
+                <div className="relative aspect-square w-full bg-muted/20 overflow-hidden">
+                  <img src={sweet.image} alt={sweet.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                  {sweet.badge && (
+                    <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-rose-500 text-white text-[9px] font-extrabold uppercase shadow-xs">
+                      {sweet.badge}
+                    </span>
+                  )}
+                  <span className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded-md bg-black/70 backdrop-blur-xs text-white text-[10px] font-bold">
+                    {sweet.weightOrUnit}
+                  </span>
+                </div>
+                <CardContent className="p-3.5 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h4 className="font-bold text-xs text-foreground line-clamp-1 mb-0.5">{sweet.name}</h4>
+                    <p className="text-[11px] text-muted-foreground line-clamp-1">{sweet.sweetShop}</p>
+                    <div className="flex items-center gap-1 mt-1">
+                      <span className="text-amber-500 text-xs">★</span>
+                      <span className="text-[11px] font-bold text-foreground">{sweet.rating}</span>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between pt-2 border-t border-border">
+                    <span className="font-extrabold text-sm text-foreground">₹{sweet.price}</span>
+                    <Button
+                      size="sm"
+                      onClick={() => handleAddItemToCart({ id: sweet.id, name: sweet.name, price: sweet.price, image: sweet.image, category: "sweets" })}
+                      className="h-7 px-3 rounded-lg text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90"
+                    >
+                      Add +
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </ScrollableRow>
+        </section>
+
+        {/* ========================================================= */}
+        {/* 15D. 👗 FASHION & CLOTHES (Women, Men & Kids Tabs)         */}
+        {/* ========================================================= */}
+        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div>
+              <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
+                <span className="text-xl">👗</span>
+                Fashion & Apparel
+              </h2>
+              <p className="text-xs text-muted-foreground">Ethnic kurtas, summer dresses, pure linen & kidswear</p>
+            </div>
+            
+            {/* Gender Switch Tabs */}
+            <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-xl border border-border self-start sm:self-auto">
+              {(["Women", "Men", "Kids"] as const).map((gender) => (
+                <button
+                  key={gender}
+                  onClick={() => setSelectedFashionGender(gender)}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                    selectedFashionGender === gender
+                      ? "bg-primary text-primary-foreground shadow-xs"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {gender === "Women" ? "👩 Women" : gender === "Men" ? "👨 Men" : "🧒 Kids"}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <ScrollableRow>
+            {filteredFashion.map((item) => (
+              <Card key={item.id} className="w-52 sm:w-60 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col group">
+                <div className="relative aspect-[3/4] w-full bg-muted/20 overflow-hidden">
+                  <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                  <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md bg-rose-600 text-white text-[9px] font-extrabold uppercase shadow-xs">
+                    {item.discount}
+                  </span>
+                  {item.badge && (
+                    <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-black/70 backdrop-blur-xs text-white text-[9px] font-bold">
+                      {item.badge}
+                    </span>
+                  )}
+                </div>
+                <CardContent className="p-3.5 flex-1 flex flex-col justify-between">
+                  <div>
+                    <span className="text-[10px] font-bold text-primary uppercase tracking-wider block mb-0.5">{item.brand}</span>
+                    <h4 className="font-bold text-xs text-foreground line-clamp-1">{item.name}</h4>
+                    <div className="flex items-center gap-1 mt-1">
+                      <span className="text-amber-500 text-xs">★</span>
+                      <span className="text-[11px] font-bold text-foreground">{item.rating}</span>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between pt-2 border-t border-border">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="font-extrabold text-sm text-foreground">₹{item.price}</span>
+                      <span className="text-[10px] line-through text-muted-foreground">₹{item.originalPrice}</span>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => handleAddItemToCart({ id: item.id, name: item.name, price: item.price, originalPrice: item.originalPrice, image: item.image, category: "fashion" })}
+                      className="h-7 px-2.5 rounded-lg text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90"
+                    >
+                      Add +
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </ScrollableRow>
+        </section>
+
+        {/* ========================================================= */}
+        {/* 15E. 💍 JEWELLERY & ORNAMENTS (Hallmarked & Designer)      */}
+        {/* ========================================================= */}
+        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
+                <span className="text-xl">💍</span>
+                Jewellery & Ornaments
+              </h2>
+              <p className="text-xs text-muted-foreground">Certified 925 sterling silver, gold plated chokers & temple jewels</p>
+            </div>
+            <Link to={"/category/jewellery" as any} className="text-xs font-semibold text-primary hover:underline">
+              View All Jewellery →
+            </Link>
+          </div>
+
+          <ScrollableRow>
+            {JEWELLERY_ITEMS.map((item) => (
+              <Card key={item.id} className="w-52 sm:w-60 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col group">
+                <div className="relative aspect-square w-full bg-muted/20 overflow-hidden">
+                  <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                  {item.badge && (
+                    <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-amber-500 text-black text-[9px] font-extrabold uppercase shadow-xs">
+                      {item.badge}
+                    </span>
+                  )}
+                  <span className="absolute bottom-2 left-2 px-1.5 py-0.5 rounded-md bg-card/90 backdrop-blur-xs text-foreground text-[9px] font-bold border border-border">
+                    {item.metal}
+                  </span>
+                </div>
+                <CardContent className="p-3.5 flex-1 flex flex-col justify-between">
+                  <div>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase block mb-0.5">{item.brand}</span>
+                    <h4 className="font-bold text-xs text-foreground line-clamp-1">{item.name}</h4>
+                    <div className="flex items-center gap-1 mt-1">
+                      <span className="text-amber-500 text-xs">★</span>
+                      <span className="text-[11px] font-bold text-foreground">{item.rating}</span>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between pt-2 border-t border-border">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="font-extrabold text-sm text-foreground">₹{item.price}</span>
+                      <span className="text-[10px] line-through text-muted-foreground">₹{item.originalPrice}</span>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => handleAddItemToCart({ id: item.id, name: item.name, price: item.price, originalPrice: item.originalPrice, image: item.image, category: "jewellery" })}
+                      className="h-7 px-2.5 rounded-lg text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90"
+                    >
+                      Add +
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </ScrollableRow>
+        </section>
+
+        {/* ========================================================= */}
+        {/* 15F. 💄 COSMETICS & BEAUTY (Dermat Tested & Luxury)        */}
+        {/* ========================================================= */}
+        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
+                <span className="text-xl">💄</span>
+                Cosmetics & Beauty
+              </h2>
+              <p className="text-xs text-muted-foreground">Radiance serums, waterproof sunscreens, lipsticks & haircare</p>
+            </div>
+            <Link to={"/category/beauty" as any} className="text-xs font-semibold text-primary hover:underline">
+              Explore Beauty →
+            </Link>
+          </div>
+
+          <ScrollableRow>
+            {COSMETICS_ITEMS.map((item) => (
+              <Card key={item.id} className="w-52 sm:w-56 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col group">
+                <div className="relative aspect-square w-full bg-muted/20 overflow-hidden">
+                  <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                  {item.badge && (
+                    <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-pink-600 text-white text-[9px] font-extrabold uppercase shadow-xs">
+                      {item.badge}
+                    </span>
+                  )}
+                  <span className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded-md bg-black/70 backdrop-blur-xs text-white text-[9px] font-medium">
+                    {item.category}
+                  </span>
+                </div>
+                <CardContent className="p-3.5 flex-1 flex flex-col justify-between">
+                  <div>
+                    <span className="text-[10px] font-bold text-pink-600 dark:text-pink-400 uppercase block mb-0.5">{item.brand}</span>
+                    <h4 className="font-bold text-xs text-foreground line-clamp-1">{item.name}</h4>
+                    <div className="flex items-center gap-1 mt-1">
+                      <span className="text-amber-500 text-xs">★</span>
+                      <span className="text-[11px] font-bold text-foreground">{item.rating}</span>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between pt-2 border-t border-border">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="font-extrabold text-sm text-foreground">₹{item.price}</span>
+                      <span className="text-[10px] line-through text-muted-foreground">₹{item.originalPrice}</span>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => handleAddItemToCart({ id: item.id, name: item.name, price: item.price, originalPrice: item.originalPrice, image: item.image, category: "beauty" })}
+                      className="h-7 px-2.5 rounded-lg text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90"
+                    >
+                      Add +
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </ScrollableRow>
+        </section>
+
+        {/* ========================================================= */}
+        {/* 15G. 💻 DIGITAL & ON-DEMAND SERVICES                       */}
+        {/* ========================================================= */}
+        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
+                <span className="text-xl">💻</span>
+                Digital & On-Demand Services
+              </h2>
+              <p className="text-xs text-muted-foreground">1-Tap instant access to doctors, lab tests, courier, repairs & travel</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            {DIGITAL_SERVICES.map((srv) => (
+              <div key={srv.id} className="p-4 rounded-2xl border border-border bg-card hover:border-primary/40 hover:shadow-subtle transition-smooth flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-2.5">
+                    <span className="text-3xl">{srv.iconEmoji}</span>
+                    <Badge className="bg-primary/10 text-primary border-primary/20 text-[9px] font-bold">
+                      {srv.badge}
+                    </Badge>
+                  </div>
+                  <h4 className="font-bold text-sm text-foreground mb-1">{srv.title}</h4>
+                  <p className="text-[11px] text-muted-foreground line-clamp-2 mb-3">{srv.description}</p>
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {srv.features.map((feat) => (
+                      <span key={feat} className="text-[9px] font-semibold bg-muted/60 text-foreground px-1.5 py-0.5 rounded-md">
+                        ✓ {feat}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <Button asChild size="sm" className="w-full h-8 text-xs font-bold rounded-xl bg-primary text-primary-foreground">
+                  <Link to={srv.route as any}>
+                    Book Now →
+                  </Link>
+                </Button>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ========================================================= */}
+        {/* 15H. 🏪 POPULAR LOCAL SHOPS NEAR YOU                       */}
+        {/* ========================================================= */}
+        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
+                <span className="text-xl">🏪</span>
+                Popular Local Shops Near You
+              </h2>
+              <p className="text-xs text-muted-foreground">Trusted neighborhood retail stores, organic grocers & pharmacies</p>
+            </div>
+            <Link to="/local-shops" className="text-xs font-semibold text-primary hover:underline">
+              View All Local Shops →
+            </Link>
+          </div>
+
+          <ScrollableRow>
+            {POPULAR_LOCAL_SHOPS_DATA.map((shop) => (
+              <div key={shop.id} className="w-64 sm:w-72 flex-shrink-0 p-3.5 rounded-2xl border border-border bg-card hover:shadow-subtle transition-smooth flex flex-col justify-between">
+                <div>
+                  <div className="relative aspect-video w-full rounded-xl overflow-hidden mb-3 bg-muted">
+                    <img src={shop.image} alt={shop.name} className="w-full h-full object-cover" loading="lazy" />
+                    <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-emerald-600 text-white">
+                      ● OPEN NOW
+                    </span>
+                    <span className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-black/75 text-white">
+                      📍 {shop.distance}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-bold text-primary uppercase block mb-0.5">{shop.category}</span>
+                  <h4 className="font-bold text-xs sm:text-sm text-foreground line-clamp-1">{shop.name}</h4>
+                  <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">🌟 {shop.specialty}</p>
+                  <p className="text-[10px] text-muted-foreground truncate mt-0.5">{shop.address}</p>
+                </div>
+                <div className="mt-3 pt-2.5 border-t border-border flex items-center justify-between">
+                  <div className="flex items-center gap-1">
+                    <span className="text-amber-500 text-xs font-bold">★ {shop.rating}</span>
+                    <span className="text-[10px] text-muted-foreground">({shop.reviewsCount})</span>
+                  </div>
+                  <Button asChild size="sm" variant="outline" className="h-7 text-[11px] font-bold rounded-lg">
+                    <Link to="/local-shops">
+                      Visit Store →
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </ScrollableRow>
+        </section>
+
+        {/* ========================================================= */}
+        {/* 16. 💬 24/7 CUSTOMER SUPPORT & TRUST PROMISE              */}
+        {/* ========================================================= */}
+        <section className="container max-w-7xl mx-auto py-8 px-4 sm:px-6">
+          <div className="p-6 rounded-3xl bg-muted/40 border border-border flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+            <div className="space-y-1">
+              <h3 className="font-bold text-base text-foreground">Need help with an order, booking or ride?</h3>
+              <p className="text-xs text-muted-foreground">
+                Our 24/7 customer resolution team is available via chat, WhatsApp, and phone support.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button asChild size="sm" className="rounded-xl font-bold text-xs bg-primary text-primary-foreground">
+                <Link to="/dashboard/chat">Live Chat Support</Link>
+              </Button>
+              <Button asChild size="sm" variant="outline" className="rounded-xl font-bold text-xs">
+                <a href="tel:1800123456">Toll-Free 1800</a>
+              </Button>
+            </div>
+          </div>
+        </section>
+      </div>
     </Layout>
   );
 }

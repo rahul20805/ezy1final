@@ -11,12 +11,19 @@ import {
   AdminRoute,
   UserRoute,
   VendorRoute,
+  PartnerRoute,
+  HospitalRoute,
+  PharmacyRoute,
+  DeliveryRoute,
+  ServiceProviderRoute,
 } from "./components/ProtectedRoute";
+import { AuthPromptProvider } from "./components/AuthPromptModal";
 
 // Lazy-loaded pages
 const LandingPage = lazy(() => import("./pages/LandingPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const PartnerLoginPage = lazy(() => import("./pages/PartnerLoginPage"));
+const PartnerDashboardPage = lazy(() => import("./pages/PartnerDashboardPage"));
 const DashboardPage = lazy(() => import("./pages/DashboardPage"));
 const HealthcarePage = lazy(() => import("./pages/HealthcarePage"));
 const TransportPage = lazy(() => import("./pages/TransportPage"));
@@ -40,6 +47,25 @@ const HomeServicesPage = lazy(() => import("./pages/HomeServicesPage"));
 const VendorStorefrontPage = lazy(() => import("./pages/VendorStorefrontPage"));
 const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
+
+// Super-App Dedicated Category & Local Pages
+const CategoryDetailPage = lazy(() => import("./pages/CategoryDetailPage"));
+const HospitalsPage = lazy(() => import("./pages/HospitalsPage"));
+const DoctorsPage = lazy(() => import("./pages/DoctorsPage"));
+const DiagnosticsPage = lazy(() => import("./pages/DiagnosticsPage"));
+const ParcelPage = lazy(() => import("./pages/ParcelPage"));
+const LocalFamousPage = lazy(() => import("./pages/LocalFamousPage"));
+const OmniSearchPage = lazy(() => import("./pages/OmniSearchPage"));
+const MyOrdersPage = lazy(() => import("./pages/MyOrdersPage"));
+const MyBookingsPage = lazy(() => import("./pages/MyBookingsPage"));
+
+// Additional Services (Stay, Travel, Bus, Share Ride, Home Healthcare)
+const StaysPage = lazy(() => import("./pages/StaysPage"));
+const TravelPage = lazy(() => import("./pages/TravelPage"));
+const BusTransportPage = lazy(() => import("./pages/BusTransportPage"));
+const ShareRidePage = lazy(() => import("./pages/ShareRidePage"));
+const HomeHealthcarePage = lazy(() => import("./pages/HomeHealthcarePage"));
+
 import { NAVAEIN_URL } from "./config/links";
 
 function PageLoader() {
@@ -55,12 +81,14 @@ function PageLoader() {
   );
 }
 
-// Root layout
+// Root layout with AuthPromptProvider to enable explore-without-login
 const rootRoute = createRootRoute({
   component: () => (
-    <Suspense fallback={<PageLoader />}>
-      <Outlet />
-    </Suspense>
+    <AuthPromptProvider>
+      <Suspense fallback={<PageLoader />}>
+        <Outlet />
+      </Suspense>
+    </AuthPromptProvider>
   ),
 });
 
@@ -83,36 +111,172 @@ const partnerLoginRoute = createRoute({
   component: () => <PartnerLoginPage />,
 });
 
+const partnerDashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/partner-dashboard",
+  component: () => (
+    <PartnerRoute>
+      <PartnerDashboardPage />
+    </PartnerRoute>
+  ),
+});
+
+// Guest-accessible browsing routes
 const dashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/dashboard",
-  component: () => (
-    <UserRoute>
-      <DashboardPage />
-    </UserRoute>
-  ),
+  component: () => <DashboardPage />,
 });
 
 const healthcareRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/dashboard/healthcare",
-  component: () => (
-    <UserRoute>
-      <HealthcarePage />
-    </UserRoute>
-  ),
+  component: () => <HealthcarePage />,
 });
 
 const transportRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/dashboard/transport",
+  component: () => <TransportPage />,
+});
+
+const commerceRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard/commerce",
+  component: () => <CommercePage />,
+});
+
+const cartRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard/cart",
+  component: () => <CartPage />,
+});
+
+// New Consumer-First Super-App Ecosystem Routes
+const categoryRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/category/$categoryId",
+  component: () => <CategoryDetailPage />,
+});
+
+const hospitalsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/hospitals",
+  component: () => <HospitalsPage />,
+});
+
+const doctorsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/doctors",
+  component: () => <DoctorsPage />,
+});
+
+const diagnosticsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/diagnostics",
+  component: () => <DiagnosticsPage />,
+});
+
+const parcelRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/parcel",
+  component: () => <ParcelPage />,
+});
+
+const famousRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/famous",
+  component: () => <LocalFamousPage />,
+});
+
+const localShopsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/local-shops",
+  component: () => <LocalFamousPage />,
+});
+
+const omniSearchRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/search",
+  component: () => <OmniSearchPage />,
+});
+
+const myOrdersRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/my-orders",
   component: () => (
     <UserRoute>
-      <TransportPage />
+      <MyOrdersPage />
     </UserRoute>
   ),
 });
 
+const myBookingsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/my-bookings",
+  component: () => (
+    <UserRoute>
+      <MyBookingsPage />
+    </UserRoute>
+  ),
+});
+
+// Stays, Travel, Buses, Share Ride, Home Healthcare Routes
+const staysRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/stays",
+  component: () => <StaysPage />,
+});
+
+const hotelsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/hotels",
+  component: () => <StaysPage />,
+});
+
+const travelRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/travel",
+  component: () => <TravelPage />,
+});
+
+const exploreRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/explore",
+  component: () => <TravelPage />,
+});
+
+const busRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/bus",
+  component: () => <BusTransportPage />,
+});
+
+const busesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/buses",
+  component: () => <BusTransportPage />,
+});
+
+const shareRideRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/share-ride",
+  component: () => <ShareRidePage />,
+});
+
+const homeHealthcareRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/home-healthcare",
+  component: () => <HomeHealthcarePage />,
+});
+
+const doctorAtHomeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/doctor-at-home",
+  component: () => <HomeHealthcarePage />,
+});
+
+// Authenticated user-only management routes
 const walletRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/dashboard/wallet",
@@ -143,62 +307,6 @@ const myDashboardRoute = createRoute({
   ),
 });
 
-const commerceRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/dashboard/commerce",
-  component: () => (
-    <UserRoute>
-      <CommercePage />
-    </UserRoute>
-  ),
-});
-
-const cartRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/dashboard/cart",
-  component: () => (
-    <UserRoute>
-      <CartPage />
-    </UserRoute>
-  ),
-});
-
-const ownerRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/owner",
-  component: () => <OwnerPortalPage />,
-});
-
-const vendorDashboardRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/vendor-dashboard",
-  component: () => <OwnerPortalPage />,
-});
-
-const driverDashboardRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/driver-dashboard",
-  component: () => <OwnerPortalPage />,
-});
-
-const serviceProviderDashboardRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/service-provider-dashboard",
-  component: () => <OwnerPortalPage />,
-});
-
-const partnerOnboardingRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/partner-onboarding",
-  component: () => <PartnerOnboardingPage />,
-});
-
-const adminRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/admin",
-  component: () => <OwnerPortalPage />,
-});
-
 const checkoutRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/dashboard/checkout",
@@ -207,18 +315,6 @@ const checkoutRoute = createRoute({
       <CheckoutPage />
     </UserRoute>
   ),
-});
-
-const homeServicesRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/services",
-  component: () => <HomeServicesPage />,
-});
-
-const vendorStorefrontRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/shop",
-  component: () => <VendorStorefrontPage />,
 });
 
 const notificationsRoute = createRoute({
@@ -241,6 +337,152 @@ const settingsRoute = createRoute({
   ),
 });
 
+// Direct consumer route aliases
+const walletDirectRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/wallet",
+  component: () => (
+    <UserRoute>
+      <WalletPage />
+    </UserRoute>
+  ),
+});
+
+const cartDirectRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/cart",
+  component: () => <CartPage />,
+});
+
+const notificationsDirectRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/notifications",
+  component: () => (
+    <UserRoute>
+      <NotificationsPage />
+    </UserRoute>
+  ),
+});
+
+const settingsDirectRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/settings",
+  component: () => (
+    <UserRoute>
+      <SettingsPage />
+    </UserRoute>
+  ),
+});
+
+const myAccountRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/my-account",
+  component: () => (
+    <UserRoute>
+      <MyDashboardPage />
+    </UserRoute>
+  ),
+});
+
+const paymentsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/payments",
+  component: () => (
+    <UserRoute>
+      <WalletPage />
+    </UserRoute>
+  ),
+});
+
+const homeServicesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/services",
+  component: () => <HomeServicesPage />,
+});
+
+const vendorStorefrontRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/shop",
+  component: () => <VendorStorefrontPage />,
+});
+
+// Provider and Partner Portal Routes
+const ownerRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/owner",
+  component: () => (
+    <PartnerRoute>
+      <OwnerPortalPage />
+    </PartnerRoute>
+  ),
+});
+
+const vendorDashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/vendor-dashboard",
+  component: () => (
+    <VendorRoute>
+      <OwnerPortalPage />
+    </VendorRoute>
+  ),
+});
+
+const driverDashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/driver-dashboard",
+  component: () => (
+    <DeliveryRoute>
+      <OwnerPortalPage />
+    </DeliveryRoute>
+  ),
+});
+
+const serviceProviderDashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/service-provider-dashboard",
+  component: () => (
+    <ServiceProviderRoute>
+      <OwnerPortalPage />
+    </ServiceProviderRoute>
+  ),
+});
+
+const hospitalDashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/hospital-dashboard",
+  component: () => (
+    <HospitalRoute>
+      <OwnerPortalPage />
+    </HospitalRoute>
+  ),
+});
+
+const pharmacyDashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/pharmacy-dashboard",
+  component: () => (
+    <PharmacyRoute>
+      <OwnerPortalPage />
+    </PharmacyRoute>
+  ),
+});
+
+const partnerOnboardingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/partner-onboarding",
+  component: () => <PartnerOnboardingPage />,
+});
+
+const adminRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin",
+  component: () => (
+    <AdminRoute>
+      <OwnerPortalPage />
+    </AdminRoute>
+  ),
+});
+
 const navaeRedirectRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/store/navae",
@@ -260,6 +502,7 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
   partnerLoginRoute,
+  partnerDashboardRoute,
   ownerRoute,
   dashboardRoute,
   healthcareRoute,
@@ -269,6 +512,8 @@ const routeTree = rootRoute.addChildren([
   vendorDashboardRoute,
   driverDashboardRoute,
   serviceProviderDashboardRoute,
+  hospitalDashboardRoute,
+  pharmacyDashboardRoute,
   partnerOnboardingRoute,
   adminRoute,
   myDashboardRoute,
@@ -279,7 +524,33 @@ const routeTree = rootRoute.addChildren([
   vendorStorefrontRoute,
   notificationsRoute,
   settingsRoute,
+  walletDirectRoute,
+  cartDirectRoute,
+  notificationsDirectRoute,
+  settingsDirectRoute,
+  myAccountRoute,
+  paymentsRoute,
   navaeRedirectRoute,
+  // New Super-App Ecosystem Routes
+  categoryRoute,
+  hospitalsRoute,
+  doctorsRoute,
+  diagnosticsRoute,
+  parcelRoute,
+  famousRoute,
+  localShopsRoute,
+  omniSearchRoute,
+  myOrdersRoute,
+  myBookingsRoute,
+  staysRoute,
+  hotelsRoute,
+  travelRoute,
+  exploreRoute,
+  busRoute,
+  busesRoute,
+  shareRideRoute,
+  homeHealthcareRoute,
+  doctorAtHomeRoute,
 ]);
 
 const router = createRouter({ routeTree });
@@ -293,3 +564,4 @@ declare module "@tanstack/react-router" {
 export default function App() {
   return <RouterProvider router={router} />;
 }
+

@@ -18,17 +18,20 @@ export function ProductCard({ product }: { product: Product }) {
 
       <div className="aspect-square bg-muted/20 relative flex items-center justify-center p-4">
         {/* If image is an emoji (for mock), render as text. Otherwise img tag */}
-        {product.images[0].length <= 2 ? (
-          <div className="text-6xl group-hover:scale-110 transition-transform duration-300">
-            {product.images[0]}
-          </div>
-        ) : (
-          <img
-            src={product.images[0]}
-            alt={product.name}
-            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
-          />
-        )}
+        {(() => {
+          const imgUrl = (Array.isArray(product.images) && product.images[0]) || (product as any).image || "🛒";
+          return typeof imgUrl === "string" && imgUrl.length <= 2 ? (
+            <div className="text-6xl group-hover:scale-110 transition-transform duration-300">
+              {imgUrl}
+            </div>
+          ) : (
+            <img
+              src={imgUrl}
+              alt={product.name}
+              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+            />
+          );
+        })()}
 
         {/* Floating Add Button logic */}
         <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 shadow-sm rounded-lg overflow-hidden bg-background border border-primary/20">

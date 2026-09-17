@@ -3,11 +3,14 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { router } from "./routes.js";
 import { initDb } from "./db.js";
+import { verifyJwt } from "./authService.js";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+app.locals.verifyJwt = verifyJwt;
 
 app.use(cors());
 app.use(express.json());

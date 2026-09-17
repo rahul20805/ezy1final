@@ -17,38 +17,22 @@ import {
   Stethoscope,
   User,
   Wallet,
+  Package,
+  Calendar,
+  CreditCard,
+  ShoppingCart,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useIsMobile } from "../hooks/use-mobile";
 
+import { useNotificationStore } from "../lib/notificationStore";
+
 const sidebarItems = [
-  { icon: LayoutDashboard, label: "Home", href: "/dashboard", badge: null },
-  {
-    icon: Stethoscope,
-    label: "Healthcare",
-    href: "/dashboard/healthcare",
-    badge: null,
-  },
-  { icon: Bus, label: "Transport", href: "/dashboard/transport", badge: null },
-  {
-    icon: ShoppingBag,
-    label: "Commerce",
-    href: "/dashboard/commerce",
-    badge: "New",
-  },
-  {
-    icon: ShoppingBag,
-    label: "Cart",
-    href: "/dashboard/cart",
-    badge: null,
-  },
-  { icon: Wallet, label: "My Wallet", href: "/dashboard/wallet", badge: null },
-  {
-    icon: MessageSquare,
-    label: "AI Chat",
-    href: "/dashboard/chat",
-    badge: "AI",
-  },
+  { icon: Wallet, label: "Wallet", href: "/dashboard/wallet", badge: null },
+  { icon: ShoppingCart, label: "Cart", href: "/dashboard/cart", badge: null },
+  { icon: Calendar, label: "History", href: "/my-bookings", badge: null },
+  { icon: Package, label: "Orders", href: "/my-orders", badge: null },
+  { icon: CreditCard, label: "Payments", href: "/dashboard", badge: null },
   { icon: User, label: "My Account", href: "/my-dashboard", badge: null },
 ];
 
@@ -71,6 +55,7 @@ function SidebarContent({
 }) {
   const routerState = useRouterState();
   const currentPath = routerState.location.pathname;
+  const { unreadCount } = useNotificationStore();
 
   return (
     <div className="flex flex-col h-full bg-sidebar border-r border-sidebar-border">
@@ -134,18 +119,33 @@ function SidebarContent({
       <div className="p-3 space-y-1">
         {bottomItems.map((item) => {
           const Icon = item.icon;
+          const isNotif = item.href === "/dashboard/notifications";
           return (
             <Link
               key={item.href}
               to={item.href as "/dashboard"}
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-body text-sidebar-foreground hover:bg-muted transition-smooth ${
+              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-body text-sidebar-foreground hover:bg-muted transition-smooth relative ${
                 collapsed ? "justify-center" : ""
               }`}
               onClick={onLinkClick}
               data-ocid={`sidebar.link.${item.label.toLowerCase()}`}
             >
-              <Icon className="w-4 h-4 flex-shrink-0" />
-              {!collapsed && <span>{item.label}</span>}
+              <div className="relative">
+                <Icon className="w-4 h-4 flex-shrink-0" />
+                {isNotif && unreadCount > 0 && collapsed && (
+                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                )}
+              </div>
+              {!collapsed && (
+                <>
+                  <span className="flex-1">{item.label}</span>
+                  {isNotif && unreadCount > 0 && (
+                    <Badge className="text-[10px] px-1.5 py-0 bg-rose-500 text-white border-0 font-bold">
+                      {unreadCount}
+                    </Badge>
+                  )}
+                </>
+              )}
             </Link>
           );
         })}
@@ -174,6 +174,11 @@ export default function UserLayout({ children, title }: UserLayoutProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const isMobile = useIsMobile();
+  const { unreadCount, loadNotifications } = useNotificationStore();
+
+  useEffect(() => {
+    loadNotifications();
+  }, []);
 
   return (
     <div className="min-h-screen flex bg-background">
@@ -255,13 +260,21 @@ export default function UserLayout({ children, title }: UserLayoutProps) {
                 <span className="text-primary font-semibold">₹1,935</span>
               </Button>
             </Link>
-            <Button
-              variant="ghost"
-              size="sm"
-              data-ocid="topbar.notifications_button"
-            >
-              <Bell className="w-4 h-4" />
-            </Button>
+            <Link to="/dashboard/notifications" data-ocid="topbar.notifications_link">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="relative"
+                data-ocid="topbar.notifications_button"
+              >
+                <Bell className="w-4 h-4" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-rose-500 text-white font-bold text-[9px] animate-pulse shadow-2xs">
+                    {unreadCount}
+                  </span>
+                )}
+              </Button>
+            </Link>
           </div>
         </div>
 

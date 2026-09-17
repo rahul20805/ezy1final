@@ -1,5 +1,9 @@
+import { useEffect, useState } from "react";
 import { Navigate } from "@tanstack/react-router";
 import { useIsAuthenticated, useUserRole } from "../lib/auth";
+import { usePartnerAuth, getPartnerToken } from "../lib/partnerAuthStore";
+import { hasProviderAccess } from "../lib/permissions";
+import { AccessRestrictedPage } from "../pages/AccessRestrictedPage";
 import type { UserRole } from "../types";
 
 interface ProtectedRouteProps {
@@ -8,7 +12,7 @@ interface ProtectedRouteProps {
   redirectTo?: string;
 }
 
-function ProtectedRoute({
+export function ProtectedRoute({
   children,
   requiredRole,
   redirectTo = "/login",
@@ -22,15 +26,11 @@ function ProtectedRoute({
 
   if (requiredRole && role !== requiredRole) {
     if (requiredRole === "vendor" && role === "service_partner") {
-      // Allow service_partner in vendor routes for now (they share the partner portal)
       return <>{children}</>;
     }
-
-    // Also allow customer to access user routes
     if (requiredRole === "user" && role === "customer") {
       return <>{children}</>;
     }
-
     if (requiredRole === "vendor") {
       return <Navigate to="/partner-login" />;
     }
@@ -48,20 +48,105 @@ export function UserRoute({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Strict Partner Route (Verifies partner authentication token)
+export function PartnerRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, currentPartner, fetchMe } = usePartnerAuth();
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    const token = getPartnerToken();
+    if (token && !currentPartner) {
+      fetchMe().finally(() => setChecking(false));
+    } else {
+      setChecking(false);
+    }
+  }, []);
+
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <div className="text-center space-y-3">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-xs text-muted-foreground font-medium">Verifying partner credentials...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const token = getPartnerToken();
+  if (!isAuthenticated || !token || !currentPartner) {
+    return <Navigate to="/partner-login" />;
+  }
+
+  return <>{children}</>;
+}
+
 export function VendorRoute({ children }: { children: React.ReactNode }) {
-  return (
-    <ProtectedRoute requiredRole="vendor" redirectTo="/partner-login">
-      {children}
-    </ProtectedRoute>
-  );
+  return <ProviderRoute allowedTypes={["GROCERY", "VENDOR"]}>{children}</ProviderRoute>;
+}
+
+export function HospitalRoute({ children }: { children: React.ReactNode }) {
+  return <ProviderRoute allowedTypes={["HOSPITAL"]}>{children}</ProviderRoute>;
+}
+
+export function PharmacyRoute({ children }: { children: React.ReactNode }) {
+  return <ProviderRoute allowedTypes={["PHARMACY"]}>{children}</ProviderRoute>;
+}
+
+export function DeliveryRoute({ children }: { children: React.ReactNode }) {
+  return <ProviderRoute allowedTypes={["DELIVERY", "DRIVER"]}>{children}</ProviderRoute>;
+}
+
+export function ServiceProviderRoute({ children }: { children: React.ReactNode }) {
+  return <ProviderRoute allowedTypes={["SERVICE_PROVIDER"]}>{children}</ProviderRoute>;
 }
 
 export function AdminRoute({ children }: { children: React.ReactNode }) {
-  return (
-    <ProtectedRoute requiredRole="admin" redirectTo="/login">
-      {children}
-    </ProtectedRoute>
-  );
+  return <ProviderRoute allowedTypes={["ADMIN"]}>{children}</ProviderRoute>;
+}
+
+export function ProviderRoute({
+  children,
+  allowedTypes,
+}: {
+  children: React.ReactNode;
+  allowedTypes: string[];
+}) {
+  const { isAuthenticated, currentPartner, fetchMe } = usePartnerAuth();
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    const token = getPartnerToken();
+    if (token && !currentPartner) {
+      fetchMe().finally(() => setChecking(false));
+    } else {
+      setChecking(false);
+    }
+  }, []);
+
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <div className="text-center space-y-3">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-xs text-muted-foreground font-medium">Verifying authorization permissions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const token = getPartnerToken();
+  if (!isAuthenticated || !token || !currentPartner) {
+    return <Navigate to="/partner-login" />;
+  }
+
+  // Check if partner is authorized for this provider module
+  const isAuthorized = hasProviderAccess(currentPartner, allowedTypes);
+  if (!isAuthorized) {
+    return <AccessRestrictedPage requiredProviderTypes={allowedTypes} />;
+  }
+
+  return <>{children}</>;
 }
 
 export default ProtectedRoute;

@@ -1,373 +1,339 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 
-export type AdminRole =
-  | "super_owner"
-  | "SUPER_ADMIN"
-  | "ADMIN"
-  | "CONTENT_MANAGER"
-  | "ORDER_MANAGER"
-  | "SUPPORT_AGENT"
-  | "FINANCE_MANAGER"
-  | "PARTNER_MANAGER"
-  | "partner";
-
-export interface PartnerPermissions {
-  canManageShop: boolean;
-  canManageServices: boolean;
-  canManageBookings: boolean;
-  canManageOrders: boolean;
-  canManageEnquiries: boolean;
-  canManageCustomers: boolean;
-  canManageGallery: boolean;
-  canManageReviews: boolean;
-  canManageWebsiteContent: boolean;
-  canManageCategories: boolean;
-  canManageOwnerSettings: boolean;
-  canManageHealthcare?: boolean;
-  canManageTransport?: boolean;
-  canManageDelivery?: boolean;
-  canManageFinance?: boolean;
-  canManageAuditLogs?: boolean;
-  canManageAdmins?: boolean;
-}
+export type AdminRole = "super_admin" | "admin" | "manager" | "editor" | "viewer" | string;
 
 export interface PartnerAccount {
-  id: string; // Unique login ID e.g. "admin", "sharma_grocery"
-  password: string;
+  id: number | string;
+  partnerUserId: string; // e.g. "EZY-P-10001"
   businessName: string;
   ownerName: string;
-  category:
-    | "All"
-    | "Grocery"
-    | "Pharmacy"
-    | "Services"
-    | "Transport"
-    | "Workshops"
-    | "Healthcare"
-    | "System";
-  role: AdminRole;
+  name?: string;
+  category: string;
+  role: string;
+  partnerType?: string;
+  providerType?: string;
   phone: string;
   email: string;
   city: string;
+  address?: string;
+  status: "ACTIVE" | "SUSPENDED" | "INACTIVE" | "active" | "suspended" | "pending";
+  isVerified?: boolean;
+  mustChangePassword?: boolean;
+  lastLoginAt?: string;
   vendorId?: number;
-  permissions: PartnerPermissions;
-  status: "active" | "suspended" | "pending";
+  permissions?: any;
+  password?: string;
 }
-
-export const DEFAULT_PARTNER_ACCOUNTS: PartnerAccount[] = [
-  {
-    id: "admin",
-    password: "admin123",
-    businessName: "EZY1 Platform Headquarters",
-    ownerName: "Alka & Rahul Yadav",
-    category: "All",
-    role: "super_owner",
-    phone: "+91 98765 43210",
-    email: "admin@ezy1.in",
-    city: "Bengaluru",
-    vendorId: 0,
-    status: "active",
-    permissions: {
-      canManageShop: true,
-      canManageServices: true,
-      canManageBookings: true,
-      canManageOrders: true,
-      canManageEnquiries: true,
-      canManageCustomers: true,
-      canManageGallery: true,
-      canManageReviews: true,
-      canManageWebsiteContent: true,
-      canManageCategories: true,
-      canManageOwnerSettings: true,
-      canManageHealthcare: true,
-      canManageTransport: true,
-      canManageDelivery: true,
-      canManageFinance: true,
-      canManageAuditLogs: true,
-      canManageAdmins: true,
-    },
-  },
-  {
-    id: "sharma_grocery",
-    password: "partner123",
-    businessName: "Sharma Kirana Store",
-    ownerName: "Ramesh Sharma",
-    category: "Grocery",
-    role: "partner",
-    phone: "9876543210",
-    email: "sharma.kirana@partner.ezy1.in",
-    city: "Mumbai",
-    vendorId: 1,
-    status: "active",
-    permissions: {
-      canManageShop: true,
-      canManageServices: false,
-      canManageBookings: false,
-      canManageOrders: true,
-      canManageEnquiries: true,
-      canManageCustomers: true,
-      canManageGallery: true,
-      canManageReviews: true,
-      canManageWebsiteContent: false,
-      canManageCategories: false,
-      canManageOwnerSettings: false,
-    },
-  },
-  {
-    id: "nair_pharma",
-    password: "partner123",
-    businessName: "Nair Ayurveda & Pharma",
-    ownerName: "Krishnan Nair",
-    category: "Pharmacy",
-    role: "partner",
-    phone: "9845012345",
-    email: "nair.pharma@partner.ezy1.in",
-    city: "Thiruvananthapuram",
-    vendorId: 2,
-    status: "active",
-    permissions: {
-      canManageShop: true,
-      canManageServices: false,
-      canManageBookings: false,
-      canManageOrders: true,
-      canManageEnquiries: true,
-      canManageCustomers: true,
-      canManageGallery: true,
-      canManageReviews: true,
-      canManageWebsiteContent: false,
-      canManageCategories: false,
-      canManageOwnerSettings: false,
-    },
-  },
-  {
-    id: "suresh_services",
-    password: "partner123",
-    businessName: "Suresh Electricals & Fixes",
-    ownerName: "Suresh Sharma",
-    category: "Services",
-    role: "partner",
-    phone: "9812345670",
-    email: "suresh.services@partner.ezy1.in",
-    city: "Bengaluru",
-    vendorId: 4,
-    status: "active",
-    permissions: {
-      canManageShop: false,
-      canManageServices: true,
-      canManageBookings: true,
-      canManageOrders: true,
-      canManageEnquiries: true,
-      canManageCustomers: true,
-      canManageGallery: true,
-      canManageReviews: true,
-      canManageWebsiteContent: false,
-      canManageCategories: false,
-      canManageOwnerSettings: false,
-    },
-  },
-  {
-    id: "rajesh_transport",
-    password: "partner123",
-    businessName: "Rajesh Fleet & Logistics",
-    ownerName: "Rajesh Kumar",
-    category: "Transport",
-    role: "partner",
-    phone: "9900112233",
-    email: "rajesh.transport@partner.ezy1.in",
-    city: "Bengaluru",
-    vendorId: 5,
-    status: "active",
-    permissions: {
-      canManageShop: false,
-      canManageServices: false,
-      canManageBookings: true,
-      canManageOrders: true,
-      canManageEnquiries: true,
-      canManageCustomers: false,
-      canManageGallery: false,
-      canManageReviews: true,
-      canManageWebsiteContent: false,
-      canManageCategories: false,
-      canManageOwnerSettings: false,
-    },
-  },
-];
 
 interface PartnerAuthState {
   token: string | null;
   currentPartner: PartnerAccount | null;
   partners: PartnerAccount[];
   isAuthenticated: boolean;
-  login: (id: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  isLoading: boolean;
+
+  login: (partnerUserId: string, password: string) => Promise<{ success: boolean; mustChangePassword?: boolean; error?: string }>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
+  forgotPassword: (identifier: string) => Promise<{ success: boolean; message?: string; resetToken?: string; error?: string }>;
+  resetPassword: (token: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
+  fetchMe: () => Promise<PartnerAccount | null>;
   logout: () => void;
-  addPartner: (partner: PartnerAccount) => void;
-  updatePartner: (id: string, updates: Partial<PartnerAccount>) => Promise<void>;
-  deletePartner: (id: string) => void;
+  fetchPartners: () => Promise<void>;
+  addPartner: (partner: any) => Promise<any>;
+  updatePartner: (id: string | number, updates: any) => Promise<any>;
+  deletePartner: (id: string | number) => Promise<any>;
   resetPartnersToDefault: () => void;
 }
 
-export const usePartnerAuth = create<PartnerAuthState>()(
-  persist(
-    (set, get) => ({
-      token: null,
-      currentPartner: DEFAULT_PARTNER_ACCOUNTS[0], // Default logged in as Super Admin
-      partners: DEFAULT_PARTNER_ACCOUNTS,
-      isAuthenticated: true,
+const PARTNER_TOKEN_KEY = "ezy1_partner_token";
 
-      login: async (id, password) => {
-        try {
-          const res = await fetch("/api/auth/partner/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username: id.trim(), password: password.trim() }),
-          });
-          const data = await res.json();
-          if (data && data.success && data.token) {
-            const partnerData: PartnerAccount = {
-              id: data.user.username || id.trim(),
-              password: "",
-              businessName: data.user.vendor?.businessName || data.user.name,
-              ownerName: data.user.name,
-              category: data.user.vendor?.category || "Grocery",
-              role: data.user.role || (id.trim() === "admin" ? "super_owner" : "partner"),
-              phone: data.user.vendor?.phone || data.user.phone || "",
-              email: data.user.vendor?.email || data.user.email || "",
-              city: data.user.vendor?.city || data.user.city || "",
-              vendorId: data.user.vendorId || (data.user.vendor ? data.user.vendor.id : 0),
-              status: "active",
-              permissions:
-                data.user.role === "super_owner"
-                  ? DEFAULT_PARTNER_ACCOUNTS[0].permissions
-                  : {
-                      canManageShop: true,
-                      canManageServices: true,
-                      canManageBookings: true,
-                      canManageOrders: true,
-                      canManageEnquiries: true,
-                      canManageCustomers: true,
-                      canManageGallery: true,
-                      canManageReviews: true,
-                      canManageWebsiteContent: false,
-                      canManageCategories: false,
-                      canManageOwnerSettings: false,
-                    },
-            };
-            if (typeof window !== "undefined") {
-              try {
-                localStorage.setItem("ezy1_token", data.token);
-                localStorage.setItem("token", data.token);
-              } catch (e) {
-                console.warn("Could not save token to localStorage:", e);
-              }
-            }
-            set({ currentPartner: partnerData, token: data.token, isAuthenticated: true });
-            return { success: true };
-          }
-          if (data && data.error) {
-            return { success: false, error: data.error };
-          }
-        } catch (err) {
-          console.warn("Backend API login network fallback to local auth store:", err);
-        }
+export function getPartnerToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return sessionStorage.getItem(PARTNER_TOKEN_KEY) || localStorage.getItem(PARTNER_TOKEN_KEY);
+}
 
-        // Fallback check against cached partners if offline
-        const found = get().partners.find(
-          (p) =>
-            p.id.toLowerCase() === id.trim().toLowerCase() &&
-            p.password === password.trim(),
-        );
+export function setPartnerToken(token: string): void {
+  if (typeof window === "undefined") return;
+  sessionStorage.setItem(PARTNER_TOKEN_KEY, token);
+  localStorage.setItem(PARTNER_TOKEN_KEY, token);
+}
 
-        if (!found) {
-          return {
-            success: false,
-            error: "Invalid Admin / Partner ID or Password.",
-          };
-        }
+export function clearPartnerToken(): void {
+  if (typeof window === "undefined") return;
+  sessionStorage.removeItem(PARTNER_TOKEN_KEY);
+  localStorage.removeItem(PARTNER_TOKEN_KEY);
+  localStorage.removeItem("ezy1_token");
+  localStorage.removeItem("token");
+}
 
-        if (found.status === "suspended") {
-          return {
-            success: false,
-            error: "This partner account has been suspended by administration.",
-          };
-        }
+export const usePartnerAuth = create<PartnerAuthState>((set, get) => ({
+  token: getPartnerToken(),
+  currentPartner: null, // Strictly null by default — NO AUTOMATIC LOGIN
+  isAuthenticated: false,
+  isLoading: false,
 
-        set({ currentPartner: found, isAuthenticated: true });
-        return { success: true };
-      },
+  login: async (partnerUserId: string, password: string) => {
+    set({ isLoading: true });
+    try {
+      const res = await fetch("/api/partner/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          partnerUserId: partnerUserId.trim(),
+          password: password.trim(),
+        }),
+      });
 
-      logout: () => {
-        if (typeof window !== "undefined") {
-          try {
-            localStorage.removeItem("ezy1_token");
-            localStorage.removeItem("token");
-          } catch (e) {
-            console.warn("Could not remove token from localStorage:", e);
-          }
-        }
-        set({ currentPartner: null, token: null, isAuthenticated: false });
-      },
+      const data = await res.json();
+      set({ isLoading: false });
 
-      addPartner: (partner) => {
+      if (!res.ok || !data.success || !data.token) {
+        return {
+          success: false,
+          error: data.error || "Invalid Partner ID or password.",
+        };
+      }
+
+      setPartnerToken(data.token);
+
+      const partnerData: PartnerAccount = {
+        id: data.partner.id,
+        partnerUserId: data.partner.partnerUserId,
+        businessName: data.partner.businessName,
+        ownerName: data.partner.name,
+        category: data.partner.category || "Grocery",
+        role: data.partner.role || "PARTNER",
+        partnerType: data.partner.partnerType || data.partner.providerType || "GROCERY",
+        providerType: data.partner.providerType || data.partner.partnerType || "GROCERY",
+        phone: data.partner.phone || "",
+        email: data.partner.email || "",
+        city: data.partner.city || "",
+        status: data.partner.status || "ACTIVE",
+        isVerified: Boolean(data.partner.isVerified),
+        mustChangePassword: Boolean(data.partner.mustChangePassword),
+        lastLoginAt: data.partner.lastLoginAt,
+        permissions: data.partner.permissions,
+      };
+
+      set({
+        token: data.token,
+        currentPartner: partnerData,
+        isAuthenticated: true,
+      });
+
+      return {
+        success: true,
+        mustChangePassword: partnerData.mustChangePassword,
+      };
+    } catch (err: any) {
+      set({ isLoading: false });
+      return {
+        success: false,
+        error: "Unable to connect to partner authentication service. Please try again.",
+      };
+    }
+  },
+
+  changePassword: async (currentPassword: string, newPassword: string) => {
+    const token = get().token || getPartnerToken();
+    if (!token) return { success: false, error: "Authentication required" };
+
+    try {
+      const res = await fetch("/api/partner/auth/change-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        return { success: false, error: data.error || "Failed to change password." };
+      }
+
+      if (get().currentPartner) {
         set({
-          partners: [
-            ...get().partners.filter((p) => p.id !== partner.id),
-            partner,
-          ],
+          currentPartner: {
+            ...get().currentPartner!,
+            mustChangePassword: false,
+          },
         });
-      },
+      }
 
-      updatePartner: async (id, updates) => {
-        const current = get().partners.find((p) => p.id === id);
-        const vendorId = updates.vendorId || current?.vendorId;
-        const token = get().token;
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message || "Failed to update password." };
+    }
+  },
 
-        if (vendorId && token) {
-          try {
-            await fetch(`/api/vendors/${vendorId}`, {
-              method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify(updates),
-            });
-          } catch (err) {
-            console.error("Failed to sync vendor update with server API:", err);
-          }
-        }
+  forgotPassword: async (identifier: string) => {
+    try {
+      const res = await fetch("/api/partner/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifier: identifier.trim() }),
+      });
+      const data = await res.json();
+      return {
+        success: true,
+        message: data.message,
+        resetToken: data.resetToken,
+      };
+    } catch (err: any) {
+      return { success: false, error: err.message || "Failed to process request." };
+    }
+  },
 
-        set({
-          partners: get().partners.map((p) =>
-            p.id === id ? { ...p, ...updates } : p,
-          ),
-          currentPartner:
-            get().currentPartner?.id === id
-              ? { ...get().currentPartner!, ...updates }
-              : get().currentPartner,
+  resetPassword: async (token: string, newPassword: string) => {
+    try {
+      const res = await fetch("/api/partner/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: token.trim(), newPassword }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        return { success: false, error: data.error || "Failed to reset password." };
+      }
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message || "Failed to reset password." };
+    }
+  },
+
+  fetchMe: async () => {
+    const token = get().token || getPartnerToken();
+    if (!token) {
+      set({ currentPartner: null, isAuthenticated: false });
+      return null;
+    }
+
+    try {
+      const res = await fetch("/api/partner/auth/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+
+      if (res.ok && data.partner) {
+        const partnerData: PartnerAccount = {
+          id: data.partner.id,
+          partnerUserId: data.partner.partnerUserId,
+          businessName: data.partner.businessName,
+          ownerName: data.partner.name,
+          category: data.partner.category,
+          role: data.partner.role,
+          partnerType: data.partner.partnerType || data.partner.providerType || "GROCERY",
+          providerType: data.partner.providerType || data.partner.partnerType || "GROCERY",
+          phone: data.partner.phone,
+          email: data.partner.email,
+          city: data.partner.city,
+          address: data.partner.address,
+          status: data.partner.status,
+          isVerified: Boolean(data.partner.isVerified),
+          mustChangePassword: Boolean(data.partner.mustChangePassword),
+          lastLoginAt: data.partner.lastLoginAt,
+          permissions: data.partner.permissions,
+        };
+        set({ currentPartner: partnerData, isAuthenticated: true, token });
+        return partnerData;
+      }
+    } catch (err) {
+      // Network failure
+    }
+
+    clearPartnerToken();
+    set({ currentPartner: null, isAuthenticated: false, token: null });
+    return null;
+  },
+
+  logout: () => {
+    const token = get().token || getPartnerToken();
+    if (token) {
+      fetch("/api/partner/auth/logout", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      }).catch(() => {});
+    }
+    clearPartnerToken();
+    set({ currentPartner: null, token: null, isAuthenticated: false });
+  },
+
+  partners: [],
+
+  fetchPartners: async () => {
+    const token = get().token || getPartnerToken();
+    if (!token) return;
+    try {
+      const res = await fetch("/api/admin/partners", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const list = await res.json();
+        set({ partners: Array.isArray(list) ? list : [] });
+      }
+    } catch {}
+  },
+
+  addPartner: async (partnerData: any) => {
+    const token = get().token || getPartnerToken();
+    if (!token) return { success: false, error: "Not authenticated" };
+    try {
+      const res = await fetch("/api/admin/partners", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(partnerData),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        await get().fetchPartners();
+        return { success: true, data };
+      }
+      return { success: false, error: data.error || "Failed to create partner" };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  updatePartner: async (id: string | number, updates: any) => {
+    const token = get().token || getPartnerToken();
+    if (!token) return;
+    try {
+      if (updates.status) {
+        await fetch(`/api/admin/partners/${id}/status`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ status: updates.status }),
         });
-      },
+        await get().fetchPartners();
+      }
+    } catch {}
+  },
 
-      deletePartner: (id) => {
-        set({
-          partners: get().partners.filter((p) => p.id !== id),
-          currentPartner:
-            get().currentPartner?.id === id ? null : get().currentPartner,
-          isAuthenticated:
-            get().currentPartner?.id === id ? false : get().isAuthenticated,
-        });
-      },
+  deletePartner: async (id: string | number) => {
+    const token = get().token || getPartnerToken();
+    if (!token) return;
+    try {
+      await fetch(`/api/admin/partners/${id}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: "SUSPENDED" }),
+      });
+      await get().fetchPartners();
+    } catch {}
+  },
 
-      resetPartnersToDefault: () => {
-        set({
-          partners: DEFAULT_PARTNER_ACCOUNTS,
-          currentPartner: DEFAULT_PARTNER_ACCOUNTS[0],
-          isAuthenticated: true,
-        });
-      },
-    }),
-    {
-      name: "ezy1_partner_auth_v3",
-    },
-  ),
-);
+  resetPartnersToDefault: () => {
+    get().fetchPartners();
+  },
+}));

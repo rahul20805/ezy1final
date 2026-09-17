@@ -57,7 +57,7 @@ export function AdminUsersManager() {
     }
 
     if (
-      partners.some((p) => p.id.toLowerCase() === adminId.trim().toLowerCase())
+      partners.some((p) => String(p.id || p.partnerUserId).toLowerCase() === adminId.trim().toLowerCase())
     ) {
       toast.error("An admin account with this ID already exists.");
       return;
@@ -112,14 +112,14 @@ export function AdminUsersManager() {
         data={partners}
         searchPlaceholder="Search admin ID, name, role..."
         searchFilter={(item, query) =>
-          item.id.toLowerCase().includes(query) ||
+          String(item.partnerUserId || item.id).toLowerCase().includes(query) ||
           item.ownerName.toLowerCase().includes(query) ||
           item.role.toLowerCase().includes(query)
         }
         filterOptions={[]}
         sortOptions={[{ label: "Admin ID", value: "id_asc" }]}
         defaultSort="id_asc"
-        onSort={(items) => [...items].sort((a, b) => a.id.localeCompare(b.id))}
+        onSort={(items) => [...items].sort((a, b) => String(a.partnerUserId || a.id).localeCompare(String(b.partnerUserId || b.id)))}
         onAddNew={() => {
           setAdminId("");
           setPassword("");
@@ -142,10 +142,10 @@ export function AdminUsersManager() {
                 </div>
                 <div>
                   <h3 className="font-display font-bold text-base text-foreground">
-                    {admin.ownerName}
+                    {admin.ownerName || admin.name}
                   </h3>
                   <p className="text-xs text-muted-foreground font-mono">
-                    ID: {admin.id}
+                    ID: {admin.partnerUserId || admin.id}
                   </p>
                 </div>
               </div>
@@ -163,8 +163,8 @@ export function AdminUsersManager() {
 
             <div className="p-3 rounded-2xl bg-muted/40 border border-border/60 text-xs font-mono space-y-1">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Password:</span>
-                <span className="font-bold text-primary">{admin.password}</span>
+                <span className="text-muted-foreground">Auth Method:</span>
+                <span className="font-semibold text-emerald-600">PBKDF2 Secured</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Email:</span>

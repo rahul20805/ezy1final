@@ -1,8 +1,17 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Link } from "@tanstack/react-router";
 import {
+  Bell,
   Bot,
   ChevronDown,
   LogOut,
@@ -13,6 +22,12 @@ import {
   User,
   Wallet,
   X,
+  ShoppingCart,
+  Package,
+  Calendar,
+  CreditCard,
+  Settings,
+  History,
 } from "lucide-react";
 import { useState } from "react";
 import { useIsMobile } from "../hooks/use-mobile";
@@ -20,17 +35,19 @@ import { useAuth } from "../lib/AuthContext";
 import { setCurrentRole } from "../lib/auth";
 import { useStoreData } from "../lib/storeData";
 import { MOCK_WALLET_BALANCE } from "../mock-data";
+import { useNotificationStore } from "../lib/notificationStore";
+import { useCartStore } from "../lib/cartStore";
 
 import { useLocationStore } from "../lib/locationStore";
 import { LocationModal } from "./location/LocationModal";
 import { NAVAEIN_URL } from "../config/links";
 
 const navLinks = [
-  { label: "Shop", href: "/shop" },
-  { label: "Services", href: "/services" },
-  { label: "Healthcare", href: "/#healthcare" },
-  { label: "Transport", href: "/#transport" },
-  { label: "Partner Portal", href: "/partner-login" },
+  { label: "All Services", href: "/dashboard" },
+  { label: "Quick Commerce", href: "/dashboard/commerce" },
+  { label: "Hospitals & Care", href: "/hospitals" },
+  { label: "Rides & Parcel", href: "/dashboard/transport" },
+  { label: "Famous in City", href: "/famous" },
 ];
 
 interface LayoutProps {
@@ -42,6 +59,8 @@ export default function Layout({ children }: LayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [locationDropdown, setLocationDropdown] = useState(false);
   const { currentLocation } = useLocationStore();
+  const { unreadCount } = useNotificationStore();
+  const { totalItems } = useCartStore();
   const [waMessages, setWaMessages] = useState<
     { from: "bot" | "user"; text: string }[]
   >([
@@ -59,7 +78,7 @@ export default function Layout({ children }: LayoutProps) {
     },
   ]);
   const isMobile = useIsMobile();
-  const { isAuthenticated, login, logout } = useAuth();
+  const { isAuthenticated, user, login, logout } = useAuth();
   const handleLogin = async () => {
     await login();
     setCurrentRole("user");
@@ -124,12 +143,15 @@ export default function Layout({ children }: LayoutProps) {
           {/* Global Search */}
           {!isMobile && (
             <div className="flex-1 max-w-md mx-4 relative hidden lg:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search groceries, doctors, services..."
-                className="w-full h-9 pl-9 pr-4 rounded-full bg-muted/50 border border-transparent focus:border-primary focus:bg-background transition-smooth text-sm outline-none"
-              />
+              <Link to="/search" className="block relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  readOnly
+                  placeholder="Search products, food, doctors, services & more..."
+                  className="w-full h-9 pl-9 pr-4 rounded-full bg-muted/50 border border-transparent hover:border-primary/40 cursor-pointer focus:border-primary focus:bg-background transition-smooth text-xs outline-none"
+                />
+              </Link>
             </div>
           )}
 
@@ -155,66 +177,165 @@ export default function Layout({ children }: LayoutProps) {
               onOpenChange={setLocationDropdown}
             />
 
+            {/* Live Cart Button with Floating Item Counter */}
+            <Link to="/dashboard/cart" data-ocid="nav.cart_link">
+              <Button
+                variant="outline"
+                size="sm"
+                className="relative gap-1.5 rounded-full h-9 px-3 border-border hover:border-primary/50 text-xs font-semibold"
+              >
+                <ShoppingCart className="w-4 h-4 text-primary" />
+                <span className="hidden sm:inline font-display font-bold">Cart</span>
+                {totalItems > 0 && (
+                  <span className="flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground font-black text-[10px] shadow-sm">
+                    {totalItems}
+                  </span>
+                )}
+              </Button>
+            </Link>
+
             {isAuthenticated ? (
-              <div className="flex items-center gap-2">
-                <Link to="/dashboard" data-ocid="nav.dashboard_link">
-                  <Button variant="ghost" size="sm" className="gap-1.5 text-sm">
-                    <User className="w-4 h-4" />
-                    {!isMobile && <span>Dashboard</span>}
+              <div className="flex items-center gap-1.5">
+                {/* Notifications Bell */}
+                <Link to="/dashboard/notifications" data-ocid="nav.notifications_link">
+                  <Button variant="ghost" size="sm" className="relative p-2 rounded-full h-9 w-9" title="Notifications">
+                    <Bell className="w-4 h-4 text-foreground" />
+                    {unreadCount > 0 && (
+                      <span className="absolute top-1.5 right-1.5 flex items-center justify-center min-w-[15px] h-3.5 px-1 rounded-full bg-rose-500 text-white font-bold text-[8px] animate-pulse">
+                        {unreadCount}
+                      </span>
+                    )}
                   </Button>
                 </Link>
-                <Link to="/dashboard/wallet" data-ocid="nav.wallet_link">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="gap-1.5 text-sm hidden sm:flex"
-                  >
-                    <Wallet className="w-4 h-4" />
-                    <span className="text-primary font-semibold">
-                      ₹{MOCK_WALLET_BALANCE.toLocaleString("en-IN")}
-                    </span>
-                  </Button>
-                </Link>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleLogout}
-                  className="gap-1.5 text-sm text-muted-foreground"
-                  data-ocid="nav.logout_button"
-                >
-                  <LogOut className="w-4 h-4" />
-                  {!isMobile && <span>Logout</span>}
-                </Button>
+
+                {/* Unified Customer Navigation Dropdown (8 Essential Sections) */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-2 rounded-full h-9 px-3 border-border hover:border-primary/50 text-xs font-semibold"
+                      data-ocid="nav.user_dropdown_trigger"
+                    >
+                      <div className="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[11px]">
+                        <User className="w-3.5 h-3.5" />
+                      </div>
+                      <span className="max-w-[100px] truncate hidden sm:inline font-display">
+                        {user?.name?.split(" ")[0] || "My Account"}
+                      </span>
+                      <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-60 p-1.5 shadow-elevated rounded-2xl border-border bg-card">
+                    <DropdownMenuLabel className="px-3 py-2">
+                      <div className="text-xs font-bold text-foreground truncate">{user?.name || "Customer Account"}</div>
+                      <div className="text-[11px] text-muted-foreground font-mono truncate">{user?.phone || user?.email || "customer@ezy1.in"}</div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+
+                    {/* 1. Wallet */}
+                    <DropdownMenuItem asChild>
+                      <Link to="/dashboard/wallet" className="flex items-center justify-between px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold">
+                        <span className="flex items-center gap-2">
+                          <Wallet className="w-4 h-4 text-amber-500" />
+                          Wallet
+                        </span>
+                        <Badge variant="secondary" className="text-[10px] font-bold px-1.5 py-0 bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                          ₹{MOCK_WALLET_BALANCE.toLocaleString("en-IN")}
+                        </Badge>
+                      </Link>
+                    </DropdownMenuItem>
+
+                    {/* 2. Cart */}
+                    <DropdownMenuItem asChild>
+                      <Link to="/dashboard/cart" className="flex items-center justify-between px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold">
+                        <span className="flex items-center gap-2">
+                          <ShoppingCart className="w-4 h-4 text-emerald-500" />
+                          My Cart
+                        </span>
+                        {totalItems > 0 && (
+                          <Badge variant="secondary" className="text-[10px] font-bold px-1.5 py-0 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                            {totalItems} items
+                          </Badge>
+                        )}
+                      </Link>
+                    </DropdownMenuItem>
+
+                    {/* 3. History / Bookings */}
+                    <DropdownMenuItem asChild>
+                      <Link to="/my-bookings" className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold">
+                        <History className="w-4 h-4 text-blue-500" />
+                        <span>History & Bookings</span>
+                      </Link>
+                    </DropdownMenuItem>
+
+                    {/* 4. Orders */}
+                    <DropdownMenuItem asChild>
+                      <Link to="/my-orders" className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold">
+                        <Package className="w-4 h-4 text-indigo-500" />
+                        <span>My Orders</span>
+                      </Link>
+                    </DropdownMenuItem>
+
+                    {/* 5. Payments */}
+                    <DropdownMenuItem asChild>
+                      <Link to="/dashboard" className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold">
+                        <CreditCard className="w-4 h-4 text-violet-500" />
+                        <span>Payments & Cards</span>
+                      </Link>
+                    </DropdownMenuItem>
+
+                    {/* 6. My Account */}
+                    <DropdownMenuItem asChild>
+                      <Link to="/dashboard" className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold">
+                        <User className="w-4 h-4 text-primary" />
+                        <span>My Profile & Account</span>
+                      </Link>
+                    </DropdownMenuItem>
+
+                    {/* 7. Settings */}
+                    <DropdownMenuItem asChild>
+                      <Link to="/dashboard/settings" className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold">
+                        <Settings className="w-4 h-4 text-slate-500" />
+                        <span>Account Settings</span>
+                      </Link>
+                    </DropdownMenuItem>
+
+                    {/* 8. Notifications */}
+                    <DropdownMenuItem asChild>
+                      <Link to="/dashboard/notifications" className="flex items-center justify-between px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold">
+                        <span className="flex items-center gap-2">
+                          <Bell className="w-4 h-4 text-purple-500" />
+                          Notifications
+                        </span>
+                        {unreadCount > 0 && (
+                          <span className="w-2 h-2 rounded-full bg-rose-500" />
+                        )}
+                      </Link>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={handleLogout}
+                      className="flex items-center gap-2 px-3 py-2 cursor-pointer text-rose-600 dark:text-rose-400 rounded-xl text-xs font-semibold hover:bg-rose-500/10"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Sign Out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             ) : (
               <div className="flex items-center gap-2">
                 <Button
-                  variant="outline"
+                  variant="default"
                   size="sm"
                   onClick={handleLogin}
-                  className="text-sm"
+                  className="text-xs font-bold font-display rounded-full px-4 bg-primary text-primary-foreground shadow-sm"
                   data-ocid="nav.login_button"
                 >
-                  Login
+                  Login / Sign Up
                 </Button>
-                <Link
-                  to="/partner-login"
-                  className="hidden sm:block"
-                  data-ocid="nav.partner_login_link"
-                >
-                  <Button
-                    size="sm"
-                    className="text-sm bg-primary text-primary-foreground hover:bg-primary/90"
-                  >
-                    Partner
-                    <Badge
-                      variant="secondary"
-                      className="ml-1.5 text-xs px-1.5 py-0 bg-primary-foreground/20 text-primary-foreground"
-                    >
-                      Join
-                    </Badge>
-                  </Button>
-                </Link>
               </div>
             )}
 
@@ -284,27 +405,118 @@ export default function Layout({ children }: LayoutProps) {
                         </a>
                       ))}
                       {isAuthenticated && (
-                        <>
+                        <div className="mt-2 pt-2 border-t border-border space-y-0.5">
+                          <p className="px-3 py-1 text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+                            My Account & Services
+                          </p>
+
+                          {/* 1. Wallet */}
+                          <Link
+                            to="/dashboard/wallet"
+                            className="flex items-center justify-between px-3 py-2.5 text-sm font-body text-foreground hover:bg-muted rounded-lg transition-smooth"
+                            onClick={() => setMobileOpen(false)}
+                            data-ocid="nav.mobile_wallet_link"
+                          >
+                            <span className="flex items-center gap-2.5">
+                              <Wallet className="w-4 h-4 text-amber-500" />
+                              Wallet
+                            </span>
+                            <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
+                              ₹{MOCK_WALLET_BALANCE.toLocaleString("en-IN")}
+                            </span>
+                          </Link>
+
+                          {/* 2. Cart */}
+                          <Link
+                            to="/dashboard/cart"
+                            className="flex items-center justify-between px-3 py-2.5 text-sm font-body text-foreground hover:bg-muted rounded-lg transition-smooth"
+                            onClick={() => setMobileOpen(false)}
+                            data-ocid="nav.mobile_cart_link"
+                          >
+                            <span className="flex items-center gap-2.5">
+                              <ShoppingCart className="w-4 h-4 text-emerald-500" />
+                              My Cart
+                            </span>
+                            {totalItems > 0 && (
+                              <Badge className="text-[10px] font-bold px-1.5 py-0 bg-primary">
+                                {totalItems}
+                              </Badge>
+                            )}
+                          </Link>
+
+                          {/* 3. History */}
+                          <Link
+                            to="/my-bookings"
+                            className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-body text-foreground hover:bg-muted rounded-lg transition-smooth"
+                            onClick={() => setMobileOpen(false)}
+                            data-ocid="nav.mobile_bookings_link"
+                          >
+                            <History className="w-4 h-4 text-blue-500" />
+                            History & Bookings
+                          </Link>
+
+                          {/* 4. Orders */}
+                          <Link
+                            to="/my-orders"
+                            className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-body text-foreground hover:bg-muted rounded-lg transition-smooth"
+                            onClick={() => setMobileOpen(false)}
+                            data-ocid="nav.mobile_orders_link"
+                          >
+                            <Package className="w-4 h-4 text-indigo-500" />
+                            My Orders
+                          </Link>
+
+                          {/* 5. Payments */}
                           <Link
                             to="/dashboard"
-                            className="flex items-center gap-2 px-3 py-3 text-sm font-body text-foreground hover:bg-muted rounded-lg transition-smooth"
+                            className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-body text-foreground hover:bg-muted rounded-lg transition-smooth"
+                            onClick={() => setMobileOpen(false)}
+                            data-ocid="nav.mobile_payments_link"
+                          >
+                            <CreditCard className="w-4 h-4 text-violet-500" />
+                            Payments & Cards
+                          </Link>
+
+                          {/* 6. My Account */}
+                          <Link
+                            to="/dashboard"
+                            className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-body text-foreground hover:bg-muted rounded-lg transition-smooth"
                             onClick={() => setMobileOpen(false)}
                             data-ocid="nav.mobile_dashboard_link"
                           >
                             <User className="w-4 h-4 text-primary" />
-                            My Dashboard
+                            Profile & Account
                           </Link>
+
+                          {/* 7. Settings */}
                           <Link
-                            to="/dashboard"
-                            className="flex items-center gap-2 px-3 py-3 text-sm font-body text-foreground hover:bg-muted rounded-lg transition-smooth"
+                            to="/dashboard/settings"
+                            className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-body text-foreground hover:bg-muted rounded-lg transition-smooth"
                             onClick={() => setMobileOpen(false)}
-                            data-ocid="nav.mobile_wallet_link"
+                            data-ocid="nav.mobile_settings_link"
                           >
-                            <Wallet className="w-4 h-4 text-secondary" />
-                            Wallet — ₹
-                            {MOCK_WALLET_BALANCE.toLocaleString("en-IN")}
+                            <Settings className="w-4 h-4 text-slate-500" />
+                            Account Settings
                           </Link>
-                        </>
+
+                          {/* 8. Notifications */}
+                          <Link
+                            to="/dashboard/notifications"
+                            className="flex items-center justify-between px-3 py-2.5 text-sm font-body text-foreground hover:bg-muted rounded-lg transition-smooth"
+                            onClick={() => setMobileOpen(false)}
+                            data-ocid="nav.mobile_notifications_link"
+                          >
+                            <span className="flex items-center gap-2.5">
+                              <Bell className="w-4 h-4 text-purple-500" />
+                              Notifications
+                            </span>
+                            {unreadCount > 0 && (
+                              <Badge variant="destructive" className="text-[9px] px-1.5 py-0">
+                                {unreadCount}
+                              </Badge>
+                            )}
+                          </Link>
+                        </div>
                       )}
                     </nav>
 
@@ -335,18 +547,6 @@ export default function Layout({ children }: LayoutProps) {
                           >
                             Login / Sign Up
                           </Button>
-                          <Link
-                            to="/partner-login"
-                            onClick={() => setMobileOpen(false)}
-                          >
-                            <Button
-                              variant="outline"
-                              className="w-full"
-                              data-ocid="nav.mobile_partner_button"
-                            >
-                              Join as Partner
-                            </Button>
-                          </Link>
                         </div>
                       )}
                     </div>
@@ -633,14 +833,6 @@ export default function Layout({ children }: LayoutProps) {
                   </a>
                 </li>
                 <li>
-                  <Link
-                    to="/partner-login"
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    Partner & Merchant Portal
-                  </Link>
-                </li>
-                <li>
                   <a
                     href={NAVAEIN_URL}
                     className="text-sm text-muted-foreground hover:text-orange-500 transition-colors flex items-center gap-1.5"
@@ -652,10 +844,10 @@ export default function Layout({ children }: LayoutProps) {
               </ul>
             </div>
 
-            {/* Support */}
+            {/* Business & Support */}
             <div>
               <h4 className="font-display font-semibold text-foreground mb-3 text-sm">
-                Support & Admin
+                Business & Support
               </h4>
               <ul className="space-y-2">
                 <li>
@@ -667,30 +859,6 @@ export default function Layout({ children }: LayoutProps) {
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    to="/partner-login"
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    Merchant Login
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/owner"
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    Owner Control Center
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/admin"
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    Super Admin Console
-                  </Link>
-                </li>
-                <li>
                   <a
                     href={`https://wa.me/${(store.settings.whatsappNumber || "919876543210").replace(/[^0-9]/g, "")}?text=Hello%20EZY1%20Support`}
                     target="_blank"
@@ -699,6 +867,16 @@ export default function Layout({ children }: LayoutProps) {
                   >
                     WhatsApp Helpline
                   </a>
+                </li>
+                <li>
+                  <Link
+                    to="/partner-login"
+                    className="text-sm font-medium text-primary hover:underline transition-colors flex items-center gap-1"
+                    data-ocid="footer.partner_login_link"
+                  >
+                    <span>Partner Login</span>
+                    <span className="text-xs">→</span>
+                  </Link>
                 </li>
               </ul>
             </div>

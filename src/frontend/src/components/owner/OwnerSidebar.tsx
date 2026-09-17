@@ -165,12 +165,43 @@ export function OwnerSidebar({
   const { currentPartner, logout } = usePartnerAuth();
   const store = useStoreData();
 
-  const isSuperOwner = currentPartner?.role === "super_owner";
+  const role = (currentPartner?.role || "").toUpperCase();
+  const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN" || role === "SUPER_OWNER" || role === "super_owner";
+  const pType = (currentPartner?.providerType || currentPartner?.partnerType || "GROCERY").toUpperCase();
 
   const availableItems = OWNER_SIDEBAR_ITEMS.filter((item) => {
-    if (isSuperOwner) return true;
-    if (!item.permissionKey) return true;
-    return currentPartner?.permissions?.[item.permissionKey] === true;
+    if (isAdmin) return true;
+    if (item.id === "dashboard") return true;
+
+    if (pType === "GROCERY" || pType === "VENDOR") {
+      return ["dashboard", "inventory", "orders", "customers", "reviews", "settings"].includes(item.id);
+    }
+    if (pType === "HOSPITAL") {
+      return ["dashboard", "bookings", "enquiries", "services", "reviews", "settings"].includes(item.id);
+    }
+    if (pType === "SERVICE_PROVIDER") {
+      return ["dashboard", "services", "bookings", "enquiries", "reviews", "settings"].includes(item.id);
+    }
+    if (pType === "PHARMACY") {
+      return ["dashboard", "inventory", "orders", "customers", "reviews", "settings"].includes(item.id);
+    }
+    if (pType === "RESTAURANT") {
+      return ["dashboard", "inventory", "orders", "reviews", "settings"].includes(item.id);
+    }
+    if (pType === "DELIVERY" || pType === "DRIVER") {
+      return ["dashboard", "orders", "settings"].includes(item.id);
+    }
+
+    if (Array.isArray(currentPartner?.permissions)) {
+      if (currentPartner.permissions.includes("*")) return true;
+      return true;
+    }
+
+    if (item.permissionKey && typeof currentPartner?.permissions === "object") {
+      return currentPartner.permissions[item.permissionKey] === true;
+    }
+
+    return true;
   });
 
   return (
@@ -193,9 +224,9 @@ export function OwnerSidebar({
               <div className="flex items-center gap-1 mt-0.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-[11px] text-muted-foreground truncate capitalize">
-                  {isSuperOwner
+                  {isAdmin
                     ? "Master Owner Portal"
-                    : `${currentPartner?.category} Partner`}
+                    : `${currentPartner?.providerType || currentPartner?.category || "Business"} Partner`}
                 </span>
               </div>
             </div>
