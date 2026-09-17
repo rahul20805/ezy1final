@@ -756,6 +756,80 @@ export function findUserById(id) {
   return db.users.find((u) => Number(u.id) === Number(id)) || null;
 }
 
+export function findUserByPhone(phone) {
+  const db = getDb();
+  if (!phone) return null;
+  const digits = phone.replace(/[^0-9]/g, "").slice(-10);
+  return db.users.find((u) => {
+    if (!u.phone) return false;
+    const uDigits = String(u.phone).replace(/[^0-9]/g, "").slice(-10);
+    return uDigits === digits;
+  }) || null;
+}
+
+export function findOrCreateUserByPhone(phone, name) {
+  const existing = findUserByPhone(phone);
+  if (existing) return existing;
+  const digits = phone.replace(/[^0-9]/g, "").slice(-10);
+  return createUser({
+    name: name || `Customer ${digits.slice(-4)}`,
+    phone: digits,
+    role: "CUSTOMER",
+    vendorId: 0,
+    email: `customer_${digits}@ezy1.site`,
+  });
+}
+
+// In-memory OTP storage for serverless runtime
+if (!globalThis.__ezy1_otps) {
+  globalThis.__ezy1_otps = [];
+}
+
+export function recordOtp({ phone, otpHash, expiresAt }) {
+  const digits = phone.replace(/[^0-9]/g, "").slice(-10);
+  // Mark previous OTPs as superseded
+  globalThis.__ezy1_otps.forEach((o) => {
+    if (o.phone === digits && o.verified === 0) o.verified = 2;
+  });
+
+  const record = {
+    id: globalThis.__ezy1_otps.length + 1,
+    phone: digits,
+    otpHash,
+    expiresAt,
+    attempts: 0,
+    lastSentAt: Date.now(),
+    verified: 0,
+    createdAt: new Date().toISOString(),
+  };
+  globalThis.__ezy1_otps.push(record);
+  return record;
+}
+
+export function getLatestOtp(phone) {
+  const digits = phone.replace(/[^0-9]/g, "").slice(-10);
+  const active = globalThis.__ezy1_otps
+    .filter((o) => o.phone === digits)
+    .sort((a, b) => b.id - a.id);
+  return active[0] || null;
+}
+
+export function incrementOtpAttempts(id) {
+  const record = globalThis.__ezy1_otps.find((o) => o.id === id);
+  if (record) {
+    record.attempts = (record.attempts || 0) + 1;
+  }
+  return record;
+}
+
+export function markOtpVerified(id) {
+  const record = globalThis.__ezy1_otps.find((o) => o.id === id);
+  if (record) {
+    record.verified = 1;
+  }
+  return record;
+}
+
 export function createUser(userData) {
   const db = getDb();
   const nextId = db.users.length ? Math.max(...db.users.map((u) => u.id)) + 1 : 1;
@@ -767,7 +841,7 @@ export function createUser(userData) {
     email: userData.email,
     phone: userData.phone || "",
     city: userData.city || "",
-    role: userData.role || "user",
+    role: userData.role || "CUSTOMER",
     vendorId: userData.vendorId || 0,
     status: "active",
     createdAt: new Date().toISOString(),

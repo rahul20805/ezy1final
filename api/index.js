@@ -1,5 +1,7 @@
+import crypto from "crypto";
 import { getAuthUser, hashPassword, signJwt, verifyPassword } from "./auth.js";
 import { reverseGeocode, searchAddress } from "./location.js";
+import { dispatchOtpSms } from "../src/server/src/smsProvider.js";
 import {
   bulkUpdateVendors,
   createOrder,
@@ -12,7 +14,13 @@ import {
   deleteService,
   findUserByEmail,
   findUserById,
+  findUserByPhone,
+  findOrCreateUserByPhone,
   findUserByUsername,
+  recordOtp,
+  getLatestOtp,
+  incrementOtpAttempts,
+  markOtpVerified,
   getAdminStats,
   getCategories,
   getChangeLogs,
@@ -178,7 +186,275 @@ export default async function handler(req, res) {
     }
 
     // ----------------------------------------------------
-    // 2. AUTHENTICATION & PARTNER PORTAL ACCESS
+    // 2. AUTHENTICATION & PHONE NUMBER OTP FLOW (REAL SMS GATEWAY)
+    // ----------------------------------------------------
+
+    // 2.1 Send Real Phone OTP
+    if (pathname === "/auth/send-otp" && method === "POST") {
+      const body = await parseBody(req);
+      const { phone } = body;
+
+      if (!phone || typeof phone !== "string") {
+        return sendJson(res, 400, { success: false, error: "Please enter a valid mobile phone number." });
+      }
+
+      const digits = phone.replace(/[^0-9]/g, "");
+      const tenDigit = digits.slice(-10);
+      if (tenDigit.length !== 10) {
+        return sendJson(res, 400, { success: false, error: "Please enter a valid 10-digit mobile number." });
+      }
+
+      // Check 30s resend cooldown
+      const existing = getLatestOtp(tenDigit);
+      if (existing && existing.verified === 0) {
+        const timeSince = (Date.now() - existing.lastSentAt) / 1000;
+        if (timeSince < 30) {
+          const waitRemaining = Math.ceil(30 - timeSince);
+          return sendJson(res, 400, {
+            success: false,
+            error: `Please wait ${waitRemaining}s before requesting a new OTP.`,
+            cooldownSeconds: waitRemaining,
+          });
+        }
+      }
+
+      // Generate secure 6-digit numeric OTP
+      const isTestEnv = process.env.NODE_ENV === "test" && process.env.ENABLE_TEST_OTP === "true";
+      const otp = isTestEnv ? "123456" : String(crypto.randomInt(100000, 999999));
+      const otpSecret = process.env.OTP_HMAC_SECRET || process.env.JWT_SECRET || "ezy1_otp_hmac_secret_sha256";
+      const otpHash = crypto.createHmac("sha256", otpSecret).update(`${tenDigit}:${otp}`).digest("hex");
+      const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes
+
+      recordOtp({ phone: tenDigit, otpHash, expiresAt });
+
+      try {
+        const smsResult = await dispatchOtpSms({ phone: tenDigit, otp });
+        return sendJson(res, 200, {
+          success: true,
+          message: "OTP sent successfully to your phone number",
+          cooldownSeconds: 30,
+          expiresInSeconds: 300,
+          provider: smsResult.provider,
+        });
+      } catch (err) {
+        console.error("SMS Gateway error:", err);
+        return sendJson(res, err.statusCode || 503, {
+          success: false,
+          error: err.message || "Failed to deliver SMS. Please check mobile number or try again later.",
+        });
+      }
+    }
+
+    // 2.2 Verify Real Phone OTP & Auto-Register / Login Customer
+    if (pathname === "/auth/verify-otp" && method === "POST") {
+      const body = await parseBody(req);
+      const { phone, otp, name } = body;
+
+      if (!phone || !otp) {
+        return sendJson(res, 400, { success: false, error: "Phone number and OTP code are required." });
+      }
+
+      const digits = phone.replace(/[^0-9]/g, "").slice(-10);
+      const latest = getLatestOtp(digits);
+
+      if (!latest || latest.verified !== 0) {
+        return sendJson(res, 400, { success: false, error: "No active OTP found. Please request a new OTP." });
+      }
+
+      if (Date.now() > latest.expiresAt) {
+        return sendJson(res, 400, { success: false, error: "This OTP code has expired. Please request a new code." });
+      }
+
+      if ((latest.attempts || 0) >= 5) {
+        return sendJson(res, 400, { success: false, error: "Too many failed attempts. Please request a new OTP." });
+      }
+
+      const otpSecret = process.env.OTP_HMAC_SECRET || process.env.JWT_SECRET || "ezy1_otp_hmac_secret_sha256";
+      const candidateHash = crypto.createHmac("sha256", otpSecret).update(`${digits}:${String(otp).trim()}`).digest("hex");
+
+      const match = crypto.timingSafeEqual(Buffer.from(candidateHash, "hex"), Buffer.from(latest.otpHash, "hex"));
+
+      if (!match) {
+        incrementOtpAttempts(latest.id);
+        const attemptsLeft = 5 - (latest.attempts + 1);
+        return sendJson(res, 400, {
+          success: false,
+          error: `Incorrect OTP code. ${attemptsLeft > 0 ? `${attemptsLeft} attempt(s) remaining.` : "Please request a new code."}`,
+        });
+      }
+
+      // Mark OTP consumed
+      markOtpVerified(latest.id);
+
+      // Authenticate or create user
+      const user = findOrCreateUserByPhone(digits, name);
+      const token = signJwt({
+        id: user.id,
+        phone: user.phone,
+        role: user.role || "CUSTOMER",
+        vendorId: user.vendorId || 0,
+      });
+
+      return sendJson(res, 200, {
+        success: true,
+        token,
+        user: {
+          id: user.id,
+          name: user.name,
+          phone: user.phone,
+          email: user.email,
+          role: user.role || "CUSTOMER",
+          walletBal: user.walletBal || 0,
+          avatar: user.avatar || null,
+        },
+      });
+    }
+
+    // ----------------------------------------------------
+    // 2.3 PAYMENTS & RAZORPAY INTEGRATION
+    // ----------------------------------------------------
+    if (pathname === "/payments/create-razorpay-order" && method === "POST") {
+      const body = await parseBody(req);
+      const { amount, currency = "INR", receipt = `rcpt_${Date.now()}`, notes = {} } = body;
+      const keyId = process.env.RAZORPAY_KEY_ID || process.env.VITE_PAYMENT_KEY_ID;
+      const keySecret = process.env.RAZORPAY_KEY_SECRET || process.env.VITE_PAYMENT_SECRET;
+
+      if (!keyId || !keySecret) {
+        return sendJson(res, 503, {
+          success: false,
+          error: "Razorpay credentials not configured. Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.",
+        });
+      }
+
+      const auth = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
+      const amountInPaise = Math.round(Number(amount) * 100);
+
+      const rzpRes = await fetch("https://api.razorpay.com/v1/orders", {
+        method: "POST",
+        headers: {
+          Authorization: `Basic ${auth}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          amount: amountInPaise,
+          currency,
+          receipt,
+          notes,
+        }),
+      });
+
+      const rzpData = await rzpRes.json();
+      if (!rzpRes.ok) {
+        return sendJson(res, rzpRes.status, {
+          success: false,
+          error: rzpData.error?.description || "Razorpay order creation failed",
+        });
+      }
+
+      return sendJson(res, 200, {
+        success: true,
+        orderId: rzpData.id,
+        amount: rzpData.amount,
+        currency: rzpData.currency,
+        keyId,
+      });
+    }
+
+    if (pathname === "/payments/verify" && method === "POST") {
+      const body = await parseBody(req);
+      const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = body;
+      const keySecret = process.env.RAZORPAY_KEY_SECRET || process.env.VITE_PAYMENT_SECRET;
+
+      if (!keySecret) {
+        return sendJson(res, 503, { success: false, error: "Razorpay secret not configured." });
+      }
+
+      const generatedSignature = crypto
+        .createHmac("sha256", keySecret)
+        .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+        .digest("hex");
+
+      if (generatedSignature !== razorpay_signature) {
+        return sendJson(res, 400, { success: false, error: "Invalid payment signature verification failed." });
+      }
+
+      if (orderId) {
+        updateOrderStatus(orderId, "CONFIRMED");
+      }
+
+      return sendJson(res, 200, {
+        success: true,
+        message: "Payment verified successfully",
+        paymentId: razorpay_payment_id,
+      });
+    }
+
+    // ----------------------------------------------------
+    // 2.4 AI CONCIERGE ASSISTANT (OPENAI ENGINE)
+    // ----------------------------------------------------
+    if (pathname === "/ai/assistant" && method === "POST") {
+      const body = await parseBody(req);
+      const { message, history = [] } = body;
+      const apiKey = process.env.OPENAI_API_KEY || process.env.VITE_AI_API_KEY;
+      const model = process.env.OPENAI_MODEL || process.env.VITE_AI_MODEL || "gpt-4o";
+
+      if (!apiKey) {
+        return sendJson(res, 503, {
+          success: false,
+          error: "OpenAI API Key not configured. Please set OPENAI_API_KEY in environment settings.",
+        });
+      }
+
+      if (!message) {
+        return sendJson(res, 400, { success: false, error: "Message is required." });
+      }
+
+      const systemPrompt = `You are the friendly, intelligent AI concierge for EZY1 (Everything You Need, One Platform - https://ezy1.site).
+EZY1 offers:
+1. Quick Commerce & Grocery delivery (Sharma Kirana, Fresh Veggies, Fruits, Sweets, Cafe, Paan, Sexual Wellness).
+2. Healthcare: Hospitals, Doctor Appointments, Bed Availability, Home Healthcare & Diagnostics.
+3. Transport: Share Ride, Parcel Courier, Bus Tickets, Travel Booking & Stays/Hotels.
+4. Merchant & Partner Ecosystem: Dedicated portals for Groceries, Restaurants, Hospitals, Pharmacies, and Service Providers.
+Be helpful, concise, courteous, and provide accurate navigation instructions to customers.`;
+
+      const messages = [
+        { role: "system", content: systemPrompt },
+        ...history.slice(-6),
+        { role: "user", content: message },
+      ];
+
+      const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          temperature: 0.7,
+          max_tokens: 500,
+        }),
+      });
+
+      const openaiData = await openaiRes.json();
+      if (!openaiRes.ok) {
+        return sendJson(res, openaiRes.status, {
+          success: false,
+          error: openaiData.error?.message || "OpenAI completion failed",
+        });
+      }
+
+      const reply = openaiData.choices?.[0]?.message?.content || "How else may I help you on EZY1?";
+      return sendJson(res, 200, {
+        success: true,
+        reply,
+        model: openaiData.model,
+      });
+    }
+
+    // ----------------------------------------------------
+    // 2.5 PARTNER PORTAL CREDENTIAL LOGIN
     // ----------------------------------------------------
     if ((pathname === "/auth/login" || pathname === "/auth/partner/login") && method === "POST") {
       const body = await parseBody(req);
