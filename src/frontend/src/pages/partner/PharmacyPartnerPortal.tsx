@@ -1,4 +1,4 @@
-﻿/**
+/**
  * EZY1 Pharmacy Partner Portal
  * Medicine inventory, prescription tracking, order management
  */
@@ -35,6 +35,15 @@ function StatCard({ label, value, sub, color }: any) {
       </CardContent>
     </Card>
   );
+}
+
+function formatOrderItems(items: any): string {
+  if (!items) return "—";
+  if (typeof items === "string") return items;
+  if (Array.isArray(items)) {
+    return items.map((it: any) => typeof it === "string" ? it : `${it.quantity || 1}x ${it.name || "Item"}`).join(", ") || "—";
+  }
+  return "—";
 }
 
 export default function PharmacyPartnerPortal() {
@@ -164,7 +173,7 @@ export default function PharmacyPartnerPortal() {
               <CardContent className="p-5 flex items-center gap-4">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold">{o.customerName || "Customer"}</p>
-                  <p className="text-xs text-muted-foreground">{o.medicines || o.items} · {o.createdAt ? new Date(o.createdAt).toLocaleDateString() : ""}</p>
+                  <p className="text-xs text-muted-foreground">{formatOrderItems(o.medicines || o.items)} · {o.createdAt ? new Date(o.createdAt).toLocaleDateString() : ""}</p>
                 </div>
                 <p className="text-sm font-bold">₹{o.totalAmount || 0}</p>
                 <Badge variant={o.status === "completed" ? "default" : "secondary"}>{o.status}</Badge>

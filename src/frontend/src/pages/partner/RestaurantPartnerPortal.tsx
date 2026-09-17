@@ -1,4 +1,4 @@
-﻿/**
+/**
  * EZY1 Restaurant Partner Portal
  * Menu management, order management, table management for restaurant/cafe/food partners
  */
@@ -33,6 +33,15 @@ function StatCard({ label, value, color }: any) {
       </CardContent>
     </Card>
   );
+}
+
+function formatOrderItems(items: any): string {
+  if (!items) return "—";
+  if (typeof items === "string") return items;
+  if (Array.isArray(items)) {
+    return items.map((it: any) => typeof it === "string" ? it : `${it.quantity || 1}x ${it.name || "Item"}`).join(", ") || "—";
+  }
+  return "—";
 }
 
 export default function RestaurantPartnerPortal() {
@@ -101,7 +110,7 @@ export default function RestaurantPartnerPortal() {
                   <ShoppingCart className="w-4 h-4 text-muted-foreground shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium">{o.customerName || "Customer"} · Table {o.tableNumber || "Takeaway"}</p>
-                    <p className="text-xs text-muted-foreground">{o.items || "Items"}</p>
+                    <p className="text-xs text-muted-foreground">{formatOrderItems(o.items)}</p>
                   </div>
                   <p className="text-sm font-bold">₹{o.totalAmount || 0}</p>
                   <Badge variant={o.status === "delivered" ? "default" : o.status === "preparing" ? "secondary" : "outline"}>{o.status || "pending"}</Badge>
@@ -172,7 +181,7 @@ export default function RestaurantPartnerPortal() {
               <CardContent className="p-5 flex items-center gap-4">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold">{o.customerName || "Customer"}</p>
-                  <p className="text-xs text-muted-foreground">{o.items} · {o.createdAt ? new Date(o.createdAt).toLocaleDateString() : ""}</p>
+                  <p className="text-xs text-muted-foreground">{formatOrderItems(o.items)} · {o.createdAt ? new Date(o.createdAt).toLocaleDateString() : ""}</p>
                 </div>
                 <p className="font-bold text-sm">₹{o.totalAmount || 0}</p>
                 <Badge variant={o.status === "delivered" ? "default" : "secondary"}>{o.status || "pending"}</Badge>

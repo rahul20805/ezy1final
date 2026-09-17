@@ -46,6 +46,23 @@ function StatCard({ label, value, sub, color }: { label: string; value: string; 
   );
 }
 
+function formatOrderItems(items: any): string {
+  if (!items) return "—";
+  if (typeof items === "string") return items;
+  if (Array.isArray(items)) {
+    return (
+      items
+        .map((it: any) =>
+          typeof it === "string"
+            ? it
+            : `${it.quantity || 1}x ${it.name || it.title || "Item"}`
+        )
+        .join(", ") || "—"
+    );
+  }
+  return "—";
+}
+
 export default function GroceryPartnerPortal() {
   const [section, setSection] = useState("dashboard");
   const [products, setProducts] = useState<any[]>([]);
@@ -228,7 +245,7 @@ export default function GroceryPartnerPortal() {
                       <ShoppingCart className="w-4 h-4 text-muted-foreground shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{order.customerName || "Customer"}</p>
-                        <p className="text-xs text-muted-foreground">{order.items || "—"}</p>
+                        <p className="text-xs text-muted-foreground">{formatOrderItems(order.items)}</p>
                       </div>
                       <p className="text-sm font-semibold shrink-0">₹{order.totalAmount || order.amount || 0}</p>
                       <Badge variant={order.status === "completed" ? "default" : order.status === "pending" ? "secondary" : "outline"}
@@ -508,10 +525,10 @@ export default function GroceryPartnerPortal() {
             orders.map((order: any, i: number) => (
               <Card key={order.id || i} className="rounded-2xl border-border">
                 <CardContent className="p-5 flex flex-col sm:flex-row sm:items-center gap-4">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold">{order.customerName || "Customer"}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{order.items || "Items"} · {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : ""}</p>
-                  </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold">{order.customerName || "Customer"}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{formatOrderItems(order.items)} · {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : ""}</p>
+                    </div>
                   <p className="text-base font-bold">₹{order.totalAmount || order.amount || 0}</p>
                   <Badge variant={order.status === "completed" ? "default" : order.status === "pending" ? "secondary" : "outline"}>
                     {order.status}

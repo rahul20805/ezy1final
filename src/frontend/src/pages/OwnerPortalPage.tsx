@@ -25,7 +25,7 @@ import {
   Building2,
   LogOut,
   ExternalLink,
-  ChevronRight,
+  Lock,
 } from "lucide-react";
 
 export default function OwnerPortalPage() {
@@ -48,28 +48,33 @@ export default function OwnerPortalPage() {
     // If partner is logged in but not an owner/admin, redirect to their default dashboard
     if (isAuthenticated && currentPartner) {
       return (
-        <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 text-center">
-          <ShieldCheck className="w-12 h-12 text-amber-500 mb-4" />
-          <h1 className="text-xl font-bold">Owner Access Restricted</h1>
-          <p className="text-slate-400 text-sm max-w-md mt-2">
-            Your partner account ({currentPartner.partnerUserId}) does not have Platform Owner privileges.
-          </p>
-          <div className="flex gap-3 mt-6">
-            <Button
-              onClick={() => navigate({ to: "/partner-dashboard" })}
-              className="bg-primary hover:bg-primary/90"
-            >
-              Go to Partner Portal
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                logout();
-                navigate({ to: "/partner-login" });
-              }}
-            >
-              Sign In as Owner
-            </Button>
+        <div className="min-h-screen bg-muted/40 flex items-center justify-center p-6">
+          <div className="max-w-md w-full p-8 rounded-3xl bg-card border border-border text-center shadow-xl space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+            <h2 className="text-2xl font-display font-bold text-foreground">Owner Access Restricted</h2>
+            <p className="text-xs text-muted-foreground">
+              Your partner account ({currentPartner.partnerUserId}) does not have Platform Owner privileges.
+            </p>
+            <div className="flex gap-3 mt-4">
+              <Button
+                onClick={() => navigate({ to: "/partner-dashboard" })}
+                className="flex-1 rounded-xl bg-primary text-primary-foreground font-semibold"
+              >
+                Go to Partner Portal
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  logout();
+                  navigate({ to: "/partner-login" });
+                }}
+                className="flex-1 rounded-xl"
+              >
+                Sign In as Owner
+              </Button>
+            </div>
           </div>
         </div>
       );
@@ -108,13 +113,9 @@ export default function OwnerPortalPage() {
   };
 
   return (
-    <div className="flex h-screen w-full bg-slate-950 text-slate-100 overflow-hidden">
-      {/* Desktop & Collapsible Sidebar */}
-      <div
-        className={`hidden md:flex flex-col border-r border-slate-800 bg-slate-900 transition-all duration-300 ${
-          sidebarCollapsed ? "w-16" : "w-64"
-        }`}
-      >
+    <div className="h-screen max-h-screen bg-background flex flex-row overflow-hidden antialiased selection:bg-primary/20">
+      {/* Desktop Persistent Sidebar */}
+      <div className="hidden md:block flex-shrink-0 h-screen overflow-hidden">
         <OwnerSidebar
           currentSection={currentSection}
           onSelectSection={(sec) => setCurrentSection(sec)}
@@ -123,14 +124,14 @@ export default function OwnerPortalPage() {
         />
       </div>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Drawer Sheet */}
       {mobileSidebarOpen && (
         <div className="fixed inset-0 z-50 flex md:hidden">
           <div
             className="fixed inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setMobileSidebarOpen(false)}
           />
-          <div className="relative flex w-72 flex-col bg-slate-900 border-r border-slate-800 p-0 shadow-2xl z-10">
+          <div className="relative flex w-72 flex-col bg-card border-r border-border p-0 shadow-2xl z-10">
             <OwnerSidebar
               currentSection={currentSection}
               onSelectSection={(sec) => {
@@ -145,67 +146,68 @@ export default function OwnerPortalPage() {
         </div>
       )}
 
-      {/* Main Content Area */}
-      <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Top Header */}
-        <header className="h-16 border-b border-slate-800 bg-slate-900/80 backdrop-blur px-4 sm:px-6 flex items-center justify-between z-10">
+      {/* Main Administrative Control Workspace */}
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+        {/* Top Operational Header */}
+        <header className="h-16 border-b border-border bg-card/80 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between gap-4 z-20 flex-shrink-0">
           <div className="flex items-center gap-3">
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setMobileSidebarOpen(true)}
-              className="md:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 focus:outline-none"
-              aria-label="Open sidebar"
+              className="md:hidden h-9 w-9 p-0 text-muted-foreground rounded-xl"
             >
               <Menu className="w-5 h-5" />
-            </button>
-            <div className="flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-indigo-400" />
-              <h1 className="font-semibold text-slate-100 text-sm sm:text-base tracking-wide">
-                Owner Control Centre
-              </h1>
-              <Badge
-                variant="outline"
-                className="hidden sm:inline-flex text-[10px] tracking-wider uppercase bg-indigo-950/60 border-indigo-700/60 text-indigo-300 font-semibold px-2 py-0.5"
-              >
-                Super Owner
-              </Badge>
+            </Button>
+
+            <div>
+              <div className="flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-primary" />
+                <h2 className="font-display font-bold text-sm sm:text-base text-foreground leading-none capitalize">
+                  {currentSection.replace(/_/g, " ")}
+                </h2>
+                <Badge
+                  variant="outline"
+                  className="text-[10px] hidden sm:inline-flex text-amber-600 border-amber-300 bg-amber-500/10 font-semibold"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1 animate-pulse" />
+                  Owner Control Centre
+                </Badge>
+              </div>
+              <p className="text-[11px] text-muted-foreground hidden sm:block mt-0.5">
+                {currentPartner?.businessName || "EZY1 Platform Headquarters"} • ID: {currentPartner?.partnerUserId || "EZY-P-10000"}
+              </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="hidden lg:flex items-center gap-2 text-xs text-slate-400 border border-slate-800 bg-slate-800/40 rounded-full px-3 py-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>{currentPartner?.businessName || "EZY1 Platform Owner"}</span>
-              <span className="text-slate-600">•</span>
-              <span className="font-mono text-slate-300">{currentPartner?.partnerUserId || "EZY-P-10000"}</span>
-            </div>
-
+          <div className="flex items-center gap-2.5">
             <Link
               to="/dashboard"
               target="_blank"
-              className="hidden sm:inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white px-2.5 py-1.5 rounded-md hover:bg-slate-800 transition"
+              className="inline-flex items-center gap-1.5 px-3 h-8 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 text-xs font-semibold transition-colors"
             >
-              <span>View Site</span>
               <ExternalLink className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Live Store</span>
             </Link>
 
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => {
                 logout();
                 navigate({ to: "/partner-login" });
               }}
-              className="text-xs text-slate-400 hover:text-rose-400 hover:bg-rose-950/20"
+              className="h-8 text-xs rounded-xl gap-1.5 border-border bg-card shadow-xs text-muted-foreground hover:text-destructive"
             >
-              <LogOut className="w-4 h-4 mr-1.5" />
+              <LogOut className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Logout</span>
             </Button>
           </div>
         </header>
 
-        {/* Section View Container */}
-        <main className="flex-1 overflow-y-auto bg-slate-950 p-4 sm:p-6 md:p-8">
-          <div className="max-w-7xl mx-auto space-y-6">
+        {/* Dynamic Workspace Container */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 custom-scrollbar bg-background/50">
+          <div className="max-w-7xl mx-auto pb-12">
             {renderSection()}
           </div>
         </main>

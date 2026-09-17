@@ -49,13 +49,20 @@ const PARTNER_TOKEN_KEY = "ezy1_partner_token";
 
 export function getPartnerToken(): string | null {
   if (typeof window === "undefined") return null;
-  return sessionStorage.getItem(PARTNER_TOKEN_KEY) || localStorage.getItem(PARTNER_TOKEN_KEY);
+  return (
+    sessionStorage.getItem(PARTNER_TOKEN_KEY) ||
+    localStorage.getItem(PARTNER_TOKEN_KEY) ||
+    localStorage.getItem("ezy1_token") ||
+    localStorage.getItem("token")
+  );
 }
 
 export function setPartnerToken(token: string): void {
   if (typeof window === "undefined") return;
   sessionStorage.setItem(PARTNER_TOKEN_KEY, token);
   localStorage.setItem(PARTNER_TOKEN_KEY, token);
+  localStorage.setItem("ezy1_token", token);
+  localStorage.setItem("token", token);
 }
 
 export function clearPartnerToken(): void {
