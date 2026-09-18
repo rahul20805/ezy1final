@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useIsMobile } from "../hooks/use-mobile";
+import { Ezy1Logo } from "./Ezy1Logo";
 
 const ADMIN_ITEMS = [
   { icon: LayoutDashboard, label: "Overview", href: "/admin" },
@@ -75,21 +76,14 @@ function AdminSidebarContent({
     <div className="flex flex-col h-full bg-sidebar border-r border-sidebar-border">
       {/* Brand header */}
       <div
-        className={`flex items-center gap-2 p-4 border-b border-sidebar-border ${collapsed ? "justify-center" : ""}`}
+        className={`p-4 border-b border-sidebar-border flex items-center ${collapsed ? "justify-center" : ""}`}
       >
-        <div className="w-8 h-8 rounded-lg bg-accent flex-shrink-0 flex items-center justify-center shadow-xs">
-          <ShieldCheck className="w-4 h-4 text-accent-foreground" />
-        </div>
-        {!collapsed && (
-          <div>
-            <div className="font-display font-bold text-sm text-sidebar-foreground leading-none">
-              ezy<span className="text-primary">1</span>
-            </div>
-            <div className="text-xs text-muted-foreground leading-none mt-0.5">
-              Super Admin
-            </div>
-          </div>
-        )}
+        <Ezy1Logo
+          size={collapsed ? "sm" : "md"}
+          showWordmark={!collapsed}
+          subtitle="Super Admin"
+          to="/"
+        />
       </div>
 
       {/* Main nav */}
@@ -107,13 +101,11 @@ function AdminSidebarContent({
             <Link
               key={item.href}
               to={isOverview ? "/admin" : item.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-body transition-smooth ${
-                collapsed ? "justify-center" : ""
-              } ${
-                isActive
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-body transition-smooth ${collapsed ? "justify-center" : ""
+                } ${isActive
                   ? "bg-accent text-accent-foreground shadow-xs"
                   : "text-sidebar-foreground hover:bg-muted"
-              }`}
+                }`}
               onClick={onLinkClick}
               data-ocid={`admin_sidebar.link.${item.label.toLowerCase().replace(/ /g, "_")}`}
             >

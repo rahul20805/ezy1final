@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useIsMobile } from "../hooks/use-mobile";
+import { Ezy1Logo } from "./Ezy1Logo";
 
 const VENDOR_ITEMS = [
   {
@@ -180,21 +181,14 @@ function VendorSidebarContent({
     <div className="flex flex-col h-full bg-sidebar border-r border-sidebar-border">
       {/* Brand header */}
       <div
-        className={`flex items-center gap-2 p-4 border-b border-sidebar-border ${collapsed ? "justify-center" : ""}`}
+        className={`p-4 border-b border-sidebar-border flex items-center ${collapsed ? "justify-center" : ""}`}
       >
-        <div className="w-8 h-8 rounded-lg bg-secondary flex-shrink-0 flex items-center justify-center shadow-xs">
-          <PortalIcon className="w-4 h-4 text-secondary-foreground" />
-        </div>
-        {!collapsed && (
-          <div>
-            <div className="font-display font-bold text-sm text-sidebar-foreground leading-none">
-              ezy<span className="text-primary">1</span>
-            </div>
-            <div className="text-xs text-muted-foreground leading-none mt-0.5">
-              {config.title}
-            </div>
-          </div>
-        )}
+        <Ezy1Logo
+          size={collapsed ? "sm" : "md"}
+          showWordmark={!collapsed}
+          subtitle={config.title}
+          to="/"
+        />
       </div>
 
       {/* Status badge */}

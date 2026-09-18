@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { FaGoogle } from "react-icons/fa";
 import Layout from "../components/Layout";
+import { Ezy1Logo } from "../components/Ezy1Logo";
 import { useAuth } from "../lib/AuthContext";
 import { checkUsernameAvailability } from "../lib/api";
 import { toast } from "sonner";
@@ -323,16 +324,9 @@ export default function LoginPage() {
       <div className="min-h-[calc(100vh-8rem)] bg-gradient-to-b from-background via-muted/20 to-background flex items-center justify-center p-4 sm:p-6">
         <div className="w-full max-w-md space-y-6">
           {/* Header Brand */}
-          <div className="text-center space-y-2">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-600 shadow-elevated mb-1">
-              <span className="text-white font-display font-black text-2xl tracking-tight">
-                e1
-              </span>
-            </div>
-            <h1 className="font-display font-bold text-2xl sm:text-3xl text-foreground">
-              Welcome to ezy<span className="text-emerald-600">1</span>
-            </h1>
-            <p className="text-muted-foreground text-xs sm:text-sm">
+          <div className="text-center space-y-3 flex flex-col items-center">
+            <Ezy1Logo size="xl" asLink={false} />
+            <p className="text-muted-foreground text-xs sm:text-sm max-w-xs">
               Instant Groceries, Healthcare, Bus Tracking & On-Demand Services
             </p>
           </div>

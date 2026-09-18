@@ -42,6 +42,7 @@ import { useLocationStore } from "../lib/locationStore";
 import { LocationModal } from "./location/LocationModal";
 import { NAVAEIN_URL } from "../config/links";
 import { NavaeInBottomAd } from "./NavaeInBottomAd";
+import { Ezy1Logo } from "./Ezy1Logo";
 
 const navLinks = [
   { label: "All Services", href: "/dashboard" },
@@ -108,20 +109,7 @@ export default function Layout({ children }: LayoutProps) {
       <header className="sticky top-0 z-50 bg-card border-b border-border shadow-subtle">
         <div className="container flex items-center justify-between h-16 px-4">
           {/* Logo */}
-          <Link
-            to="/"
-            className="flex items-center gap-2 group"
-            data-ocid="nav.logo_link"
-          >
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-xs">
-              <span className="text-primary-foreground font-display font-black text-sm">
-                e1
-              </span>
-            </div>
-            <span className="font-display font-bold text-xl text-foreground tracking-tight">
-              ezy<span className="text-primary">1</span>
-            </span>
-          </Link>
+          <Ezy1Logo size="md" />
 
           {/* Desktop Navigation */}
           {!isMobile && (
@@ -394,15 +382,8 @@ export default function Layout({ children }: LayoutProps) {
                 <SheetContent side="right" className="w-72 bg-card p-0">
                   <div className="flex flex-col h-full">
                     {/* Mobile menu header */}
-                    <div className="flex items-center gap-2 p-4 border-b border-border">
-                      <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                        <span className="text-primary-foreground font-display font-black text-sm">
-                          e1
-                        </span>
-                      </div>
-                      <span className="font-display font-bold text-xl text-foreground">
-                        ezy<span className="text-primary">1</span>
-                      </span>
+                    <div className="p-4 border-b border-border">
+                      <Ezy1Logo size="md" />
                     </div>
 
                     {/* Location */}
@@ -841,15 +822,8 @@ export default function Layout({ children }: LayoutProps) {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {/* Brand */}
             <div className="md:col-span-2">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                  <span className="text-primary-foreground font-display font-black text-sm">
-                    e1
-                  </span>
-                </div>
-                <span className="font-display font-bold text-xl text-foreground">
-                  ezy<span className="text-primary">1</span>
-                </span>
+              <div className="mb-3">
+                <Ezy1Logo size="lg" />
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
                 Everything App Connecting India. From daily essentials to

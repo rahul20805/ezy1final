@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" width="320" height="80">
+  <defs>
+    <linearGradient id="logoBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF6A00" />
+      <stop offset="50%" stop-color="#FF5100" />
+      <stop offset="100%" stop-color="#E53935" />
+    </linearGradient>
+    <linearGradient id="logoGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF500" />
+      <stop offset="100%" stop-color="#FFB300" />
+    </linearGradient>
+    <linearGradient id="logoGlossGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+
+  <!-- Left Icon Emblem -->
+  <g transform="translate(4, 8)">
+    <rect x="0" y="0" width="64" height="64" rx="18" fill="url(#logoBgGrad)" />
+    <rect x="0.5" y="0.5" width="63" height="63" rx="17.5" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1" />
+    
+    <text x="32" y="42" 
+          text-anchor="middle" 
+          font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" 
+          font-weight="900" 
+          font-size="25" 
+          letter-spacing="-1">
+      <tspan fill="#FFFFFF">ezy</tspan><tspan fill="url(#logoGoldGrad)" font-size="28">1</tspan>
+    </text>
+    
+    <rect x="18" y="48" width="22" height="3" rx="1.5" fill="url(#logoGoldGrad)" />
+    <circle cx="14" cy="49.5" r="1.5" fill="#FFFFFF" />
+    <circle cx="44" cy="49.5" r="1.5" fill="url(#logoGoldGrad)" />
+  </g>
+
+  <!-- Right Typography -->
+  <g transform="translate(80, 0)">
+    <text x="0" y="47" 
+          font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" 
+          font-weight="900" 
+          font-size="44" 
+          letter-spacing="-1.5">
+      <tspan fill="currentColor">ezy</tspan><tspan fill="#FF5722">1</tspan>
+    </text>
+    <text x="2" y="65" 
+          font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" 
+          font-weight="700" 
+          font-size="10.5" 
+          letter-spacing="2.8" 
+          fill="#FF6A00">
+      SUPERAPP &bull; HYPERLOCAL
+    </text>
+  </g>
+</svg>

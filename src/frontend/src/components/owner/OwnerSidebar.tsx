@@ -32,6 +32,7 @@ import {
   usePartnerAuth,
 } from "../../lib/partnerAuthStore";
 import { useStoreData } from "../../lib/storeData";
+import { Ezy1Logo } from "../Ezy1Logo";
 
 export type OwnerSectionId =
   | "dashboard"
@@ -206,17 +207,18 @@ export function OwnerSidebar({
 
   return (
     <aside
-      className={`h-screen flex flex-col bg-card border-r border-border transition-all duration-300 z-30 ${
-        collapsed ? "w-16" : "w-64 sm:w-72"
-      }`}
+      className={`h-screen flex flex-col bg-card border-r border-border transition-all duration-300 z-30 ${collapsed ? "w-16" : "w-64 sm:w-72"
+        }`}
     >
       {/* Brand Header */}
       <div className="p-4 border-b border-border flex items-center justify-between gap-2">
         {!collapsed && (
           <div className="flex items-center gap-2.5 overflow-hidden">
-            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-display font-black text-lg shadow-sm flex-shrink-0">
-              e1
-            </div>
+            <Ezy1Logo
+              size="sm"
+              showWordmark={false}
+              to="/"
+            />
             <div className="min-w-0">
               <h2 className="font-display font-bold text-sm text-foreground truncate leading-tight">
                 {currentPartner?.businessName || store.settings.brandName}
@@ -234,8 +236,12 @@ export function OwnerSidebar({
         )}
 
         {collapsed && (
-          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-display font-black text-lg shadow-sm mx-auto">
-            e1
+          <div className="mx-auto">
+            <Ezy1Logo
+              size="sm"
+              showWordmark={false}
+              to="/"
+            />
           </div>
         )}
 
@@ -269,19 +275,17 @@ export function OwnerSidebar({
                 onSelectSection(item.id);
                 if (onCloseMobile) onCloseMobile();
               }}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all group ${
-                isActive
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all group ${isActive
                   ? "bg-primary text-primary-foreground font-semibold shadow-xs"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
-              } ${collapsed ? "justify-center px-2" : ""}`}
+                } ${collapsed ? "justify-center px-2" : ""}`}
               title={collapsed ? item.label : undefined}
             >
               <Icon
-                className={`w-4 h-4 flex-shrink-0 transition-transform ${
-                  isActive
+                className={`w-4 h-4 flex-shrink-0 transition-transform ${isActive
                     ? "text-primary-foreground scale-110"
                     : "text-muted-foreground group-hover:text-foreground"
-                }`}
+                  }`}
               />
               {!collapsed && (
                 <span className="flex-1 text-left truncate">{item.label}</span>
@@ -289,11 +293,10 @@ export function OwnerSidebar({
               {!collapsed && badgeVal !== null && (
                 <Badge
                   variant={isActive ? "outline" : "secondary"}
-                  className={`text-[10px] px-1.5 py-0 h-5 min-w-[20px] rounded-full flex items-center justify-center font-bold ${
-                    isActive
+                  className={`text-[10px] px-1.5 py-0 h-5 min-w-[20px] rounded-full flex items-center justify-center font-bold ${isActive
                       ? "border-primary-foreground/40 text-primary-foreground bg-primary-foreground/15"
                       : "bg-muted text-foreground"
-                  }`}
+                    }`}
                 >
                   {badgeVal}
                 </Badge>
@@ -309,9 +312,8 @@ export function OwnerSidebar({
           href="/"
           target="_blank"
           rel="noreferrer"
-          className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors ${
-            collapsed ? "justify-center" : ""
-          }`}
+          className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors ${collapsed ? "justify-center" : ""
+            }`}
           title="View Live Public Store"
         >
           <ExternalLink className="w-3.5 h-3.5 flex-shrink-0" />

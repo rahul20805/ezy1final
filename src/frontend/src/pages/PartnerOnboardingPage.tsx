@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { setCurrentRole } from "../lib/auth";
+import { Ezy1Logo } from "../components/Ezy1Logo";
 
 const STEPS = ["Business Info", "Location & Ops", "Docs & Bank", "Review"];
 
@@ -161,14 +162,7 @@ export default function PartnerOnboardingPage() {
       {/* Header */}
       <div className="bg-card border-b border-border shadow-subtle sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <Store className="w-4 h-4 text-primary-foreground" />
-            </div>
-            <span className="font-display font-bold text-lg">
-              ezy<span className="text-primary">1</span>
-            </span>
-          </div>
+          <Ezy1Logo size="sm" to="/" />
           <Badge variant="outline" className="text-xs">
             Partner Registration
           </Badge>

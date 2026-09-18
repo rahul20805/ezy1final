@@ -26,6 +26,7 @@ import { useState, useEffect } from "react";
 import { useIsMobile } from "../hooks/use-mobile";
 
 import { useNotificationStore } from "../lib/notificationStore";
+import { Ezy1Logo } from "./Ezy1Logo";
 
 const sidebarItems = [
   { icon: Wallet, label: "Wallet", href: "/dashboard/wallet", badge: null },
@@ -61,18 +62,13 @@ function SidebarContent({
     <div className="flex flex-col h-full bg-sidebar border-r border-sidebar-border">
       {/* Brand header */}
       <div
-        className={`flex items-center gap-2 p-4 border-b border-sidebar-border ${collapsed ? "justify-center" : ""}`}
+        className={`p-4 border-b border-sidebar-border flex items-center ${collapsed ? "justify-center" : ""}`}
       >
-        <div className="w-8 h-8 rounded-lg bg-primary flex-shrink-0 flex items-center justify-center shadow-xs">
-          <span className="text-primary-foreground font-display font-black text-sm">
-            e1
-          </span>
-        </div>
-        {!collapsed && (
-          <span className="font-display font-bold text-lg text-sidebar-foreground">
-            ezy<span className="text-primary">1</span>
-          </span>
-        )}
+        <Ezy1Logo
+          size={collapsed ? "sm" : "md"}
+          showWordmark={!collapsed}
+          to="/"
+        />
       </div>
 
       {/* Main nav */}

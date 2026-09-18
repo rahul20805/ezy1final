@@ -5,6 +5,7 @@ import { Link } from "@tanstack/react-router";
 import { Clock, MapPin, ShoppingBag, Star } from "lucide-react";
 import Layout from "../components/Layout";
 import { useStoreData } from "../lib/storeData";
+import { Ezy1IconBadge } from "../components/Ezy1Logo";
 
 export default function VendorStorefrontPage() {
   const store = useStoreData();
@@ -18,8 +19,8 @@ export default function VendorStorefrontPage() {
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
 
           <div className="flex flex-col md:flex-row gap-6 items-start">
-            <div className="w-24 h-24 rounded-3xl bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0 text-3xl font-display font-black text-primary">
-              {store.settings.brandName.charAt(0)}
+            <div className="w-24 h-24 rounded-3xl overflow-hidden flex items-center justify-center flex-shrink-0 shadow-md">
+              <Ezy1IconBadge size={96} />
             </div>
             <div className="flex-1">
               <div className="flex flex-wrap gap-2 mb-2">

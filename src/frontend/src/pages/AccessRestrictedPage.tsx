@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { usePartnerAuth } from "../lib/partnerAuthStore";
 import { getProviderLabel, getProviderDashboardUrl } from "../lib/permissions";
+import { Ezy1Logo } from "../components/Ezy1Logo";
 
 interface AccessRestrictedPageProps {
   requiredProviderTypes?: string[];
@@ -22,14 +23,8 @@ export function AccessRestrictedPage({ requiredProviderTypes = [] }: AccessRestr
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
       {/* Brand Header */}
-      <div className="mb-8 flex items-center gap-2.5">
-        <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-md">
-          <span className="text-primary-foreground font-display font-black text-base">e1</span>
-        </div>
-        <div>
-          <span className="font-display font-black text-xl tracking-tight text-foreground">EZY1</span>
-          <span className="text-xs ml-1.5 font-bold uppercase tracking-widest text-primary">Partner Security</span>
-        </div>
+      <div className="mb-8 flex flex-col items-center gap-1">
+        <Ezy1Logo size="lg" subtitle="Partner Security Portal" />
       </div>
 
       <Card className="max-w-md w-full border-border/80 shadow-lg rounded-3xl bg-card overflow-hidden">

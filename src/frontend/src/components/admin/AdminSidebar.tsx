@@ -63,6 +63,7 @@ import {
   usePartnerAuth,
 } from "../../lib/partnerAuthStore";
 import { useStoreData } from "../../lib/storeData";
+import { Ezy1Logo } from "../Ezy1Logo";
 
 export type AdminSectionId =
   // 1. Main
@@ -477,23 +478,19 @@ export function AdminSidebar({
       {/* Brand Header */}
       <div className="h-16 px-4 border-b border-border flex items-center justify-between flex-shrink-0">
         {!collapsed ? (
-          <div className="flex items-center gap-2.5 overflow-hidden">
-            <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-display font-black text-sm shadow-xs flex-shrink-0">
-              e1
-            </div>
-            <div className="truncate">
-              <h1 className="font-display font-bold text-sm text-foreground tracking-tight leading-none">
-                {store.settings.brandName}{" "}
-                <span className="text-primary font-black">OS</span>
-              </h1>
-              <p className="text-[10px] text-muted-foreground font-medium truncate mt-0.5">
-                Central Admin Control Center
-              </p>
-            </div>
-          </div>
+          <Ezy1Logo
+            size="md"
+            showWordmark={true}
+            subtitle="Central Admin OS"
+            to="/"
+          />
         ) : (
-          <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-display font-black text-sm mx-auto shadow-xs">
-            e1
+          <div className="mx-auto">
+            <Ezy1Logo
+              size="sm"
+              showWordmark={false}
+              to="/"
+            />
           </div>
         )}
 
