@@ -5,6 +5,7 @@ import {
   createRootRoute,
   createRoute,
   createRouter,
+  type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { Suspense, lazy } from "react";
 import {
@@ -84,6 +85,123 @@ function PageLoader() {
   );
 }
 
+function RouterErrorFallback({ error }: ErrorComponentProps) {
+  const handleReload = () => {
+    try {
+      localStorage.removeItem("ezy1-cart");
+      localStorage.removeItem("ezy1_auth_token");
+      localStorage.removeItem("ezy1_customer_user");
+      localStorage.removeItem("ezy1_complete_platform_os_v3");
+    } catch {}
+    window.location.href = "/";
+  };
+
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "linear-gradient(135deg, #fff7f0 0%, #fff 100%)",
+        fontFamily: "'Inter', system-ui, sans-serif",
+        padding: "24px",
+        textAlign: "center",
+      }}
+    >
+      <div
+        style={{
+          width: 64,
+          height: 64,
+          borderRadius: 20,
+          background: "linear-gradient(135deg, #FF5100 0%, #FF7A00 100%)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginBottom: 20,
+          boxShadow: "0 8px 32px rgba(255,81,0,0.25)",
+          fontSize: 32,
+        }}
+      >
+        ⚡
+      </div>
+
+      <h1
+        style={{
+          fontSize: 22,
+          fontWeight: 800,
+          color: "#111",
+          marginBottom: 8,
+          letterSpacing: "-0.5px",
+        }}
+      >
+        Oops! Something went wrong
+      </h1>
+      <p
+        style={{
+          fontSize: 14,
+          color: "#666",
+          maxWidth: 340,
+          lineHeight: 1.6,
+          marginBottom: 28,
+        }}
+      >
+        Ezy1 hit an unexpected error. Tap the button below — this will clear
+        any bad cached data and reload the app fresh.
+      </p>
+
+      <button
+        onClick={handleReload}
+        style={{
+          background: "linear-gradient(135deg, #FF5100 0%, #FF7A00 100%)",
+          color: "#fff",
+          border: "none",
+          borderRadius: 14,
+          padding: "14px 32px",
+          fontSize: 15,
+          fontWeight: 700,
+          cursor: "pointer",
+          boxShadow: "0 4px 16px rgba(255,81,0,0.3)",
+          marginBottom: 16,
+        }}
+      >
+        🔄 Reload Ezy1
+      </button>
+
+      {error && (
+        <details
+          style={{
+            marginTop: 16,
+            maxWidth: 480,
+            textAlign: "left",
+            fontSize: 11,
+            color: "#aaa",
+          }}
+        >
+          <summary style={{ cursor: "pointer", marginBottom: 6 }}>
+            Technical details
+          </summary>
+          <pre
+            style={{
+              background: "#f5f5f5",
+              padding: "10px 14px",
+              borderRadius: 8,
+              overflowX: "auto",
+              fontSize: 10,
+              color: "#c0392b",
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-all",
+            }}
+          >
+            {error.toString()}
+          </pre>
+        </details>
+      )}
+    </div>
+  );
+}
+
 // Root layout with AuthPromptProvider to enable explore-without-login
 const rootRoute = createRootRoute({
   component: () => (
@@ -93,6 +211,7 @@ const rootRoute = createRootRoute({
       </Suspense>
     </AuthPromptProvider>
   ),
+  errorComponent: RouterErrorFallback,
 });
 
 // Multi-Domain Root & Dispatcher Components

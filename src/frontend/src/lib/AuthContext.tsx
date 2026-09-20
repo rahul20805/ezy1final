@@ -1,5 +1,4 @@
 import type { Identity } from "@dfinity/agent";
-import { AuthClient } from "@dfinity/auth-client";
 import type React from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 import {
@@ -40,48 +39,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [identity, setIdentity] = useState<Identity | null>(null);
-  const [authClient, setAuthClient] = useState<AuthClient | null>(null);
+  const [identity] = useState<Identity | null>(null);
 
   const { initSseConnection, closeSseConnection } = useNotificationStore();
 
   useEffect(() => {
     async function init() {
-      // 1. Check custom JWT token session
-      const storedToken = getAuthToken();
-      const storedUser = getStoredUser();
-
-      if (storedToken && storedUser) {
-        setToken(storedToken);
-        setUser(storedUser);
-        setIsAuthenticated(true);
-        setCurrentRole((storedUser.role?.toLowerCase() as any) || "customer");
-        initSseConnection();
-
-        // Background profile refresh
-        fetchCurrentUser()
-          .then((res) => {
-            if (res.user) {
-              setUser(res.user);
-              setStoredUser(res.user);
-            }
-          })
-          .catch(() => {
-            // Token may have expired
-          });
-      }
-
-      // 2. Initialize Internet Identity client if present
       try {
-        const client = await AuthClient.create();
-        setAuthClient(client);
+        // Restore JWT session from localStorage
+        const storedToken = getAuthToken();
+        const storedUser = getStoredUser();
 
-        if (await client.isAuthenticated()) {
+        if (storedToken && storedUser) {
+          setToken(storedToken);
+          setUser(storedUser);
           setIsAuthenticated(true);
-          setIdentity(client.getIdentity());
+          setCurrentRole((storedUser.role?.toLowerCase() as any) || "customer");
+          initSseConnection();
+
+          // Background profile refresh
+          fetchCurrentUser()
+            .then((res) => {
+              if (res.user) {
+                setUser(res.user);
+                setStoredUser(res.user);
+              }
+            })
+            .catch(() => {
+              // Token may have expired — that's fine, user stays logged in locally
+            });
         }
       } catch (e) {
-        // Continue if II is not active in local environment
+        // Auth init failure — continue as guest
+        console.warn("[AuthProvider] Init error:", e);
       }
     }
 
@@ -179,15 +169,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await logoutCustomer();
     } catch {}
-    if (authClient) {
-      await authClient.logout();
-    }
     clearAuthSession();
     clearRole();
     setIsAuthenticated(false);
     setUser(null);
     setToken(null);
-    setIdentity(null);
     closeSseConnection();
   };
 
