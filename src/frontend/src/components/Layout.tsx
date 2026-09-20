@@ -303,7 +303,7 @@ export default function Layout({ children }: LayoutProps) {
 
                     {/* 5. Payments */}
                     <DropdownMenuItem asChild>
-                      <Link to="/dashboard" className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold">
+                      <Link to="/payments" className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold">
                         <CreditCard className="w-4 h-4 text-violet-500" />
                         <span>Payments & Cards</span>
                       </Link>
@@ -311,7 +311,7 @@ export default function Layout({ children }: LayoutProps) {
 
                     {/* 6. My Account */}
                     <DropdownMenuItem asChild>
-                      <Link to="/dashboard" className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold">
+                      <Link to="/my-account" className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold">
                         <User className="w-4 h-4 text-primary" />
                         <span>My Profile & Account</span>
                       </Link>
@@ -517,7 +517,7 @@ export default function Layout({ children }: LayoutProps) {
 
                           {/* 5. Payments */}
                           <Link
-                            to="/dashboard"
+                            to="/payments"
                             className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-body text-foreground hover:bg-muted rounded-lg transition-smooth"
                             onClick={() => setMobileOpen(false)}
                             data-ocid="nav.mobile_payments_link"
@@ -528,7 +528,7 @@ export default function Layout({ children }: LayoutProps) {
 
                           {/* 6. My Account */}
                           <Link
-                            to="/dashboard"
+                            to="/my-account"
                             className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-body text-foreground hover:bg-muted rounded-lg transition-smooth"
                             onClick={() => setMobileOpen(false)}
                             data-ocid="nav.mobile_dashboard_link"
@@ -872,20 +872,20 @@ export default function Layout({ children }: LayoutProps) {
                   </Link>
                 </li>
                 <li>
-                  <a
-                    href="/#healthcare"
+                  <Link
+                    to="/hospitals"
                     className="text-sm text-muted-foreground hover:text-primary transition-colors"
                   >
                     Healthcare & Doctors
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="/#transport"
+                  <Link
+                    to="/dashboard/transport"
                     className="text-sm text-muted-foreground hover:text-primary transition-colors"
                   >
                     Transport & Fleet
-                  </a>
+                  </Link>
                 </li>
                 <li>
                   <a

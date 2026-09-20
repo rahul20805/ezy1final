@@ -33,7 +33,7 @@ const sidebarItems = [
   { icon: ShoppingCart, label: "Cart", href: "/dashboard/cart", badge: null },
   { icon: Calendar, label: "History", href: "/my-bookings", badge: null },
   { icon: Package, label: "Orders", href: "/my-orders", badge: null },
-  { icon: CreditCard, label: "Payments", href: "/dashboard", badge: null },
+  { icon: CreditCard, label: "Payments", href: "/payments", badge: null },
   { icon: User, label: "My Account", href: "/my-dashboard", badge: null },
 ];
 

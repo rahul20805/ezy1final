@@ -1942,3 +1942,63 @@ router.delete("/grocery/products/:id", requirePartnerAuth, requireProviderType("
   } catch (err) { res.status(500).json({ error: "Failed to delete product" }); }
 });
 
+// --- ECOSYSTEM DISCOVERY ROUTES ---
+router.get("/hospitals/availability", async (req, res) => {
+  res.json({
+    success: true,
+    summary: { totalBeds: 450, availableICU: 42, availableGeneral: 180, availableVentilator: 18 },
+    hospitals: [
+      { id: "hosp-1", name: "Apollo Multispeciality Hospital", availableBeds: { general: 45, icu: 14, ventilator: 6 } },
+      { id: "hosp-2", name: "Fortis Memorial Hospital", availableBeds: { general: 32, icu: 9, ventilator: 4 } },
+      { id: "hosp-3", name: "Max Super Care Clinic & Trauma", availableBeds: { general: 28, icu: 6, ventilator: 3 } }
+    ]
+  });
+});
+
+router.get("/stays", async (req, res) => {
+  res.json([
+    { id: "stay-1", name: "The Grand Heritage Palace", city: "City Center", rating: 4.8, pricePerNight: 2499 },
+    { id: "stay-2", name: "Treebo Trend Comfort Inn", city: "Station Road", rating: 4.6, pricePerNight: 1499 }
+  ]);
+});
+
+router.get("/travel", async (req, res) => {
+  res.json([
+    { id: "tr-1", title: "Golden Triangle Heritage Expedition", duration: "3 Days / 2 Nights", price: 4999, rating: 4.9 }
+  ]);
+});
+
+router.get("/explore", async (req, res) => {
+  res.json([
+    { id: "exp-1", name: "Historic Fort & Clock Tower", category: "Heritage & Culture", rating: 4.8 }
+  ]);
+});
+
+router.get("/buses", async (req, res) => {
+  res.json([
+    { id: "bus-1", operator: "EZY Express Volvo", from: "City Center", to: "Capital Junction", fare: 799 }
+  ]);
+});
+
+router.get("/rides/shared", async (req, res) => {
+  res.json([
+    { id: "pool-1", driverName: "Vikram S.", route: "Metro Station ➔ Cyber Hub", pricePerSeat: 75 }
+  ]);
+});
+
+router.get("/healthcare/home", async (req, res) => {
+  res.json([
+    { id: "hh-1", title: "Elder Care & Bedside Assistance", pricePerDay: 999 }
+  ]);
+});
+
+router.get("/user/recent-items", async (req, res) => {
+  res.json([
+    { id: "g-1", name: "Aashirvaad Superior MP Sharbati Atta", price: 245 }
+  ]);
+});
+
+router.post("/whatsapp/webhook", async (req, res) => {
+  res.json({ success: true, received: true, status: "DELIVERED" });
+});
+

@@ -1622,6 +1622,247 @@ Be helpful, concise, courteous, and provide accurate navigation instructions to 
       return sendJson(res, 200, { success: true, auditLogs: db.auditLogs || [] });
     }
 
+    // ----------------------------------------------------
+    // 14. SUPER-APP ECOSYSTEM & DISCOVERY ENDPOINTS
+    // ----------------------------------------------------
+    if (pathname === "/hospitals/availability" && method === "GET") {
+      return sendJson(res, 200, {
+        success: true,
+        summary: { totalBeds: 450, availableICU: 42, availableGeneral: 180, availableVentilator: 18 },
+        hospitals: [
+          {
+            id: "hosp-1",
+            name: "Apollo Multispeciality Hospital",
+            type: "Multispeciality Tertiary Care",
+            address: "Main Ring Road, Health City",
+            phone: "+91 98765 43210",
+            emergencyPhone: "1066",
+            rating: 4.9,
+            totalBeds: 250,
+            availableBeds: { general: 45, icu: 14, ventilator: 6, emergency: 8 },
+            distance: "1.8 km",
+            ambulanceAvailable: true,
+          },
+          {
+            id: "hosp-2",
+            name: "Fortis Memorial Hospital",
+            type: "Super Speciality & Cardiac Center",
+            address: "Sector 14, Central Avenue",
+            phone: "+91 98765 43211",
+            emergencyPhone: "1050",
+            rating: 4.8,
+            totalBeds: 180,
+            availableBeds: { general: 32, icu: 9, ventilator: 4, emergency: 5 },
+            distance: "3.2 km",
+            ambulanceAvailable: true,
+          },
+          {
+            id: "hosp-3",
+            name: "Max Super Care Clinic & Trauma",
+            type: "Trauma & Critical Care",
+            address: "Opposite Metro Station, Gate 2",
+            phone: "+91 98765 43212",
+            emergencyPhone: "102",
+            rating: 4.7,
+            totalBeds: 120,
+            availableBeds: { general: 28, icu: 6, ventilator: 3, emergency: 4 },
+            distance: "4.1 km",
+            ambulanceAvailable: true,
+          }
+        ]
+      });
+    }
+
+    if (pathname === "/stays" && method === "GET") {
+      return sendJson(res, 200, [
+        {
+          id: "stay-1",
+          name: "The Grand Heritage Palace",
+          city: "City Center",
+          rating: 4.8,
+          reviews: 1240,
+          pricePerNight: 2499,
+          mrp: 3999,
+          image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500&auto=format&fit=crop&q=60",
+          tags: ["Couple Friendly", "Pool", "Free Breakfast"]
+        },
+        {
+          id: "stay-2",
+          name: "Treebo Trend Comfort Inn",
+          city: "Station Road",
+          rating: 4.6,
+          reviews: 890,
+          pricePerNight: 1499,
+          mrp: 2200,
+          image: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=500&auto=format&fit=crop&q=60",
+          tags: ["Business", "Free Wifi", "AC"]
+        },
+        {
+          id: "stay-3",
+          name: "Royal Boutique Residency",
+          city: "Civil Lines",
+          rating: 4.7,
+          reviews: 560,
+          pricePerNight: 1899,
+          mrp: 2999,
+          image: "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=500&auto=format&fit=crop&q=60",
+          tags: ["Family", "Restaurant", "Sanitized"]
+        }
+      ]);
+    }
+
+    if (pathname === "/travel" && method === "GET") {
+      return sendJson(res, 200, [
+        {
+          id: "tr-1",
+          title: "Golden Triangle Heritage Expedition",
+          duration: "3 Days / 2 Nights",
+          price: 4999,
+          rating: 4.9,
+          image: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=500&auto=format&fit=crop&q=60",
+          inclusions: ["AC Cab", "Guide", "Monument Entry"]
+        },
+        {
+          id: "tr-2",
+          title: "Spiritual Temple Trail & Evening Aarti",
+          duration: "Full Day Tour",
+          price: 1299,
+          rating: 4.8,
+          image: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=500&auto=format&fit=crop&q=60",
+          inclusions: ["AC Vehicle", "VIP Darshan", "Lunch"]
+        }
+      ]);
+    }
+
+    if (pathname === "/explore" && method === "GET") {
+      return sendJson(res, 200, [
+        {
+          id: "exp-1",
+          name: "Historic Fort & Clock Tower",
+          category: "Heritage & Culture",
+          rating: 4.8,
+          image: "https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?w=500&auto=format&fit=crop&q=60",
+          timings: "9:00 AM - 6:00 PM"
+        },
+        {
+          id: "exp-2",
+          name: "Central Botanical Rose Gardens",
+          category: "Nature & Walks",
+          rating: 4.7,
+          image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=500&auto=format&fit=crop&q=60",
+          timings: "6:00 AM - 8:00 PM"
+        }
+      ]);
+    }
+
+    if (pathname === "/buses" && method === "GET") {
+      return sendJson(res, 200, [
+        {
+          id: "bus-1",
+          operator: "EZY Express Volvo Multi-Axle",
+          type: "AC Sleeper (2+1)",
+          from: "City Center Terminal",
+          to: "Capital Interstate Junction",
+          departure: "21:30",
+          arrival: "06:00",
+          fare: 799,
+          seatsAvailable: 14,
+          rating: 4.8
+        },
+        {
+          id: "bus-2",
+          operator: "Rajdhani Royal Travels",
+          type: "BharatBenz AC Seater (2+2)",
+          from: "North Bypass Station",
+          to: "Tech Park Metro Terminal",
+          departure: "07:00",
+          arrival: "12:30",
+          fare: 450,
+          seatsAvailable: 22,
+          rating: 4.6
+        }
+      ]);
+    }
+
+    if (pathname === "/rides/shared" && method === "GET") {
+      return sendJson(res, 200, [
+        {
+          id: "pool-1",
+          driverName: "Vikram S. (Verified Daily Commuter)",
+          vehicle: "Swift Dzire (White) • DL 01 AB 1234",
+          route: "Metro Station Gate 3 ➔ Cyber Hub Tech Park",
+          departureTime: "08:45 AM Today",
+          seatsAvailable: 2,
+          pricePerSeat: 75,
+          rating: 4.9
+        },
+        {
+          id: "pool-2",
+          driverName: "Pooja M. (Verified Corporate)",
+          vehicle: "Baleno (Silver) • HR 26 CZ 9988",
+          route: "South Extension ➔ Electronic City Phase 1",
+          departureTime: "09:15 AM Today",
+          seatsAvailable: 3,
+          pricePerSeat: 85,
+          rating: 4.8
+        }
+      ]);
+    }
+
+    if (pathname === "/healthcare/home" && method === "GET") {
+      return sendJson(res, 200, [
+        {
+          id: "hh-1",
+          title: "Elder Care & Daily Bedside Assistance",
+          duration: "12 Hours / 24 Hours",
+          pricePerDay: 999,
+          rating: 4.9,
+          nurseType: "Certified Nurse / GDA Caregiver"
+        },
+        {
+          id: "hh-2",
+          title: "Post-Op & Physiotherapy Session at Home",
+          duration: "45 Mins Session",
+          pricePerDay: 599,
+          rating: 4.8,
+          nurseType: "Qualified BPT Physiotherapist"
+        }
+      ]);
+    }
+
+    if (pathname === "/user/recent-items" && method === "GET") {
+      return sendJson(res, 200, [
+        {
+          id: "g-1",
+          name: "Aashirvaad Superior MP Sharbati Atta",
+          price: 245,
+          image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&auto=format&fit=crop&q=60"
+        },
+        {
+          id: "g-5",
+          name: "Amul Pasteurised Pure Cow Butter",
+          price: 58,
+          image: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=500&auto=format&fit=crop&q=60"
+        },
+        {
+          id: "g-6",
+          name: "Mother Dairy Full Cream Fresh Milk",
+          price: 34,
+          image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=500&auto=format&fit=crop&q=60"
+        }
+      ]);
+    }
+
+    if (pathname === "/whatsapp/webhook" && method === "POST") {
+      const body = await parseBody(req);
+      return sendJson(res, 200, {
+        success: true,
+        received: true,
+        status: "DELIVERED",
+        timestamp: new Date().toISOString()
+      });
+    }
+
     // Route not found
     return sendJson(res, 404, {
       success: false,
