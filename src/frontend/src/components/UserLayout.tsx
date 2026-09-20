@@ -26,6 +26,8 @@ import { useState, useEffect } from "react";
 import { useIsMobile } from "../hooks/use-mobile";
 
 import { useNotificationStore } from "../lib/notificationStore";
+import { useCartStore } from "../lib/cartStore";
+import { MOCK_WALLET_BALANCE } from "../mock-data";
 import { Ezy1Logo } from "./Ezy1Logo";
 
 const sidebarItems = [
@@ -171,6 +173,7 @@ export default function UserLayout({ children, title }: UserLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const isMobile = useIsMobile();
   const { unreadCount, loadNotifications } = useNotificationStore();
+  const { totalItems } = useCartStore();
 
   useEffect(() => {
     loadNotifications();
@@ -243,7 +246,9 @@ export default function UserLayout({ children, title }: UserLayoutProps) {
                 className="gap-1.5 text-sm hidden sm:flex"
               >
                 <ShoppingBag className="w-4 h-4 text-primary" />
-                <span className="text-primary font-semibold">2 items</span>
+                <span className="text-primary font-semibold">
+                  {totalItems > 0 ? `${totalItems} item${totalItems === 1 ? "" : "s"}` : "Cart"}
+                </span>
               </Button>
             </Link>
             <Link to="/dashboard/wallet" data-ocid="topbar.wallet_link">
@@ -253,7 +258,7 @@ export default function UserLayout({ children, title }: UserLayoutProps) {
                 className="gap-1.5 text-sm hidden sm:flex"
               >
                 <Wallet className="w-4 h-4 text-primary" />
-                <span className="text-primary font-semibold">₹1,935</span>
+                <span className="text-primary font-semibold">₹{MOCK_WALLET_BALANCE.toLocaleString("en-IN")}</span>
               </Button>
             </Link>
             <Link to="/dashboard/notifications" data-ocid="topbar.notifications_link">
