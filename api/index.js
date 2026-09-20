@@ -1863,6 +1863,26 @@ Be helpful, concise, courteous, and provide accurate navigation instructions to 
       });
     }
 
+    // Stays / Hotels stub
+    if ((pathname === "/stays" || pathname === "/hotels") && method === "GET") {
+      return sendJson(res, 200, []);
+    }
+
+    // Travel / Tours stub
+    if ((pathname === "/travel" || pathname === "/explore") && method === "GET") {
+      return sendJson(res, 200, []);
+    }
+
+    // Bus transport stub
+    if ((pathname === "/buses" || pathname === "/bus") && method === "GET") {
+      return sendJson(res, 200, []);
+    }
+
+    // Shared rides stub
+    if ((pathname === "/rides/shared" || pathname === "/share-ride") && method === "GET") {
+      return sendJson(res, 200, []);
+    }
+
     // Route not found
     return sendJson(res, 404, {
       success: false,

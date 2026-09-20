@@ -220,7 +220,10 @@ export function AuthPromptProvider({ children }: { children: React.ReactNode }) 
 export function useRequireAuth() {
   const context = useContext(AuthPromptContext);
   if (!context) {
-    throw new Error("useRequireAuth must be used within an AuthPromptProvider");
+    // Return a no-op instead of crashing the app
+    return {
+      requireAuth: (_action: any) => false,
+    } as AuthPromptContextType;
   }
   return context;
 }

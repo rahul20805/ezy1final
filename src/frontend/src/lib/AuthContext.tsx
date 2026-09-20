@@ -215,7 +215,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    // Return a safe no-op context instead of crashing the whole app
+    return {
+      isAuthenticated: false,
+      user: null,
+      token: null,
+      identity: null,
+      signInWithPassword: async () => ({ success: false, error: "Not in AuthProvider" }),
+      signUp: async () => ({ success: false, error: "Not in AuthProvider" }),
+      sendPhoneOtp: async () => ({ success: false, message: "Not in AuthProvider" }),
+      verifyPhoneOtp: async () => ({ success: false }),
+      signInWithGoogle: async () => ({ success: false }),
+      login: async () => { window.location.href = "/login"; },
+      logout: async () => {},
+    } as AuthContextType;
   }
   return context;
 }
