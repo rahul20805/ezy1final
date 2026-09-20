@@ -53,13 +53,43 @@ import {
   getGroceryOrders,
 } from "./db.js";
 
-// Helper to set CORS headers
+import redis from "./redisClient.js";
+import queue from "./queueManager.js";
+import storage from "./storageService.js";
+import paymentService from "./paymentService.js";
+import {
+  getSystemHealth,
+  getPartnerScopedProducts,
+  getPartnerScopedOrders,
+  getPartnerScopedSettlements,
+  partnerUpdateProduct,
+  recordAuditLog,
+  loadDatabase,
+} from "./dbAdapter.js";
+
+const ALLOWED_ORIGINS = [
+  "https://ezy1.site",
+  "https://www.ezy1.site",
+  "https://partner.ezy1.site",
+  "https://admin.ezy1.site",
+  "https://cdn.ezy1.site",
+];
+
+// Helper to set hardened CORS and security headers
 function setCorsHeaders(req, res) {
-  const origin = req.headers.origin || "*";
-  res.setHeader("Access-Control-Allow-Origin", origin);
+  const origin = req.headers.origin;
+  if (origin && (ALLOWED_ORIGINS.includes(origin) || origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:"))) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  } else {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+  }
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Idempotency-Key");
   res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "SAMEORIGIN");
+  res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
 }
 
 // Helper to parse JSON body across standard Node and Vercel Serverless
@@ -130,11 +160,17 @@ export default async function handler(req, res) {
   const urlObj = new URL(req.url, `http://${req.headers.host || "localhost"}`);
   let pathname = urlObj.pathname;
   
-  // Normalize pathname to strip /api prefix if present
-  if (pathname.startsWith("/api/")) {
+  // Normalize pathname to strip /api/v1 or /api prefix if present
+  if (pathname.startsWith("/api/v1/")) {
+    pathname = pathname.replace("/api/v1", "");
+  } else if (pathname === "/api/v1") {
+    pathname = "/";
+  } else if (pathname.startsWith("/api/")) {
     pathname = pathname.replace("/api", "");
   } else if (pathname === "/api") {
     pathname = "/";
+  } else if (pathname.startsWith("/v1/")) {
+    pathname = pathname.replace("/v1", "");
   }
 
   const query = Object.fromEntries(urlObj.searchParams.entries());
@@ -142,12 +178,17 @@ export default async function handler(req, res) {
 
   try {
     // ----------------------------------------------------
-    // 1. HEALTH CHECK & STATUS
+    // 1. ENTERPRISE HEALTH CHECK & STATUS
     // ----------------------------------------------------
-    if (pathname === "/health" && method === "GET") {
+    if ((pathname === "/health" || pathname === "/status") && method === "GET") {
       return sendJson(res, 200, {
         status: "ok",
-        service: "Ezy1 Production API Engine",
+        service: "Ezy1 Production Enterprise API Layer",
+        version: "v1.0.0",
+        system: getSystemHealth(),
+        redis: redis.getStatus(),
+        queue: queue.getStatus(),
+        storage: storage.getStatus(),
         uptime: process.uptime(),
         timestamp: new Date().toISOString(),
       });
@@ -1472,6 +1513,113 @@ Be helpful, concise, courteous, and provide accurate navigation instructions to 
       const partnerId = authUser?.id || 1;
       const orders = getGroceryOrders(partnerId);
       return sendJson(res, 200, orders);
+    }
+
+    // ----------------------------------------------------
+    // 10. PAYMENTS, IDEMPOTENCY & RAZORPAY WEBHOOKS
+    // ----------------------------------------------------
+    if (pathname === "/payments/create-order" && method === "POST") {
+      const body = await parseBody(req);
+      const authUser = getAuthUser(req);
+      const idempotencyKey = req.headers["idempotency-key"] || body.idempotencyKey;
+      try {
+        const order = await paymentService.createPaymentOrder({
+          orderId: body.orderId || `ORD-${Date.now()}`,
+          amount: Number(body.amount),
+          currency: body.currency || "INR",
+          userId: authUser?.id || body.userId || 1,
+          idempotencyKey,
+        });
+        return sendJson(res, 200, order);
+      } catch (err) {
+        return sendJson(res, 400, { success: false, error: err.message });
+      }
+    }
+
+    if (pathname === "/payments/webhook" && method === "POST") {
+      const body = await parseBody(req);
+      const signature = req.headers["x-razorpay-signature"] || req.headers["X-Razorpay-Signature"];
+      const rawBody = typeof req.body === "string" ? req.body : JSON.stringify(body);
+      try {
+        const result = await paymentService.processWebhookEvent({
+          eventId: body.event_id || body.id || `evt_${Date.now()}`,
+          eventType: body.event || "payment.captured",
+          payload: body.payload || body,
+          signature,
+          rawBody,
+        });
+        return sendJson(res, 200, result);
+      } catch (err) {
+        return sendJson(res, 400, { success: false, error: err.message });
+      }
+    }
+
+    // ----------------------------------------------------
+    // 11. PARTNER FINANCIAL SETTLEMENTS & MULTI-TENANT ISOLATION
+    // ----------------------------------------------------
+    if (pathname === "/partner/settlements" && method === "GET") {
+      const authUser = getAuthUser(req);
+      if (!authUser) {
+        return sendJson(res, 401, { success: false, error: "Authentication required.", code: "UNAUTHORIZED" });
+      }
+      const partnerId = authUser.vendorId || authUser.id;
+      try {
+        const settlements = getPartnerScopedSettlements(partnerId);
+        return sendJson(res, 200, { success: true, ...settlements });
+      } catch (err) {
+        return sendJson(res, 403, { success: false, error: err.message });
+      }
+    }
+
+    if (pathname === "/partner/orders" && method === "GET") {
+      const authUser = getAuthUser(req);
+      if (!authUser) {
+        return sendJson(res, 401, { success: false, error: "Authentication required.", code: "UNAUTHORIZED" });
+      }
+      const partnerId = authUser.vendorId || authUser.id;
+      const orders = getPartnerScopedOrders(partnerId);
+      return sendJson(res, 200, { success: true, orders });
+    }
+
+    if (pathname === "/partner/products" && method === "GET") {
+      const authUser = getAuthUser(req);
+      if (!authUser) {
+        return sendJson(res, 401, { success: false, error: "Authentication required.", code: "UNAUTHORIZED" });
+      }
+      const partnerId = authUser.vendorId || authUser.id;
+      const products = getPartnerScopedProducts(partnerId);
+      return sendJson(res, 200, { success: true, products });
+    }
+
+    // ----------------------------------------------------
+    // 12. PARTNER KYC & S3 PRESIGNED DOCUMENT URLS
+    // ----------------------------------------------------
+    if (pathname === "/partner/kyc/presigned-url" && method === "POST") {
+      const authUser = getAuthUser(req);
+      if (!authUser) {
+        return sendJson(res, 401, { success: false, error: "Authentication required.", code: "UNAUTHORIZED" });
+      }
+      const body = await parseBody(req);
+      const partnerId = authUser.vendorId || authUser.id;
+      try {
+        const presigned = storage.generatePresignedKycUrl(partnerId, body.documentType, body.fileName);
+        return sendJson(res, 200, { success: true, ...presigned });
+      } catch (err) {
+        return sendJson(res, 400, { success: false, error: err.message });
+      }
+    }
+
+    // ----------------------------------------------------
+    // 13. ADMIN AUDIT LOGS
+    // ----------------------------------------------------
+    if (pathname === "/admin/audit-logs" && method === "GET") {
+      const authUser = getAuthUser(req);
+      const role = (authUser?.role || "").toUpperCase();
+      if (!authUser || (role !== "ADMIN" && role !== "SUPER_ADMIN" && role !== "SUPER_OWNER" && role !== "OWNER")) {
+        return sendJson(res, 403, { success: false, error: "Administrative privilege required.", code: "FORBIDDEN" });
+      }
+      const db = loadDatabase();
+      return sendJson(res, 200, { success: true, auditLogs: db.auditLogs || [] });
     }
 
     // Route not found

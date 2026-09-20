@@ -1,62 +1,532 @@
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 generator client {
   provider = "prisma-client-js"
 }
 
-model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  role      String   @default("CUSTOMER") // "CUSTOMER", "VENDOR", "SERVICE_PARTNER", "ADMIN"
-  phone     String?
-  walletBal Float    @default(0.0)
-  createdAt DateTime @default(now())
+// ---------------------------------------------------------
+// 1. IDENTITY & CUSTOMER DOMAIN
+// ---------------------------------------------------------
 
-  vendors   Vendor[]
-  orders    Order[]
+enum UserRole {
+  CUSTOMER
+  PARTNER
+  PARTNER_STAFF
+  ADMIN
+  SUPER_ADMIN
+  OWNER
+  SUPER_OWNER
 }
 
-model Vendor {
-  id             Int       @id @default(autoincrement())
-  userId         Int
-  businessName   String
-  category       String    // "Grocery", "Transport", "Healthcare", "Service"
-  status         String    @default("pending") // "pending", "approved", "rejected"
-  city           String
-  address        String
-  phone          String
-  rating         Float     @default(0.0)
-  createdAt      DateTime  @default(now())
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING
+  DEACTIVATED
+}
 
-  user           User      @relation(fields: [userId], references: [id])
+model User {
+  id               Int           @id @default(autoincrement())
+  username         String        @unique
+  email            String        @unique
+  passwordHash     String
+  name             String
+  phone            String?       @unique
+  city             String?
+  role             UserRole      @default(CUSTOMER)
+  status           AccountStatus @default(ACTIVE)
+  walletBalance    Float         @default(0.0)
+  mustChangePassword Boolean     @default(false)
+  lastLoginAt      DateTime?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  addresses        Address[]
+  orders           Order[]
+  bookings         Booking[]
+  reviews          Review[]
+  notifications    Notification[]
+  auditLogs        AuditLog[]
+
+  // If user is a partner or staff
+  partnerAccount   Partner?      @relation("PartnerUser")
+  staffAccount     PartnerStaff? @relation("StaffUser")
+
+  @@index([role, status])
+  @@index([email])
+  @@index([phone])
+}
+
+model Address {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  type         String   @default("Home") // "Home", "Work", "Other"
+  receiverName String
+  phone        String
+  street       String
+  locality     String
+  city         String
+  state        String
+  pincode      String
+  latitude     Float?
+  longitude    Float?
+  isDefault    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ---------------------------------------------------------
+// 2. PARTNER & PROVIDER MULTI-TENANT DOMAIN
+// ---------------------------------------------------------
+
+enum PartnerProviderType {
+  GROCERY
+  VENDOR
+  HOSPITAL
+  CLINIC
+  HEALTHCARE
+  PHARMACY
+  RESTAURANT
+  DELIVERY
+  SERVICE_PROVIDER
+  HOTEL
+  OWNER
+  ADMIN
+}
+
+model Partner {
+  id             Int                 @id @default(autoincrement())
+  partnerUserId  String              @unique // e.g. "EZY-P-10001"
+  userId         Int                 @unique
+  businessName   String
+  ownerName      String
+  category       String
+  providerType   PartnerProviderType @default(GROCERY)
+  status         AccountStatus       @default(ACTIVE)
+  isVerified     Boolean             @default(false)
+  phone          String
+  email          String
+  city           String
+  address        String?
+  latitude       Float?
+  longitude      Float?
+  rating         Float               @default(5.0)
+  totalRatings   Int                 @default(0)
+  commissionRate Float               @default(10.0) // 10% platform fee
+  walletBalance  Float               @default(0.0)
+  pendingSettlement Float            @default(0.0)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  user           User                @relation("PartnerUser", fields: [userId], references: [id])
+  staff          PartnerStaff[]
+  kyc            PartnerKYC?
+  bankDetails    PartnerBankDetails?
   products       Product[]
+  services       Service[]
   orders         Order[]
+  bookings       Booking[]
+  settlements    Settlement[]
+  inventoryItems InventoryItem[]
+
+  @@index([status, providerType])
+  @@index([city])
+  @@index([latitude, longitude])
+}
+
+model PartnerStaff {
+  id           Int           @id @default(autoincrement())
+  partnerId    Int
+  userId       Int           @unique
+  staffRole    String        @default("OPERATIONS") // "MANAGER", "OPERATIONS", "FINANCE", "CLERK"
+  permissions  Json          // Granular permissions e.g. {"orders": true, "inventory": true, "finance": false}
+  status       AccountStatus @default(ACTIVE)
+  createdAt    DateTime      @default(now())
+
+  partner      Partner       @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  user         User          @relation("StaffUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([partnerId])
+}
+
+model PartnerKYC {
+  id             Int       @id @default(autoincrement())
+  partnerId      Int       @unique
+  panNumber      String
+  gstin          String?
+  tradeLicense   String?
+  panDocPath     String?   // Private S3 object key
+  gstDocPath     String?   // Private S3 object key
+  licenseDocPath String?   // Private S3 object key
+  isVerified     Boolean   @default(false)
+  verifiedAt     DateTime?
+  verifiedBy     Int?
+  notes          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  partner        Partner   @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+}
+
+model PartnerBankDetails {
+  id              Int      @id @default(autoincrement())
+  partnerId       Int      @unique
+  accountNumber   String
+  ifscCode        String
+  bankName        String
+  beneficiaryName String
+  isVerified      Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  partner         Partner  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+}
+
+// ---------------------------------------------------------
+// 3. CATALOG: PRODUCTS, SERVICES & INVENTORY
+// ---------------------------------------------------------
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  icon        String?
+  imageUrl    String?
+  isActive    Boolean   @default(true)
+  sortOrder   Int       @default(0)
+
+  products    Product[]
+  services    Service[]
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
-  vendorId    Int
-  name        String
-  description String
-  price       Float
-  available   Boolean  @default(true)
-  category    String
+  id             Int           @id @default(autoincrement())
+  partnerId      Int
+  categoryId     Int
+  name           String
+  description    String?
+  price          Float
+  mrp            Float?
+  unit           String        @default("piece") // "kg", "pack", "unit", "litre"
+  sku            String?
+  barcode        String?
+  imageUrl       String?
+  galleryImages  String[]
+  isAvailable    Boolean       @default(true)
+  stockQuantity  Int           @default(100)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
-  vendor      Vendor   @relation(fields: [vendorId], references: [id])
+  partner        Partner       @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  category       Category      @relation(fields: [categoryId], references: [id])
+  orderItems     OrderItem[]
+  inventory      InventoryItem?
+
+  @@index([partnerId, isAvailable])
+  @@index([categoryId])
+  @@index([name])
+}
+
+model Service {
+  id             Int           @id @default(autoincrement())
+  partnerId      Int
+  categoryId     Int
+  title          String
+  description    String?
+  price          Float
+  durationMinutes Int          @default(60)
+  serviceType    String        @default("HOME") // "HOME", "IN_CLINIC", "ON_ROAD"
+  imageUrl       String?
+  isAvailable    Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  partner        Partner       @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  category       Category      @relation(fields: [categoryId], references: [id])
+  bookingItems   BookingItem[]
+
+  @@index([partnerId, isAvailable])
+  @@index([categoryId])
+}
+
+model InventoryItem {
+  id           Int      @id @default(autoincrement())
+  partnerId    Int
+  productId    Int      @unique
+  inStock      Int      @default(0)
+  reserved     Int      @default(0)
+  lowStockAlert Int     @default(5)
+  lastRestocked DateTime @default(now())
+
+  partner      Partner  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([partnerId])
+}
+
+// ---------------------------------------------------------
+// 4. ORDERS, BOOKINGS & TRANSACTIONS
+// ---------------------------------------------------------
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
 }
 
 model Order {
-  id          Int      @id @default(autoincrement())
-  userId      Int
-  vendorId    Int
-  status      String   @default("pending") // "pending", "completed", "rejected"
-  totalAmount Float
-  createdAt   DateTime @default(now())
+  id             Int         @id @default(autoincrement())
+  orderNumber    String      @unique // e.g. "ORD-2026-98124"
+  userId         Int
+  partnerId      Int
+  status         OrderStatus @default(PENDING)
+  subtotal       Float
+  deliveryFee    Float       @default(0.0)
+  discountAmount Float       @default(0.0)
+  totalAmount    Float
+  idempotencyKey String?     @unique
+  deliveryAddress Json
+  estimatedDelivery DateTime?
+  notes          String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id])
-  vendor      Vendor   @relation(fields: [vendorId], references: [id])
+  user           User        @relation(fields: [userId], references: [id])
+  partner        Partner     @relation(fields: [partnerId], references: [id])
+  items          OrderItem[]
+  payments       Payment[]
+
+  @@index([userId, status])
+  @@index([partnerId, status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id        Int      @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  unitPrice Float
+  quantity  Int      @default(1)
+  totalPrice Float
+
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+}
+
+model Booking {
+  id             Int           @id @default(autoincrement())
+  bookingNumber  String        @unique // e.g. "BKG-2026-11029"
+  userId         Int
+  partnerId      Int
+  status         BookingStatus @default(PENDING)
+  totalAmount    Float
+  scheduledDate  DateTime
+  scheduledSlot  String        // e.g. "10:00 AM - 11:00 AM"
+  customerAddress Json?
+  idempotencyKey String?       @unique
+  notes          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  user           User          @relation(fields: [userId], references: [id])
+  partner        Partner       @relation(fields: [partnerId], references: [id])
+  items          BookingItem[]
+  payments       Payment[]
+
+  @@index([userId, status])
+  @@index([partnerId, scheduledDate])
+}
+
+model BookingItem {
+  id        Int      @id @default(autoincrement())
+  bookingId Int
+  serviceId Int
+  unitPrice Float
+  quantity  Int      @default(1)
+  totalPrice Float
+
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  service   Service  @relation(fields: [serviceId], references: [id])
+
+  @@index([bookingId])
+}
+
+// ---------------------------------------------------------
+// 5. PAYMENTS, SETTLEMENTS & REFUNDS
+// ---------------------------------------------------------
+
+enum PaymentStatus {
+  CREATED
+  AUTHORIZED
+  CAPTURED
+  FAILED
+  REFUNDED
+}
+
+model Payment {
+  id                 Int           @id @default(autoincrement())
+  paymentNumber      String        @unique
+  orderId            Int?
+  bookingId          Int?
+  userId             Int
+  amount             Float
+  currency           String        @default("INR")
+  gateway            String        @default("RAZORPAY")
+  gatewayOrderId     String?       // razorpay_order_id
+  gatewayPaymentId   String?       @unique // razorpay_payment_id
+  gatewaySignature   String?       // signature verified
+  status             PaymentStatus @default(CREATED)
+  idempotencyKey     String?       @unique
+  metadata           Json?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  order              Order?        @relation(fields: [orderId], references: [id])
+  booking            Booking?      @relation(fields: [bookingId], references: [id])
+  refunds            Refund[]
+
+  @@index([gatewayOrderId])
+  @@index([status])
+}
+
+model Settlement {
+  id             Int      @id @default(autoincrement())
+  partnerId      Int
+  periodStart    DateTime
+  periodEnd      DateTime
+  grossSales     Float
+  platformFee    Float
+  taxDeduction   Float    @default(0.0)
+  netPayout      Float
+  status         String   @default("PENDING") // "PENDING", "PROCESSING", "PAID"
+  utrReference   String?
+  paidAt         DateTime?
+  createdAt      DateTime @default(now())
+
+  partner        Partner  @relation(fields: [partnerId], references: [id])
+
+  @@index([partnerId, status])
+}
+
+model Refund {
+  id             Int      @id @default(autoincrement())
+  paymentId      Int
+  amount         Float
+  reason         String
+  status         String   @default("PENDING") // "PENDING", "PROCESSED", "FAILED"
+  gatewayRefundId String?
+  processedAt    DateTime?
+  createdAt      DateTime @default(now())
+
+  payment        Payment  @relation(fields: [paymentId], references: [id])
+
+  @@index([paymentId])
+}
+
+// ---------------------------------------------------------
+// 6. CMS, REVIEWS, COUPONS & AUDIT LOGS
+// ---------------------------------------------------------
+
+model CMSBanner {
+  id        Int      @id @default(autoincrement())
+  title     String
+  subtitle  String?
+  imageUrl  String
+  targetUrl String?
+  location  String   @default("HOMEPAGE_HERO")
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model CMSPage {
+  id        Int      @id @default(autoincrement())
+  slug      String   @unique
+  title     String
+  content   String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Review {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  partnerId  Int?
+  productId  Int?
+  rating     Int      // 1 to 5
+  comment    String
+  isReported Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@index([partnerId])
+  @@index([productId])
+}
+
+model Coupon {
+  id             Int       @id @default(autoincrement())
+  code           String    @unique
+  discountType   String    // "PERCENTAGE", "FLAT"
+  discountValue  Float
+  minOrderValue  Float     @default(0.0)
+  maxDiscount    Float?
+  usageLimit     Int?
+  usedCount      Int       @default(0)
+  validFrom      DateTime  @default(now())
+  validUntil     DateTime
+  isActive       Boolean   @default(true)
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  title     String
+  body      String
+  type      String   @default("ORDER") // "ORDER", "PROMO", "SYSTEM"
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+}
+
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  actorId    Int?
+  action     String   // e.g. "PARTNER_APPROVED", "PRICE_UPDATE", "REFUND_ISSUED"
+  resource   String   // e.g. "Partner:1001", "Order:98124"
+  oldValue   Json?
+  newValue   Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  actor      User?    @relation(fields: [actorId], references: [id])
+
+  @@index([action, createdAt])
+  @@index([resource])
 }

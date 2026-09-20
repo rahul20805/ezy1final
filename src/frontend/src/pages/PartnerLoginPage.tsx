@@ -37,6 +37,7 @@ import {
 import Layout from "../components/Layout";
 import { usePartnerAuth } from "../lib/partnerAuthStore";
 import { useStoreData } from "../lib/storeData";
+import { getCustomerPlatformUrl, getAdminPortalUrl } from "../config/links";
 import { toast } from "sonner";
 
 export type PortalType = "merchant" | "owner" | "admin";
@@ -338,16 +339,32 @@ export default function PartnerLoginPage() {
     <Layout>
       <div className="min-h-[calc(100vh-8rem)] bg-muted/20 flex items-center justify-center p-4 sm:p-6 lg:p-8">
         <div className="w-full max-w-4xl space-y-6">
+          {/* Ecosystem Domain Top Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+            <a
+              href={getCustomerPlatformUrl()}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-primary transition-colors bg-card border border-border/80 px-3 py-1.5 rounded-full shadow-xs"
+              title="Return to Customer Platform"
+            >
+              <span>← Back to Customer Platform (ezy1.site)</span>
+            </a>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-[11px] font-mono bg-primary/5 text-primary border-primary/20">
+                🌐 partner.ezy1.site
+              </Badge>
+            </div>
+          </div>
+
           {/* Header Banner */}
           <div className="text-center space-y-2">
             <Badge className="bg-primary/15 text-primary border-primary/30 text-xs px-3.5 py-1 rounded-full font-semibold">
-              🔒 EZY1 Management Ecosystem
+              🔒 EZY1 Partner Portal
             </Badge>
             <h1 className="font-display font-black text-2xl sm:text-4xl text-foreground tracking-tight">
-              EZY1 Management Portals
+              EZY1 Partner & Operations Portal
             </h1>
             <p className="text-xs sm:text-sm text-muted-foreground max-w-lg mx-auto">
-              Select your authorization portal or sign in below with your verified credentials.
+              Dedicated partner gateway at <span className="font-mono font-semibold text-foreground">partner.ezy1.site</span>. Sign in below with your verified credentials.
             </p>
           </div>
 

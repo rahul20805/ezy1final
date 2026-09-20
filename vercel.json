@@ -18,6 +18,39 @@
       "source": "www.ezy1.site/:path*",
       "destination": "https://ezy1.site/:path*",
       "permanent": true
+    },
+    {
+      "source": "/partner-login",
+      "has": [
+        {
+          "type": "host",
+          "value": "ezy1.site"
+        }
+      ],
+      "destination": "https://partner.ezy1.site",
+      "permanent": false
+    },
+    {
+      "source": "/partner",
+      "has": [
+        {
+          "type": "host",
+          "value": "ezy1.site"
+        }
+      ],
+      "destination": "https://partner.ezy1.site",
+      "permanent": false
+    },
+    {
+      "source": "/admin",
+      "has": [
+        {
+          "type": "host",
+          "value": "ezy1.site"
+        }
+      ],
+      "destination": "https://admin.ezy1.site",
+      "permanent": false
     }
   ]
 }

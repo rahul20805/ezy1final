@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 import { toast } from "sonner";
+import { getCustomerPlatformUrl, getPartnerPortalUrl } from "../config/links";
 
 // Sidebar & Types
 import {
@@ -415,15 +416,28 @@ export default function AdminPage() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* View Live Store Button */}
+            {/* Partner Portal Shortcut */}
             <a
-              href="/"
+              href={getPartnerPortalUrl()}
+              target="_blank"
+              rel="noreferrer"
+              className="hidden lg:inline-flex items-center gap-1.5 px-3 h-8 rounded-xl bg-muted hover:bg-muted/80 text-foreground text-xs font-semibold transition-colors border border-border"
+              title="Open Partner Portal (partner.ezy1.site)"
+            >
+              <span>Partner Portal</span>
+              <span className="text-[10px] text-muted-foreground">↗</span>
+            </a>
+
+            {/* View Live Customer Platform Button */}
+            <a
+              href={getCustomerPlatformUrl()}
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-1.5 px-3 h-8 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 text-xs font-semibold transition-colors"
+              title="Open Live Customer Platform (ezy1.site)"
             >
               <ExternalLink className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Live Store</span>
+              <span className="hidden sm:inline">Customer App</span>
             </a>
           </div>
         </header>

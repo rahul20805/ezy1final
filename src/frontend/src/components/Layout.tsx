@@ -40,7 +40,7 @@ import { useCartStore } from "../lib/cartStore";
 
 import { useLocationStore } from "../lib/locationStore";
 import { LocationModal } from "./location/LocationModal";
-import { NAVAEIN_URL } from "../config/links";
+import { NAVAEIN_URL, getPartnerPortalUrl } from "../config/links";
 import { NavaeInBottomAd } from "./NavaeInBottomAd";
 import { Ezy1Logo } from "./Ezy1Logo";
 
@@ -596,6 +596,16 @@ export default function Layout({ children }: LayoutProps) {
                           >
                             Login / Sign Up
                           </Button>
+                          <a
+                            href={getPartnerPortalUrl()}
+                            className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border border-border bg-muted/40 hover:bg-muted text-xs font-semibold text-foreground transition-colors"
+                            onClick={() => setMobileOpen(false)}
+                            data-ocid="nav.mobile_partner_login_button"
+                          >
+                            <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+                            <span>Partner Login (partner.ezy1.site)</span>
+                            <span className="text-[10px] text-muted-foreground">→</span>
+                          </a>
                         </div>
                       )}
                     </div>
@@ -914,14 +924,14 @@ export default function Layout({ children }: LayoutProps) {
                   </a>
                 </li>
                 <li>
-                  <Link
-                    to="/partner-login"
+                  <a
+                    href={getPartnerPortalUrl()}
                     className="text-sm font-medium text-primary hover:underline transition-colors flex items-center gap-1"
                     data-ocid="footer.partner_login_link"
                   >
                     <span>Partner Login</span>
                     <span className="text-xs">→</span>
-                  </Link>
+                  </a>
                 </li>
               </ul>
             </div>

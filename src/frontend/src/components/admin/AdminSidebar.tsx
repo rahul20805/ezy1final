@@ -64,6 +64,7 @@ import {
 } from "../../lib/partnerAuthStore";
 import { useStoreData } from "../../lib/storeData";
 import { Ezy1Logo } from "../Ezy1Logo";
+import { getCustomerPlatformUrl, getPartnerPortalUrl } from "../../config/links";
 
 export type AdminSectionId =
   // 1. Main
@@ -481,15 +482,15 @@ export function AdminSidebar({
           <Ezy1Logo
             size="md"
             showWordmark={true}
-            subtitle="Central Admin OS"
-            to="/"
+            subtitle="Admin Portal • admin.ezy1.site"
+            to="/admin"
           />
         ) : (
           <div className="mx-auto">
             <Ezy1Logo
               size="sm"
               showWordmark={false}
-              to="/"
+              to="/admin"
             />
           </div>
         )}
@@ -608,6 +609,31 @@ export function AdminSidebar({
           );
         })}
       </div>
+
+      {/* Ecosystem Portal Switcher */}
+      {!collapsed && (
+        <div className="p-2 border-t border-border flex items-center justify-between gap-1 text-[11px] bg-muted/15 flex-shrink-0">
+          <a
+            href={getCustomerPlatformUrl()}
+            target="_blank"
+            rel="noreferrer"
+            className="flex-1 py-1 px-2 rounded-md hover:bg-muted text-muted-foreground hover:text-primary transition-colors text-center font-semibold truncate"
+            title="Customer Platform (ezy1.site)"
+          >
+            Customer App ↗
+          </a>
+          <span className="text-muted-foreground/30">•</span>
+          <a
+            href={getPartnerPortalUrl()}
+            target="_blank"
+            rel="noreferrer"
+            className="flex-1 py-1 px-2 rounded-md hover:bg-muted text-muted-foreground hover:text-primary transition-colors text-center font-semibold truncate"
+            title="Partner Portal (partner.ezy1.site)"
+          >
+            Partner Portal ↗
+          </a>
+        </div>
+      )}
 
       {/* Admin User Footer Profile */}
       <div className="p-3 border-t border-border flex-shrink-0 bg-muted/20">

@@ -1,10 +1,11 @@
-﻿/**
+/**
  * EZY1 Partner Portal Layout
  * Shared sidebar + topbar layout for all service-specific partner portals
  */
 import { useState } from "react";
 import { usePartnerAuth } from "../../lib/partnerAuthStore";
 import { getProviderLabel } from "../../lib/permissions";
+import { getCustomerPlatformUrl } from "../../config/links";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -123,6 +124,16 @@ export default function PartnerLayout({
 
         {/* Footer */}
         <div className="p-3 border-t border-border space-y-1">
+          <a
+            href={getCustomerPlatformUrl()}
+            target="_blank"
+            rel="noreferrer"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-primary hover:bg-primary/10 transition-all border border-primary/20"
+            title="Open Customer Platform (ezy1.site)"
+          >
+            <span>Customer Platform</span>
+            <span className="text-[10px]">↗</span>
+          </a>
           <button
             onClick={() => onSectionChange("settings")}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-all"
@@ -158,6 +169,16 @@ export default function PartnerLayout({
           </div>
 
           <div className="ml-auto flex items-center gap-2">
+            <a
+              href={getCustomerPlatformUrl()}
+              target="_blank"
+              rel="noreferrer"
+              className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors border border-border"
+              title="Open Customer Platform (ezy1.site)"
+            >
+              <span>Customer App</span>
+              <span className="text-[10px]">↗</span>
+            </a>
             <Badge variant="secondary" className="text-[10px] hidden sm:flex">
               {currentPartner?.status || "ACTIVE"}
             </Badge>

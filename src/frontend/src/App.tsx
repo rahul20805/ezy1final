@@ -19,6 +19,8 @@ import {
   OwnerRoute,
 } from "./components/ProtectedRoute";
 import { AuthPromptProvider } from "./components/AuthPromptModal";
+import { getSubdomain } from "./lib/domain";
+import { usePartnerAuth } from "./lib/partnerAuthStore";
 
 // Lazy-loaded pages
 const LandingPage = lazy(() => import("./pages/LandingPage"));
@@ -93,11 +95,61 @@ const rootRoute = createRootRoute({
   ),
 });
 
+// Multi-Domain Root & Dispatcher Components
+function PartnerIndexDispatcher() {
+  const { isAuthenticated, currentPartner } = usePartnerAuth();
+  if (isAuthenticated && currentPartner) {
+    return (
+      <PartnerRoute>
+        <PartnerDashboardPage />
+      </PartnerRoute>
+    );
+  }
+  return <PartnerLoginPage />;
+}
+
+function RootDomainDispatcher() {
+  const subdomain = getSubdomain();
+
+  if (subdomain === "admin") {
+    return (
+      <AdminRoute>
+        <AdminPage />
+      </AdminRoute>
+    );
+  }
+
+  if (subdomain === "partner") {
+    return <PartnerIndexDispatcher />;
+  }
+
+  return <LandingPage />;
+}
+
+function PartnerLoginDispatcher() {
+  if (typeof window !== "undefined") {
+    const hostname = window.location.hostname.toLowerCase();
+    // On the main customer domain ezy1.site, hand off directly to partner.ezy1.site
+    if (hostname === "ezy1.site" || hostname === "www.ezy1.site") {
+      window.location.replace(`https://partner.ezy1.site${window.location.search}`);
+      return (
+        <div className="min-h-screen bg-background flex items-center justify-center p-6 text-center">
+          <div className="space-y-2">
+            <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin mx-auto" />
+            <p className="text-sm font-semibold text-foreground">Redirecting to Partner Portal (partner.ezy1.site)...</p>
+          </div>
+        </div>
+      );
+    }
+  }
+  return <PartnerLoginPage />;
+}
+
 // Routes
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
-  component: () => <LandingPage />,
+  component: () => <RootDomainDispatcher />,
 });
 
 const loginRoute = createRoute({
@@ -109,13 +161,13 @@ const loginRoute = createRoute({
 const partnerLoginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/partner-login",
-  component: () => <PartnerLoginPage />,
+  component: () => <PartnerLoginDispatcher />,
 });
 
 const partnerAliasRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/partner",
-  component: () => <PartnerLoginPage />,
+  component: () => <PartnerLoginDispatcher />,
 });
 
 const partnerDashboardRoute = createRoute({
@@ -480,14 +532,33 @@ const partnerOnboardingRoute = createRoute({
   component: () => <PartnerOnboardingPage />,
 });
 
-const adminRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/admin",
-  component: () => (
+function AdminDispatcher() {
+  if (typeof window !== "undefined") {
+    const hostname = window.location.hostname.toLowerCase();
+    // On the main customer domain ezy1.site, hand off directly to admin.ezy1.site
+    if (hostname === "ezy1.site" || hostname === "www.ezy1.site") {
+      window.location.replace(`https://admin.ezy1.site${window.location.search}`);
+      return (
+        <div className="min-h-screen bg-background flex items-center justify-center p-6 text-center">
+          <div className="space-y-2">
+            <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin mx-auto" />
+            <p className="text-sm font-semibold text-foreground">Redirecting to Admin Portal (admin.ezy1.site)...</p>
+          </div>
+        </div>
+      );
+    }
+  }
+  return (
     <AdminRoute>
       <AdminPage />
     </AdminRoute>
-  ),
+  );
+}
+
+const adminRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin",
+  component: () => <AdminDispatcher />,
 });
 
 const navaeRedirectRoute = createRoute({

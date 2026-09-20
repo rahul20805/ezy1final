@@ -27,6 +27,7 @@ import {
 import { useState } from "react";
 import { useIsMobile } from "../hooks/use-mobile";
 import { Ezy1Logo } from "./Ezy1Logo";
+import { getCustomerPlatformUrl } from "../config/links";
 
 const ADMIN_ITEMS = [
   { icon: LayoutDashboard, label: "Overview", href: "/admin" },
@@ -127,16 +128,16 @@ function AdminSidebarContent({
 
       {!collapsed && (
         <div className="p-3">
-          <Link to="/" data-ocid="admin_sidebar.home_link">
+          <a href={getCustomerPlatformUrl()} data-ocid="admin_sidebar.home_link">
             <Button
               variant="ghost"
               size="sm"
               className="w-full gap-2 text-xs text-muted-foreground justify-start"
             >
               <Home className="w-3.5 h-3.5" />
-              Back to App Home
+              Customer Platform (ezy1.site)
             </Button>
-          </Link>
+          </a>
         </div>
       )}
     </div>

@@ -9,3 +9,12 @@
  */
 
 export const NAVAEIN_URL = "https://navaein.ezy1.site";
+
+export {
+  DOMAINS,
+  getSubdomain,
+  getPartnerPortalUrl,
+  getAdminPortalUrl,
+  getCustomerPlatformUrl,
+} from "../lib/domain";
+export type { SubdomainType } from "../lib/domain";

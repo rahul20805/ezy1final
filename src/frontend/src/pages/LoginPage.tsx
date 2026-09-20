@@ -33,6 +33,7 @@ import Layout from "../components/Layout";
 import { Ezy1Logo } from "../components/Ezy1Logo";
 import { useAuth } from "../lib/AuthContext";
 import { checkUsernameAvailability } from "../lib/api";
+import { getPartnerPortalUrl, getAdminPortalUrl } from "../config/links";
 import { toast } from "sonner";
 
 export default function LoginPage() {
@@ -844,15 +845,17 @@ export default function LoginPage() {
             </div>
             <div className="flex items-center gap-3">
               <a
-                href="/partner-login"
-                className="font-medium hover:text-foreground hover:underline transition-colors"
+                href={getPartnerPortalUrl()}
+                className="font-medium hover:text-primary hover:underline transition-colors"
+                title="Partner Portal (partner.ezy1.site)"
               >
-                Merchant Login
+                Partner Login
               </a>
               <span>•</span>
               <a
-                href="/admin"
-                className="font-medium hover:text-foreground hover:underline transition-colors"
+                href={getAdminPortalUrl()}
+                className="font-medium hover:text-primary hover:underline transition-colors"
+                title="Admin Portal (admin.ezy1.site)"
               >
                 Admin Console
               </a>
