@@ -46,7 +46,7 @@ import { Ezy1Logo } from "./Ezy1Logo";
 import { LegalDocumentLink } from "./legal/LegalDocumentLink";
 
 const navLinks = [
-  { label: "All Services", href: "/dashboard" },
+  { label: "All Services", href: "/" },
   { label: "Quick Commerce", href: "/dashboard/commerce" },
   { label: "Hospitals & Care", href: "/hospitals" },
   { label: "Rides & Parcel", href: "/dashboard/transport" },

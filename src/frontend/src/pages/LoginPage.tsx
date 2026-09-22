@@ -84,10 +84,10 @@ export default function LoginPage() {
   const [googleEmail, setGoogleEmail] = useState("");
   const [googleName, setGoogleName] = useState("");
 
-  // Redirect if already logged in
+  // Redirect if already logged in — to homepage, not dashboard
   useEffect(() => {
     if (isAuthenticated) {
-      navigate({ to: "/dashboard" });
+      navigate({ to: "/" });
     }
   }, [isAuthenticated, navigate]);
 
@@ -151,7 +151,7 @@ export default function LoginPage() {
       const res = await signInWithPassword(loginUsername.trim(), loginPassword);
       if (res.success) {
         toast.success(`Welcome back, ${res.user?.name || loginUsername}! 👋`);
-        navigate({ to: "/dashboard" });
+        navigate({ to: "/" });
       } else {
         toast.error(res.error || "Invalid credentials. Please try again.");
       }
@@ -199,7 +199,7 @@ export default function LoginPage() {
 
       if (res.success) {
         toast.success(`Account created! Welcome to Ezy1, ${res.user?.name}! 🎉`);
-        navigate({ to: "/dashboard" });
+        navigate({ to: "/" });
       } else {
         toast.error(res.error || "Registration failed. Please try again.");
       }
@@ -249,7 +249,7 @@ export default function LoginPage() {
       const res = await verifyPhoneOtp(phone, fullOtp, otpName);
       if (res.success) {
         toast.success(`Welcome back, ${res.user?.name || "Customer"}! 🎉`);
-        navigate({ to: "/dashboard" });
+        navigate({ to: "/" });
       } else {
         toast.error("Verification failed. Please check the code.");
       }
@@ -311,7 +311,7 @@ export default function LoginPage() {
       if (res.success) {
         setGoogleModalOpen(false);
         toast.success(`Signed in as ${res.user?.name || googleEmail}! 🚀`);
-        navigate({ to: "/dashboard" });
+        navigate({ to: "/" });
       }
     } catch (err: any) {
       toast.error(err.message || "Google sign-in failed");

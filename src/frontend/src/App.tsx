@@ -5,6 +5,7 @@ import {
   createRootRoute,
   createRoute,
   createRouter,
+  Navigate,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { Suspense, lazy } from "react";
@@ -28,7 +29,7 @@ const LandingPage = lazy(() => import("./pages/LandingPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const PartnerLoginPage = lazy(() => import("./pages/PartnerLoginPage"));
 const PartnerDashboardPage = lazy(() => import("./pages/PartnerDashboardPage"));
-const DashboardPage = lazy(() => import("./pages/DashboardPage"));
+// DashboardPage removed — /dashboard now redirects to homepage
 const HealthcarePage = lazy(() => import("./pages/HealthcarePage"));
 const TransportPage = lazy(() => import("./pages/TransportPage"));
 const WalletPage = lazy(() => import("./pages/WalletPage"));
@@ -299,11 +300,11 @@ const partnerDashboardRoute = createRoute({
   ),
 });
 
-// Guest-accessible browsing routes
+// /dashboard redirects to homepage — keeps all /dashboard/xxx sub-routes working
 const dashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/dashboard",
-  component: () => <DashboardPage />,
+  component: () => <Navigate to="/" />,
 });
 
 const healthcareRoute = createRoute({
