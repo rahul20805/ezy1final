@@ -1760,26 +1760,50 @@ Be helpful, concise, courteous, and provide accurate navigation instructions to 
         {
           id: "bus-1",
           operator: "EZY Express Volvo Multi-Axle",
+          operatorName: "EZY Express Volvo Multi-Axle",
           type: "AC Sleeper (2+1)",
+          busType: "AC_Sleeper",
           from: "City Center Terminal",
+          sourceCity: "Bengaluru",
           to: "Capital Interstate Junction",
+          destinationCity: "Mysore",
           departure: "21:30",
+          departureTime: "21:30",
           arrival: "06:00",
+          arrivalTime: "06:00",
+          duration: "8h 30m",
+          runningStatus: "On Time",
           fare: 799,
           seatsAvailable: 14,
-          rating: 4.8
+          availableSeats: 14,
+          totalSeats: 36,
+          busNumber: "KA 01 F 4492",
+          rating: 4.8,
+          stops: "City Center -> Electronic City -> Mandya -> Mysore"
         },
         {
           id: "bus-2",
           operator: "Rajdhani Royal Travels",
+          operatorName: "Rajdhani Royal Travels",
           type: "BharatBenz AC Seater (2+2)",
+          busType: "AC_Seater",
           from: "North Bypass Station",
+          sourceCity: "Bengaluru",
           to: "Tech Park Metro Terminal",
+          destinationCity: "Mysore",
           departure: "07:00",
+          departureTime: "07:00",
           arrival: "12:30",
+          arrivalTime: "12:30",
+          duration: "5h 30m",
+          runningStatus: "On Time",
           fare: 450,
           seatsAvailable: 22,
-          rating: 4.6
+          availableSeats: 22,
+          totalSeats: 40,
+          busNumber: "KA 05 B 1890",
+          rating: 4.6,
+          stops: "North Bypass -> Majestic -> Kengeri -> Ramanagara -> Mysore"
         }
       ]);
     }
@@ -1814,17 +1838,31 @@ Be helpful, concise, courteous, and provide accurate navigation instructions to 
         {
           id: "hh-1",
           title: "Elder Care & Daily Bedside Assistance",
+          serviceName: "Elder Care & Daily Bedside Assistance",
+          category: "Elder_Care",
+          description: "Compassionate bedside assistance, medication management, mobility support and daily health monitoring.",
           duration: "12 Hours / 24 Hours",
+          fee: 999,
           pricePerDay: 999,
           rating: 4.9,
+          image: "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=500&auto=format&fit=crop&q=60",
+          providerName: "Apollo HomeCare Certified",
+          availableSlots: "Available Today",
           nurseType: "Certified Nurse / GDA Caregiver"
         },
         {
           id: "hh-2",
           title: "Post-Op & Physiotherapy Session at Home",
+          serviceName: "Post-Op & Physiotherapy Session at Home",
+          category: "Physiotherapy",
+          description: "Rehabilitation, joint mobility exercises, post-surgery recovery guided by verified physiotherapists.",
           duration: "45 Mins Session",
+          fee: 599,
           pricePerDay: 599,
           rating: 4.8,
+          image: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=500&auto=format&fit=crop&q=60",
+          providerName: "Max Care Physiotherapy",
+          availableSlots: "4 Slots Today",
           nurseType: "Qualified BPT Physiotherapist"
         }
       ]);

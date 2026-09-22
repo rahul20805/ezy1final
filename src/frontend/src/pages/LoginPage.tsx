@@ -445,6 +445,29 @@ export default function LoginPage() {
                     )}
                   </Button>
 
+                  <p className="text-[11px] text-muted-foreground text-center px-2 pt-1 leading-relaxed">
+                    By signing in, you agree to EZY1&apos;s{" "}
+                    <a
+                      href="/legal/ezy1-user-terms-and-conditions.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-emerald-600 hover:underline font-medium inline-flex items-center gap-0.5"
+                    >
+                      User Terms
+                      <span className="text-[9px]">↗</span>
+                    </a>{" "}
+                    &amp;{" "}
+                    <a
+                      href="/legal/ezy1-universal-privacy-policy.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-emerald-600 hover:underline font-medium inline-flex items-center gap-0.5"
+                    >
+                      Privacy Policy
+                      <span className="text-[9px]">↗</span>
+                    </a>.
+                  </p>
+
                   {/* Switch to Sign Up */}
                   <div className="text-center pt-2">
                     <p className="text-xs text-muted-foreground">
@@ -664,6 +687,29 @@ export default function LoginPage() {
                     )}
                   </Button>
 
+                  <p className="text-[11px] text-muted-foreground text-center px-2 pt-1 leading-relaxed">
+                    By registering, you agree to EZY1&apos;s{" "}
+                    <a
+                      href="/legal/ezy1-user-terms-and-conditions.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-emerald-600 hover:underline font-medium inline-flex items-center gap-0.5"
+                    >
+                      User Terms &amp; Conditions
+                      <span className="text-[9px]">↗</span>
+                    </a>{" "}
+                    &amp;{" "}
+                    <a
+                      href="/legal/ezy1-universal-privacy-policy.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-emerald-600 hover:underline font-medium inline-flex items-center gap-0.5"
+                    >
+                      Universal Privacy Policy
+                      <span className="text-[9px]">↗</span>
+                    </a>.
+                  </p>
+
                   {/* Switch back to Sign In */}
                   <div className="text-center pt-1">
                     <p className="text-xs text-muted-foreground">
@@ -838,26 +884,63 @@ export default function LoginPage() {
           </Card>
 
           {/* Security & Partner Links Footer */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground px-2">
-            <div className="flex items-center gap-1.5">
-              <Shield className="w-3.5 h-3.5 text-emerald-600" />
-              <span>256-bit SSL Secure Auth</span>
+          <div className="space-y-2 text-xs text-muted-foreground px-2">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="flex items-center gap-1.5">
+                <Shield className="w-3.5 h-3.5 text-emerald-600" />
+                <span>256-bit SSL Secure Auth</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <a
+                  href={getPartnerPortalUrl()}
+                  className="font-medium hover:text-primary hover:underline transition-colors"
+                  title="Partner Portal (partner.ezy1.site)"
+                >
+                  Partner Login
+                </a>
+                <span>•</span>
+                <a
+                  href={getAdminPortalUrl()}
+                  className="font-medium hover:text-primary hover:underline transition-colors"
+                  title="Admin Portal (admin.ezy1.site)"
+                >
+                  Admin Console
+                </a>
+              </div>
             </div>
-            <div className="flex items-center gap-3">
+
+            <div className="pt-2 border-t border-border/60 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
               <a
-                href={getPartnerPortalUrl()}
-                className="font-medium hover:text-primary hover:underline transition-colors"
-                title="Partner Portal (partner.ezy1.site)"
+                href="/legal/ezy1-user-terms-and-conditions.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-primary transition-colors flex items-center gap-1"
+                title="User Terms & Conditions (PDF)"
               >
-                Partner Login
+                <span>User Terms</span>
+                <span className="text-[9px] text-muted-foreground/70">↗</span>
               </a>
               <span>•</span>
               <a
-                href={getAdminPortalUrl()}
-                className="font-medium hover:text-primary hover:underline transition-colors"
-                title="Admin Portal (admin.ezy1.site)"
+                href="/legal/ezy1-universal-privacy-policy.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-primary transition-colors flex items-center gap-1"
+                title="Universal Privacy Policy (PDF)"
               >
-                Admin Console
+                <span>Privacy Policy</span>
+                <span className="text-[9px] text-muted-foreground/70">↗</span>
+              </a>
+              <span>•</span>
+              <a
+                href="/legal/ezy1-master-partner-agreement.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-primary transition-colors flex items-center gap-1"
+                title="Master Partner Agreement (PDF)"
+              >
+                <span>Partner Terms</span>
+                <span className="text-[9px] text-muted-foreground/70">↗</span>
               </a>
             </div>
           </div>

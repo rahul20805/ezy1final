@@ -259,7 +259,7 @@ export default function TravelPage() {
                       <div>
                         <div className="flex items-center justify-between gap-1 mb-1">
                           <span className="text-[10px] font-bold text-primary uppercase tracking-wide">
-                            {place.category.replace("_", " ")}
+                            {(place.category || "Attraction").replace(/_/g, " ")}
                           </span>
                           <span className="text-xs font-bold text-amber-500 flex items-center gap-0.5">
                             ★ {place.rating}

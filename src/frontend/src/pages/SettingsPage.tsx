@@ -18,6 +18,9 @@ import {
   User,
   LogOut,
   Save,
+  FileText,
+  Download,
+  ExternalLink,
 } from "lucide-react";
 import UserLayout from "../components/UserLayout";
 import { useAuth } from "../lib/AuthContext";
@@ -235,6 +238,96 @@ export default function SettingsPage() {
                 checked={preferences ? Boolean(preferences.emailEnabled ?? 1) : true}
                 onCheckedChange={(val) => handleToggle("emailEnabled", val)}
               />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Legal & Platform Policies */}
+        <Card className="border-border shadow-xs">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <FileText className="w-5 h-5" />
+              </div>
+              <div>
+                <CardTitle className="text-base font-bold">Legal &amp; Platform Policies</CardTitle>
+                <CardDescription className="text-xs">
+                  Review terms of service, consumer rights, data privacy protocols, and partner covenants.
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3 pt-0">
+            <div className="p-3.5 rounded-xl bg-muted/40 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h4 className="text-sm font-semibold text-foreground">User Terms &amp; Conditions</h4>
+                <p className="text-xs text-muted-foreground">General marketplace rules, consumer rights &amp; refund guidelines</p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <a
+                  href="/legal/ezy1-user-terms-and-conditions.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border bg-background hover:bg-muted text-xs font-medium transition-colors"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" /> Open
+                </a>
+                <a
+                  href="/legal/ezy1-user-terms-and-conditions.pdf"
+                  download="EZY1_User_Terms_and_Conditions.pdf"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium transition-colors shadow-xs"
+                >
+                  <Download className="w-3.5 h-3.5" /> Download
+                </a>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-muted/40 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h4 className="text-sm font-semibold text-foreground">Universal Privacy Policy</h4>
+                <p className="text-xs text-muted-foreground">DPDP Act 2023 compliance, data retention &amp; grievance redressal</p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <a
+                  href="/legal/ezy1-universal-privacy-policy.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border bg-background hover:bg-muted text-xs font-medium transition-colors"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" /> Open
+                </a>
+                <a
+                  href="/legal/ezy1-universal-privacy-policy.pdf"
+                  download="EZY1_Universal_Privacy_Policy.pdf"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium transition-colors shadow-xs"
+                >
+                  <Download className="w-3.5 h-3.5" /> Download
+                </a>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-muted/40 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h4 className="text-sm font-semibold text-foreground">Master Partner Agreement</h4>
+                <p className="text-xs text-muted-foreground">Framework for merchants, vendors, transport operators &amp; professionals</p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <a
+                  href="/legal/ezy1-master-partner-agreement.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border bg-background hover:bg-muted text-xs font-medium transition-colors"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" /> Open
+                </a>
+                <a
+                  href="/legal/ezy1-master-partner-agreement.pdf"
+                  download="EZY1_Master_Partner_Agreement.pdf"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium transition-colors shadow-xs"
+                >
+                  <Download className="w-3.5 h-3.5" /> Download
+                </a>
+              </div>
             </div>
           </CardContent>
         </Card>

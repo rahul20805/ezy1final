@@ -1004,7 +1004,7 @@ export default function LandingPage() {
                 <div className="relative aspect-video w-full bg-muted">
                   <img src={hotel.image} alt={hotel.name} className="w-full h-full object-cover" loading="lazy" />
                   <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-black/70 text-white text-[10px] font-bold uppercase backdrop-blur-sm">
-                    {hotel.type}
+                    {hotel.type || (Array.isArray(hotel.tags) ? hotel.tags[0] : "Hotel")}
                   </span>
                   <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-black/60 text-amber-400 text-[10px] font-bold backdrop-blur-sm">
                     ★ {hotel.rating}
@@ -1013,8 +1013,8 @@ export default function LandingPage() {
                 <CardContent className="p-4 flex-1 flex flex-col justify-between">
                   <div>
                     <h4 className="font-bold text-sm text-foreground line-clamp-1">{hotel.name}</h4>
-                    <p className="text-xs text-muted-foreground line-clamp-1 mb-2">{hotel.address}</p>
-                    <span className="text-[10px] text-emerald-600 font-semibold block">{hotel.availableRooms} rooms available</span>
+                    <p className="text-xs text-muted-foreground line-clamp-1 mb-2">{hotel.address || hotel.city || "Prime Location"}</p>
+                    <span className="text-[10px] text-emerald-600 font-semibold block">{hotel.availableRooms ?? 5} rooms available</span>
                   </div>
                   <div className="mt-3 pt-2 border-t border-border flex items-center justify-between">
                     <div>
@@ -1067,8 +1067,8 @@ export default function LandingPage() {
                 <CardContent className="p-4 flex-1 flex flex-col justify-between">
                   <div>
                     <h4 className="font-bold text-sm text-foreground line-clamp-1">{tour.title}</h4>
-                    <p className="text-xs text-muted-foreground line-clamp-1 mb-1">{tour.agencyName} • {tour.destination}</p>
-                    <p className="text-[11px] text-muted-foreground line-clamp-1">{tour.includedAmenities}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-1 mb-1">{tour.agencyName || "Verified Operator"} • {tour.destination || "Sightseeing Tour"}</p>
+                    <p className="text-[11px] text-muted-foreground line-clamp-1">{tour.includedAmenities || (Array.isArray(tour.inclusions) ? tour.inclusions.join(" • ") : "All Inclusions")}</p>
                   </div>
                   <div className="mt-3 pt-2 border-t border-border flex items-center justify-between">
                     <div>
@@ -1112,29 +1112,29 @@ export default function LandingPage() {
                 <CardContent className="p-4 flex-1 flex flex-col justify-between">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-xs text-foreground truncate">{bus.operatorName}</span>
+                      <span className="font-bold text-xs text-foreground truncate">{bus.operatorName || bus.operator || "Express Bus"}</span>
                       <Badge variant="outline" className="text-[9px] font-bold uppercase">
-                        {bus.busType.replace("_", " ")}
+                        {(bus.busType || bus.type || "Bus").replace(/_/g, " ")}
                       </Badge>
                     </div>
 
                     <div className="flex items-center justify-between py-2 border-y border-border text-center">
                       <div>
-                        <span className="font-black text-sm text-foreground block">{bus.departureTime}</span>
-                        <span className="text-[10px] text-muted-foreground">{bus.sourceCity}</span>
+                        <span className="font-black text-sm text-foreground block">{bus.departureTime || bus.departure || "--:--"}</span>
+                        <span className="text-[10px] text-muted-foreground">{bus.sourceCity || bus.from || "Boarding"}</span>
                       </div>
                       <div className="text-[9px] text-muted-foreground">
-                        <span>{bus.duration}</span>
+                        <span>{bus.duration || "Direct"}</span>
                         <div className="w-12 h-0.5 bg-border my-0.5" />
-                        <span className="text-emerald-600 font-bold">{bus.runningStatus}</span>
+                        <span className="text-emerald-600 font-bold">{bus.runningStatus || "On Time"}</span>
                       </div>
                       <div>
-                        <span className="font-black text-sm text-foreground block">{bus.arrivalTime}</span>
-                        <span className="text-[10px] text-muted-foreground">{bus.destinationCity}</span>
+                        <span className="font-black text-sm text-foreground block">{bus.arrivalTime || bus.arrival || "--:--"}</span>
+                        <span className="text-[10px] text-muted-foreground">{bus.destinationCity || bus.to || "Destination"}</span>
                       </div>
                     </div>
 
-                    <span className="text-[10px] text-sky-600 font-semibold block">{bus.availableSeats} seats left</span>
+                    <span className="text-[10px] text-sky-600 font-semibold block">{bus.availableSeats ?? bus.seatsAvailable ?? 12} seats left</span>
                   </div>
 
                   <div className="mt-3 pt-2 border-t border-border flex items-center justify-between">

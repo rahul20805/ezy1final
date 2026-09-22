@@ -151,28 +151,28 @@ export default function HomeHealthcarePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {services.map((svc) => (
                 <Card key={svc.id} className="rounded-3xl border-border bg-card overflow-hidden hover:shadow-subtle transition-smooth flex flex-col sm:flex-row">
-                  <img src={svc.image} alt={svc.serviceName} className="w-full sm:w-48 h-48 sm:h-auto object-cover bg-muted flex-shrink-0" />
+                  <img src={svc.image || "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=500&auto=format&fit=crop&q=60"} alt={svc.serviceName || (svc as any).title || "Healthcare"} className="w-full sm:w-48 h-48 sm:h-auto object-cover bg-muted flex-shrink-0" />
                   <CardContent className="p-5 flex-1 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between gap-1 mb-1">
                         <Badge variant="outline" className="text-[10px] font-bold text-teal-600 border-teal-500/30 uppercase">
-                          {svc.category.replace(/_/g, " ")}
+                          {(svc.category || "General Care").replace(/_/g, " ")}
                         </Badge>
                         <span className="flex items-center gap-1 text-xs font-bold text-amber-500">
-                          ★ {svc.rating}
+                          ★ {svc.rating || 4.8}
                         </span>
                       </div>
-                      <h3 className="font-bold text-base text-foreground mb-1">{svc.serviceName}</h3>
-                      <p className="text-xs text-muted-foreground mb-2">{svc.description}</p>
+                      <h3 className="font-bold text-base text-foreground mb-1">{svc.serviceName || (svc as any).title || "Home Visit"}</h3>
+                      <p className="text-xs text-muted-foreground mb-2">{svc.description || (svc as any).nurseType || "Certified healthcare professional at your doorstep"}</p>
                       
                       <div className="text-[11px] text-muted-foreground space-y-1 bg-muted/40 p-2.5 rounded-xl">
                         <div className="flex items-center gap-1">
                           <UserCheck className="w-3.5 h-3.5 text-primary" />
-                          <span>Provider: <b>{svc.providerName}</b></span>
+                          <span>Provider: <b>{svc.providerName || (svc as any).nurseType || "Verified Partner"}</b></span>
                         </div>
                         <div className="flex items-center gap-1">
                           <Clock className="w-3.5 h-3.5 text-primary" />
-                          <span>Slots: {svc.availableSlots}</span>
+                          <span>Slots: {svc.availableSlots || svc.duration || "Available Today"}</span>
                         </div>
                       </div>
                     </div>
@@ -180,7 +180,7 @@ export default function HomeHealthcarePage() {
                     <div className="mt-4 pt-3 border-t border-border flex items-center justify-between">
                       <div>
                         <span className="text-[10px] text-muted-foreground block">Consultation Fee</span>
-                        <span className="text-lg font-black text-foreground">₹{svc.fee}</span>
+                        <span className="text-lg font-black text-foreground">₹{svc.fee ?? (svc as any).pricePerDay ?? 499}</span>
                       </div>
                       <Button
                         onClick={() => handleBookClick(svc)}

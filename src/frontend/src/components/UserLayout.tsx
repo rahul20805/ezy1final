@@ -162,6 +162,37 @@ function SidebarContent({
               Back to Home
             </Button>
           </Link>
+          <div className="pt-2 mt-1 border-t border-sidebar-border/60 flex items-center justify-center gap-2 text-[10px] text-muted-foreground">
+            <a
+              href="/legal/ezy1-user-terms-and-conditions.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-primary transition-colors"
+              title="User Terms & Conditions (PDF)"
+            >
+              Terms
+            </a>
+            <span>•</span>
+            <a
+              href="/legal/ezy1-universal-privacy-policy.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-primary transition-colors"
+              title="Universal Privacy Policy (PDF)"
+            >
+              Privacy
+            </a>
+            <span>•</span>
+            <a
+              href="/legal/ezy1-master-partner-agreement.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-primary transition-colors"
+              title="Master Partner Agreement (PDF)"
+            >
+              Partner Terms
+            </a>
+          </div>
         </div>
       )}
     </div>

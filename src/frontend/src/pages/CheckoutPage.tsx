@@ -8,6 +8,7 @@ import {
   CreditCard,
   MapPin,
   ShoppingBag,
+  ShieldCheck,
 } from "lucide-react";
 import { useState } from "react";
 import Layout from "../components/Layout";
@@ -286,6 +287,29 @@ export default function CheckoutPage() {
                     >
                       {isProcessing ? "Processing..." : `Pay ₹${toPay}`}
                     </Button>
+
+                    <p className="text-[11px] text-muted-foreground text-center pt-2 leading-relaxed">
+                      By placing this order, you agree to EZY1&apos;s{" "}
+                      <a
+                        href="/legal/ezy1-user-terms-and-conditions.pdf"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline font-medium inline-flex items-center gap-0.5"
+                      >
+                        Terms &amp; Conditions
+                        <span className="text-[9px]">↗</span>
+                      </a>{" "}
+                      and{" "}
+                      <a
+                        href="/legal/ezy1-universal-privacy-policy.pdf"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline font-medium inline-flex items-center gap-0.5"
+                      >
+                        Privacy Policy
+                        <span className="text-[9px]">↗</span>
+                      </a>.
+                    </p>
                   </div>
                 )}
                 {step === 3 && (
@@ -341,6 +365,32 @@ export default function CheckoutPage() {
                 <div className="border-t pt-2 flex justify-between items-center font-bold text-lg">
                   <span>To Pay</span>
                   <span className="text-primary">₹{toPay}</span>
+                </div>
+
+                <div className="border-t pt-3 space-y-1.5 text-[11px] text-muted-foreground text-center">
+                  <p className="flex items-center justify-center gap-1">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Consumer Protection &amp; Safe Checkout</span>
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-muted-foreground">
+                    <a
+                      href="/legal/ezy1-user-terms-and-conditions.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-primary underline"
+                    >
+                      User Terms (PDF)
+                    </a>
+                    <span>•</span>
+                    <a
+                      href="/legal/ezy1-universal-privacy-policy.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-primary underline"
+                    >
+                      Privacy (PDF)
+                    </a>
+                  </div>
                 </div>
               </CardContent>
             </Card>

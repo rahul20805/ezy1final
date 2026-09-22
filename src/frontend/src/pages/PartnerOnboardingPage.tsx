@@ -20,6 +20,7 @@ import {
   Upload,
   User,
   Wrench,
+  Download,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { setCurrentRole } from "../lib/auth";
@@ -443,13 +444,41 @@ export default function PartnerOnboardingPage() {
                 </div>
               </div>
 
-              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 text-sm text-yellow-700 flex items-start gap-2">
-                <Clock className="w-4 h-4 mt-0.5 shrink-0" />
-                <p>
-                  By submitting, you agree to the Ezy1 Partner Terms. Your
-                  account will remain in "Pending Verification" until an admin
-                  reviews your documents.
-                </p>
+              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3.5 text-xs text-yellow-800 dark:text-yellow-300 space-y-2">
+                <div className="flex items-start gap-2">
+                  <Clock className="w-4 h-4 mt-0.5 shrink-0 text-yellow-600 dark:text-yellow-400" />
+                  <p className="leading-relaxed">
+                    By submitting, you agree to the binding terms of the{" "}
+                    <a
+                      href="/legal/ezy1-master-partner-agreement.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-bold underline hover:text-primary transition-colors inline-flex items-center gap-0.5"
+                    >
+                      EZY1 Master Partner Agreement
+                      <span className="text-[10px]">↗</span>
+                    </a>{" "}
+                    and{" "}
+                    <a
+                      href="/legal/ezy1-universal-privacy-policy.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-bold underline hover:text-primary transition-colors inline-flex items-center gap-0.5"
+                    >
+                      Universal Privacy Policy
+                      <span className="text-[10px]">↗</span>
+                    </a>. Your account will remain in &quot;Pending Verification&quot; until an admin reviews your documents.
+                  </p>
+                </div>
+                <div className="pt-2 border-t border-yellow-500/20 flex flex-wrap items-center gap-3 text-[11px]">
+                  <a
+                    href="/legal/ezy1-master-partner-agreement.pdf"
+                    download="EZY1_Master_Partner_Agreement.pdf"
+                    className="font-semibold underline hover:text-primary inline-flex items-center gap-1 text-foreground"
+                  >
+                    <Download className="w-3 h-3" /> Download Partner Agreement (PDF)
+                  </a>
+                </div>
               </div>
 
               <div className="flex gap-3 pt-2">
@@ -469,6 +498,39 @@ export default function PartnerOnboardingPage() {
               </div>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Footer Legal Links */}
+      <div className="py-6 border-t border-border mt-8 text-center text-xs text-muted-foreground space-y-1.5">
+        <p>© {new Date().getFullYear()} EZY1 Technologies Private Limited. All rights reserved.</p>
+        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px]">
+          <a
+            href="/legal/ezy1-master-partner-agreement.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-primary transition-colors"
+          >
+            Partner Agreement (PDF)
+          </a>
+          <span>•</span>
+          <a
+            href="/legal/ezy1-universal-privacy-policy.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-primary transition-colors"
+          >
+            Privacy Policy (PDF)
+          </a>
+          <span>•</span>
+          <a
+            href="/legal/ezy1-user-terms-and-conditions.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-primary transition-colors"
+          >
+            User Terms (PDF)
+          </a>
         </div>
       </div>
     </div>

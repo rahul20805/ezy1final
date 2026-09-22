@@ -148,6 +148,29 @@ export default function PartnerLayout({
             <LogOut className="w-4 h-4" />
             Sign Out
           </button>
+          <div className="pt-2 border-t border-border/60 flex items-center justify-center gap-2 text-[11px] text-muted-foreground">
+            <a
+              href="/legal/ezy1-master-partner-agreement.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-primary transition-colors inline-flex items-center gap-0.5"
+              title="View Master Partner Agreement (PDF)"
+            >
+              <span>Partner Agreement</span>
+              <span className="text-[9px]">↗</span>
+            </a>
+            <span>•</span>
+            <a
+              href="/legal/ezy1-universal-privacy-policy.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-primary transition-colors inline-flex items-center gap-0.5"
+              title="View Universal Privacy Policy (PDF)"
+            >
+              <span>Privacy</span>
+              <span className="text-[9px]">↗</span>
+            </a>
+          </div>
         </div>
       </aside>
 

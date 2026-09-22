@@ -610,6 +610,29 @@ export default function PartnerLoginPage() {
                       </>
                     )}
                   </Button>
+
+                  <p className="text-[11px] text-muted-foreground text-center pt-2 leading-relaxed">
+                    By logging in, you agree to the{" "}
+                    <a
+                      href="/legal/ezy1-master-partner-agreement.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline font-medium inline-flex items-center gap-0.5"
+                    >
+                      Master Partner Agreement
+                      <span className="text-[9px]">↗</span>
+                    </a>{" "}
+                    &amp;{" "}
+                    <a
+                      href="/legal/ezy1-universal-privacy-policy.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline font-medium inline-flex items-center gap-0.5"
+                    >
+                      Privacy Policy
+                      <span className="text-[9px]">↗</span>
+                    </a>.
+                  </p>
                 </form>
 
                 <div className="mt-6 pt-4 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
@@ -617,6 +640,30 @@ export default function PartnerLoginPage() {
                     <ShieldCheck className="w-3.5 h-3.5 text-primary" /> 256-Bit Encrypted
                   </span>
                   <span>Role-Based Access Control</span>
+                </div>
+
+                <div className="mt-3 pt-2 border-t border-border/60 flex flex-wrap items-center justify-center gap-3 text-[11px] text-muted-foreground">
+                  <a
+                    href="/legal/ezy1-master-partner-agreement.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-primary transition-colors flex items-center gap-1"
+                    title="View Master Partner Agreement (PDF)"
+                  >
+                    <span>Partner Agreement (PDF)</span>
+                    <span className="text-[9px]">↗</span>
+                  </a>
+                  <span>•</span>
+                  <a
+                    href="/legal/ezy1-universal-privacy-policy.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-primary transition-colors flex items-center gap-1"
+                    title="View Universal Privacy Policy (PDF)"
+                  >
+                    <span>Privacy Policy (PDF)</span>
+                    <span className="text-[9px]">↗</span>
+                  </a>
                 </div>
               </CardContent>
             </Card>

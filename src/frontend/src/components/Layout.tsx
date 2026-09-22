@@ -43,6 +43,7 @@ import { LocationModal } from "./location/LocationModal";
 import { NAVAEIN_URL, getPartnerPortalUrl } from "../config/links";
 import { NavaeInBottomAd } from "./NavaeInBottomAd";
 import { Ezy1Logo } from "./Ezy1Logo";
+import { LegalDocumentLink } from "./legal/LegalDocumentLink";
 
 const navLinks = [
   { label: "All Services", href: "/dashboard" },
@@ -829,9 +830,9 @@ export default function Layout({ children }: LayoutProps) {
       {/* Footer */}
       <footer className="bg-card border-t border-border mt-auto">
         <div className="container px-4 py-10">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
             {/* Brand */}
-            <div className="md:col-span-2">
+            <div className="sm:col-span-2 lg:col-span-2">
               <div className="mb-3">
                 <Ezy1Logo size="lg" />
               </div>
@@ -933,17 +934,83 @@ export default function Layout({ children }: LayoutProps) {
                     <span className="text-xs">→</span>
                   </a>
                 </li>
+                <li>
+                  <Link
+                    to="/partner-onboarding"
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    Partner Registration
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Legal & Compliance */}
+            <div>
+              <h4 className="font-display font-semibold text-foreground mb-3 text-sm">
+                Legal & Compliance
+              </h4>
+              <ul className="space-y-2">
+                <li>
+                  <LegalDocumentLink docKey="userTerms" showDownload />
+                </li>
+                <li>
+                  <LegalDocumentLink docKey="privacyPolicy" showDownload />
+                </li>
+                <li>
+                  <LegalDocumentLink docKey="partnerTerms" showDownload />
+                </li>
+                <li>
+                  <LegalDocumentLink docKey="refundPolicy" />
+                </li>
+                <li>
+                  <LegalDocumentLink docKey="grievancePolicy" />
+                </li>
               </ul>
             </div>
           </div>
 
-          <div className="border-t border-border mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-xs text-muted-foreground">
-              © {new Date().getFullYear()} EZY1. All rights reserved.
+          <div className="border-t border-border mt-8 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-xs text-muted-foreground text-center md:text-left">
+              © {new Date().getFullYear()} EZY1 Technologies Private Limited. All rights reserved.
             </p>
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
+              <a
+                href="/legal/ezy1-user-terms-and-conditions.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-primary transition-colors flex items-center gap-1"
+                title="User Terms & Conditions (PDF)"
+              >
+                <span>Terms & Conditions</span>
+                <span className="text-[10px] text-muted-foreground/70">↗</span>
+              </a>
+              <span>•</span>
+              <a
+                href="/legal/ezy1-universal-privacy-policy.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-primary transition-colors flex items-center gap-1"
+                title="Universal Privacy Policy (PDF)"
+              >
+                <span>Privacy Policy</span>
+                <span className="text-[10px] text-muted-foreground/70">↗</span>
+              </a>
+              <span>•</span>
+              <a
+                href="/legal/ezy1-master-partner-agreement.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-primary transition-colors flex items-center gap-1"
+                title="Master Partner Agreement (PDF)"
+              >
+                <span>Partner Terms</span>
+                <span className="text-[10px] text-muted-foreground/70">↗</span>
+              </a>
+            </div>
             <div className="flex items-center gap-4">
               <span className="text-xs text-muted-foreground">
-                🔒 Secure & Trusted
+                🔒 DPDP & SSL Secure
               </span>
               <span className="text-xs text-muted-foreground">
                 📍 Hyperlocal First
