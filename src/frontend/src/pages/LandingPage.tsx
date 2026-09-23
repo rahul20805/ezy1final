@@ -27,6 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
+import { ItemDetailModal, type ItemDetailData } from "../components/ItemDetailModal";
 import {
   Search,
   MapPin,
@@ -110,6 +111,15 @@ export default function LandingPage() {
   const [searchCategory, setSearchCategory] = useState<string>("all");
   const [activeBannerIdx, setActiveBannerIdx] = useState(0);
 
+  // Detail modal state for Click -> Details -> Action flow
+  const [selectedDetailItem, setSelectedDetailItem] = useState<ItemDetailData | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+  const openItemDetails = (detail: ItemDetailData) => {
+    setSelectedDetailItem(detail);
+    setIsDetailModalOpen(true);
+  };
+
   // Real backend states
   const [hospitalData, setHospitalData] = useState<any>(null);
   const [stays, setStays] = useState<any[]>([]);
@@ -119,12 +129,14 @@ export default function LandingPage() {
   const [sharedRides, setSharedRides] = useState<any[]>([]);
   const [homeHealth, setHomeHealth] = useState<any[]>([]);
   const [recentItems, setRecentItems] = useState<any[]>([]);
+  const [dynamicProducts, setDynamicProducts] = useState<any[]>([]);
+  const [dynamicServices, setDynamicServices] = useState<any[]>([]);
 
   // Fetch real data on mount
   useEffect(() => {
     async function loadRealData() {
       try {
-        const [hosp, st, tr, exp, bs, rd, hh, rc] = await Promise.all([
+        const [hosp, st, tr, exp, bs, rd, hh, rc, prods, servs] = await Promise.all([
           fetch("/api/hospitals/availability").then((r) => r.json()).catch(() => null),
           fetch("/api/stays").then((r) => r.json()).catch(() => []),
           fetch("/api/travel").then((r) => r.json()).catch(() => []),
@@ -133,6 +145,8 @@ export default function LandingPage() {
           fetch("/api/rides/shared").then((r) => r.json()).catch(() => []),
           fetch("/api/healthcare/home").then((r) => r.json()).catch(() => []),
           fetch("/api/user/recent-items").then((r) => r.json()).catch(() => []),
+          fetch("/api/products").then((r) => r.json()).catch(() => []),
+          fetch("/api/services").then((r) => r.json()).catch(() => []),
         ]);
 
         if (hosp) setHospitalData(hosp);
@@ -143,6 +157,10 @@ export default function LandingPage() {
         if (Array.isArray(rd)) setSharedRides(rd);
         if (Array.isArray(hh)) setHomeHealth(hh);
         if (Array.isArray(rc)) setRecentItems(rc);
+        if (Array.isArray(prods)) setDynamicProducts(prods);
+        else if (prods && Array.isArray((prods as any).items)) setDynamicProducts((prods as any).items);
+        if (Array.isArray(servs)) setDynamicServices(servs);
+        else if (servs && Array.isArray((servs as any).items)) setDynamicServices((servs as any).items);
       } catch (e) {
         console.error("Failed to load ecosystem data", e);
       }
@@ -160,6 +178,43 @@ export default function LandingPage() {
     }
   };
 
+  // Dynamic Catalog merging Partner Portal and Store updates in real-time
+  const allCatalogItems = useMemo(() => {
+    if (!dynamicProducts.length) return CATALOG_ITEMS;
+
+    const itemsMap = new Map(CATALOG_ITEMS.map((item) => [String(item.id), { ...item }]));
+
+    dynamicProducts.forEach((p: any) => {
+      const key = String(p.id);
+      const existing = itemsMap.get(key);
+      if (existing) {
+        existing.price = Number(p.price) || existing.price;
+        if (p.mrp) existing.mrp = Number(p.mrp);
+        if (p.image) existing.image = p.image;
+        if (p.name) existing.name = p.name;
+        if (p.description) existing.description = p.description;
+      } else {
+        itemsMap.set(key, {
+          id: String(p.id),
+          categoryId: (p.category || "grocery").toLowerCase(),
+          name: p.name || "Partner Product",
+          description: p.description || p.name || "",
+          price: Number(p.price) || 0,
+          mrp: Number(p.mrp) || Number(p.price) || 0,
+          unit: p.unit || "1 unit",
+          rating: Number(p.rating) || 4.5,
+          reviewCount: Number(p.reviewCount) || 10,
+          deliveryMinutes: 15,
+          image: p.image || (p.images && p.images[0]) || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80",
+          tags: [p.category || "Grocery", "Partner Verified"],
+          isVeg: true,
+        });
+      }
+    });
+
+    return Array.from(itemsMap.values());
+  }, [dynamicProducts]);
+
   // Live Homepage Universal Search Engine across all entities
   const liveSearchResults = useMemo(() => {
     const q = homeSearch.trim().toLowerCase();
@@ -174,7 +229,7 @@ export default function LandingPage() {
     };
 
     const products = (searchCategory === "all" || searchCategory === "products" || searchCategory === "food")
-      ? CATALOG_ITEMS.filter((p) => calcScore(p.name) > 0 || calcScore(p.description) > 0 || p.tags.some((t) => calcScore(t) > 0)).slice(0, 10)
+      ? allCatalogItems.filter((p) => calcScore(p.name) > 0 || calcScore(p.description) > 0 || p.tags.some((t) => calcScore(t) > 0)).slice(0, 10)
       : [];
 
     const docs = (searchCategory === "all" || searchCategory === "doctors")
@@ -257,10 +312,51 @@ export default function LandingPage() {
     return FASHION_ITEMS.filter((f) => f.gender === selectedFashionGender);
   }, [selectedFashionGender]);
 
-  // Static/Catalog Datasets
-  const quickPicks = useMemo(() => CATALOG_ITEMS.slice(0, 8), []);
-  const freshProduce = useMemo(() => CATALOG_ITEMS.filter((i) => i.categoryId === "fruits" || i.categoryId === "vegetables"), []);
-  const popularRestaurants = useMemo(() => CATALOG_ITEMS.filter((i) => i.categoryId === "restaurants" || i.categoryId === "cafe"), []);
+  // Dynamic Catalog Datasets derived from real-time store inventory
+  const quickPicks = useMemo(() => allCatalogItems.slice(0, 8), [allCatalogItems]);
+  const freshProduce = useMemo(() => allCatalogItems.filter((i) => i.categoryId === "fruits" || i.categoryId === "vegetables"), [allCatalogItems]);
+  const popularRestaurants = useMemo(() => allCatalogItems.filter((i) => i.categoryId === "restaurants" || i.categoryId === "cafe" || i.categoryId === "food"), [allCatalogItems]);
+
+  const dynamicFoodItems = useMemo(() => {
+    const partnerDishes = dynamicProducts
+      .filter((p: any) => {
+        const cat = (p.category || "").toLowerCase();
+        return cat === "food" || cat === "restaurants" || cat === "restaurant" || cat === "dining";
+      })
+      .map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        restaurant: p.vendorName || "Partner Restaurant",
+        price: Number(p.price) || 199,
+        originalPrice: Number(p.mrp) || Number(p.price) || 249,
+        rating: Number(p.rating) || 4.8,
+        deliveryTime: p.deliveryTime || "20-25 mins",
+        image: p.image || (p.images && p.images[0]) || "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=500&q=80",
+        isVeg: p.isVeg !== false,
+        tags: [p.category || "Food", "Partner Verified"],
+        badge: "Partner Added",
+      }));
+    return [...partnerDishes, ...POPULAR_FOOD_ITEMS];
+  }, [dynamicProducts]);
+
+  const dynamicSweetsItems = useMemo(() => {
+    const partnerSweets = dynamicProducts
+      .filter((p: any) => {
+        const cat = (p.category || "").toLowerCase();
+        return cat === "sweets" || cat === "bakery" || cat === "dessert" || cat === "mithai";
+      })
+      .map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        sweetShop: p.vendorName || "Partner Sweet Shop",
+        price: Number(p.price) || 299,
+        rating: Number(p.rating) || 4.9,
+        weightOrUnit: p.unit || "500g",
+        image: p.image || (p.images && p.images[0]) || "https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=500&q=80",
+        badge: "Partner Added",
+      }));
+    return [...partnerSweets, ...SWEETS_ITEMS];
+  }, [dynamicProducts]);
 
   // Promotional Banners
   const PROMO_BANNERS = [
@@ -459,19 +555,33 @@ export default function LandingPage() {
                         {liveSearchResults.products.map((p) => (
                           <div
                             key={p.id}
-                            className="flex-shrink-0 w-56 sm:w-60 p-3 rounded-2xl bg-background border border-border/80 hover:border-primary/40 transition-all flex flex-col justify-between"
+                            onClick={() => openItemDetails({
+                              id: p.id,
+                              name: p.name,
+                              price: p.price,
+                              image: p.image,
+                              unit: p.unit,
+                              category: (p as any).category || p.categoryId,
+                              categoryId: p.categoryId,
+                              description: p.description || p.name,
+                              type: "product",
+                            })}
+                            className="flex-shrink-0 w-56 sm:w-60 p-3 rounded-2xl bg-background border border-border/80 hover:border-primary/40 transition-all flex flex-col justify-between cursor-pointer group hover:shadow-subtle"
                           >
                             <div className="flex items-start gap-2.5">
-                              <img src={p.image} alt={p.name} className="w-14 h-14 rounded-xl object-cover bg-muted shrink-0" />
+                              <img src={p.image} alt={p.name} className="w-14 h-14 rounded-xl object-cover bg-muted shrink-0 group-hover:scale-105 transition-transform" />
                               <div className="min-w-0 flex-1">
-                                <h5 className="text-xs font-bold text-foreground truncate">{p.name}</h5>
+                                <h5 className="text-xs font-bold text-foreground truncate group-hover:text-primary transition-colors">{p.name}</h5>
                                 <p className="text-[10px] text-muted-foreground truncate">{p.unit}</p>
                                 <span className="text-xs font-extrabold text-foreground mt-1 inline-block">₹{p.price}</span>
                               </div>
                             </div>
                             <Button
                               size="sm"
-                              onClick={() => handleAddToCart(p)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAddToCart(p);
+                              }}
                               className="w-full mt-3 h-7 rounded-xl text-xs font-bold bg-primary text-primary-foreground shadow-xs gap-1"
                             >
                               <Plus className="w-3 h-3" />
@@ -499,15 +609,41 @@ export default function LandingPage() {
                         {liveSearchResults.doctors.map((d) => (
                           <div
                             key={d.id}
-                            className="flex-shrink-0 w-64 sm:w-72 p-3.5 rounded-2xl bg-background border border-border/80 hover:border-cyan-500/40 transition-all flex items-center justify-between gap-3"
+                            onClick={() => openItemDetails({
+                              id: d.id,
+                              name: d.name,
+                              specialty: d.specialty,
+                              hospital: d.hospital,
+                              fee: d.fee,
+                              rating: d.rating,
+                              experience: `${d.experience} yrs`,
+                              type: "doctor",
+                            })}
+                            className="flex-shrink-0 w-64 sm:w-72 p-3.5 rounded-2xl bg-background border border-border/80 hover:border-cyan-500/40 transition-all flex items-center justify-between gap-3 cursor-pointer group hover:shadow-subtle"
                           >
                             <div className="min-w-0 flex-1">
-                              <h5 className="text-xs font-bold text-foreground truncate">{d.name}</h5>
+                              <h5 className="text-xs font-bold text-foreground truncate group-hover:text-cyan-600 transition-colors">{d.name}</h5>
                               <p className="text-[11px] text-primary font-semibold truncate">{d.specialty}</p>
                               <p className="text-[10px] text-muted-foreground truncate">{d.hospital} • ₹{d.fee}</p>
                             </div>
-                            <Button size="sm" asChild className="rounded-xl text-xs font-bold shrink-0 h-8">
-                              <Link to="/doctors">Book</Link>
+                            <Button
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openItemDetails({
+                                  id: d.id,
+                                  name: d.name,
+                                  specialty: d.specialty,
+                                  hospital: d.hospital,
+                                  fee: d.fee,
+                                  rating: d.rating,
+                                  experience: `${d.experience} yrs`,
+                                  type: "doctor",
+                                });
+                              }}
+                              className="rounded-xl text-xs font-bold shrink-0 h-8"
+                            >
+                              Book
                             </Button>
                           </div>
                         ))}
@@ -531,15 +667,38 @@ export default function LandingPage() {
                         {liveSearchResults.hospitals.map((h) => (
                           <div
                             key={h.id}
-                            className="flex-shrink-0 w-64 sm:w-72 p-3.5 rounded-2xl bg-background border border-border/80 hover:border-rose-500/40 transition-all flex items-center justify-between gap-3"
+                            onClick={() => openItemDetails({
+                              id: h.id,
+                              name: h.name,
+                              address: h.address,
+                              availableBeds: h.availableBeds,
+                              emergencyPhone: h.emergencyPhone,
+                              type: "hospital",
+                            })}
+                            className="flex-shrink-0 w-64 sm:w-72 p-3.5 rounded-2xl bg-background border border-border/80 hover:border-rose-500/40 transition-all flex items-center justify-between gap-3 cursor-pointer group hover:shadow-subtle"
                           >
                             <div className="min-w-0 flex-1">
-                              <h5 className="text-xs font-bold text-foreground truncate">{h.name}</h5>
+                              <h5 className="text-xs font-bold text-foreground truncate group-hover:text-rose-600 transition-colors">{h.name}</h5>
                               <p className="text-[11px] text-emerald-600 font-bold">{h.availableBeds.icu} ICU Beds Available</p>
                               <p className="text-[10px] text-muted-foreground truncate">{h.address}</p>
                             </div>
-                            <Button size="sm" variant="outline" asChild className="rounded-xl text-xs font-bold shrink-0 h-8">
-                              <Link to="/hospitals">Beds</Link>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openItemDetails({
+                                  id: h.id,
+                                  name: h.name,
+                                  address: h.address,
+                                  availableBeds: h.availableBeds,
+                                  emergencyPhone: h.emergencyPhone,
+                                  type: "hospital",
+                                });
+                              }}
+                              className="rounded-xl text-xs font-bold shrink-0 h-8"
+                            >
+                              Beds
                             </Button>
                           </div>
                         ))}
@@ -563,15 +722,39 @@ export default function LandingPage() {
                         {liveSearchResults.services.map((s) => (
                           <div
                             key={s.id}
-                            className="flex-shrink-0 w-56 sm:w-64 p-3.5 rounded-2xl bg-background border border-border/80 hover:border-blue-500/40 transition-all flex flex-col justify-between"
+                            onClick={() => openItemDetails({
+                              id: s.id,
+                              name: s.name,
+                              category: s.category,
+                              price: s.pricePerHour,
+                              rating: s.rating,
+                              type: "service",
+                              route: "/services",
+                            })}
+                            className="flex-shrink-0 w-56 sm:w-64 p-3.5 rounded-2xl bg-background border border-border/80 hover:border-blue-500/40 transition-all flex flex-col justify-between cursor-pointer group hover:shadow-subtle"
                           >
                             <div>
-                              <h5 className="text-xs font-bold text-foreground truncate">{s.name}</h5>
+                              <h5 className="text-xs font-bold text-foreground truncate group-hover:text-blue-600 transition-colors">{s.name}</h5>
                               <p className="text-[11px] text-primary font-semibold">{s.category}</p>
                               <p className="text-[10px] text-muted-foreground mt-0.5">₹{s.pricePerHour}/visit • {s.rating} ★</p>
                             </div>
-                            <Button size="sm" asChild className="w-full mt-2 h-7 rounded-xl text-xs font-bold">
-                              <Link to="/services">Book</Link>
+                            <Button
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openItemDetails({
+                                  id: s.id,
+                                  name: s.name,
+                                  category: s.category,
+                                  price: s.pricePerHour,
+                                  rating: s.rating,
+                                  type: "service",
+                                  route: "/services",
+                                });
+                              }}
+                              className="w-full mt-2 h-7 rounded-xl text-xs font-bold"
+                            >
+                              Book
                             </Button>
                           </div>
                         ))}
@@ -595,14 +778,35 @@ export default function LandingPage() {
                         {liveSearchResults.spots.map((sp) => (
                           <div
                             key={sp.id}
-                            className="flex-shrink-0 w-56 sm:w-64 p-3.5 rounded-2xl bg-background border border-border/80 hover:border-purple-500/40 transition-all flex flex-col justify-between"
+                            onClick={() => openItemDetails({
+                              id: sp.id,
+                              name: sp.name,
+                              badge: sp.tagline,
+                              description: sp.tagline,
+                              type: "spot",
+                            })}
+                            className="flex-shrink-0 w-56 sm:w-64 p-3.5 rounded-2xl bg-background border border-border/80 hover:border-purple-500/40 transition-all flex flex-col justify-between cursor-pointer group hover:shadow-subtle"
                           >
                             <div>
-                              <h5 className="text-xs font-bold text-foreground truncate">{sp.name}</h5>
+                              <h5 className="text-xs font-bold text-foreground truncate group-hover:text-purple-600 transition-colors">{sp.name}</h5>
                               <p className="text-[10px] text-muted-foreground line-clamp-2 mt-0.5">{sp.tagline}</p>
                             </div>
-                            <Button size="sm" variant="outline" asChild className="w-full mt-2 h-7 rounded-xl text-xs font-bold">
-                              <Link to="/famous">View</Link>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openItemDetails({
+                                  id: sp.id,
+                                  name: sp.name,
+                                  badge: sp.tagline,
+                                  description: sp.tagline,
+                                  type: "spot",
+                                });
+                              }}
+                              className="w-full mt-2 h-7 rounded-xl text-xs font-bold"
+                            >
+                              View
                             </Button>
                           </div>
                         ))}
@@ -760,17 +964,37 @@ export default function LandingPage() {
               const cartItem = items[numId];
 
               return (
-                <Card key={item.id} className="w-44 sm:w-48 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col">
-                  <div className="relative aspect-square w-full bg-muted/20">
-                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" loading="lazy" />
+                <Card
+                  key={item.id}
+                  onClick={() => openItemDetails({
+                    id: item.id,
+                    name: item.name,
+                    price: item.price,
+                    originalPrice: item.mrp,
+                    image: item.image,
+                    category: item.categoryId,
+                    categoryId: item.categoryId,
+                    unit: item.unit,
+                    deliveryMinutes: item.deliveryMinutes,
+                    rating: item.rating,
+                    description: item.description,
+                    type: "product"
+                  })}
+                  className="w-44 sm:w-48 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col cursor-pointer group"
+                >
+                  <div className="relative aspect-square w-full bg-muted/20 overflow-hidden">
+                    <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                     <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md bg-emerald-600 text-white text-[9px] font-bold">
                       {item.deliveryMinutes}m
                     </span>
+                    <span className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-md bg-black/60 text-white text-[9px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                      🔍 Zoom
+                    </span>
                   </div>
                   <CardContent className="p-3 flex-1 flex flex-col">
-                    <h4 className="font-bold text-xs text-foreground line-clamp-1 mb-0.5">{item.name}</h4>
+                    <h4 className="font-bold text-xs text-foreground line-clamp-1 mb-0.5 group-hover:text-primary transition-colors">{item.name}</h4>
                     <span className="text-[11px] text-muted-foreground mb-2">{item.unit}</span>
-                    <div className="mt-auto flex items-center justify-between pt-1 border-t border-border">
+                    <div className="mt-auto flex items-center justify-between pt-1 border-t border-border" onClick={(e) => e.stopPropagation()}>
                       <span className="font-bold text-sm text-foreground">₹{item.price}</span>
                       {cartItem ? (
                         <div className="flex items-center gap-1.5 bg-primary text-primary-foreground rounded-lg px-1.5 py-0.5 text-xs">
@@ -814,22 +1038,42 @@ export default function LandingPage() {
 
           <ScrollableRow>
             {popularRestaurants.map((dish) => (
-              <Card key={dish.id} className="w-64 sm:w-72 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col">
-                <div className="relative aspect-video w-full">
-                  <img src={dish.image} alt={dish.name} className="w-full h-full object-cover" loading="lazy" />
+              <Card
+                key={dish.id}
+                onClick={() => openItemDetails({
+                  id: dish.id,
+                  name: dish.name,
+                  price: dish.price,
+                  originalPrice: dish.mrp,
+                  image: dish.image,
+                  category: "restaurants",
+                  cuisine: dish.cuisine,
+                  rating: dish.rating,
+                  isVeg: dish.isVeg,
+                  restaurant: dish.brand || "EZY Restaurant",
+                  description: dish.description,
+                  type: "food"
+                })}
+                className="w-64 sm:w-72 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col cursor-pointer group"
+              >
+                <div className="relative aspect-video w-full overflow-hidden">
+                  <img src={dish.image} alt={dish.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                   <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-black/70 text-white text-[10px] font-bold backdrop-blur-sm">
                     {dish.cuisine || "Specialty"}
                   </span>
                   <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-black/60 text-amber-400 text-[10px] font-bold backdrop-blur-sm">
                     ★ {dish.rating}
                   </span>
+                  <span className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded-md bg-black/60 text-white text-[9px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                    🔍 Zoom
+                  </span>
                 </div>
                 <CardContent className="p-4 flex-1 flex flex-col justify-between">
                   <div>
-                    <h4 className="font-bold text-sm text-foreground line-clamp-1 mb-1">{dish.name}</h4>
+                    <h4 className="font-bold text-sm text-foreground line-clamp-1 mb-1 group-hover:text-primary transition-colors">{dish.name}</h4>
                     <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{dish.description}</p>
                   </div>
-                  <div className="pt-2 border-t border-border flex items-center justify-between">
+                  <div className="pt-2 border-t border-border flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
                     <span className="font-bold text-base text-foreground">₹{dish.price}</span>
                     <Button size="sm" onClick={() => handleAddToCart(dish)} className="h-8 rounded-xl px-4 text-xs font-bold bg-primary text-primary-foreground">
                       Order Food
@@ -864,19 +1108,38 @@ export default function LandingPage() {
               const cartItem = items[numId];
 
               return (
-                <Card key={item.id} className="w-44 sm:w-48 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-subtle transition-smooth flex flex-col">
-                  <div className="relative aspect-square w-full bg-muted/20">
-                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" loading="lazy" />
+                <Card
+                  key={item.id}
+                  onClick={() => openItemDetails({
+                    id: item.id,
+                    name: item.name,
+                    price: item.price,
+                    originalPrice: item.mrp,
+                    image: item.image,
+                    category: item.categoryId,
+                    categoryId: item.categoryId,
+                    unit: item.unit,
+                    rating: item.rating,
+                    description: item.description,
+                    type: "product"
+                  })}
+                  className="w-44 sm:w-48 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-subtle transition-smooth flex flex-col cursor-pointer group"
+                >
+                  <div className="relative aspect-square w-full bg-muted/20 overflow-hidden">
+                    <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                     {item.freshnessScore && (
                       <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-emerald-600 text-white text-[9px] font-bold">
                         {item.freshnessScore}% Fresh
                       </span>
                     )}
+                    <span className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-md bg-black/60 text-white text-[9px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                      🔍 Zoom
+                    </span>
                   </div>
                   <CardContent className="p-3 flex-1 flex flex-col">
-                    <h4 className="font-bold text-xs text-foreground line-clamp-1 mb-0.5">{item.name}</h4>
+                    <h4 className="font-bold text-xs text-foreground line-clamp-1 mb-0.5 group-hover:text-primary transition-colors">{item.name}</h4>
                     <span className="text-[11px] text-muted-foreground mb-2">{item.unit}</span>
-                    <div className="mt-auto flex items-center justify-between pt-1 border-t border-border">
+                    <div className="mt-auto flex items-center justify-between pt-1 border-t border-border" onClick={(e) => e.stopPropagation()}>
                       <span className="font-bold text-sm text-foreground">₹{item.price}</span>
                       {cartItem ? (
                         <div className="flex items-center gap-1 bg-primary text-primary-foreground rounded-lg px-1.5 py-0.5 text-xs">
@@ -934,9 +1197,23 @@ export default function LandingPage() {
             {/* Live Bed Availability Grid (Real verified statuses: Available / Limited / Full) */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {hospitalData?.capacitySummary?.map((cap: any, i: number) => (
-                <div key={i} className="p-4 rounded-2xl bg-card border border-border flex items-center justify-between shadow-xs">
+                <div
+                  key={i}
+                  onClick={() => openItemDetails({
+                    id: `hospital-cap-${i}`,
+                    name: cap.name,
+                    type: "hospital",
+                    availableBeds: {
+                      icu: Math.max(1, Math.round(cap.available * 0.2)),
+                      oxygen: Math.max(2, Math.round(cap.available * 0.3)),
+                      general: Math.max(3, Math.round(cap.available * 0.5)),
+                    },
+                    description: `Verified hospital bed capacity: ${cap.available} available out of ${cap.total} total capacity. Last updated: ${cap.lastUpdated}. 24/7 emergency bed allocation available.`,
+                  })}
+                  className="p-4 rounded-2xl bg-card border border-border flex items-center justify-between shadow-xs hover:border-primary/40 hover:shadow-subtle transition-all cursor-pointer group"
+                >
                   <div>
-                    <span className="text-xs font-bold text-foreground block">{cap.name}</span>
+                    <span className="text-xs font-bold text-foreground block group-hover:text-primary transition-colors">{cap.name}</span>
                     <span className="text-[11px] text-muted-foreground">Last updated: {cap.lastUpdated}</span>
                   </div>
                   <div className="text-right">
@@ -1000,30 +1277,59 @@ export default function LandingPage() {
 
           <ScrollableRow>
             {stays.map((hotel) => (
-              <Card key={hotel.id} className="w-72 sm:w-80 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col">
-                <div className="relative aspect-video w-full bg-muted">
-                  <img src={hotel.image} alt={hotel.name} className="w-full h-full object-cover" loading="lazy" />
+              <Card
+                key={hotel.id}
+                onClick={() => openItemDetails({
+                  id: hotel.id,
+                  name: hotel.name,
+                  pricePerNight: hotel.pricePerNight,
+                  rating: hotel.rating,
+                  image: hotel.image,
+                  address: hotel.address || hotel.city,
+                  amenities: hotel.amenities,
+                  availableRooms: hotel.availableRooms,
+                  description: hotel.description || `Verified hotel stay offering comfortable deluxe rooms, free high-speed Wi-Fi, 24/7 service, and instant booking confirmation.`,
+                  type: "stay",
+                })}
+                className="w-72 sm:w-80 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col cursor-pointer group"
+              >
+                <div className="relative aspect-video w-full bg-muted overflow-hidden">
+                  <img src={hotel.image} alt={hotel.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                   <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-black/70 text-white text-[10px] font-bold uppercase backdrop-blur-sm">
                     {hotel.type || (Array.isArray(hotel.tags) ? hotel.tags[0] : "Hotel")}
                   </span>
                   <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-black/60 text-amber-400 text-[10px] font-bold backdrop-blur-sm">
                     ★ {hotel.rating}
                   </span>
+                  <span className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded-md bg-black/60 text-white text-[9px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                    🔍 Zoom
+                  </span>
                 </div>
                 <CardContent className="p-4 flex-1 flex flex-col justify-between">
                   <div>
-                    <h4 className="font-bold text-sm text-foreground line-clamp-1">{hotel.name}</h4>
+                    <h4 className="font-bold text-sm text-foreground line-clamp-1 group-hover:text-primary transition-colors">{hotel.name}</h4>
                     <p className="text-xs text-muted-foreground line-clamp-1 mb-2">{hotel.address || hotel.city || "Prime Location"}</p>
                     <span className="text-[10px] text-emerald-600 font-semibold block">{hotel.availableRooms ?? 5} rooms available</span>
                   </div>
-                  <div className="mt-3 pt-2 border-t border-border flex items-center justify-between">
+                  <div className="mt-3 pt-2 border-t border-border flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
                     <div>
                       <span className="text-[10px] text-muted-foreground block">per night</span>
                       <span className="font-black text-base text-foreground">₹{hotel.pricePerNight}</span>
                     </div>
                     <Button
                       size="sm"
-                      onClick={() => requireAuth(() => navigate({ to: "/stays" }))}
+                      onClick={() => openItemDetails({
+                        id: hotel.id,
+                        name: hotel.name,
+                        pricePerNight: hotel.pricePerNight,
+                        rating: hotel.rating,
+                        image: hotel.image,
+                        address: hotel.address || hotel.city,
+                        amenities: hotel.amenities,
+                        availableRooms: hotel.availableRooms,
+                        description: hotel.description,
+                        type: "stay",
+                      })}
                       className="rounded-xl font-bold text-xs bg-primary text-primary-foreground h-8 px-3.5"
                     >
                       Book Stay
@@ -1054,30 +1360,65 @@ export default function LandingPage() {
 
           <ScrollableRow>
             {tours.map((tour) => (
-              <Card key={tour.id} className="w-72 sm:w-80 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col">
-                <div className="relative aspect-video w-full bg-muted">
-                  <img src={tour.image} alt={tour.title} className="w-full h-full object-cover" loading="lazy" />
+              <Card
+                key={tour.id}
+                onClick={() => openItemDetails({
+                  id: tour.id,
+                  title: tour.title,
+                  name: tour.title,
+                  price: tour.price,
+                  rating: tour.rating,
+                  image: tour.image,
+                  duration: tour.duration,
+                  agencyName: tour.agencyName,
+                  destination: tour.destination,
+                  inclusions: tour.inclusions,
+                  includedAmenities: tour.includedAmenities,
+                  description: tour.description || `Curated travel package by ${tour.agencyName || "Verified Operator"} covering top scenic spots, transport, stay and meals.`,
+                  type: "tour",
+                })}
+                className="w-72 sm:w-80 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col cursor-pointer group"
+              >
+                <div className="relative aspect-video w-full bg-muted overflow-hidden">
+                  <img src={tour.image} alt={tour.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                   <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-black/70 text-white text-[10px] font-bold backdrop-blur-sm">
                     {tour.duration}
                   </span>
                   <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-sky-600 text-white text-[10px] font-bold">
                     ★ {tour.rating}
                   </span>
+                  <span className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded-md bg-black/60 text-white text-[9px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                    🔍 Zoom
+                  </span>
                 </div>
                 <CardContent className="p-4 flex-1 flex flex-col justify-between">
                   <div>
-                    <h4 className="font-bold text-sm text-foreground line-clamp-1">{tour.title}</h4>
+                    <h4 className="font-bold text-sm text-foreground line-clamp-1 group-hover:text-primary transition-colors">{tour.title}</h4>
                     <p className="text-xs text-muted-foreground line-clamp-1 mb-1">{tour.agencyName || "Verified Operator"} • {tour.destination || "Sightseeing Tour"}</p>
                     <p className="text-[11px] text-muted-foreground line-clamp-1">{tour.includedAmenities || (Array.isArray(tour.inclusions) ? tour.inclusions.join(" • ") : "All Inclusions")}</p>
                   </div>
-                  <div className="mt-3 pt-2 border-t border-border flex items-center justify-between">
+                  <div className="mt-3 pt-2 border-t border-border flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
                     <div>
                       <span className="text-[10px] text-muted-foreground block">per person</span>
                       <span className="font-black text-base text-foreground">₹{tour.price}</span>
                     </div>
                     <Button
                       size="sm"
-                      onClick={() => requireAuth(() => navigate({ to: "/travel" }))}
+                      onClick={() => openItemDetails({
+                        id: tour.id,
+                        title: tour.title,
+                        name: tour.title,
+                        price: tour.price,
+                        rating: tour.rating,
+                        image: tour.image,
+                        duration: tour.duration,
+                        agencyName: tour.agencyName,
+                        destination: tour.destination,
+                        inclusions: tour.inclusions,
+                        includedAmenities: tour.includedAmenities,
+                        description: tour.description,
+                        type: "tour",
+                      })}
                       className="rounded-xl font-bold text-xs bg-primary text-primary-foreground h-8 px-3.5"
                     >
                       Book Tour
@@ -1108,11 +1449,29 @@ export default function LandingPage() {
 
           <ScrollableRow>
             {buses.map((bus) => (
-              <Card key={bus.id} className="w-72 sm:w-80 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-subtle transition-smooth flex flex-col">
+              <Card
+                key={bus.id}
+                onClick={() => openItemDetails({
+                  id: bus.id,
+                  name: `${bus.operatorName || bus.operator || "Express Bus"} (${bus.sourceCity || bus.from || "Boarding"} → ${bus.destinationCity || bus.to || "Destination"})`,
+                  fare: bus.fare,
+                  operatorName: bus.operatorName || bus.operator,
+                  departureTime: bus.departureTime || bus.departure,
+                  arrivalTime: bus.arrivalTime || bus.arrival,
+                  sourceCity: bus.sourceCity || bus.from,
+                  destinationCity: bus.destinationCity || bus.to,
+                  busType: (bus.busType || bus.type || "Bus").replace(/_/g, " "),
+                  runningStatus: bus.runningStatus || "On Time",
+                  availableSeats: bus.availableSeats ?? bus.seatsAvailable ?? 12,
+                  description: `Direct regional carrier service operating between ${bus.sourceCity || "Origin"} and ${bus.destinationCity || "Destination"}. AC push-back seats with digital QR boarding.`,
+                  type: "bus",
+                })}
+                className="w-72 sm:w-80 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-subtle transition-smooth flex flex-col cursor-pointer group"
+              >
                 <CardContent className="p-4 flex-1 flex flex-col justify-between">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-xs text-foreground truncate">{bus.operatorName || bus.operator || "Express Bus"}</span>
+                      <span className="font-bold text-xs text-foreground truncate group-hover:text-primary transition-colors">{bus.operatorName || bus.operator || "Express Bus"}</span>
                       <Badge variant="outline" className="text-[9px] font-bold uppercase">
                         {(bus.busType || bus.type || "Bus").replace(/_/g, " ")}
                       </Badge>
@@ -1125,7 +1484,7 @@ export default function LandingPage() {
                       </div>
                       <div className="text-[9px] text-muted-foreground">
                         <span>{bus.duration || "Direct"}</span>
-                        <div className="w-12 h-0.5 bg-border my-0.5" />
+                        <div className="w-12 h-0.5 bg-border my-0.5 mx-auto" />
                         <span className="text-emerald-600 font-bold">{bus.runningStatus || "On Time"}</span>
                       </div>
                       <div>
@@ -1137,11 +1496,25 @@ export default function LandingPage() {
                     <span className="text-[10px] text-sky-600 font-semibold block">{bus.availableSeats ?? bus.seatsAvailable ?? 12} seats left</span>
                   </div>
 
-                  <div className="mt-3 pt-2 border-t border-border flex items-center justify-between">
+                  <div className="mt-3 pt-2 border-t border-border flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
                     <span className="font-black text-base text-foreground">₹{bus.fare}</span>
                     <Button
                       size="sm"
-                      onClick={() => requireAuth(() => navigate({ to: "/bus" }))}
+                      onClick={() => openItemDetails({
+                        id: bus.id,
+                        name: `${bus.operatorName || bus.operator || "Express Bus"} (${bus.sourceCity || bus.from || "Boarding"} → ${bus.destinationCity || bus.to || "Destination"})`,
+                        fare: bus.fare,
+                        operatorName: bus.operatorName || bus.operator,
+                        departureTime: bus.departureTime || bus.departure,
+                        arrivalTime: bus.arrivalTime || bus.arrival,
+                        sourceCity: bus.sourceCity || bus.from,
+                        destinationCity: bus.destinationCity || bus.to,
+                        busType: (bus.busType || bus.type || "Bus").replace(/_/g, " "),
+                        runningStatus: bus.runningStatus || "On Time",
+                        availableSeats: bus.availableSeats ?? bus.seatsAvailable ?? 12,
+                        description: `Direct regional carrier service operating between ${bus.sourceCity || "Origin"} and ${bus.destinationCity || "Destination"}. AC push-back seats with digital QR boarding.`,
+                        type: "bus",
+                      })}
                       className="rounded-xl font-bold text-xs bg-primary text-primary-foreground h-8 px-3.5"
                     >
                       Select Seats
@@ -1159,12 +1532,21 @@ export default function LandingPage() {
         <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* EZY Ride Card */}
-            <div className="p-6 rounded-3xl bg-card border border-border shadow-xs hover:shadow-subtle transition-all flex flex-col justify-between">
+            <div
+              onClick={() => openItemDetails({
+                id: "ezy-ride",
+                name: "EZY Ride — Bike, Auto & Cabs",
+                description: "Zero surge pricing, vetted drivers, and rapid 3-min pickups across town. Available 24/7 for instant city travel.",
+                route: "/dashboard/transport",
+                type: "ride",
+              })}
+              className="p-6 rounded-3xl bg-card border border-border shadow-xs hover:shadow-subtle hover:border-primary/40 transition-all flex flex-col justify-between cursor-pointer group"
+            >
               <div>
-                <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center mb-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                   <Car className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-bold font-display text-foreground">
+                <h3 className="text-lg font-bold font-display text-foreground group-hover:text-primary transition-colors">
                   EZY Ride — Bike, Auto & Cabs
                 </h3>
                 <p className="text-xs text-muted-foreground mt-1 mb-4">
@@ -1182,12 +1564,21 @@ export default function LandingPage() {
             </div>
 
             {/* EZY Share Ride Card */}
-            <div className="p-6 rounded-3xl bg-card border border-border shadow-xs hover:shadow-subtle transition-all flex flex-col justify-between">
+            <div
+              onClick={() => openItemDetails({
+                id: "ezy-share-ride",
+                name: "EZY Share Ride — Verified Carpool",
+                description: "Split fuel costs and commute with verified corporate members. Save up to 60% on daily office travel with guaranteed seat bookings.",
+                route: "/share-ride",
+                type: "ride",
+              })}
+              className="p-6 rounded-3xl bg-card border border-border shadow-xs hover:shadow-subtle hover:border-primary/40 transition-all flex flex-col justify-between cursor-pointer group"
+            >
               <div>
-                <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center mb-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                   <ShieldCheck className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-bold font-display text-foreground">
+                <h3 className="text-lg font-bold font-display text-foreground group-hover:text-primary transition-colors">
                   EZY Share Ride — Verified Carpool
                 </h3>
                 <p className="text-xs text-muted-foreground mt-1 mb-4">
@@ -1211,12 +1602,21 @@ export default function LandingPage() {
         <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* EZY Parcel */}
-            <div className="p-6 rounded-3xl bg-card border border-border shadow-xs flex flex-col justify-between">
+            <div
+              onClick={() => openItemDetails({
+                id: "ezy-parcel",
+                name: "EZY Parcel — Local City Courier",
+                description: "Send lunch boxes, keys, documents or packages anywhere in town in 30-45 mins. Live GPS tracking and delivery verification PIN.",
+                route: "/parcel",
+                type: "parcel",
+              })}
+              className="p-6 rounded-3xl bg-card border border-border shadow-xs hover:border-primary/40 transition-all flex flex-col justify-between cursor-pointer group hover:shadow-subtle"
+            >
               <div className="space-y-2">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                   <Package className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-bold font-display text-foreground">
+                <h3 className="text-lg font-bold font-display text-foreground group-hover:text-primary transition-colors">
                   EZY Parcel — Local City Courier
                 </h3>
                 <p className="text-xs text-muted-foreground">
@@ -1232,12 +1632,21 @@ export default function LandingPage() {
             </div>
 
             {/* Local Services */}
-            <div className="p-6 rounded-3xl bg-card border border-border shadow-xs flex flex-col justify-between">
+            <div
+              onClick={() => openItemDetails({
+                id: "home-services",
+                name: "Home Services & Repairs",
+                description: "Electricians, plumbers, AC service, deep cleaning and carpentry with 30-day warranty. Verified technicians from ₹199.",
+                route: "/services",
+                type: "service",
+              })}
+              className="p-6 rounded-3xl bg-card border border-border shadow-xs hover:border-primary/40 transition-all flex flex-col justify-between cursor-pointer group hover:shadow-subtle"
+            >
               <div className="space-y-2">
-                <div className="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                   <Wrench className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-bold font-display text-foreground">
+                <h3 className="text-lg font-bold font-display text-foreground group-hover:text-primary transition-colors">
                   Home Services & Repairs
                 </h3>
                 <p className="text-xs text-muted-foreground">
@@ -1273,17 +1682,30 @@ export default function LandingPage() {
 
           <ScrollableRow>
             {FAMOUS_LOCAL_SPOTS.map((spot) => (
-              <div key={spot.id} className="w-64 sm:w-72 flex-shrink-0 p-3.5 rounded-2xl border border-border bg-card hover:shadow-subtle transition-smooth flex items-center gap-3">
-                <img src={spot.image} alt={spot.name} className="w-16 h-16 rounded-xl object-cover bg-muted flex-shrink-0" />
+              <div
+                key={spot.id}
+                onClick={() => openItemDetails({
+                  id: spot.id,
+                  name: spot.name,
+                  image: spot.image,
+                  address: spot.address,
+                  rating: spot.rating,
+                  badge: spot.tagline,
+                  description: `${spot.tagline} — Located at ${spot.address}. Rated ${spot.rating}/5. A must-visit local landmark.`,
+                  type: "spot",
+                })}
+                className="w-64 sm:w-72 flex-shrink-0 p-3.5 rounded-2xl border border-border bg-card hover:shadow-subtle transition-smooth flex items-center gap-3 cursor-pointer group"
+              >
+                <img src={spot.image} alt={spot.name} className="w-16 h-16 rounded-xl object-cover bg-muted flex-shrink-0 group-hover:scale-105 transition-transform" />
                 <div className="min-w-0 flex-1">
                   <span className="text-[9px] font-bold text-primary uppercase block truncate">{spot.tagline}</span>
-                  <h4 className="font-bold text-xs text-foreground truncate">{spot.name}</h4>
+                  <h4 className="font-bold text-xs text-foreground truncate group-hover:text-primary transition-colors">{spot.name}</h4>
                   <p className="text-[10px] text-muted-foreground truncate">{spot.address}</p>
                   <div className="flex items-center gap-2 mt-1 text-[11px]">
                     <span className="font-bold text-amber-500">★ {spot.rating}</span>
-                    <Link to="/famous" className="text-primary hover:underline ml-auto font-medium text-[10px]">
+                    <span className="text-primary group-hover:underline ml-auto font-medium text-[10px]">
                       Details →
-                    </Link>
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1312,10 +1734,21 @@ export default function LandingPage() {
               { code: "HEALTH20", discount: "Flat 20% OFF", desc: "Valid on lab checkup packages & doctor visits", color: "border-rose-500/30 bg-rose-500/5" },
               { code: "RIDEFREE", discount: "₹50 Cashback", desc: "Valid on your first EZY Share Ride or auto trip", color: "border-emerald-500/30 bg-emerald-500/5" },
             ].map((coupon) => (
-              <div key={coupon.code} className={`p-4 rounded-2xl border ${coupon.color} flex flex-col justify-between shadow-xs`}>
+              <div
+                key={coupon.code}
+                onClick={() => openItemDetails({
+                  id: coupon.code,
+                  code: coupon.code,
+                  discount: coupon.discount,
+                  desc: coupon.desc,
+                  description: `Get ${coupon.discount}. ${coupon.desc}. Copy code and apply during checkout.`,
+                  type: "coupon",
+                })}
+                className={`p-4 rounded-2xl border ${coupon.color} flex flex-col justify-between shadow-xs cursor-pointer hover:shadow-md transition-all group`}
+              >
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-mono font-black text-sm text-foreground">{coupon.code}</span>
+                    <span className="font-mono font-black text-sm text-foreground group-hover:text-primary transition-colors">{coupon.code}</span>
                     <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] font-bold">
                       {coupon.discount}
                     </Badge>
@@ -1325,7 +1758,10 @@ export default function LandingPage() {
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => copyCoupon(coupon.code)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    copyCoupon(coupon.code);
+                  }}
                   className="mt-3 h-8 text-xs font-bold rounded-xl w-full"
                 >
                   <Copy className="w-3 h-3 mr-1" /> Copy Code
@@ -1352,22 +1788,36 @@ export default function LandingPage() {
 
             <ScrollableRow>
               {recentItems.map((prod) => (
-                <Card key={prod.id} className="w-44 sm:w-48 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden flex flex-col">
-                  <div className="aspect-square w-full bg-muted/20">
-                    <img src={prod.image} alt={prod.name} className="w-full h-full object-cover" loading="lazy" />
+                <Card
+                  key={prod.id}
+                  onClick={() => openItemDetails({
+                    id: prod.id,
+                    name: prod.name,
+                    price: prod.price,
+                    image: prod.image,
+                    category: prod.category || "Grocery",
+                    description: prod.description || `Reorder ${prod.name} with 1 click.`,
+                    type: "product",
+                  })}
+                  className="w-44 sm:w-48 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden flex flex-col cursor-pointer group hover:shadow-subtle"
+                >
+                  <div className="aspect-square w-full bg-muted/20 overflow-hidden">
+                    <img src={prod.image} alt={prod.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                   </div>
                   <CardContent className="p-3 flex-1 flex flex-col justify-between">
                     <div>
-                      <h4 className="font-bold text-xs text-foreground line-clamp-1">{prod.name}</h4>
+                      <h4 className="font-bold text-xs text-foreground line-clamp-1 group-hover:text-primary transition-colors">{prod.name}</h4>
                       <span className="text-[11px] text-muted-foreground">₹{prod.price}</span>
                     </div>
-                    <Button
-                      size="sm"
-                      onClick={() => handleAddToCart(prod)}
-                      className="mt-2 h-7 rounded-lg text-xs font-bold bg-primary text-primary-foreground w-full"
-                    >
-                      Reorder
-                    </Button>
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <Button
+                        size="sm"
+                        onClick={() => handleAddToCart(prod)}
+                        className="mt-2 h-7 rounded-lg text-xs font-bold bg-primary text-primary-foreground w-full"
+                      >
+                        Reorder
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -1393,8 +1843,27 @@ export default function LandingPage() {
           </div>
 
           <ScrollableRow>
-            {POPULAR_FOOD_ITEMS.map((dish) => (
-              <Card key={dish.id} className="w-56 sm:w-64 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col group">
+            {dynamicFoodItems.map((dish) => (
+              <Card
+                key={dish.id}
+                onClick={() => openItemDetails({
+                  id: dish.id,
+                  name: dish.name,
+                  price: dish.price,
+                  originalPrice: dish.originalPrice,
+                  image: dish.image,
+                  images: [dish.image],
+                  category: "food",
+                  description: `${dish.name} from ${dish.restaurant}. ${dish.tags.join(", ")}. Fast delivery in ${dish.deliveryTime}.`,
+                  type: "food",
+                  rating: dish.rating,
+                  deliveryTime: dish.deliveryTime,
+                  restaurant: dish.restaurant,
+                  isVeg: dish.isVeg,
+                  tags: dish.tags,
+                })}
+                className="w-56 sm:w-64 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col group cursor-pointer"
+              >
                 <div className="relative aspect-video w-full bg-muted/20 overflow-hidden">
                   <img src={dish.image} alt={dish.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                   {dish.badge && (
@@ -1413,7 +1882,7 @@ export default function LandingPage() {
                 </div>
                 <CardContent className="p-3.5 flex-1 flex flex-col justify-between">
                   <div>
-                    <h4 className="font-bold text-xs sm:text-sm text-foreground line-clamp-1 mb-0.5">{dish.name}</h4>
+                    <h4 className="font-bold text-xs sm:text-sm text-foreground line-clamp-1 mb-0.5 group-hover:text-primary transition-colors">{dish.name}</h4>
                     <p className="text-[11px] text-muted-foreground line-clamp-1">{dish.restaurant}</p>
                     <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
                       <span className="inline-flex items-center text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 px-1.5 py-0.2 rounded-md">
@@ -1435,7 +1904,10 @@ export default function LandingPage() {
                     </div>
                     <Button
                       size="sm"
-                      onClick={() => handleAddItemToCart({ id: dish.id, name: dish.name, price: dish.price, originalPrice: dish.originalPrice, image: dish.image, category: "food" })}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddItemToCart({ id: dish.id, name: dish.name, price: dish.price, originalPrice: dish.originalPrice, image: dish.image, category: "food" });
+                      }}
                       className="h-7 px-3 rounded-lg text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90"
                     >
                       Add +
@@ -1465,8 +1937,24 @@ export default function LandingPage() {
           </div>
 
           <ScrollableRow>
-            {SWEETS_ITEMS.map((sweet) => (
-              <Card key={sweet.id} className="w-52 sm:w-56 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col group">
+            {dynamicSweetsItems.map((sweet) => (
+              <Card
+                key={sweet.id}
+                onClick={() => openItemDetails({
+                  id: sweet.id,
+                  name: sweet.name,
+                  price: sweet.price,
+                  image: sweet.image,
+                  images: [sweet.image],
+                  category: "sweets",
+                  description: `${sweet.name} from ${sweet.sweetShop}. Pack: ${sweet.weightOrUnit}. Rating: ★${sweet.rating}. Freshly prepared traditional and artisanal sweets.`,
+                  type: "sweets",
+                  rating: sweet.rating,
+                  sweetShop: sweet.sweetShop,
+                  weightOrUnit: sweet.weightOrUnit,
+                })}
+                className="w-52 sm:w-56 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col group cursor-pointer"
+              >
                 <div className="relative aspect-square w-full bg-muted/20 overflow-hidden">
                   <img src={sweet.image} alt={sweet.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                   {sweet.badge && (
@@ -1480,7 +1968,7 @@ export default function LandingPage() {
                 </div>
                 <CardContent className="p-3.5 flex-1 flex flex-col justify-between">
                   <div>
-                    <h4 className="font-bold text-xs text-foreground line-clamp-1 mb-0.5">{sweet.name}</h4>
+                    <h4 className="font-bold text-xs text-foreground line-clamp-1 mb-0.5 group-hover:text-primary transition-colors">{sweet.name}</h4>
                     <p className="text-[11px] text-muted-foreground line-clamp-1">{sweet.sweetShop}</p>
                     <div className="flex items-center gap-1 mt-1">
                       <span className="text-amber-500 text-xs">★</span>
@@ -1491,7 +1979,10 @@ export default function LandingPage() {
                     <span className="font-extrabold text-sm text-foreground">₹{sweet.price}</span>
                     <Button
                       size="sm"
-                      onClick={() => handleAddItemToCart({ id: sweet.id, name: sweet.name, price: sweet.price, image: sweet.image, category: "sweets" })}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddItemToCart({ id: sweet.id, name: sweet.name, price: sweet.price, image: sweet.image, category: "sweets" });
+                      }}
                       className="h-7 px-3 rounded-lg text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90"
                     >
                       Add +
@@ -1536,7 +2027,23 @@ export default function LandingPage() {
 
           <ScrollableRow>
             {filteredFashion.map((item) => (
-              <Card key={item.id} className="w-52 sm:w-60 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col group">
+              <Card
+                key={item.id}
+                onClick={() => openItemDetails({
+                  id: item.id,
+                  name: item.name,
+                  price: item.price,
+                  originalPrice: item.originalPrice,
+                  image: item.image,
+                  images: [item.image],
+                  category: "fashion",
+                  brand: item.brand,
+                  rating: item.rating,
+                  description: `${item.name} by ${item.brand}. Category: ${item.gender} fashion. Special discount ${item.discount}. Premium quality fabric and authentic design.`,
+                  type: "fashion",
+                })}
+                className="w-52 sm:w-60 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col group cursor-pointer"
+              >
                 <div className="relative aspect-[3/4] w-full bg-muted/20 overflow-hidden">
                   <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                   <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md bg-rose-600 text-white text-[9px] font-extrabold uppercase shadow-xs">
@@ -1551,7 +2058,7 @@ export default function LandingPage() {
                 <CardContent className="p-3.5 flex-1 flex flex-col justify-between">
                   <div>
                     <span className="text-[10px] font-bold text-primary uppercase tracking-wider block mb-0.5">{item.brand}</span>
-                    <h4 className="font-bold text-xs text-foreground line-clamp-1">{item.name}</h4>
+                    <h4 className="font-bold text-xs text-foreground line-clamp-1 group-hover:text-primary transition-colors">{item.name}</h4>
                     <div className="flex items-center gap-1 mt-1">
                       <span className="text-amber-500 text-xs">★</span>
                       <span className="text-[11px] font-bold text-foreground">{item.rating}</span>
@@ -1564,7 +2071,10 @@ export default function LandingPage() {
                     </div>
                     <Button
                       size="sm"
-                      onClick={() => handleAddItemToCart({ id: item.id, name: item.name, price: item.price, originalPrice: item.originalPrice, image: item.image, category: "fashion" })}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddItemToCart({ id: item.id, name: item.name, price: item.price, originalPrice: item.originalPrice, image: item.image, category: "fashion" });
+                      }}
                       className="h-7 px-2.5 rounded-lg text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90"
                     >
                       Add +
@@ -1595,7 +2105,24 @@ export default function LandingPage() {
 
           <ScrollableRow>
             {JEWELLERY_ITEMS.map((item) => (
-              <Card key={item.id} className="w-52 sm:w-60 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col group">
+              <Card
+                key={item.id}
+                onClick={() => openItemDetails({
+                  id: item.id,
+                  name: item.name,
+                  price: item.price,
+                  originalPrice: item.originalPrice,
+                  image: item.image,
+                  images: [item.image],
+                  category: "jewellery",
+                  brand: item.brand,
+                  metal: item.metal,
+                  rating: item.rating,
+                  description: `${item.name} by ${item.brand}. Certified ${item.metal}. Hallmark certified with genuine authenticity guarantee.`,
+                  type: "jewellery",
+                })}
+                className="w-52 sm:w-60 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col group cursor-pointer"
+              >
                 <div className="relative aspect-square w-full bg-muted/20 overflow-hidden">
                   <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                   {item.badge && (
@@ -1610,7 +2137,7 @@ export default function LandingPage() {
                 <CardContent className="p-3.5 flex-1 flex flex-col justify-between">
                   <div>
                     <span className="text-[10px] font-bold text-muted-foreground uppercase block mb-0.5">{item.brand}</span>
-                    <h4 className="font-bold text-xs text-foreground line-clamp-1">{item.name}</h4>
+                    <h4 className="font-bold text-xs text-foreground line-clamp-1 group-hover:text-primary transition-colors">{item.name}</h4>
                     <div className="flex items-center gap-1 mt-1">
                       <span className="text-amber-500 text-xs">★</span>
                       <span className="text-[11px] font-bold text-foreground">{item.rating}</span>
@@ -1623,7 +2150,10 @@ export default function LandingPage() {
                     </div>
                     <Button
                       size="sm"
-                      onClick={() => handleAddItemToCart({ id: item.id, name: item.name, price: item.price, originalPrice: item.originalPrice, image: item.image, category: "jewellery" })}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddItemToCart({ id: item.id, name: item.name, price: item.price, originalPrice: item.originalPrice, image: item.image, category: "jewellery" });
+                      }}
                       className="h-7 px-2.5 rounded-lg text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90"
                     >
                       Add +
@@ -1654,7 +2184,23 @@ export default function LandingPage() {
 
           <ScrollableRow>
             {COSMETICS_ITEMS.map((item) => (
-              <Card key={item.id} className="w-52 sm:w-56 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col group">
+              <Card
+                key={item.id}
+                onClick={() => openItemDetails({
+                  id: item.id,
+                  name: item.name,
+                  price: item.price,
+                  originalPrice: item.originalPrice,
+                  image: item.image,
+                  images: [item.image],
+                  category: "beauty",
+                  brand: item.brand,
+                  rating: item.rating,
+                  description: `${item.name} by ${item.brand}. Category: ${item.category}. Dermatologically tested luxury beauty essential.`,
+                  type: "cosmetics",
+                })}
+                className="w-52 sm:w-56 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col group cursor-pointer"
+              >
                 <div className="relative aspect-square w-full bg-muted/20 overflow-hidden">
                   <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                   {item.badge && (
@@ -1669,7 +2215,7 @@ export default function LandingPage() {
                 <CardContent className="p-3.5 flex-1 flex flex-col justify-between">
                   <div>
                     <span className="text-[10px] font-bold text-pink-600 dark:text-pink-400 uppercase block mb-0.5">{item.brand}</span>
-                    <h4 className="font-bold text-xs text-foreground line-clamp-1">{item.name}</h4>
+                    <h4 className="font-bold text-xs text-foreground line-clamp-1 group-hover:text-primary transition-colors">{item.name}</h4>
                     <div className="flex items-center gap-1 mt-1">
                       <span className="text-amber-500 text-xs">★</span>
                       <span className="text-[11px] font-bold text-foreground">{item.rating}</span>
@@ -1682,7 +2228,10 @@ export default function LandingPage() {
                     </div>
                     <Button
                       size="sm"
-                      onClick={() => handleAddItemToCart({ id: item.id, name: item.name, price: item.price, originalPrice: item.originalPrice, image: item.image, category: "beauty" })}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddItemToCart({ id: item.id, name: item.name, price: item.price, originalPrice: item.originalPrice, image: item.image, category: "beauty" });
+                      }}
                       className="h-7 px-2.5 rounded-lg text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90"
                     >
                       Add +
@@ -1710,7 +2259,21 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
             {DIGITAL_SERVICES.map((srv) => (
-              <div key={srv.id} className="p-4 rounded-2xl border border-border bg-card hover:border-primary/40 hover:shadow-subtle transition-smooth flex flex-col justify-between">
+              <div
+                key={srv.id}
+                onClick={() => openItemDetails({
+                  id: srv.id,
+                  title: srv.title,
+                  name: srv.title,
+                  description: `${srv.description}. Features: ${srv.features.join(", ")}. 1-Tap instant access to certified professionals.`,
+                  badge: srv.badge,
+                  route: srv.route,
+                  features: srv.features,
+                  iconEmoji: srv.iconEmoji,
+                  type: "service",
+                })}
+                className="p-4 rounded-2xl border border-border bg-card hover:border-primary/40 hover:shadow-subtle transition-smooth flex flex-col justify-between cursor-pointer group"
+              >
                 <div>
                   <div className="flex items-center justify-between mb-2.5">
                     <span className="text-3xl">{srv.iconEmoji}</span>
@@ -1718,7 +2281,7 @@ export default function LandingPage() {
                       {srv.badge}
                     </Badge>
                   </div>
-                  <h4 className="font-bold text-sm text-foreground mb-1">{srv.title}</h4>
+                  <h4 className="font-bold text-sm text-foreground mb-1 group-hover:text-primary transition-colors">{srv.title}</h4>
                   <p className="text-[11px] text-muted-foreground line-clamp-2 mb-3">{srv.description}</p>
                   <div className="flex flex-wrap gap-1 mb-3">
                     {srv.features.map((feat) => (
@@ -1728,11 +2291,13 @@ export default function LandingPage() {
                     ))}
                   </div>
                 </div>
-                <Button asChild size="sm" className="w-full h-8 text-xs font-bold rounded-xl bg-primary text-primary-foreground">
-                  <Link to={srv.route as any}>
-                    Book Now →
-                  </Link>
-                </Button>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <Button asChild size="sm" className="w-full h-8 text-xs font-bold rounded-xl bg-primary text-primary-foreground">
+                    <Link to={srv.route as any}>
+                      Book Now →
+                    </Link>
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
@@ -1757,10 +2322,27 @@ export default function LandingPage() {
 
           <ScrollableRow>
             {POPULAR_LOCAL_SHOPS_DATA.map((shop) => (
-              <div key={shop.id} className="w-64 sm:w-72 flex-shrink-0 p-3.5 rounded-2xl border border-border bg-card hover:shadow-subtle transition-smooth flex flex-col justify-between">
+              <div
+                key={shop.id}
+                onClick={() => openItemDetails({
+                  id: shop.id,
+                  name: shop.name,
+                  image: shop.image,
+                  images: [shop.image],
+                  category: shop.category,
+                  specialty: shop.specialty,
+                  address: shop.address,
+                  rating: shop.rating,
+                  reviewsCount: shop.reviewsCount,
+                  distance: shop.distance,
+                  description: `${shop.name} (${shop.category}). Specialty: ${shop.specialty}. Address: ${shop.address}. Distance: ${shop.distance}. Rated ${shop.rating}★ (${shop.reviewsCount} reviews).`,
+                  type: "shop",
+                })}
+                className="w-64 sm:w-72 flex-shrink-0 p-3.5 rounded-2xl border border-border bg-card hover:shadow-subtle transition-smooth flex flex-col justify-between cursor-pointer group"
+              >
                 <div>
                   <div className="relative aspect-video w-full rounded-xl overflow-hidden mb-3 bg-muted">
-                    <img src={shop.image} alt={shop.name} className="w-full h-full object-cover" loading="lazy" />
+                    <img src={shop.image} alt={shop.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                     <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-emerald-600 text-white">
                       ● OPEN NOW
                     </span>
@@ -1769,7 +2351,7 @@ export default function LandingPage() {
                     </span>
                   </div>
                   <span className="text-[10px] font-bold text-primary uppercase block mb-0.5">{shop.category}</span>
-                  <h4 className="font-bold text-xs sm:text-sm text-foreground line-clamp-1">{shop.name}</h4>
+                  <h4 className="font-bold text-xs sm:text-sm text-foreground line-clamp-1 group-hover:text-primary transition-colors">{shop.name}</h4>
                   <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">🌟 {shop.specialty}</p>
                   <p className="text-[10px] text-muted-foreground truncate mt-0.5">{shop.address}</p>
                 </div>
@@ -1778,11 +2360,13 @@ export default function LandingPage() {
                     <span className="text-amber-500 text-xs font-bold">★ {shop.rating}</span>
                     <span className="text-[10px] text-muted-foreground">({shop.reviewsCount})</span>
                   </div>
-                  <Button asChild size="sm" variant="outline" className="h-7 text-[11px] font-bold rounded-lg">
-                    <Link to="/local-shops">
-                      Visit Store →
-                    </Link>
-                  </Button>
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <Button asChild size="sm" variant="outline" className="h-7 text-[11px] font-bold rounded-lg">
+                      <Link to="/local-shops">
+                        Visit Store →
+                      </Link>
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -1810,6 +2394,13 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        {/* Universal Item Detail & Action Modal with Pinch/Zoom/Enlarge */}
+        <ItemDetailModal
+          isOpen={isDetailModalOpen}
+          onClose={() => setIsDetailModalOpen(false)}
+          item={selectedDetailItem}
+        />
       </div>
     </Layout>
   );

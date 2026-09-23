@@ -20,12 +20,15 @@ export async function initDb() {
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
+      username TEXT UNIQUE,
       email TEXT UNIQUE,
-      role TEXT DEFAULT 'CUSTOMER',
       phone TEXT UNIQUE,
+      passwordHash TEXT,
+      role TEXT DEFAULT 'CUSTOMER',
       walletBal REAL DEFAULT 0.0,
       googleId TEXT,
       avatar TEXT,
+      status TEXT DEFAULT 'ACTIVE',
       createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
       updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
     );
@@ -481,6 +484,15 @@ export async function initDb() {
 
   const userColumns = await db.all("PRAGMA table_info(users)");
   const colNames = userColumns.map((c) => c.name);
+  if (!colNames.includes("username")) {
+    try { await db.exec("ALTER TABLE users ADD COLUMN username TEXT"); } catch {}
+  }
+  if (!colNames.includes("passwordHash")) {
+    try { await db.exec("ALTER TABLE users ADD COLUMN passwordHash TEXT"); } catch {}
+  }
+  if (!colNames.includes("status")) {
+    try { await db.exec("ALTER TABLE users ADD COLUMN status TEXT DEFAULT 'ACTIVE'"); } catch {}
+  }
   if (!colNames.includes("googleId")) {
     try { await db.exec("ALTER TABLE users ADD COLUMN googleId TEXT"); } catch {}
   }

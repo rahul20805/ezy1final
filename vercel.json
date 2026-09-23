@@ -1,5 +1,5 @@
 {
-  "installCommand": "npm --prefix src/frontend install",
+  "installCommand": "npm install --production=false && npm --prefix src/frontend install",
   "buildCommand": "npm --prefix src/frontend run build",
   "outputDirectory": "src/frontend/dist",
   "framework": "vite",

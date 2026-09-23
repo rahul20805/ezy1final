@@ -33,6 +33,47 @@ export function normalizePhoneNumber(rawPhone) {
   throw new Error("Please enter a valid 10-digit mobile number");
 }
 
+// Cryptographic Password Hashing (PBKDF2 SHA-512, 100,000 iterations, 16-byte random salt)
+export function hashPassword(password) {
+  if (!password || typeof password !== "string") {
+    throw new Error("Password must be a non-empty string");
+  }
+  const salt = crypto.randomBytes(16).toString("hex");
+  const derivedKey = crypto.pbkdf2Sync(password, salt, 100000, 64, "sha512").toString("hex");
+  return `${salt}:${derivedKey}`;
+}
+
+// Universal timing-safe password verification (supports PBKDF2, scrypt, and legacy formats)
+export function verifyPassword(password, storedHash) {
+  if (!password || !storedHash || typeof storedHash !== "string") {
+    return false;
+  }
+  if (!storedHash.includes(":")) {
+    return password === storedHash;
+  }
+
+  const [salt, originalHash] = storedHash.split(":");
+  if (!salt || !originalHash) return false;
+
+  // 1. Try PBKDF2 (Current standard)
+  try {
+    const derivedKey = crypto.pbkdf2Sync(password, salt, 100000, 64, "sha512").toString("hex");
+    if (crypto.timingSafeEqual(Buffer.from(derivedKey, "hex"), Buffer.from(originalHash, "hex"))) {
+      return true;
+    }
+  } catch {}
+
+  // 2. Try scrypt (Compat with api/auth.js)
+  try {
+    const scryptKey = crypto.scryptSync(password, salt, 64).toString("hex");
+    if (crypto.timingSafeEqual(Buffer.from(scryptKey, "hex"), Buffer.from(originalHash, "hex"))) {
+      return true;
+    }
+  } catch {}
+
+  return false;
+}
+
 // Helper: Sign JWT using Node Crypto (HMAC-SHA256)
 export function signJwt(payload, expiresInSeconds = 7 * 24 * 3600) {
   const header = { alg: "HS256", typ: "JWT" };

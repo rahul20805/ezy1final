@@ -2,6 +2,7 @@ import crypto from "crypto";
 import { getAuthUser, hashPassword, signJwt, verifyJwt, verifyPassword } from "./auth.js";
 import { reverseGeocode, searchAddress } from "./location.js";
 import { dispatchOtpSms } from "../src/server/src/smsProvider.js";
+import { sendPartnerRegistrationEmail } from "./emailService.js";
 import {
   bulkUpdateVendors,
   createOrder,
@@ -1262,6 +1263,24 @@ Be helpful, concise, courteous, and provide accurate navigation instructions to 
         operatingHours,
         deliveryRadius,
       });
+
+      // Dispatch automated email notification to anyanant7115@gmail.com and alert console
+      try {
+        sendPartnerRegistrationEmail({
+          businessName,
+          email,
+          phone,
+          ownerName,
+          category,
+          partnerType,
+          address,
+          city,
+          operatingHours,
+          deliveryRadius,
+        }).catch((err) => console.error("[PARTNER REGISTRATION EMAIL ERROR]", err));
+      } catch (emailErr) {
+        console.error("[PARTNER REGISTRATION EMAIL DISPATCH ERROR]", emailErr);
+      }
 
       return sendJson(res, 201, {
         success: true,

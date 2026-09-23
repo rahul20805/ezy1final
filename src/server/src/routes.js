@@ -7,7 +7,9 @@ import {
   googleLogin,
   authMiddleware,
   requireRole,
-  signJwt
+  signJwt,
+  hashPassword,
+  verifyPassword
 } from "./authService.js";
 import {
   EVENT_TYPES,
@@ -23,6 +25,7 @@ import {
   triggerNotificationEvent,
   dispatchNotificationSync
 } from "./notificationService.js";
+import { sendPartnerRegistrationEmail } from "./emailService.js";
 
 export const router = express.Router();
 
@@ -88,12 +91,14 @@ router.get("/auth/me", authMiddleware, async (req, res) => {
   res.json({
     user: {
       id: req.user.id,
+      username: req.user.username,
       name: req.user.name,
       email: req.user.email,
       phone: req.user.phone,
       role: req.user.role,
       walletBal: req.user.walletBal,
       avatar: req.user.avatar,
+      status: req.user.status,
       createdAt: req.user.createdAt
     }
   });
@@ -112,42 +117,268 @@ router.post("/auth/logout", authMiddleware, async (req, res) => {
   }
 });
 
-// 1.6 Preserved Existing Partner / Merchant Login Endpoints
+// 1.5.1 Check Username Availability (Live availability for registration)
+router.get("/auth/check-username", async (req, res) => {
+  try {
+    const rawU = (req.query.username || "").trim().toLowerCase();
+    if (!rawU || rawU.length < 3) {
+      return res.json({ available: false, message: "Username must be at least 3 characters" });
+    }
+    if (!/^[a-zA-Z0-9_]{3,25}$/.test(rawU)) {
+      return res.json({ available: false, message: "Use 3-25 letters, numbers, or _" });
+    }
+
+    const db = await openDb();
+    const existingUser = await db.get("SELECT id FROM users WHERE LOWER(username) = ?", [rawU]);
+    const existingPartner = await db.get("SELECT id FROM partners WHERE LOWER(partnerUserId) = ?", [rawU]);
+
+    if (existingUser || existingPartner) {
+      return res.json({ available: false, message: "This username is already taken" });
+    }
+
+    res.json({ available: true, message: "Username available!" });
+  } catch (err) {
+    res.json({ available: false, message: "Unable to verify username" });
+  }
+});
+
+// 1.5.2 Customer Account Registration
+router.post("/auth/register", async (req, res) => {
+  try {
+    const { name, username, password, confirmPassword, phone, email } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ success: false, error: "Full name is required." });
+    }
+
+    const cleanUsername = (username || "").trim().toLowerCase();
+    if (!cleanUsername || cleanUsername.length < 3 || cleanUsername.length > 25) {
+      return res.status(400).json({ success: false, error: "Username must be between 3 and 25 characters." });
+    }
+
+    if (!/^[a-zA-Z0-9_]+$/.test(cleanUsername)) {
+      return res.status(400).json({ success: false, error: "Username can only contain letters, numbers, and underscores." });
+    }
+
+    if (!password || password.length < 6) {
+      return res.status(400).json({ success: false, error: "Password must be at least 6 characters." });
+    }
+
+    if (confirmPassword !== undefined && password !== confirmPassword) {
+      return res.status(400).json({ success: false, error: "Passwords do not match." });
+    }
+
+    const db = await openDb();
+
+    // Check duplicate username
+    const userWithUsername = await db.get("SELECT id FROM users WHERE LOWER(username) = ?", [cleanUsername]);
+    const partnerWithUsername = await db.get("SELECT id FROM partners WHERE LOWER(partnerUserId) = ?", [cleanUsername]);
+    if (userWithUsername || partnerWithUsername) {
+      return res.status(409).json({ success: false, error: "This username is already taken. Please choose another." });
+    }
+
+    // Check duplicate email if provided
+    const cleanEmail = email ? email.trim().toLowerCase() : `${cleanUsername}@customer.ezy1.site`;
+    const userWithEmail = await db.get("SELECT id FROM users WHERE LOWER(email) = ?", [cleanEmail]);
+    if (userWithEmail) {
+      return res.status(409).json({ success: false, error: "An account with this email already exists." });
+    }
+
+    // Check duplicate phone if provided
+    const cleanPhone = phone ? String(phone).replace(/[^0-9]/g, "").slice(-10) : null;
+    if (cleanPhone && cleanPhone.length === 10) {
+      const userWithPhone = await db.get("SELECT id FROM users WHERE phone = ?", [cleanPhone]);
+      if (userWithPhone) {
+        return res.status(409).json({ success: false, error: "An account with this mobile number already exists." });
+      }
+    }
+
+    const passwordHash = hashPassword(password);
+
+    const result = await db.run(
+      "INSERT INTO users (name, username, email, phone, passwordHash, role, walletBal, status) VALUES (?, ?, ?, ?, ?, 'CUSTOMER', 100.0, 'ACTIVE')",
+      [name.trim(), cleanUsername, cleanEmail, cleanPhone || null, passwordHash]
+    );
+
+    const newUser = await db.get("SELECT * FROM users WHERE id = ?", [result.lastID]);
+
+    // Dual-engine sync: also persist into ezy1_db.json if it exists so serverless/local is 100% synchronized
+    try {
+      const fs = await import("fs");
+      const path = await import("path");
+      const dbFile = path.resolve(process.cwd(), "ezy1_db.json");
+      if (fs.existsSync(dbFile)) {
+        const fileData = JSON.parse(fs.readFileSync(dbFile, "utf-8"));
+        if (fileData && fileData.users) {
+          const alreadyInJson = fileData.users.find((u) => u.username && u.username.toLowerCase() === cleanUsername);
+          if (!alreadyInJson) {
+            fileData.users.push({
+              id: newUser.id,
+              username: cleanUsername,
+              passwordHash,
+              name: name.trim(),
+              email: cleanEmail,
+              phone: cleanPhone || "",
+              city: "",
+              role: "CUSTOMER",
+              vendorId: 0,
+              status: "active",
+              createdAt: new Date().toISOString()
+            });
+            fs.writeFileSync(dbFile, JSON.stringify(fileData, null, 2), "utf-8");
+          }
+        }
+      }
+    } catch (syncErr) {
+      console.warn("[RegisterSync] ezy1_db.json sync warning:", syncErr.message);
+    }
+
+    // Create default notification preferences
+    await db.run("INSERT OR IGNORE INTO notification_preferences (userId) VALUES (?)", [newUser.id]);
+
+    const token = signJwt({
+      userId: newUser.id,
+      id: newUser.id,
+      username: newUser.username,
+      role: newUser.role,
+      email: newUser.email,
+      phone: newUser.phone,
+      name: newUser.name
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Account created successfully! Welcome to Ezy1.",
+      token,
+      user: {
+        id: newUser.id,
+        username: newUser.username,
+        name: newUser.name,
+        email: newUser.email,
+        phone: newUser.phone,
+        role: newUser.role,
+        walletBal: newUser.walletBal,
+        avatar: newUser.avatar,
+        status: newUser.status
+      }
+    });
+  } catch (error) {
+    console.error("[Register Error]:", error);
+    res.status(500).json({ success: false, error: "Failed to create account. Please try again." });
+  }
+});
+
+// 1.5.3 Universal Login (Username, Mobile Number, or Email + Password)
 router.post("/auth/login", async (req, res) => {
-  const { email, password, phone } = req.body;
-  const db = await openDb();
+  try {
+    const { username, email, phone, password } = req.body;
+    const identifier = (username || email || phone || "").trim();
 
-  let user;
-  if (email) {
-    user = await db.get("SELECT * FROM users WHERE email = ?", [email.toLowerCase().trim()]);
-  } else if (phone) {
-    user = await db.get("SELECT * FROM users WHERE phone = ?", [phone.replace(/[^0-9]/g, "")]);
-  }
+    if (!identifier || !password) {
+      return res.status(400).json({
+        success: false,
+        error: "Please enter your username, email or mobile number, and password."
+      });
+    }
 
-  if (!user) {
-    return res.status(401).json({ error: "Invalid credentials" });
-  }
+    const cleanIdentifier = identifier.toLowerCase();
+    const cleanDigits = identifier.replace(/[^0-9]/g, "").slice(-10);
+    const db = await openDb();
 
-  const token = signJwt({
-    userId: user.id,
-    role: user.role,
-    email: user.email,
-    phone: user.phone,
-    name: user.name
-  });
+    // 1. Search SQLite users by username, email, or phone
+    let user = await db.get(
+      `SELECT * FROM users 
+       WHERE LOWER(username) = ? 
+          OR LOWER(email) = ? 
+          OR (phone IS NOT NULL AND phone = ?)
+       LIMIT 1`,
+      [cleanIdentifier, cleanIdentifier, cleanDigits || "__no_phone__"]
+    );
 
-  res.json({
-    success: true,
-    token,
-    user: {
+    // 2. Fallback: Search in ezy1_db.json if not found in SQLite (auto-sync migration)
+    if (!user) {
+      try {
+        const fs = await import("fs");
+        const path = await import("path");
+        const dbFile = path.resolve(process.cwd(), "ezy1_db.json");
+        if (fs.existsSync(dbFile)) {
+          const fileData = JSON.parse(fs.readFileSync(dbFile, "utf-8"));
+          if (fileData && fileData.users) {
+            const jsonUser = fileData.users.find((u) =>
+              (u.username && u.username.toLowerCase() === cleanIdentifier) ||
+              (u.email && u.email.toLowerCase() === cleanIdentifier) ||
+              (u.phone && cleanDigits.length === 10 && String(u.phone).replace(/[^0-9]/g, "").slice(-10) === cleanDigits)
+            );
+            if (jsonUser) {
+              // Import into SQLite
+              await db.run(
+                "INSERT OR REPLACE INTO users (id, name, username, email, phone, passwordHash, role, walletBal, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                [jsonUser.id, jsonUser.name, jsonUser.username, jsonUser.email, jsonUser.phone || null, jsonUser.passwordHash, jsonUser.role || "CUSTOMER", 100.0, "ACTIVE"]
+              );
+              user = await db.get("SELECT * FROM users WHERE id = ?", [jsonUser.id]);
+            }
+          }
+        }
+      } catch (fbErr) {
+        console.warn("[LoginFallback] Error searching ezy1_db.json:", fbErr.message);
+      }
+    }
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        error: "Invalid username, email, mobile, or password."
+      });
+    }
+
+    if (user.status && user.status.toUpperCase() === "SUSPENDED") {
+      return res.status(403).json({
+        success: false,
+        error: "This account has been suspended. Please contact platform administration."
+      });
+    }
+
+    // Verify Password
+    const isPasswordValid = verifyPassword(password, user.passwordHash);
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        error: "Invalid username, email, mobile, or password."
+      });
+    }
+
+    const token = signJwt({
+      userId: user.id,
       id: user.id,
-      name: user.name,
+      username: user.username,
+      role: user.role,
       email: user.email,
       phone: user.phone,
-      role: user.role,
-      walletBal: user.walletBal
-    }
-  });
+      name: user.name
+    });
+
+    res.json({
+      success: true,
+      token,
+      user: {
+        id: user.id,
+        username: user.username || cleanIdentifier,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        walletBal: user.walletBal,
+        avatar: user.avatar,
+        status: user.status
+      }
+    });
+  } catch (error) {
+    console.error("[Login Error]:", error);
+    res.status(500).json({
+      success: false,
+      error: "An unexpected error occurred during login. Please try again."
+    });
+  }
 });
 
 // ==========================================
@@ -161,8 +392,7 @@ import {
   requirePartnerAuth,
   requireAdminAuth,
   generateNextPartnerUserId,
-  generateTempPassword,
-  hashPassword
+  generateTempPassword
 } from "./partnerAuthService.js";
 import {
   requireProviderType,
@@ -981,6 +1211,8 @@ router.post("/vendors", async (req, res) => {
   } catch (error) {
     res.status(400).json({ error: "Failed to register vendor" });
   }
+});
+
 // Unified Global Search (Products, Doctors, Hospitals, Services, Shops)
 router.get("/search", async (req, res) => {
   try {
@@ -1421,16 +1653,72 @@ router.get("/partner-applications", async (req, res) => {
 });
 
 router.post("/partner-applications", async (req, res) => {
-  const { user_id, business_name, partner_type, category, owner_name, address, city, district, state, pincode, latitude, longitude, operating_hours, service_area, delivery_radius } = req.body;
+  const {
+    user_id,
+    business_name,
+    businessName,
+    partner_type,
+    partnerType,
+    category,
+    owner_name,
+    ownerName,
+    address,
+    city,
+    district,
+    state,
+    pincode,
+    latitude,
+    longitude,
+    operating_hours,
+    operatingHours,
+    service_area,
+    serviceArea,
+    delivery_radius,
+    deliveryRadius,
+    email,
+    phone
+  } = req.body;
+
+  const finalBusinessName = business_name || businessName || "Partner Business";
+  const finalOwnerName = owner_name || ownerName || "Partner Applicant";
+  const finalPartnerType = partner_type || partnerType || "shop_owner";
+  const finalCategory = category || "Grocery";
+  const finalAddress = address || "Not specified";
+  const finalCity = city || "Bangalore";
+  const finalDistrict = district || finalCity || "Bangalore Urban";
+  const finalState = state || "Karnataka";
+  const finalPincode = pincode || "560001";
+  const finalHours = operating_hours || operatingHours || "09:00 AM - 09:00 PM";
+  const finalServiceArea = service_area || serviceArea || finalCity;
+  const finalRadius = Number(delivery_radius || deliveryRadius) || 5;
+  const finalUserId = user_id || 1; // Default to admin/system user if not logged in
+
   const db = await openDb();
   try {
     const result = await db.run(
       "INSERT INTO partner_applications (user_id, business_name, partner_type, category, owner_name, address, city, district, state, pincode, latitude, longitude, operating_hours, service_area, delivery_radius) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [user_id, business_name, partner_type, category, owner_name, address, city, district, state, pincode, latitude, longitude, operating_hours, service_area, delivery_radius]
+      [finalUserId, finalBusinessName, finalPartnerType, finalCategory, finalOwnerName, finalAddress, finalCity, finalDistrict, finalState, finalPincode, latitude || 0, longitude || 0, finalHours, finalServiceArea, finalRadius]
     );
     const application = await db.get("SELECT * FROM partner_applications WHERE id = ?", [result.lastID]);
-    res.json(application);
+
+    // Dispatch automated email alert to anyanant7115@gmail.com
+    sendPartnerRegistrationEmail({
+      businessName: finalBusinessName,
+      ownerName: finalOwnerName,
+      partnerType: finalPartnerType,
+      category: finalCategory,
+      email: email || "Not provided",
+      phone: phone || "Not provided",
+      address: finalAddress,
+      city: finalCity,
+      operatingHours: finalHours,
+      serviceArea: finalServiceArea,
+      deliveryRadius: finalRadius
+    }).catch(err => console.error("[PARTNER REGISTRATION EMAIL ERROR]:", err));
+
+    res.json(application || { id: result.lastID, success: true });
   } catch (error) {
+    console.error("Partner application insert error:", error);
     res.status(400).json({ error: "Failed to submit partner application" });
   }
 });

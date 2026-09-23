@@ -61,6 +61,7 @@ export default function LoginPage() {
   const [regPassword, setRegPassword] = useState("");
   const [regConfirmPassword, setRegConfirmPassword] = useState("");
   const [regPhone, setRegPhone] = useState("");
+  const [regEmail, setRegEmail] = useState("");
   const [showRegPassword, setShowRegPassword] = useState(false);
   const [showRegConfirmPassword, setShowRegConfirmPassword] = useState(false);
   const [usernameStatus, setUsernameStatus] = useState<{
@@ -195,6 +196,7 @@ export default function LoginPage() {
         password: regPassword,
         confirmPassword: regConfirmPassword,
         phone: regPhone.trim(),
+        email: regEmail.trim(),
       });
 
       if (res.success) {
@@ -384,11 +386,11 @@ export default function LoginPage() {
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                       <User className="w-3.5 h-3.5 text-muted-foreground" />
-                      Username / Mobile Number
+                      Username / Email / Mobile Number
                     </label>
                     <Input
                       type="text"
-                      placeholder="e.g. rahul_yadav or 9876543210"
+                      placeholder="e.g. rahul_yadav, user@example.com or 9876543210"
                       value={loginUsername}
                       onChange={(e) => setLoginUsername(e.target.value)}
                       className="h-11 text-base font-medium"
@@ -639,6 +641,20 @@ export default function LoginPage() {
                         )}
                       </button>
                     </div>
+                  </div>
+
+                  {/* Email Address (Optional) */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Email Address <span className="text-muted-foreground/60 font-normal">(Optional for receipts)</span>
+                    </label>
+                    <Input
+                      type="email"
+                      placeholder="e.g. rahul@example.com"
+                      value={regEmail}
+                      onChange={(e) => setRegEmail(e.target.value)}
+                      className="h-10 text-sm font-medium"
+                    />
                   </div>
 
                   {/* Mobile Number (Optional) */}

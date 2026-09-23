@@ -926,24 +926,30 @@ export function saveDb() {
 
 // Users
 export function findUserByUsername(username) {
+  if (!username) return null;
   const db = getDb();
-  return db.users.find((u) => u.username.toLowerCase() === username.trim().toLowerCase()) || null;
+  const clean = username.trim().toLowerCase();
+  return db.users.find((u) => u.username && u.username.toLowerCase() === clean) || null;
 }
 
 export function findUserByEmail(email) {
+  if (!email) return null;
   const db = getDb();
-  return db.users.find((u) => u.email.toLowerCase() === email.trim().toLowerCase()) || null;
+  const clean = email.trim().toLowerCase();
+  return db.users.find((u) => u.email && u.email.toLowerCase() === clean) || null;
 }
 
 export function findUserById(id) {
+  if (!id) return null;
   const db = getDb();
   return db.users.find((u) => Number(u.id) === Number(id)) || null;
 }
 
 export function findUserByPhone(phone) {
-  const db = getDb();
   if (!phone) return null;
-  const digits = phone.replace(/[^0-9]/g, "").slice(-10);
+  const db = getDb();
+  const digits = String(phone).replace(/[^0-9]/g, "").slice(-10);
+  if (!digits || digits.length < 10) return null;
   return db.users.find((u) => {
     if (!u.phone) return false;
     const uDigits = String(u.phone).replace(/[^0-9]/g, "").slice(-10);

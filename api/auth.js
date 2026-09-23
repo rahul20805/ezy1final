@@ -16,15 +16,31 @@ export function hashPassword(password) {
  * Also handles legacy plain-text fallback during initial migration if needed.
  */
 export function verifyPassword(password, storedHash) {
-  if (!storedHash) return false;
+  if (!password || !storedHash || typeof storedHash !== "string") return false;
   
   // If stored as salt:key
   if (storedHash.includes(":")) {
     const [salt, key] = storedHash.split(":");
-    const keyBuffer = Buffer.from(key, "hex");
-    const derivedKey = crypto.scryptSync(password, salt, 64);
-    if (keyBuffer.length !== derivedKey.length) return false;
-    return crypto.timingSafeEqual(keyBuffer, derivedKey);
+    if (!salt || !key) return false;
+
+    // 1. Try PBKDF2 (SHA-512 100k)
+    try {
+      const derivedKey = crypto.pbkdf2Sync(password, salt, 100000, 64, "sha512").toString("hex");
+      if (crypto.timingSafeEqual(Buffer.from(derivedKey, "hex"), Buffer.from(key, "hex"))) {
+        return true;
+      }
+    } catch {}
+
+    // 2. Try scrypt
+    try {
+      const keyBuffer = Buffer.from(key, "hex");
+      const derivedKey = crypto.scryptSync(password, salt, 64);
+      if (keyBuffer.length === derivedKey.length && crypto.timingSafeEqual(keyBuffer, derivedKey)) {
+        return true;
+      }
+    } catch {}
+
+    return false;
   }
 
   // Fallback for plain-text comparison during initial seeding transition
