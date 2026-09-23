@@ -34,18 +34,33 @@ function wrapLayout({ title, previewText, content, unsubscribeUrl, showHeader = 
   <div class="container">
     ${showHeader ? `
     <div class="header">
-      <img src="${LOGO_URL}" alt="EZY1 Logo">
-      <h1 style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: #ffffff;">${title}</h1>
-      <p style="margin: 4px 0 0 0; font-size: 13px; opacity: 0.95; color: #ffffff;">Everything You Need, One Platform</p>
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+          <td style="text-align: center;">
+            <a href="${BASE_URL}" style="text-decoration: none; display: inline-block;">
+              <img src="${LOGO_URL}" width="56" height="56" alt="EZY1 Logo" style="width: 56px; height: 56px; border-radius: 14px; margin-bottom: 8px; border: 2px solid rgba(255,255,255,0.4); display: block; margin-left: auto; margin-right: auto;" />
+              <div style="color: #ffffff; font-size: 24px; font-weight: 900; letter-spacing: -0.5px; line-height: 1.2;">
+                <span>ezy</span><span style="color: #FFD700;">1</span>
+              </div>
+            </a>
+            <div style="color: rgba(255,255,255,0.92); font-size: 13px; font-weight: 600; margin-top: 4px; letter-spacing: 0.2px;">
+              Local Super App for Everything
+            </div>
+            ${title ? `<div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.2); font-size: 17px; font-weight: 700; color: #ffffff;">${title}</div>` : ""}
+          </td>
+        </tr>
+      </table>
     </div>` : ""}
     <div class="content">
       ${content}
     </div>
     <div class="footer">
-      <p style="margin: 0 0 8px 0;"><strong>EZY1 Platform Technologies Pvt. Ltd.</strong></p>
-      <p style="margin: 0 0 8px 0;">Official Platform: <a href="${BASE_URL}" style="color: #FF5100; text-decoration: none;">https://ezy1.site</a> | Support: <a href="mailto:support@ezy1.site" style="color: #FF5100; text-decoration: none;">support@ezy1.site</a></p>
+      <p style="margin: 0 0 6px 0; font-weight: 700; color: #374151;">EZY1 Platform Technologies Pvt. Ltd.</p>
+      <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 11px;">Local Super App for Everything — Daily Essentials, Groceries, Medicines, Transport &amp; Home Services</p>
+      <p style="margin: 0 0 8px 0;">Official Platform: <a href="${BASE_URL}" style="color: #FF5100; text-decoration: none; font-weight: 600;">https://ezy1.site</a> | Support: <a href="mailto:support@ezy1.site" style="color: #FF5100; text-decoration: none; font-weight: 600;">support@ezy1.site</a></p>
+      <p style="margin: 0 0 6px 0; font-size: 11px; color: #9ca3af;">Authenticated sender domain: <strong>ezy1.site</strong> (Verified via SPF, DKIM &amp; DMARC)</p>
       ${footerText ? `<p style="margin: 8px 0 0 0; font-size: 11px; color: #9ca3af;">${footerText}</p>` : ""}
-      ${unsubscribeUrl ? `<p style="margin: 10px 0 0 0; font-size: 11px;"><a href="${unsubscribeUrl}" style="color: #9ca3af; text-decoration: underline;">Unsubscribe from marketing emails</a></p>` : ""}
+      ${unsubscribeUrl ? `<p style="margin: 10px 0 0 0; font-size: 11px;"><a href="${unsubscribeUrl}" style="color: #9ca3af; text-decoration: underline;">Unsubscribe from promotional emails</a></p>` : ""}
     </div>
   </div>
 </body>
