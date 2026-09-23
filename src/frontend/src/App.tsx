@@ -70,6 +70,7 @@ const TravelPage = lazy(() => import("./pages/TravelPage"));
 const BusTransportPage = lazy(() => import("./pages/BusTransportPage"));
 const ShareRidePage = lazy(() => import("./pages/ShareRidePage"));
 const HomeHealthcarePage = lazy(() => import("./pages/HomeHealthcarePage"));
+const NoticeBoardPage = lazy(() => import("./pages/NoticeBoardPage"));
 
 import { NAVAEIN_URL } from "./config/links";
 
@@ -696,6 +697,18 @@ const navaeRedirectRoute = createRoute({
   },
 });
 
+const noticesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/notices",
+  component: () => <NoticeBoardPage />,
+});
+
+const noticeBoardAliasRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/notice-board",
+  component: () => <NoticeBoardPage />,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
@@ -730,6 +743,9 @@ const routeTree = rootRoute.addChildren([
   myAccountRoute,
   paymentsRoute,
   navaeRedirectRoute,
+  // Official Notice Board
+  noticesRoute,
+  noticeBoardAliasRoute,
   // New Super-App Ecosystem Routes
   categoryRoute,
   hospitalsRoute,

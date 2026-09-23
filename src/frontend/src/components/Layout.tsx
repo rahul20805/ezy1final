@@ -897,6 +897,17 @@ export default function Layout({ children }: LayoutProps) {
                     <span className="text-[10px] text-orange-500 font-bold">↗</span>
                   </a>
                 </li>
+                <li>
+                  <Link
+                    to="/notices"
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
+                  >
+                    <span>Official Notice Board</span>
+                    <span className="px-1.5 py-0.5 rounded text-[10px] bg-primary/10 text-primary font-bold">
+                      Notices
+                    </span>
+                  </Link>
+                </li>
               </ul>
             </div>
 

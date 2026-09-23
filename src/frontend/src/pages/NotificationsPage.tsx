@@ -21,6 +21,7 @@ import {
   CheckCircle2,
   Clock,
   SendHorizontal,
+  ShieldCheck,
 } from "lucide-react";
 import UserLayout from "../components/UserLayout";
 import { useNotificationStore } from "../lib/notificationStore";
@@ -193,6 +194,32 @@ export default function NotificationsPage() {
               </Button>
             </Link>
           </div>
+        </div>
+
+        {/* Official Public Notice Board Banner */}
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-orange-500/15 via-primary/10 to-amber-500/10 border border-primary/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shrink-0 shadow-xs">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                <span>Official EZY1 Notice Board &amp; Communication Directory</span>
+                <span className="px-1.5 py-0.5 rounded text-[10px] bg-primary text-primary-foreground font-bold">
+                  Official
+                </span>
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                View certified public advisories, authenticated department email channels, and anti-phishing guidelines.
+              </p>
+            </div>
+          </div>
+          <Link to="/notices" className="shrink-0 self-start sm:self-auto">
+            <Button size="sm" className="text-xs font-semibold rounded-xl bg-primary text-primary-foreground gap-1.5">
+              <span>View Notice Board</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </Button>
+          </Link>
         </div>
 
         {/* Live Test Event Dispatcher (For demo and verification testing) */}
