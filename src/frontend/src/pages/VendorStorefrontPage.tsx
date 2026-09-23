@@ -117,7 +117,7 @@ export default function VendorStorefrontPage() {
                       </p>
                     )}
                   </div>
-                  <Link to="/dashboard/commerce">
+                  <Link to={"/category/grocery" as any}>
                     <Button
                       size="sm"
                       className="h-8 px-3 text-xs bg-primary text-primary-foreground font-semibold rounded-xl"

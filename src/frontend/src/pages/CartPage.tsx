@@ -81,7 +81,7 @@ export default function CartPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate({ to: "/dashboard/commerce" })}
+              onClick={() => navigate({ to: "/category/grocery" as any })}
               className="text-xs"
             >
               Add More Items
@@ -99,7 +99,7 @@ export default function CartPage() {
               Looks like you haven't added anything to your cart yet. Explore fresh groceries, food, or electronics!
             </p>
             <Button
-              onClick={() => navigate({ to: "/dashboard/commerce" })}
+              onClick={() => navigate({ to: "/category/grocery" as any })}
               className="bg-primary text-primary-foreground font-bold text-xs rounded-xl px-6"
             >
               Explore Products

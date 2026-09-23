@@ -47,7 +47,7 @@ import { LegalDocumentLink } from "./legal/LegalDocumentLink";
 
 const navLinks = [
   { label: "All Services", href: "/" },
-  { label: "Quick Commerce", href: "/dashboard/commerce" },
+  { label: "Quick Commerce", href: "/category/grocery" },
   { label: "Hospitals & Care", href: "/hospitals" },
   { label: "Rides & Parcel", href: "/dashboard/transport" },
   { label: "Famous in City", href: "/famous" },

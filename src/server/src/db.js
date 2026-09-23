@@ -618,7 +618,7 @@ export async function initDb() {
       INSERT INTO notifications (userId, eventId, type, category, title, message, priority, actionUrl, isRead)
       VALUES 
       (3, 'evt_welcome_1', 'EZY1_LAUNCH', 'announcements', 'Welcome to EZY1! 🎉', 'Experience instant groceries, medicine, services, and live bus tracking in one app.', 'NORMAL', '/dashboard', 0),
-      (3, 'evt_offer_1', 'COUPON_AVAILABLE', 'offers', 'Special Welcome Offer 🎁', 'Use code EZYFIRST for flat ₹100 off on your first order above ₹299.', 'HIGH', '/dashboard/commerce', 0),
+      (3, 'evt_offer_1', 'COUPON_AVAILABLE', 'offers', 'Special Welcome Offer 🎁', 'Use code EZYFIRST for flat ₹100 off on your first order above ₹299.', 'HIGH', '/category/grocery', 0),
       (3, 'evt_wallet_1', 'PAYMENT_SUCCESS', 'orders', 'Wallet Credited 💰', 'Welcome cashback of ₹50 has been added to your EZY1 Digital Wallet.', 'NORMAL', '/dashboard/wallet', 1)
     `);
 

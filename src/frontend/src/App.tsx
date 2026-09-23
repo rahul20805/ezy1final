@@ -322,7 +322,7 @@ const transportRoute = createRoute({
 const commerceRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/dashboard/commerce",
-  component: () => <CommercePage />,
+  component: () => <Navigate to={"/category/grocery" as any} />,
 });
 
 const cartRoute = createRoute({

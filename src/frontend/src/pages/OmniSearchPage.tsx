@@ -598,7 +598,7 @@ export default function OmniSearchPage() {
                     Products & Groceries ({combinedResults.products.length})
                   </h2>
                   <Link
-                    to="/dashboard/commerce"
+                    to={"/category/grocery" as any}
                     className="text-xs font-semibold text-primary hover:underline"
                   >
                     View All Products →
@@ -819,7 +819,7 @@ export default function OmniSearchPage() {
                         asChild
                         className="rounded-xl text-xs font-bold shrink-0"
                       >
-                        <Link to="/dashboard/commerce">Shop</Link>
+                        <Link to={"/category/grocery" as any}>Shop</Link>
                       </Button>
                     </div>
                   ))}

@@ -57,7 +57,7 @@ const DOMAIN_PAGES: Record<RelatedDomain, RelatedPageItem[]> = {
   ],
   services: [
     { id: "services", label: "Home Repairs & Trades", route: "/services", icon: <Wrench className="w-3.5 h-3.5 text-blue-600" />, badge: "Verified" },
-    { id: "quick", label: "Quick Commerce", route: "/dashboard/commerce", icon: <ShoppingBag className="w-3.5 h-3.5 text-amber-600" />, badge: "15 Mins" },
+    { id: "quick", label: "Quick Commerce", route: "/category/grocery", icon: <ShoppingBag className="w-3.5 h-3.5 text-amber-600" />, badge: "15 Mins" },
     { id: "transport", label: "Rides & Cabs", route: "/dashboard/transport", icon: <Car className="w-3.5 h-3.5 text-yellow-500" /> },
     { id: "parcel", label: "Parcel Delivery", route: "/parcel", icon: <Package className="w-3.5 h-3.5 text-emerald-600" /> },
     { id: "search", label: "Universal Search", route: "/search?category=services", icon: <Search className="w-3.5 h-3.5 text-primary" /> }
@@ -65,7 +65,7 @@ const DOMAIN_PAGES: Record<RelatedDomain, RelatedPageItem[]> = {
   shopping: [
     { id: "grocery", label: "Grocery Essentials", route: "/category/grocery", icon: <ShoppingBag className="w-3.5 h-3.5 text-emerald-600" /> },
     { id: "fruits", label: "Fresh Fruits", route: "/category/fruits", icon: <Sparkles className="w-3.5 h-3.5 text-rose-500" /> },
-    { id: "quick", label: "15-Min Commerce", route: "/dashboard/commerce", icon: <ShoppingBag className="w-3.5 h-3.5 text-amber-500" />, badge: "Express" },
+    { id: "quick", label: "15-Min Commerce", route: "/category/grocery", icon: <ShoppingBag className="w-3.5 h-3.5 text-amber-500" />, badge: "Express" },
     { id: "pharmacy", label: "Pharmacy Care", route: "/dashboard/healthcare", icon: <Pill className="w-3.5 h-3.5 text-teal-600" /> },
     { id: "food", label: "Food & Restaurants", route: "/category/restaurants", icon: <UtensilsCrossed className="w-3.5 h-3.5 text-orange-500" /> },
     { id: "search", label: "Universal Search", route: "/search?category=products", icon: <Search className="w-3.5 h-3.5 text-primary" /> }

@@ -274,7 +274,7 @@ const TEMPLATES = {
         message: "Use code {couponCode} to get {discountText} on your next order."
       }
     ],
-    actionUrl: "/dashboard/commerce"
+    actionUrl: "/category/grocery"
   },
   SYSTEM_ALERT: {
     priority: "CRITICAL",

@@ -20,7 +20,7 @@ export const SUPER_CATEGORIES: SuperCategory[] = [
   { id: "grocery", name: "Grocery", icon: "🛒", tagline: "Atta, Dal, Oil, Spices & Daily Essentials", color: "emerald", route: "/category/grocery", badge: "Essentials", group: "SHOP" },
   { id: "fruits", name: "Fruits", icon: "🍎", tagline: "Farm Fresh Apples, Mangoes & Combos", color: "rose", route: "/category/fruits", badge: "Farm Fresh", group: "SHOP" },
   { id: "vegetables", name: "Vegetables", icon: "🥦", tagline: "Fresh Greens, Onions, Potatoes & Herbs", color: "green", route: "/category/vegetables", badge: "Daily Harvest", group: "SHOP" },
-  { id: "quick", name: "Quick Commerce", icon: "⚡", tagline: "Delivered in 10-15 Minutes", color: "amber", route: "/dashboard/commerce", badge: "15 Mins", group: "SHOP" },
+  { id: "quick", name: "Quick Commerce", icon: "⚡", tagline: "Delivered in 10-15 Minutes", color: "amber", route: "/category/grocery", badge: "15 Mins", group: "SHOP" },
   { id: "books", name: "Books & Stationery", icon: "📚", tagline: "Academic, Fiction, Exams & Pens", color: "indigo", route: "/category/books", group: "SHOP" },
   { id: "electronics", name: "Electronics", icon: "📱", tagline: "Mobiles, Laptops, Audio & Accessories", color: "blue", route: "/category/electronics", badge: "Best Deals", group: "SHOP" },
   { id: "fashion", name: "Fashion & Clothes", icon: "👗", tagline: "Men, Women, Kids, Ethnic & Western", color: "pink", route: "/category/fashion", group: "SHOP" },
