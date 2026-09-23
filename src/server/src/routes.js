@@ -29,7 +29,10 @@ import {
   sendEmail,
   sendPartnerRegistrationEmail,
   sendOrderConfirmationEmail,
-  sendBulkAdEmail
+  sendBulkAdEmail,
+  getEmailLogs,
+  handleImprovxInbound,
+  SENDER_IDENTITIES,
 } from "./emailService.js";
 import {
   sendOrderConfirmationSms,
@@ -1610,6 +1613,43 @@ router.post("/admin/marketing/broadcast-sms", async (req, res) => {
 });
 
 // ==========================================
+// EMAIL AUDIT LOGS & IMPROVX INBOUND
+// ==========================================
+router.get("/admin/email/logs", async (req, res) => {
+  const logs = getEmailLogs(req.query);
+  res.json({
+    success: true,
+    count: logs.length,
+    logs,
+    senders: SENDER_IDENTITIES,
+  });
+});
+
+router.get("/admin/email/feedbacks", async (req, res) => {
+  const feedbacks = globalThis.__ezy1_customer_feedbacks || [];
+  res.json({
+    success: true,
+    feedbacks,
+  });
+});
+
+router.post(["/webhooks/improvx", "/improvx/inbound"], async (req, res) => {
+  const body = req.body || {};
+  const sender = body.from || body.sender || body.envelope?.from || "customer@ezy1.site";
+  const subject = body.subject || "Customer Feedback via Email";
+  const emailBody = body["body-plain"] || body.text || body.html || body.message || "";
+
+  const result = await handleImprovxInbound({
+    sender,
+    subject,
+    body: emailBody,
+    rawData: body,
+  });
+
+  res.json(result);
+});
+
+// ==========================================
 // 3.1 PAYMENTS INTEGRATION (RAZORPAY & GATEWAYS)
 // ==========================================
 
@@ -2451,6 +2491,110 @@ router.get("/user/recent-items", async (req, res) => {
   res.json([
     { id: "g-1", name: "Aashirvaad Superior MP Sharbati Atta", price: 245 }
   ]);
+});
+
+router.post("/stays/book", async (req, res) => {
+  const body = req.body || {};
+  const bookingId = `STAY-${Date.now()}`;
+  const booking = {
+    id: bookingId,
+    ...body,
+    status: "CONFIRMED",
+    createdAt: new Date().toISOString()
+  };
+  if (body.guestEmail) {
+    sendOrderConfirmationEmail({
+      order: {
+        orderNumber: bookingId,
+        items: [{ name: `Stay Booking - Hotel #${body.hotelId}`, quantity: body.roomsCount || 1, price: body.totalAmount }],
+        totalAmount: body.totalAmount,
+        status: "CONFIRMED",
+        createdAt: new Date().toISOString()
+      },
+      customerEmail: body.guestEmail,
+      customerName: body.guestName || "Guest",
+      type: "BOOKING_CONFIRMED"
+    }).catch(err => console.warn("[STAYS EMAIL ERROR]", err));
+  }
+  if (body.guestPhone) {
+    sendOrderConfirmationSms({
+      phone: body.guestPhone,
+      orderNumber: bookingId,
+      amount: body.totalAmount
+    }).catch(err => console.warn("[STAYS SMS ERROR]", err));
+  }
+  res.json({ success: true, booking });
+});
+
+router.post("/travel/book", async (req, res) => {
+  const body = req.body || {};
+  const bookingId = `TRV-${Date.now()}`;
+  const booking = {
+    id: bookingId,
+    ...body,
+    status: "CONFIRMED",
+    createdAt: new Date().toISOString()
+  };
+  if (body.travelerEmail) {
+    sendOrderConfirmationEmail({
+      order: {
+        orderNumber: bookingId,
+        items: [{ name: `Tour Package #${body.packageId}`, quantity: body.travelersCount || 1, price: body.totalAmount }],
+        totalAmount: body.totalAmount,
+        status: "CONFIRMED",
+        createdAt: new Date().toISOString()
+      },
+      customerEmail: body.travelerEmail,
+      customerName: body.travelerName || "Traveler",
+      type: "BOOKING_CONFIRMED"
+    }).catch(err => console.warn("[TRAVEL EMAIL ERROR]", err));
+  }
+  if (body.travelerPhone) {
+    sendOrderConfirmationSms({
+      phone: body.travelerPhone,
+      orderNumber: bookingId,
+      amount: body.totalAmount
+    }).catch(err => console.warn("[TRAVEL SMS ERROR]", err));
+  }
+  res.json({ success: true, booking });
+});
+
+router.post("/rides/shared/book", async (req, res) => {
+  const body = req.body || {};
+  const bookingId = `RIDE-${Date.now()}`;
+  const booking = {
+    id: bookingId,
+    ...body,
+    status: "CONFIRMED",
+    createdAt: new Date().toISOString()
+  };
+  if (body.riderPhone) {
+    sendOrderConfirmationSms({
+      phone: body.riderPhone,
+      orderNumber: bookingId,
+      amount: body.totalAmount
+    }).catch(err => console.warn("[RIDE SMS ERROR]", err));
+  }
+  res.json({ success: true, booking });
+});
+
+router.post("/healthcare/home/book", async (req, res) => {
+  const body = req.body || {};
+  const bookingId = `HHC-${Date.now()}`;
+  const booking = {
+    id: bookingId,
+    ...body,
+    status: "CONFIRMED",
+    createdAt: new Date().toISOString()
+  };
+  if (body.patientPhone) {
+    sendOrderConfirmationSms({
+      phone: body.patientPhone,
+      orderNumber: bookingId,
+      amount: body.totalAmount
+    }).catch(err => console.warn("[HEALTHCARE SMS ERROR]", err));
+  }
+  res.json({ success: true, booking });
 });
 
 router.post("/whatsapp/webhook", async (req, res) => {

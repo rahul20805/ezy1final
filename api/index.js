@@ -2,7 +2,15 @@ import crypto from "crypto";
 import { getAuthUser, hashPassword, signJwt, verifyJwt, verifyPassword } from "./auth.js";
 import { reverseGeocode, searchAddress } from "./location.js";
 import { dispatchOtpSms, sendOrderConfirmationSms, sendBulkCampaignSms } from "./smsService.js";
-import { sendEmail, sendPartnerRegistrationEmail, sendOrderConfirmationEmail, sendBulkAdEmail } from "./emailService.js";
+import {
+  sendEmail,
+  sendPartnerRegistrationEmail,
+  sendOrderConfirmationEmail,
+  sendBulkAdEmail,
+  getEmailLogs,
+  handleImprovxInbound,
+  SENDER_IDENTITIES,
+} from "./emailService.js";
 import {
   bulkUpdateVendors,
   createOrder,
@@ -1394,6 +1402,216 @@ Be helpful, concise, courteous, and provide accurate navigation instructions to 
         recipientCount: phoneNumbers.length,
         ...smsResult,
       });
+    }
+
+    // ----------------------------------------------------
+    // EMAIL AUDIT LOGS & SENDER IDENTITIES
+    // ----------------------------------------------------
+    if (pathname === "/admin/email/logs" && method === "GET") {
+      const logs = getEmailLogs(query);
+      return sendJson(res, 200, {
+        success: true,
+        count: logs.length,
+        logs,
+        senders: SENDER_IDENTITIES,
+      });
+    }
+
+    if (pathname === "/admin/email/feedbacks" && method === "GET") {
+      const feedbacks = globalThis.__ezy1_customer_feedbacks || [];
+      return sendJson(res, 200, {
+        success: true,
+        feedbacks,
+      });
+    }
+
+    // ----------------------------------------------------
+    // IMPROVX INBOUND EMAIL FEEDBACK WEBHOOK
+    // ----------------------------------------------------
+    if ((pathname === "/webhooks/improvx" || pathname === "/improvx/inbound") && method === "POST") {
+      const body = await parseBody(req);
+      const sender = body.from || body.sender || body.envelope?.from || "customer@ezy1.site";
+      const subject = body.subject || "Customer Feedback via Email";
+      const emailBody = body["body-plain"] || body.text || body.html || body.message || "";
+
+      const result = await handleImprovxInbound({
+        sender,
+        subject,
+        body: emailBody,
+        rawData: body,
+      });
+
+      return sendJson(res, 200, result);
+    }
+
+    // ----------------------------------------------------
+    // ECOSYSTEM DISCOVERY & BOOKING ENDPOINTS
+    // ----------------------------------------------------
+    if (pathname === "/stays" && method === "GET") {
+      return sendJson(res, 200, [
+        { id: "stay-1", name: "The Grand Heritage Palace", city: "City Center", rating: 4.8, pricePerNight: 2499, availableRooms: 12, image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500&auto=format&fit=crop" },
+        { id: "stay-2", name: "Treebo Trend Comfort Inn", city: "Station Road", rating: 4.6, pricePerNight: 1499, availableRooms: 8, image: "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=500&auto=format&fit=crop" },
+        { id: "stay-3", name: "Radisson Blu Resort & Spa", city: "Green Valley", rating: 4.9, pricePerNight: 4999, availableRooms: 5, image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=500&auto=format&fit=crop" }
+      ]);
+    }
+
+    if (pathname === "/stays/book" && method === "POST") {
+      const body = await parseBody(req);
+      const bookingId = `STAY-${Date.now()}`;
+      const booking = {
+        id: bookingId,
+        ...body,
+        status: "CONFIRMED",
+        createdAt: new Date().toISOString()
+      };
+      if (body.guestEmail) {
+        sendOrderConfirmationEmail({
+          order: {
+            orderNumber: bookingId,
+            items: [{ name: `Stay Booking - Hotel #${body.hotelId}`, quantity: body.roomsCount || 1, price: body.totalAmount }],
+            totalAmount: body.totalAmount,
+            status: "CONFIRMED",
+            createdAt: new Date().toISOString()
+          },
+          customerEmail: body.guestEmail,
+          customerName: body.guestName || "Guest",
+          type: "BOOKING_CONFIRMED"
+        }).catch(err => console.warn("[STAYS EMAIL ERROR]", err));
+      }
+      if (body.guestPhone) {
+        sendOrderConfirmationSms({
+          phone: body.guestPhone,
+          orderNumber: bookingId,
+          amount: body.totalAmount
+        }).catch(err => console.warn("[STAYS SMS ERROR]", err));
+      }
+      return sendJson(res, 200, { success: true, booking });
+    }
+
+    if (pathname === "/travel" && method === "GET") {
+      return sendJson(res, 200, [
+        { id: "tr-1", title: "Golden Triangle Heritage Expedition", duration: "3 Days / 2 Nights", price: 4999, rating: 4.9, image: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=500&auto=format&fit=crop" },
+        { id: "tr-2", title: "Himalayan Foothills Nature Retreat", duration: "4 Days / 3 Nights", price: 7499, rating: 4.8, image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=500&auto=format&fit=crop" }
+      ]);
+    }
+
+    if (pathname === "/travel/book" && method === "POST") {
+      const body = await parseBody(req);
+      const bookingId = `TRV-${Date.now()}`;
+      const booking = {
+        id: bookingId,
+        ...body,
+        status: "CONFIRMED",
+        createdAt: new Date().toISOString()
+      };
+      if (body.travelerEmail) {
+        sendOrderConfirmationEmail({
+          order: {
+            orderNumber: bookingId,
+            items: [{ name: `Tour Package #${body.packageId}`, quantity: body.travelersCount || 1, price: body.totalAmount }],
+            totalAmount: body.totalAmount,
+            status: "CONFIRMED",
+            createdAt: new Date().toISOString()
+          },
+          customerEmail: body.travelerEmail,
+          customerName: body.travelerName || "Traveler",
+          type: "BOOKING_CONFIRMED"
+        }).catch(err => console.warn("[TRAVEL EMAIL ERROR]", err));
+      }
+      if (body.travelerPhone) {
+        sendOrderConfirmationSms({
+          phone: body.travelerPhone,
+          orderNumber: bookingId,
+          amount: body.totalAmount
+        }).catch(err => console.warn("[TRAVEL SMS ERROR]", err));
+      }
+      return sendJson(res, 200, { success: true, booking });
+    }
+
+    if (pathname === "/explore" && method === "GET") {
+      return sendJson(res, 200, [
+        { id: "exp-1", name: "Historic Fort & Clock Tower", category: "Heritage & Culture", rating: 4.8, location: "Old City Gate", entryFee: 50 },
+        { id: "exp-2", name: "Botanical Nature Park & Lake", category: "Recreation & Parks", rating: 4.6, location: "North Hills", entryFee: 30 }
+      ]);
+    }
+
+    if (pathname === "/buses" && method === "GET") {
+      return sendJson(res, 200, [
+        { id: "bus-1", operator: "EZY Express Volvo A/C", from: "City Center", to: "Capital Junction", departure: "06:30 AM", fare: 799, seatsAvailable: 14 },
+        { id: "bus-2", operator: "Royal Star Sleeper Multi-Axle", from: "City Center", to: "Metro Hub", departure: "10:00 PM", fare: 1199, seatsAvailable: 6 }
+      ]);
+    }
+
+    if (pathname === "/rides/shared" && method === "GET") {
+      return sendJson(res, 200, [
+        { id: "pool-1", driverName: "Vikram S.", vehicle: "Maruti Dzire (White)", route: "Metro Station ➔ Cyber Hub", departureTime: "08:45 AM", availableSeats: 3, pricePerSeat: 75 },
+        { id: "pool-2", driverName: "Anita R.", vehicle: "Honda City", route: "South Ex ➔ Tech Park", departureTime: "09:15 AM", availableSeats: 2, pricePerSeat: 90 }
+      ]);
+    }
+
+    if (pathname === "/rides/shared/book" && method === "POST") {
+      const body = await parseBody(req);
+      const bookingId = `RIDE-${Date.now()}`;
+      const booking = {
+        id: bookingId,
+        ...body,
+        status: "CONFIRMED",
+        createdAt: new Date().toISOString()
+      };
+      if (body.riderPhone) {
+        sendOrderConfirmationSms({
+          phone: body.riderPhone,
+          orderNumber: bookingId,
+          amount: body.totalAmount
+        }).catch(err => console.warn("[RIDE SMS ERROR]", err));
+      }
+      return sendJson(res, 200, { success: true, booking });
+    }
+
+    if (pathname === "/healthcare/home" && method === "GET") {
+      return sendJson(res, 200, [
+        { id: "hh-1", title: "Elder Care & Bedside Assistance", pricePerDay: 999, duration: "8 Hours", rating: 4.9, certified: true },
+        { id: "hh-2", title: "Post-Operative Nursing & Dressings", pricePerDay: 1499, duration: "Per Visit", rating: 4.8, certified: true },
+        { id: "hh-3", title: "Physiotherapy & Mobility Rehabilitation", pricePerDay: 799, duration: "45 Mins Session", rating: 4.9, certified: true }
+      ]);
+    }
+
+    if (pathname === "/healthcare/home/book" && method === "POST") {
+      const body = await parseBody(req);
+      const bookingId = `HHC-${Date.now()}`;
+      const booking = {
+        id: bookingId,
+        ...body,
+        status: "CONFIRMED",
+        createdAt: new Date().toISOString()
+      };
+      if (body.patientPhone) {
+        sendOrderConfirmationSms({
+          phone: body.patientPhone,
+          orderNumber: bookingId,
+          amount: body.totalAmount
+        }).catch(err => console.warn("[HEALTHCARE SMS ERROR]", err));
+      }
+      return sendJson(res, 200, { success: true, booking });
+    }
+
+    if (pathname === "/hospitals/availability" && method === "GET") {
+      return sendJson(res, 200, {
+        success: true,
+        summary: { totalBeds: 450, availableICU: 42, availableGeneral: 180, availableVentilator: 18 },
+        hospitals: [
+          { id: "hosp-1", name: "Apollo Multispeciality Hospital", availableBeds: { general: 45, icu: 14, ventilator: 6 } },
+          { id: "hosp-2", name: "Fortis Memorial Hospital", availableBeds: { general: 32, icu: 9, ventilator: 4 } },
+          { id: "hosp-3", name: "Max Super Care Clinic & Trauma", availableBeds: { general: 28, icu: 6, ventilator: 3 } }
+        ]
+      });
+    }
+
+    if (pathname === "/user/recent-items" && method === "GET") {
+      return sendJson(res, 200, [
+        { id: "g-1", name: "Aashirvaad Superior MP Sharbati Atta", price: 245, category: "Grocery" },
+        { id: "p-1", name: "Dolo 650mg Paracetamol Tablets", price: 32, category: "Pharmacy" }
+      ]);
     }
 
     const orderStatusMatch = pathname.match(/^\/orders\/(\d+)\/status$/);

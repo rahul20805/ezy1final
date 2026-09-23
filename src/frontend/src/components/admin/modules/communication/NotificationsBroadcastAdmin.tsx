@@ -20,7 +20,12 @@ import {
   Zap,
   Radio,
   FileText,
-  Clock
+  Clock,
+  Filter,
+  Search,
+  Inbox,
+  AlertTriangle,
+  ArrowUpRight
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -80,6 +85,21 @@ export function NotificationsBroadcastAdmin() {
     }
   ]);
 
+  // Tab Navigation State
+  const [activeTab, setActiveTab] = useState<"campaigns" | "audit_logs" | "feedbacks">("campaigns");
+
+  // Email Audit Logs State
+  const [emailLogs, setEmailLogs] = useState<any[]>([]);
+  const [isLoadingLogs, setIsLoadingLogs] = useState(false);
+  const [logFilterType, setLogFilterType] = useState<string>("all");
+  const [logFilterStatus, setLogFilterStatus] = useState<string>("all");
+  const [logSearch, setLogSearch] = useState<string>("");
+  const [senderIdentities, setSenderIdentities] = useState<any>({});
+
+  // ImprovX Customer Feedbacks State
+  const [feedbacks, setFeedbacks] = useState<any[]>([]);
+  const [isLoadingFeedbacks, setIsLoadingFeedbacks] = useState(false);
+
   const fetchStats = async () => {
     setIsLoadingStats(true);
     try {
@@ -95,8 +115,41 @@ export function NotificationsBroadcastAdmin() {
     }
   };
 
+  const fetchEmailLogs = async () => {
+    setIsLoadingLogs(true);
+    try {
+      const res = await fetch("/api/admin/email/logs");
+      if (res.ok) {
+        const data = await res.json();
+        setEmailLogs(data.logs || []);
+        if (data.senders) setSenderIdentities(data.senders);
+      }
+    } catch (err) {
+      console.warn("Failed to load email logs:", err);
+    } finally {
+      setIsLoadingLogs(false);
+    }
+  };
+
+  const fetchFeedbacks = async () => {
+    setIsLoadingFeedbacks(true);
+    try {
+      const res = await fetch("/api/admin/email/feedbacks");
+      if (res.ok) {
+        const data = await res.json();
+        setFeedbacks(data.feedbacks || []);
+      }
+    } catch (err) {
+      console.warn("Failed to load feedbacks:", err);
+    } finally {
+      setIsLoadingFeedbacks(false);
+    }
+  };
+
   useEffect(() => {
     fetchStats();
+    fetchEmailLogs();
+    fetchFeedbacks();
   }, []);
 
   const handleSendBroadcastEmail = async (e: React.FormEvent) => {
@@ -353,6 +406,78 @@ export function NotificationsBroadcastAdmin() {
         </Card>
       </div>
 
+      {/* Navigation Tabs */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            variant={activeTab === "campaigns" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setActiveTab("campaigns")}
+            className="rounded-xl text-xs gap-1.5"
+          >
+            <Radio className="w-3.5 h-3.5" />
+            Broadcast Campaigns &amp; Testing
+          </Button>
+          <Button
+            type="button"
+            variant={activeTab === "audit_logs" ? "default" : "outline"}
+            size="sm"
+            onClick={() => {
+              setActiveTab("audit_logs");
+              fetchEmailLogs();
+            }}
+            className="rounded-xl text-xs gap-1.5"
+          >
+            <Mail className="w-3.5 h-3.5" />
+            Email Delivery Audit ({emailLogs.length})
+          </Button>
+          <Button
+            type="button"
+            variant={activeTab === "feedbacks" ? "default" : "outline"}
+            size="sm"
+            onClick={() => {
+              setActiveTab("feedbacks");
+              fetchFeedbacks();
+            }}
+            className="rounded-xl text-xs gap-1.5"
+          >
+            <Inbox className="w-3.5 h-3.5" />
+            Customer Inbound Replies ({feedbacks.length})
+          </Button>
+        </div>
+
+        {activeTab === "audit_logs" && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={fetchEmailLogs}
+            disabled={isLoadingLogs}
+            className="rounded-xl text-xs gap-1.5"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoadingLogs ? "animate-spin" : ""}`} />
+            Refresh Logs
+          </Button>
+        )}
+        {activeTab === "feedbacks" && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={fetchFeedbacks}
+            disabled={isLoadingFeedbacks}
+            className="rounded-xl text-xs gap-1.5"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoadingFeedbacks ? "animate-spin" : ""}`} />
+            Refresh Inbound
+          </Button>
+        )}
+      </div>
+
+      {/* VIEW 1: CAMPAIGNS & LIVE TESTING */}
+      {activeTab === "campaigns" && (
+        <div className="space-y-6">
       {/* 2. Main Broadcast Consoles: Email & SMS */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Email Broadcaster */}
@@ -709,6 +834,269 @@ export function NotificationsBroadcastAdmin() {
           </div>
         </CardContent>
       </Card>
+    </div>
+  )}
+
+  {/* VIEW 2: EMAIL AUDIT & DELIVERY LOGS */}
+  {activeTab === "audit_logs" && (
+    <div className="space-y-6">
+      {/* Sender Domain Identities Badge Row */}
+      <Card className="rounded-2xl border-border bg-card p-4 shadow-xs">
+        <div className="text-xs font-bold text-foreground mb-2 flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-emerald-600" />
+          Authenticated Sender Identities (ezy1.site Domain)
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+          <div className="p-2 rounded-xl bg-muted/40 border border-border text-center">
+            <span className="text-[10px] text-muted-foreground block">Customer Support</span>
+            <span className="text-[11px] font-mono font-bold text-foreground">support@ezy1.site</span>
+          </div>
+          <div className="p-2 rounded-xl bg-muted/40 border border-border text-center">
+            <span className="text-[10px] text-muted-foreground block">Orders &amp; Bookings</span>
+            <span className="text-[11px] font-mono font-bold text-foreground">orders@ezy1.site</span>
+          </div>
+          <div className="p-2 rounded-xl bg-muted/40 border border-border text-center">
+            <span className="text-[10px] text-muted-foreground block">OTP &amp; Security</span>
+            <span className="text-[11px] font-mono font-bold text-foreground">no-reply@ezy1.site</span>
+          </div>
+          <div className="p-2 rounded-xl bg-muted/40 border border-border text-center">
+            <span className="text-[10px] text-muted-foreground block">Team Operations</span>
+            <span className="text-[11px] font-mono font-bold text-foreground">team@ezy1.site</span>
+          </div>
+          <div className="p-2 rounded-xl bg-muted/40 border border-border text-center">
+            <span className="text-[10px] text-muted-foreground block">System Admin</span>
+            <span className="text-[11px] font-mono font-bold text-foreground">admin@ezy1.site</span>
+          </div>
+          <div className="p-2 rounded-xl bg-muted/40 border border-border text-center">
+            <span className="text-[10px] text-muted-foreground block">Management</span>
+            <span className="text-[11px] font-mono font-bold text-foreground">owner@ezy1.site</span>
+          </div>
+          <div className="p-2 rounded-xl bg-muted/40 border border-border text-center">
+            <span className="text-[10px] text-muted-foreground block">Ad Campaigns</span>
+            <span className="text-[11px] font-mono font-bold text-foreground">offers@ezy1.site</span>
+          </div>
+        </div>
+      </Card>
+
+      {/* Filters Bar */}
+      <Card className="rounded-2xl border-border bg-card p-4 shadow-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 absolute left-3 top-3 text-muted-foreground" />
+            <Input
+              value={logSearch}
+              onChange={(e) => setLogSearch(e.target.value)}
+              placeholder="Filter by recipient, subject or order ID..."
+              className="pl-8 text-xs rounded-xl"
+            />
+          </div>
+
+          <select
+            value={logFilterType}
+            onChange={(e) => setLogFilterType(e.target.value)}
+            className="text-xs rounded-xl border border-input bg-background px-3 py-2 font-medium"
+          >
+            <option value="all">All Email Types</option>
+            <option value="OTP">OTP &amp; Authentication</option>
+            <option value="ORDER_CONFIRMATION">Order Confirmations</option>
+            <option value="PAYMENT_FAILED">Payment Failures</option>
+            <option value="BOOKING_CONFIRMED">Booking Confirmations</option>
+            <option value="PARTNER_REGISTRATION">Partner Applications</option>
+            <option value="SUPPORT_TICKET">Support Tickets</option>
+            <option value="PROMOTIONAL_OFFER">Promotional Offers</option>
+          </select>
+
+          <select
+            value={logFilterStatus}
+            onChange={(e) => setLogFilterStatus(e.target.value)}
+            className="text-xs rounded-xl border border-input bg-background px-3 py-2 font-medium"
+          >
+            <option value="all">All Statuses</option>
+            <option value="sent">Sent / Dispatched</option>
+            <option value="delivered">Delivered</option>
+            <option value="failed">Failed / Transport Error</option>
+            <option value="suppressed">Suppressed (Duplicate / Idempotent)</option>
+          </select>
+        </div>
+      </Card>
+
+      {/* Audit Logs Table */}
+      <Card className="rounded-3xl border-border bg-card shadow-xs">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-base font-display font-bold flex items-center gap-2">
+                <FileText className="w-4 h-4 text-primary" />
+                Central Email Service Audit &amp; Event Logs
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Every transactional and marketing email dispatched through central service with zero API key exposure.
+              </CardDescription>
+            </div>
+            <Badge variant="outline" className="text-xs font-mono">
+              {emailLogs.length} Events Logged
+            </Badge>
+          </div>
+        </CardHeader>
+
+        <CardContent>
+          {emailLogs.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <Mail className="w-10 h-10 mx-auto mb-2 opacity-40" />
+              <p className="text-xs">No email audit logs found yet. Dispatches will automatically stream here.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-border text-muted-foreground text-left">
+                    <th className="pb-2 font-semibold">Time</th>
+                    <th className="pb-2 font-semibold">Type</th>
+                    <th className="pb-2 font-semibold">Recipient</th>
+                    <th className="pb-2 font-semibold">Sender Identity</th>
+                    <th className="pb-2 font-semibold">Subject</th>
+                    <th className="pb-2 font-semibold">Reference</th>
+                    <th className="pb-2 font-semibold">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/60">
+                  {emailLogs
+                    .filter((log) => {
+                      if (logFilterType !== "all" && log.type !== logFilterType) return false;
+                      if (logFilterStatus !== "all" && log.status !== logFilterStatus) return false;
+                      if (logSearch) {
+                        const term = logSearch.toLowerCase();
+                        return (
+                          (log.recipient || "").toLowerCase().includes(term) ||
+                          (log.subject || "").toLowerCase().includes(term) ||
+                          (log.orderId || "").toLowerCase().includes(term)
+                        );
+                      }
+                      return true;
+                    })
+                    .map((log) => (
+                      <tr key={log.id} className="hover:bg-muted/30 transition-colors">
+                        <td className="py-2.5 text-muted-foreground font-mono whitespace-nowrap">
+                          {new Date(log.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                        </td>
+                        <td className="py-2.5">
+                          <Badge variant="outline" className="text-[10px] font-mono">
+                            {log.type}
+                          </Badge>
+                        </td>
+                        <td className="py-2.5 font-mono font-medium text-foreground">
+                          {log.recipient}
+                        </td>
+                        <td className="py-2.5 text-[11px] font-mono text-muted-foreground">
+                          {log.sender || "support@ezy1.site"}
+                        </td>
+                        <td className="py-2.5 font-medium text-foreground max-w-xs truncate">
+                          {log.subject}
+                        </td>
+                        <td className="py-2.5 font-mono text-[11px] text-muted-foreground">
+                          {log.orderId ? `Order #${log.orderId}` : log.userId ? `User #${log.userId}` : "—"}
+                        </td>
+                        <td className="py-2.5">
+                          <span
+                            className={`inline-flex items-center gap-1 text-[11px] font-semibold ${
+                              log.status === "delivered" || log.status === "sent"
+                                ? "text-emerald-600"
+                                : log.status === "suppressed"
+                                ? "text-amber-500"
+                                : "text-rose-500"
+                            }`}
+                          >
+                            {log.status === "delivered" || log.status === "sent" ? (
+                              <CheckCircle2 className="w-3 h-3" />
+                            ) : log.status === "suppressed" ? (
+                              <AlertTriangle className="w-3 h-3" />
+                            ) : (
+                              <AlertCircle className="w-3 h-3" />
+                            )}
+                            {log.status.toUpperCase()}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  )}
+
+  {/* VIEW 3: CUSTOMER INBOUND REPLIES (IMPROVX) */}
+  {activeTab === "feedbacks" && (
+    <div className="space-y-6">
+      <Card className="rounded-3xl border-border bg-card shadow-xs">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-base font-display font-bold flex items-center gap-2">
+                <Inbox className="w-4 h-4 text-primary" />
+                Customer Inbound Feedback &amp; Replies (ImprovX Gateway)
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Inbound customer emails delivered to support@ezy1.site and captured via ImprovX API.
+              </CardDescription>
+            </div>
+            <Badge variant="outline" className="text-xs font-mono text-emerald-600 border-emerald-500/30">
+              ImprovX API Active
+            </Badge>
+          </div>
+        </CardHeader>
+
+        <CardContent>
+          {feedbacks.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <Inbox className="w-10 h-10 mx-auto mb-2 opacity-40" />
+              <p className="text-xs font-semibold text-foreground">No customer inbound feedback received yet</p>
+              <p className="text-[11px] mt-1 max-w-md mx-auto">
+                When customers reply to order confirmations or support emails sent from support@ezy1.site, ImprovX webhook routes their responses here automatically.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {feedbacks.map((fb, idx) => (
+                <div
+                  key={idx}
+                  className="p-4 rounded-2xl bg-muted/30 border border-border space-y-2 hover:border-primary/30 transition-all"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-xs text-foreground font-mono">{fb.sender}</span>
+                      {fb.orderId && (
+                        <Badge variant="secondary" className="text-[10px]">
+                          Order #{fb.orderId}
+                        </Badge>
+                      )}
+                    </div>
+                    <span className="text-[11px] text-muted-foreground font-mono">
+                      {new Date(fb.timestamp).toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="text-xs font-semibold text-foreground">{fb.subject}</div>
+                  <p className="text-xs text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                    {fb.body}
+                  </p>
+                  <div className="pt-2 flex justify-end">
+                    <a
+                      href={`mailto:${fb.sender}?subject=Re: ${encodeURIComponent(fb.subject)}`}
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+                    >
+                      Reply via support@ezy1.site <ArrowUpRight className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  )}
     </div>
   );
 }
