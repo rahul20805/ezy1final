@@ -20,47 +20,210 @@ import { LocationModal } from "../components/location/LocationModal";
 import { toast } from "sonner";
 
 export default function CheckoutPage() {
-  const { isAuthenticated, identity } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const { currentLocation, savedAddresses, setLocation } = useLocationStore();
+  const { currentLocation, savedAddresses } = useLocationStore();
   const [selectedLocation, setSelectedLocation] = useState<LocationData>(currentLocation);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<string>("UPI");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [confirmedOrder, setConfirmedOrder] = useState<any | null>(null);
+  const [confirmedPaymentId, setConfirmedPaymentId] = useState<string>("");
 
   const { items, totalItems, totalAmount, clearCart } = useCartStore();
 
   const deliveryFee = totalItems > 0 ? 30 : 0;
   const toPay = totalAmount + deliveryFee;
 
-  const handlePayment = async () => {
-    setIsProcessing(true);
-    try {
-      const res = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: identity ? identity.getPrincipal().toText() : "guest-user",
-          vendorId: Object.values(items)[0]?.product?.vendorId || 1,
-          totalAmount: toPay,
-          deliveryAddress: selectedLocation.formattedAddress || "Bengaluru",
-          location: selectedLocation,
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to place order");
+  const loadRazorpayScript = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if ((window as any).Razorpay) {
+        return resolve(true);
       }
+      const existing = document.querySelector('script[src*="checkout.razorpay.com"]');
+      if (existing) {
+        return resolve(true);
+      }
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
 
-      setTimeout(() => {
+  const createBackendOrder = async (payMethod: string, payStatus: string, rzpPayId?: string, rzpOrdId?: string) => {
+    const res = await fetch("/api/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: user?.id || 1,
+        customerName: user?.name || "Valued Customer",
+        customerEmail: user?.email || "customer@ezy1.site",
+        customerPhone: user?.phone || "9876543210",
+        vendorId: Object.values(items)[0]?.product?.vendorId || 1,
+        totalAmount: toPay,
+        paymentMethod: payMethod,
+        paymentStatus: payStatus,
+        gatewayPaymentId: rzpPayId || null,
+        razorpayPaymentId: rzpPayId || null,
+        razorpayOrderId: rzpOrdId || null,
+        deliveryAddress: selectedLocation.formattedAddress || "Bengaluru, Karnataka",
+        location: selectedLocation,
+        items: Object.values(items).map((item) => ({
+          id: item.product.id,
+          name: item.product.name,
+          price: item.product.price,
+          quantity: item.quantity,
+          image: item.product.image,
+        })),
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || "Failed to record order.");
+    }
+    return await res.json();
+  };
+
+  const handlePayment = async () => {
+    if (totalItems === 0) {
+      toast.error("Your cart is empty. Please add items before checking out.");
+      return;
+    }
+
+    if (!selectedLocation.formattedAddress && !selectedLocation.locality) {
+      toast.error("Please provide a valid delivery address.");
+      setStep(1);
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      // 1. CASH ON DELIVERY
+      if (paymentMethod === "COD") {
+        const orderData = await createBackendOrder("Cash on Delivery", "pending");
+        setConfirmedOrder(orderData.order);
         clearCart();
         setStep(3);
         setIsProcessing(false);
-        toast.success("Order confirmed successfully!");
-      }, 1000);
-    } catch (err) {
-      console.error("Payment or order error:", err);
-      toast.error("Payment processing failed. Please try again.");
+        toast.success("Order placed successfully (Cash on Delivery)!");
+        return;
+      }
+
+      // 2. EZY1 WALLET
+      if (paymentMethod === "Wallet") {
+        const orderData = await createBackendOrder("EZY1 Wallet", "paid");
+        setConfirmedOrder(orderData.order);
+        clearCart();
+        setStep(3);
+        setIsProcessing(false);
+        toast.success("Paid via EZY1 Wallet! Order confirmed.");
+        return;
+      }
+
+      // 3. RAZORPAY GATEWAY (UPI, GPay, PhonePe, Cards, NetBanking)
+      const scriptReady = await loadRazorpayScript();
+      if (!scriptReady || !(window as any).Razorpay) {
+        throw new Error("Unable to connect to Razorpay payment gateway. Please check your internet connection.");
+      }
+
+      // Create genuine Razorpay Order on server
+      const rzpOrderRes = await fetch("/api/payments/create-razorpay-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: toPay,
+          currency: "INR",
+          receipt: `rcpt_${Date.now()}`,
+          notes: {
+            userId: String(user?.id || "guest"),
+            customerName: user?.name || "Customer",
+            address: selectedLocation.formattedAddress,
+          },
+        }),
+      });
+
+      const rzpOrderData = await rzpOrderRes.json();
+      if (!rzpOrderRes.ok || !rzpOrderData.success) {
+        throw new Error(rzpOrderData.error || "Failed to initialize payment gateway order.");
+      }
+
+      const options = {
+        key: rzpOrderData.keyId,
+        amount: rzpOrderData.amount,
+        currency: rzpOrderData.currency || "INR",
+        name: "EZY1 India",
+        description: `Order Checkout (${totalItems} items)`,
+        image: "https://ezy1.site/android-chrome-192x192.png",
+        order_id: rzpOrderData.orderId,
+        prefill: {
+          name: user?.name || "Customer",
+          email: user?.email || "customer@ezy1.site",
+          contact: user?.phone ? user.phone.replace(/[^0-9]/g, "").slice(-10) : "9876543210",
+        },
+        theme: {
+          color: "#FF5100",
+        },
+        handler: async (response: any) => {
+          try {
+            // Cryptographic server-side verification of payment signature
+            const verifyRes = await fetch("/api/payments/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
+            });
+
+            const verifyData = await verifyRes.json();
+            if (!verifyRes.ok || !verifyData.success) {
+              throw new Error("Payment signature verification failed. Please contact support.");
+            }
+
+            // Create genuine confirmed order in backend
+            const orderData = await createBackendOrder(
+              "UPI / Razorpay",
+              "paid",
+              response.razorpay_payment_id,
+              response.razorpay_order_id
+            );
+
+            setConfirmedOrder(orderData.order);
+            setConfirmedPaymentId(response.razorpay_payment_id);
+            clearCart();
+            setStep(3);
+            setIsProcessing(false);
+            toast.success("Payment verified! Order placed successfully.");
+          } catch (verifyErr: any) {
+            console.error("Payment confirmation error:", verifyErr);
+            toast.error(verifyErr.message || "Payment verification failed.");
+            setIsProcessing(false);
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            setIsProcessing(false);
+            toast.info("Payment window closed. You can retry when ready.");
+          },
+        },
+      };
+
+      const razorpayInstance = new (window as any).Razorpay(options);
+      razorpayInstance.on("payment.failed", (failResp: any) => {
+        setIsProcessing(false);
+        const errMsg = failResp.error?.description || "Payment was not completed. Your order has not been confirmed. Please try again.";
+        toast.error(errMsg);
+      });
+      razorpayInstance.open();
+    } catch (err: any) {
+      console.error("Payment error:", err);
+      toast.error(err.message || "Payment processing failed. Please try again.");
       setIsProcessing(false);
     }
   };
@@ -68,11 +231,38 @@ export default function CheckoutPage() {
   if (!isAuthenticated) {
     return (
       <Layout>
-        <div className="container py-20 text-center">
-          <h2 className="text-2xl font-bold mb-4">Please login to checkout</h2>
-          <Link to="/login">
-            <Button>Login</Button>
-          </Link>
+        <div className="container py-20 text-center max-w-md mx-auto">
+          <div className="p-8 rounded-3xl bg-card border border-border shadow-md space-y-4">
+            <ShoppingBag className="w-12 h-12 text-primary mx-auto opacity-80" />
+            <h2 className="text-2xl font-bold font-display">Login to Complete Order</h2>
+            <p className="text-xs text-muted-foreground">
+              Please sign in with your phone or email to securely proceed to checkout and save delivery addresses.
+            </p>
+            <div className="pt-2">
+              <Link to="/login" search={{ redirect: "/checkout" }}>
+                <Button className="w-full">Sign In to Continue</Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (totalItems === 0 && step !== 3) {
+    return (
+      <Layout>
+        <div className="container py-20 text-center max-w-md mx-auto">
+          <div className="p-8 rounded-3xl bg-card border border-border shadow-md space-y-4">
+            <ShoppingBag className="w-12 h-12 text-muted-foreground mx-auto" />
+            <h2 className="text-2xl font-bold font-display">Your Cart is Empty</h2>
+            <p className="text-xs text-muted-foreground">
+              Explore thousands of products, groceries, and daily essentials on EZY1.
+            </p>
+            <Link to="/">
+              <Button className="mt-2">Start Shopping</Button>
+            </Link>
+          </div>
         </div>
       </Layout>
     );
@@ -324,23 +514,72 @@ export default function CheckoutPage() {
             </Card>
 
             {step === 3 && (
-              <Card className="border-green-500 bg-green-50">
+              <Card className="border-green-500 bg-green-50/70 dark:bg-green-950/20 shadow-sm">
                 <CardContent className="p-8 text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-2">
-                    <CheckCircle2 className="w-8 h-8 text-green-600" />
+                  <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center mx-auto mb-2 text-green-600">
+                    <CheckCircle2 className="w-8 h-8" />
                   </div>
-                  <h2 className="text-2xl font-bold text-green-800">
+                  <h2 className="text-2xl font-bold font-display text-green-900 dark:text-green-300">
                     Order Placed Successfully!
                   </h2>
-                  <p className="text-sm text-green-700">
-                    Your order has been sent to the vendor. You can track it in
-                    your dashboard.
+                  <p className="text-sm text-green-800 dark:text-green-400 max-w-md mx-auto">
+                    Your order has been verified and dispatched to the partner store.
                   </p>
-                  <Link to="/dashboard">
-                    <Button className="mt-4 bg-green-600 hover:bg-green-700">
-                      Go to Dashboard
-                    </Button>
-                  </Link>
+
+                  <div className="bg-white dark:bg-card border border-green-200 dark:border-green-900/60 rounded-2xl p-4 text-left text-xs space-y-2 max-w-md mx-auto shadow-xs">
+                    <div className="flex justify-between items-center py-1 border-b border-border/50">
+                      <span className="text-muted-foreground font-medium">Order Number:</span>
+                      <span className="font-mono font-bold text-foreground">
+                        {confirmedOrder?.orderNumber || `EZ-${Date.now().toString().slice(-4)}`}
+                      </span>
+                    </div>
+                    {confirmedPaymentId && (
+                      <div className="flex justify-between items-center py-1 border-b border-border/50">
+                        <span className="text-muted-foreground font-medium">Razorpay Payment ID:</span>
+                        <span className="font-mono font-bold text-emerald-600">
+                          {confirmedPaymentId}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center py-1 border-b border-border/50">
+                      <span className="text-muted-foreground font-medium">Payment Method:</span>
+                      <span className="font-semibold text-foreground">{paymentMethod}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1 border-b border-border/50">
+                      <span className="text-muted-foreground font-medium">Amount Paid:</span>
+                      <span className="font-bold text-primary">₹{confirmedOrder?.totalAmount || toPay}</span>
+                    </div>
+                    <div className="py-1">
+                      <span className="text-muted-foreground font-medium block mb-0.5">Delivery Address:</span>
+                      <span className="text-foreground break-words">{selectedLocation.formattedAddress}</span>
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-white/80 dark:bg-card/80 border border-green-200/80 rounded-xl text-xs text-muted-foreground max-w-md mx-auto space-y-1">
+                    <p className="flex items-center justify-center gap-1.5 font-medium text-emerald-700 dark:text-emerald-400">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>Confirmation email dispatched via Brevo</span>
+                    </p>
+                    {user?.phone && (
+                      <p className="flex items-center justify-center gap-1.5 font-medium text-emerald-700 dark:text-emerald-400">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>SMS status updates active on MSG91</span>
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                    <Link to="/dashboard">
+                      <Button className="w-full sm:w-auto bg-green-600 hover:bg-green-700 font-semibold px-6">
+                        View in Dashboard
+                      </Button>
+                    </Link>
+                    <Link to="/">
+                      <Button variant="outline" className="w-full sm:w-auto">
+                        Continue Shopping
+                      </Button>
+                    </Link>
+                  </div>
                 </CardContent>
               </Card>
             )}

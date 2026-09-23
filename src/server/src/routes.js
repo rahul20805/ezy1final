@@ -25,7 +25,16 @@ import {
   triggerNotificationEvent,
   dispatchNotificationSync
 } from "./notificationService.js";
-import { sendPartnerRegistrationEmail } from "./emailService.js";
+import {
+  sendEmail,
+  sendPartnerRegistrationEmail,
+  sendOrderConfirmationEmail,
+  sendBulkAdEmail
+} from "./emailService.js";
+import {
+  sendOrderConfirmationSms,
+  sendBulkCampaignSms
+} from "./smsProvider.js";
 
 export const router = express.Router();
 
@@ -1414,7 +1423,7 @@ router.get("/orders", async (req, res) => {
 });
 
 router.post("/orders", async (req, res) => {
-  const { userId, vendorId, totalAmount } = req.body;
+  const { userId, vendorId, totalAmount, customerEmail, customerPhone, customerName, gatewayPaymentId, items = [], deliveryAddress } = req.body;
   const db = await openDb();
   try {
     const result = await db.run(
@@ -1422,7 +1431,11 @@ router.post("/orders", async (req, res) => {
       [userId, vendorId, totalAmount]
     );
     const order = await db.get("SELECT * FROM orders WHERE id = ?", [result.lastID]);
-    
+    order.items = items;
+    order.deliveryAddress = deliveryAddress;
+    order.gatewayPaymentId = gatewayPaymentId;
+    order.orderNumber = `EZ-${order.id}`;
+
     // Automatically trigger notification without blocking order return
     const vendor = await db.get("SELECT businessName FROM vendors WHERE id = ?", [vendorId]);
     triggerNotificationEvent({
@@ -1436,10 +1449,164 @@ router.post("/orders", async (req, res) => {
       }
     });
 
+    // Real Email Confirmation via Brevo
+    const user = await db.get("SELECT * FROM users WHERE id = ?", [userId]);
+    const targetEmail = customerEmail || user?.email;
+    const targetName = customerName || user?.name || "Valued Customer";
+    sendOrderConfirmationEmail({
+      order,
+      customerEmail: targetEmail,
+      customerName: targetName,
+    }).catch((err) => console.warn("[ORDER EMAIL ERROR]", err));
+
+    // Real SMS Confirmation via MSG91
+    const targetPhone = customerPhone || user?.phone;
+    if (targetPhone) {
+      sendOrderConfirmationSms({
+        phone: targetPhone,
+        orderNumber: order.orderNumber,
+        amount: totalAmount,
+      }).catch((err) => console.warn("[ORDER SMS ERROR]", err));
+    }
+
     res.json(order);
   } catch (error) {
     res.status(400).json({ error: "Failed to place order" });
   }
+});
+
+// Marketing & Broadcast Routes
+router.get("/admin/marketing/stats", async (req, res) => {
+  const apiKey = process.env.BREVO_API_KEY;
+  let brevoData = { active: false };
+  if (apiKey) {
+    try {
+      const bRes = await fetch("https://api.brevo.com/v3/account", {
+        headers: { "api-key": apiKey, accept: "application/json" },
+      });
+      if (bRes.ok) {
+        const acc = await bRes.json();
+        brevoData = {
+          active: true,
+          email: acc.email,
+          companyName: acc.companyName,
+          credits: acc.plan?.[0]?.credits ?? 300,
+          plan: acc.plan?.[0]?.type || "free",
+        };
+      }
+    } catch (err) {
+      console.warn("[BREVO STATS ERROR]", err.message);
+    }
+  }
+
+  res.json({
+    success: true,
+    brevo: brevoData,
+    msg91: {
+      active: !!(process.env.MSG91_AUTH_KEY || process.env.SMS_API_KEY),
+      provider: "MSG91 DLT",
+    },
+    razorpay: {
+      active: !!(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET),
+      keyId: process.env.RAZORPAY_KEY_ID || "rzp_test_TczDqkkmBd54pY",
+    },
+  });
+});
+
+router.post("/admin/marketing/test-email", async (req, res) => {
+  const { email, subject, message } = req.body;
+  if (!email || !email.includes("@")) {
+    return res.status(400).json({ success: false, error: "Valid email address is required." });
+  }
+  const resMail = await sendEmail({
+    to: email,
+    subject: subject || "EZY1 Platform Test Email",
+    htmlContent: message || "<p>This is a real test email sent from EZY1 Notification Engine.</p>",
+    senderName: "EZY1 Platform",
+    senderEmail: "support@ezy1.site",
+  });
+  res.json({ success: resMail.success, result: resMail });
+});
+
+router.post("/admin/marketing/test-sms", async (req, res) => {
+  const { phone } = req.body;
+  if (!phone) {
+    return res.status(400).json({ success: false, error: "Phone number is required." });
+  }
+  const resSms = await sendOrderConfirmationSms({
+    phone,
+    orderNumber: "TEST-001",
+    amount: 100,
+  });
+  res.json({ success: resSms.success, result: resSms });
+});
+
+router.post("/admin/marketing/broadcast-email", async (req, res) => {
+  const { subject, htmlContent, audience = "all", customRecipients = [] } = req.body;
+  if (!subject || !htmlContent) {
+    return res.status(400).json({ success: false, error: "Subject and HTML content are required." });
+  }
+  const db = await openDb();
+  let recipients = [];
+  if (audience === "custom" && Array.isArray(customRecipients)) {
+    recipients = customRecipients;
+  } else if (audience === "partners") {
+    const partners = await db.all("SELECT email FROM partner_applications WHERE email IS NOT NULL");
+    recipients = partners.map(p => p.email).filter(Boolean);
+  } else {
+    const users = await db.all("SELECT email FROM users WHERE email IS NOT NULL");
+    const partners = await db.all("SELECT email FROM partner_applications WHERE email IS NOT NULL");
+    recipients = Array.from(new Set([...users.map(u => u.email), ...partners.map(p => p.email)]));
+  }
+
+  if (!recipients.includes("anyanant7115@gmail.com")) {
+    recipients.push("anyanant7115@gmail.com");
+  }
+
+  const campaignResult = await sendBulkAdEmail({
+    subject,
+    htmlContent,
+    recipients,
+    senderName: "EZY1 Promotions",
+  });
+
+  res.json({
+    success: true,
+    message: `Campaign broadcast dispatched to ${recipients.length} recipients.`,
+    recipientCount: recipients.length,
+    ...campaignResult,
+  });
+});
+
+router.post("/admin/marketing/broadcast-sms", async (req, res) => {
+  const { message, audience = "all", customPhones = [] } = req.body;
+  if (!message) {
+    return res.status(400).json({ success: false, error: "SMS message text is required." });
+  }
+  const db = await openDb();
+  let phoneNumbers = [];
+  if (audience === "custom" && Array.isArray(customPhones)) {
+    phoneNumbers = customPhones;
+  } else if (audience === "partners") {
+    const partners = await db.all("SELECT phone FROM partner_applications WHERE phone IS NOT NULL");
+    phoneNumbers = partners.map(p => p.phone).filter(Boolean);
+  } else {
+    const users = await db.all("SELECT phone FROM users WHERE phone IS NOT NULL");
+    const partners = await db.all("SELECT phone FROM partner_applications WHERE phone IS NOT NULL");
+    phoneNumbers = Array.from(new Set([...users.map(u => u.phone), ...partners.map(p => p.phone)]));
+  }
+
+  const smsResult = await sendBulkCampaignSms({
+    phoneNumbers,
+    message,
+  });
+
+  res.json({
+    success: true,
+    message: `SMS broadcast initiated to ${phoneNumbers.length} recipients.`,
+    recipientCount: phoneNumbers.length,
+    ...smsResult,
+  });
 });
 
 // ==========================================

@@ -1,8 +1,8 @@
 import crypto from "crypto";
 import { getAuthUser, hashPassword, signJwt, verifyJwt, verifyPassword } from "./auth.js";
 import { reverseGeocode, searchAddress } from "./location.js";
-import { dispatchOtpSms } from "../src/server/src/smsProvider.js";
-import { sendPartnerRegistrationEmail } from "./emailService.js";
+import { dispatchOtpSms, sendOrderConfirmationSms, sendBulkCampaignSms } from "./smsService.js";
+import { sendEmail, sendPartnerRegistrationEmail, sendOrderConfirmationEmail, sendBulkAdEmail } from "./emailService.js";
 import {
   bulkUpdateVendors,
   createOrder,
@@ -1210,8 +1210,190 @@ Be helpful, concise, courteous, and provide accurate navigation instructions to 
 
     if (pathname === "/orders" && method === "POST") {
       const body = await parseBody(req);
-      const newOrder = createOrder(body);
+      const { items = [], totalAmount, customerEmail, customerPhone, customerName, gatewayPaymentId } = body;
+
+      // Idempotency: If gatewayPaymentId is already used, return existing order to prevent duplicates
+      if (gatewayPaymentId) {
+        const existingOrders = getOrders({ paginate: false });
+        const duplicate = (existingOrders.items || existingOrders || []).find(
+          (o) => o.gatewayPaymentId === gatewayPaymentId || o.razorpayPaymentId === gatewayPaymentId
+        );
+        if (duplicate) {
+          return sendJson(res, 200, { success: true, order: duplicate, duplicate: true });
+        }
+      }
+
+      const newOrder = createOrder({
+        ...body,
+        gatewayPaymentId: gatewayPaymentId || body.razorpayPaymentId || null,
+      });
+
+      // Dispatch Email Confirmation via Brevo
+      const targetEmail = customerEmail || body.email || (findUserById(newOrder.userId)?.email);
+      const targetName = customerName || body.name || (findUserById(newOrder.userId)?.name) || "Valued Customer";
+      sendOrderConfirmationEmail({
+        order: newOrder,
+        customerEmail: targetEmail,
+        customerName: targetName,
+      }).catch((err) => console.warn("[ORDER EMAIL ERROR]", err));
+
+      // Dispatch SMS Confirmation via MSG91
+      const targetPhone = customerPhone || body.phone || (findUserById(newOrder.userId)?.phone);
+      if (targetPhone) {
+        sendOrderConfirmationSms({
+          phone: targetPhone,
+          orderNumber: newOrder.orderNumber,
+          amount: newOrder.totalAmount,
+        }).catch((err) => console.warn("[ORDER SMS ERROR]", err));
+      }
+
       return sendJson(res, 201, { success: true, order: newOrder });
+    }
+
+    // ----------------------------------------------------
+    // MARKETING, AD CAMPAIGNS & BULK BROADCAST
+    // ----------------------------------------------------
+    if (pathname === "/admin/marketing/stats" && method === "GET") {
+      const apiKey = process.env.BREVO_API_KEY;
+      let brevoData = { active: false };
+      if (apiKey) {
+        try {
+          const bRes = await fetch("https://api.brevo.com/v3/account", {
+            headers: { "api-key": apiKey, accept: "application/json" },
+          });
+          if (bRes.ok) {
+            const acc = await bRes.json();
+            brevoData = {
+              active: true,
+              email: acc.email,
+              companyName: acc.companyName,
+              credits: acc.plan?.[0]?.credits ?? 300,
+              plan: acc.plan?.[0]?.type || "free",
+            };
+          }
+        } catch (err) {
+          console.warn("[BREVO STATS ERROR]", err.message);
+        }
+      }
+
+      return sendJson(res, 200, {
+        success: true,
+        brevo: brevoData,
+        msg91: {
+          active: !!(process.env.MSG91_AUTH_KEY || process.env.SMS_API_KEY),
+          provider: "MSG91 DLT",
+        },
+        razorpay: {
+          active: !!(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET),
+          keyId: process.env.RAZORPAY_KEY_ID || "rzp_test_TczDqkkmBd54pY",
+        },
+      });
+    }
+
+    if (pathname === "/admin/marketing/test-email" && method === "POST") {
+      const body = await parseBody(req);
+      const { email, subject, message } = body;
+      if (!email || !email.includes("@")) {
+        return sendJson(res, 400, { success: false, error: "Valid email address is required." });
+      }
+
+      const resMail = await sendEmail({
+        to: email,
+        subject: subject || "EZY1 Platform Test Email",
+        htmlContent: message || "<p>This is a real test email sent from EZY1 Notification Engine.</p>",
+        senderName: "EZY1 Platform",
+        senderEmail: "support@ezy1.site",
+      });
+
+      return sendJson(res, 200, { success: resMail.success, result: resMail });
+    }
+
+    if (pathname === "/admin/marketing/test-sms" && method === "POST") {
+      const body = await parseBody(req);
+      const { phone } = body;
+      if (!phone) {
+        return sendJson(res, 400, { success: false, error: "Phone number is required." });
+      }
+
+      const resSms = await sendOrderConfirmationSms({
+        phone,
+        orderNumber: "TEST-001",
+        amount: 100,
+      });
+
+      return sendJson(res, 200, { success: resSms.success, result: resSms });
+    }
+
+    if (pathname === "/admin/marketing/broadcast-email" && method === "POST") {
+      const body = await parseBody(req);
+      const { subject, htmlContent, audience = "all", customRecipients = [] } = body;
+
+      if (!subject || !htmlContent) {
+        return sendJson(res, 400, { success: false, error: "Subject and HTML content are required." });
+      }
+
+      let recipients = [];
+      const db = loadDatabase();
+      if (audience === "custom" && Array.isArray(customRecipients)) {
+        recipients = customRecipients;
+      } else if (audience === "partners") {
+        recipients = (db.partnerApplications || []).map((p) => p.email).filter(Boolean);
+      } else {
+        const userEmails = (db.users || []).map((u) => u.email).filter(Boolean);
+        const partnerEmails = (db.partnerApplications || []).map((p) => p.email).filter(Boolean);
+        recipients = Array.from(new Set([...userEmails, ...partnerEmails]));
+      }
+
+      if (!recipients.includes("anyanant7115@gmail.com")) {
+        recipients.push("anyanant7115@gmail.com");
+      }
+
+      const campaignResult = await sendBulkAdEmail({
+        subject,
+        htmlContent,
+        recipients,
+        senderName: "EZY1 Promotions",
+      });
+
+      return sendJson(res, 200, {
+        success: true,
+        message: `Campaign broadcast dispatched to ${recipients.length} recipients.`,
+        recipientCount: recipients.length,
+        ...campaignResult,
+      });
+    }
+
+    if (pathname === "/admin/marketing/broadcast-sms" && method === "POST") {
+      const body = await parseBody(req);
+      const { message, audience = "all", customPhones = [] } = body;
+
+      if (!message) {
+        return sendJson(res, 400, { success: false, error: "SMS message text is required." });
+      }
+
+      let phoneNumbers = [];
+      const db = loadDatabase();
+      if (audience === "custom" && Array.isArray(customPhones)) {
+        phoneNumbers = customPhones;
+      } else if (audience === "partners") {
+        phoneNumbers = (db.partnerApplications || []).map((p) => p.phone).filter(Boolean);
+      } else {
+        const userPhones = (db.users || []).map((u) => u.phone).filter(Boolean);
+        const partnerPhones = (db.partnerApplications || []).map((p) => p.phone).filter(Boolean);
+        phoneNumbers = Array.from(new Set([...userPhones, ...partnerPhones]));
+      }
+
+      const smsResult = await sendBulkCampaignSms({
+        phoneNumbers,
+        message,
+      });
+
+      return sendJson(res, 200, {
+        success: true,
+        message: `SMS broadcast initiated to ${phoneNumbers.length} recipients.`,
+        recipientCount: phoneNumbers.length,
+        ...smsResult,
+      });
     }
 
     const orderStatusMatch = pathname.match(/^\/orders\/(\d+)\/status$/);

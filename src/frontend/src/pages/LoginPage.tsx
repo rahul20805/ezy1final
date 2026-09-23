@@ -85,10 +85,12 @@ export default function LoginPage() {
   const [googleEmail, setGoogleEmail] = useState("");
   const [googleName, setGoogleName] = useState("");
 
-  // Redirect if already logged in — to homepage, not dashboard
+  // Redirect if already logged in — supports ?redirect=/checkout or defaults to /
   useEffect(() => {
     if (isAuthenticated) {
-      navigate({ to: "/" });
+      const params = new URLSearchParams(window.location.search);
+      const redirectTarget = params.get("redirect") || "/";
+      navigate({ to: redirectTarget as any });
     }
   }, [isAuthenticated, navigate]);
 

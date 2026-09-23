@@ -80,6 +80,7 @@ import { RefundsManager } from "../components/admin/modules/finance/RefundsManag
 
 // 8. Communication Modules
 import { WhatsAppAdmin } from "../components/admin/modules/communication/WhatsAppAdmin";
+import { NotificationsBroadcastAdmin } from "../components/admin/modules/communication/NotificationsBroadcastAdmin";
 
 // 9. Reviews & Quality Modules
 import { PartnerVerification } from "../components/admin/modules/quality/PartnerVerification";
@@ -282,7 +283,7 @@ export default function AdminPage() {
 
       // 8. Communication
       case "notifications":
-        return <WhatsAppAdmin />;
+        return <NotificationsBroadcastAdmin />;
       case "whatsapp_admin":
         return <WhatsAppAdmin />;
       case "customer_messages":

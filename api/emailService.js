@@ -248,3 +248,153 @@ export async function sendOtpEmail(email, otp) {
 
   return sendEmail({ to: email, subject, htmlContent });
 }
+
+/**
+ * Dispatch Customer Order Confirmation & Admin Operations Alert
+ */
+export async function sendOrderConfirmationEmail({ order, customerEmail, customerName }) {
+  const orderNumber = order.orderNumber || `EZ-${order.id}`;
+  const totalAmount = order.totalAmount || 0;
+  const items = Array.isArray(order.items) ? order.items : [];
+  const paymentMethod = order.paymentMethod || "UPI (Razorpay)";
+  const paymentId = order.gatewayPaymentId || order.razorpayPaymentId || "Confirmed";
+  const address = order.deliveryAddress || "Standard Delivery Address";
+
+  const itemsHtml = items.length > 0 
+    ? items.map(item => `
+        <tr>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #f0f0f0; color: #333;">${item.name || item.title || "Item"}</td>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #f0f0f0; text-align: center; color: #666;">x${item.quantity || 1}</td>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #f0f0f0; text-align: right; font-weight: bold; color: #111;">₹${(item.price || 0) * (item.quantity || 1)}</td>
+        </tr>
+      `).join("")
+    : `<tr><td colspan="3" style="padding: 10px 12px; text-align: center; color: #777;">Order Total Paid: ₹${totalAmount}</td></tr>`;
+
+  const subject = `🛍️ Order Confirmed #${orderNumber} - EZY1`;
+  const htmlContent = `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #eaeaea; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+      <div style="background: linear-gradient(135deg, #FF5100 0%, #FF7A00 100%); padding: 24px; color: #ffffff;">
+        <h1 style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.5px;">EZY1 Order Confirmed</h1>
+        <p style="margin: 4px 0 0 0; font-size: 13px; opacity: 0.95;">Thank you for shopping on EZY1. Your order has been placed!</p>
+      </div>
+
+      <div style="padding: 24px; color: #222222; font-size: 14px; line-height: 1.6;">
+        <p style="margin-top: 0;">Hi <strong>${customerName || "Valued Customer"}</strong>,</p>
+        <p>Your order <strong>#${orderNumber}</strong> has been confirmed and forwarded to the partner store for packaging and dispatch.</p>
+
+        <div style="background: #FFF7ED; border: 1px solid #FFEDD5; border-radius: 12px; padding: 16px; margin: 16px 0;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <span style="color: #9A3412; font-weight: 600;">Order ID:</span>
+            <span style="font-weight: 700; color: #C2410C;">${orderNumber}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <span style="color: #9A3412; font-weight: 600;">Payment Method:</span>
+            <span style="font-weight: 700; color: #C2410C;">${paymentMethod} (${paymentId.slice(-8)})</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: #9A3412; font-weight: 600;">Delivery Address:</span>
+            <span style="font-weight: 600; color: #431407; max-width: 60%; text-align: right;">${address}</span>
+          </div>
+        </div>
+
+        <h3 style="font-size: 15px; margin: 20px 0 10px 0; color: #111;">Items Ordered</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px;">
+          <thead>
+            <tr style="background: #f8f9fa;">
+              <th style="padding: 8px 12px; text-align: left; font-size: 12px; color: #666; border-bottom: 2px solid #eaeaea;">Item</th>
+              <th style="padding: 8px 12px; text-align: center; font-size: 12px; color: #666; border-bottom: 2px solid #eaeaea;">Qty</th>
+              <th style="padding: 8px 12px; text-align: right; font-size: 12px; color: #666; border-bottom: 2px solid #eaeaea;">Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsHtml}
+            <tr style="background: #fafafa;">
+              <td colspan="2" style="padding: 12px; font-weight: 800; font-size: 15px; color: #111;">Total Paid:</td>
+              <td style="padding: 12px; font-weight: 800; font-size: 16px; color: #FF5100; text-align: right;">₹${totalAmount}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="margin-top: 24px; text-align: center;">
+          <a href="https://ezy1.site/dashboard" style="display: inline-block; background: #FF5100; color: #ffffff; text-decoration: none; padding: 12px 28px; font-weight: 700; border-radius: 12px; font-size: 14px;">
+            Track Your Order on EZY1 →
+          </a>
+        </div>
+      </div>
+
+      <div style="background: #f7f7f7; padding: 14px 24px; text-align: center; font-size: 12px; color: #888888; border-top: 1px solid #eaeaea;">
+        Questions about your order? Email us at support@ezy1.site or check live tracking on https://ezy1.site.
+      </div>
+    </div>
+  `;
+
+  // 1. Send confirmation to customer if valid email
+  let customerRes = { success: false };
+  if (customerEmail && customerEmail.includes("@")) {
+    customerRes = await sendEmail({
+      to: customerEmail,
+      subject,
+      htmlContent,
+      senderName: "EZY1 Orders",
+      senderEmail: "support@ezy1.site"
+    }).catch(err => ({ success: false, error: err.message }));
+  }
+
+  // 2. Alert admin/store operations
+  const adminSubject = `🚨 [NEW ORDER] #${orderNumber} placed for ₹${totalAmount}`;
+  const adminHtml = `
+    <div style="font-family: Arial, sans-serif; padding: 16px;">
+      <h2>New EZY1 Order: #${orderNumber}</h2>
+      <p><strong>Customer:</strong> ${customerName} (${customerEmail || "N/A"})</p>
+      <p><strong>Total:</strong> ₹${totalAmount}</p>
+      <p><strong>Payment:</strong> ${paymentMethod} (${paymentId})</p>
+      <p><strong>Address:</strong> ${address}</p>
+      <p><a href="https://admin.ezy1.site">View in Admin Console</a></p>
+    </div>
+  `;
+  sendEmail({
+    to: ADMIN_EMAIL,
+    subject: adminSubject,
+    htmlContent: adminHtml,
+    senderName: "EZY1 Dispatch Bot",
+    senderEmail: "support@ezy1.site"
+  }).catch(() => {});
+
+  return customerRes;
+}
+
+/**
+ * Dispatch Promotional / Ad Bulk Email Broadcast
+ */
+export async function sendBulkAdEmail({ subject, htmlContent, recipients, senderName = "EZY1 Offers" }) {
+  if (!Array.isArray(recipients) || recipients.length === 0) {
+    return { success: false, error: "No recipients provided" };
+  }
+
+  const results = { sent: 0, failed: 0, details: [] };
+  const batchSize = 10;
+  for (let i = 0; i < recipients.length; i += batchSize) {
+    const batch = recipients.slice(i, i + batchSize);
+    await Promise.all(batch.map(async (r) => {
+      const email = typeof r === "string" ? r : r.email;
+      if (!email || !email.includes("@")) return;
+      try {
+        const res = await sendEmail({
+          to: email,
+          subject,
+          htmlContent,
+          senderName,
+          senderEmail: "support@ezy1.site"
+        });
+        if (res.success) results.sent++;
+        else results.failed++;
+        results.details.push({ email, success: res.success, messageId: res.messageId });
+      } catch (err) {
+        results.failed++;
+        results.details.push({ email, success: false, error: err.message });
+      }
+    }));
+  }
+
+  return { success: true, ...results };
+}
