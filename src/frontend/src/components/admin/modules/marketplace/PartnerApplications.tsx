@@ -37,7 +37,12 @@ interface PartnerAppRecord {
   phone: string;
   city?: string;
   address?: string;
-  status: "PENDING" | "UNDER_REVIEW" | "APPROVED" | "REJECTED" | "MORE_INFORMATION_REQUIRED";
+  status:
+    | "PENDING"
+    | "UNDER_REVIEW"
+    | "APPROVED"
+    | "REJECTED"
+    | "MORE_INFORMATION_REQUIRED";
   createdAt?: string;
 }
 
@@ -53,7 +58,10 @@ export function PartnerApplications() {
     setIsDetailOpen(true);
   };
 
-  const handleUpdateStatus = async (appId: number, nextStatus: PartnerAppRecord["status"]) => {
+  const handleUpdateStatus = async (
+    appId: number,
+    nextStatus: PartnerAppRecord["status"],
+  ) => {
     try {
       const res = await fetch(`/api/partner-applications/${appId}/status`, {
         method: "PUT",
@@ -103,8 +111,18 @@ export function PartnerApplications() {
           },
         ]}
         sortOptions={[
-          { label: "Application ID (Newest)", value: "id_desc", sortBy: "id", sortOrder: "desc" },
-          { label: "Business Name (A-Z)", value: "businessName_asc", sortBy: "businessName", sortOrder: "asc" },
+          {
+            label: "Application ID (Newest)",
+            value: "id_desc",
+            sortBy: "id",
+            sortOrder: "desc",
+          },
+          {
+            label: "Business Name (A-Z)",
+            value: "businessName_asc",
+            sortBy: "businessName",
+            sortOrder: "asc",
+          },
         ]}
         defaultSort="id_desc"
         defaultPageSize={25}
@@ -128,7 +146,10 @@ export function PartnerApplications() {
                       <h3 className="font-display font-bold text-base text-foreground break-words">
                         {app.businessName}
                       </h3>
-                      <Badge variant="outline" className="text-[10px] uppercase font-bold shrink-0">
+                      <Badge
+                        variant="outline"
+                        className="text-[10px] uppercase font-bold shrink-0"
+                      >
                         {app.category}
                       </Badge>
                     </div>
@@ -137,7 +158,10 @@ export function PartnerApplications() {
                       <span className="font-medium text-foreground">
                         {applicant}
                       </span>{" "}
-                      • Applied: {app.createdAt ? new Date(app.createdAt).toLocaleDateString() : "Recent"}
+                      • Applied:{" "}
+                      {app.createdAt
+                        ? new Date(app.createdAt).toLocaleDateString()
+                        : "Recent"}
                     </p>
                   </div>
 
@@ -219,7 +243,8 @@ export function PartnerApplications() {
               Merchant Application Dossier
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Review applicant details before approving access to the live platform.
+              Review applicant details before approving access to the live
+              platform.
             </DialogDescription>
           </DialogHeader>
 
@@ -228,7 +253,9 @@ export function PartnerApplications() {
               <div className="p-4 rounded-2xl bg-muted/40 border border-border/60 space-y-2">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Business:</span>
-                  <span className="font-bold text-foreground">{selectedApp.businessName}</span>
+                  <span className="font-bold text-foreground">
+                    {selectedApp.businessName}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Owner:</span>
@@ -238,11 +265,15 @@ export function PartnerApplications() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Category:</span>
-                  <span className="font-bold text-primary">{selectedApp.category}</span>
+                  <span className="font-bold text-primary">
+                    {selectedApp.category}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Contact:</span>
-                  <span>{selectedApp.phone} • {selectedApp.email}</span>
+                  <span>
+                    {selectedApp.phone} • {selectedApp.email}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Location:</span>
@@ -251,7 +282,9 @@ export function PartnerApplications() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold">Verification Audit Notes</label>
+                <label className="text-xs font-semibold">
+                  Verification Audit Notes
+                </label>
                 <Textarea
                   value={adminNotes}
                   onChange={(e) => setAdminNotes(e.target.value)}
@@ -277,14 +310,20 @@ export function PartnerApplications() {
                 <Button
                   variant="destructive"
                   size="sm"
-                  onClick={() => selectedApp && handleUpdateStatus(selectedApp.id, "REJECTED")}
+                  onClick={() =>
+                    selectedApp &&
+                    handleUpdateStatus(selectedApp.id, "REJECTED")
+                  }
                   className="rounded-xl"
                 >
                   Reject
                 </Button>
                 <Button
                   size="sm"
-                  onClick={() => selectedApp && handleUpdateStatus(selectedApp.id, "APPROVED")}
+                  onClick={() =>
+                    selectedApp &&
+                    handleUpdateStatus(selectedApp.id, "APPROVED")
+                  }
                   className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
                 >
                   Approve Application

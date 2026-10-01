@@ -1,6 +1,6 @@
-import React from "react";
 import { Download, ExternalLink, FileText } from "lucide-react";
-import { LegalDoc, LEGAL_DOCS } from "../../config/legal";
+import type React from "react";
+import { LEGAL_DOCS, LegalDoc } from "../../config/legal";
 
 interface LegalDocumentLinkProps {
   docKey: keyof typeof LEGAL_DOCS;
@@ -47,7 +47,9 @@ export const LegalDocumentLink: React.FC<LegalDocumentLinkProps> = ({
         className={`text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1 group ${linkClassName}`}
         title={`View ${doc.title} (PDF - Opens in new tab)`}
       >
-        {showIcon && <FileText className="w-3.5 h-3.5 text-primary/80 shrink-0" />}
+        {showIcon && (
+          <FileText className="w-3.5 h-3.5 text-primary/80 shrink-0" />
+        )}
         <span className="group-hover:underline">{label}</span>
         <ExternalLink className="w-3 h-3 opacity-60 group-hover:opacity-100 shrink-0" />
       </a>

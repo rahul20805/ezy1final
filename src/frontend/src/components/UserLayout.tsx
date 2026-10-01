@@ -6,27 +6,27 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import {
   Bell,
   Bus,
+  Calendar,
   ChevronLeft,
   ChevronRight,
+  CreditCard,
   Home,
   LayoutDashboard,
   Menu,
   MessageSquare,
+  Package,
   Settings,
   ShoppingBag,
+  ShoppingCart,
   Stethoscope,
   User,
   Wallet,
-  Package,
-  Calendar,
-  CreditCard,
-  ShoppingCart,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useIsMobile } from "../hooks/use-mobile";
 
-import { useNotificationStore } from "../lib/notificationStore";
 import { useCartStore } from "../lib/cartStore";
+import { useNotificationStore } from "../lib/notificationStore";
 import { MOCK_WALLET_BALANCE } from "../mock-data";
 import { Ezy1Logo } from "./Ezy1Logo";
 
@@ -269,34 +269,46 @@ export default function UserLayout({ children, title }: UserLayoutProps) {
               {title}
             </h1>
           )}
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
             <Link to="/dashboard/cart" data-ocid="topbar.cart_link">
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-1.5 text-sm hidden sm:flex"
+                className="gap-1 sm:gap-1.5 text-xs sm:text-sm px-2.5 sm:px-3 h-8 sm:h-9"
               >
-                <ShoppingBag className="w-4 h-4 text-primary" />
-                <span className="text-primary font-semibold">
-                  {totalItems > 0 ? `${totalItems} item${totalItems === 1 ? "" : "s"}` : "Cart"}
+                <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
+                <span className="text-primary font-semibold hidden xs:inline">
+                  {totalItems > 0
+                    ? `${totalItems} item${totalItems === 1 ? "" : "s"}`
+                    : "Cart"}
                 </span>
+                {totalItems > 0 && (
+                  <span className="xs:hidden flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-primary text-primary-foreground font-bold text-[9px]">
+                    {totalItems}
+                  </span>
+                )}
               </Button>
             </Link>
             <Link to="/dashboard/wallet" data-ocid="topbar.wallet_link">
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-1.5 text-sm hidden sm:flex"
+                className="gap-1 sm:gap-1.5 text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9"
               >
-                <Wallet className="w-4 h-4 text-primary" />
-                <span className="text-primary font-semibold">₹{MOCK_WALLET_BALANCE.toLocaleString("en-IN")}</span>
+                <Wallet className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
+                <span className="text-primary font-semibold text-xs sm:text-sm">
+                  ₹{MOCK_WALLET_BALANCE.toLocaleString("en-IN")}
+                </span>
               </Button>
             </Link>
-            <Link to="/dashboard/notifications" data-ocid="topbar.notifications_link">
+            <Link
+              to="/dashboard/notifications"
+              data-ocid="topbar.notifications_link"
+            >
               <Button
                 variant="ghost"
                 size="sm"
-                className="relative"
+                className="relative px-2 sm:px-3 h-8 sm:h-9"
                 data-ocid="topbar.notifications_button"
               >
                 <Bell className="w-4 h-4" />
@@ -311,7 +323,54 @@ export default function UserLayout({ children, title }: UserLayoutProps) {
         </div>
 
         {/* Page content */}
-        <main className="flex-1 p-4 md:p-6 overflow-auto">{children}</main>
+        <main className="flex-1 p-3 sm:p-4 md:p-6 pb-20 md:pb-6 overflow-auto">{children}</main>
+
+        {/* Mobile Phone Bottom Navigation Bar for User Dashboard */}
+        <nav
+          aria-label="Mobile Navigation"
+          className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-md border-t border-border shadow-elevated px-2 py-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] flex items-center justify-around select-none"
+        >
+          <Link
+            to="/"
+            className="flex flex-col items-center justify-center py-1 px-3 rounded-xl text-[10px] font-bold text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Home className="w-5 h-5 mb-0.5" />
+            <span>Home</span>
+          </Link>
+          <Link
+            to="/dashboard/cart"
+            className="flex flex-col items-center justify-center py-1 px-3 rounded-xl text-[10px] font-bold text-muted-foreground hover:text-foreground transition-colors relative"
+          >
+            <ShoppingCart className="w-5 h-5 mb-0.5" />
+            <span>Cart</span>
+            {totalItems > 0 && (
+              <span className="absolute top-0.5 right-2 flex items-center justify-center min-w-[14px] h-[14px] px-0.5 rounded-full bg-primary text-primary-foreground font-black text-[8px]">
+                {totalItems}
+              </span>
+            )}
+          </Link>
+          <Link
+            to="/my-orders"
+            className="flex flex-col items-center justify-center py-1 px-3 rounded-xl text-[10px] font-bold text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Package className="w-5 h-5 mb-0.5" />
+            <span>Orders</span>
+          </Link>
+          <Link
+            to="/dashboard/wallet"
+            className="flex flex-col items-center justify-center py-1 px-3 rounded-xl text-[10px] font-bold text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Wallet className="w-5 h-5 mb-0.5" />
+            <span>Wallet</span>
+          </Link>
+          <Link
+            to="/my-dashboard"
+            className="flex flex-col items-center justify-center py-1 px-3 rounded-xl text-[10px] font-bold text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <User className="w-5 h-5 mb-0.5" />
+            <span>Account</span>
+          </Link>
+        </nav>
       </div>
     </div>
   );

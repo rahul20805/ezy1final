@@ -1,22 +1,22 @@
-import { useState } from "react";
-import Layout from "../components/Layout";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  ShoppingBag,
-  Clock,
+  ArrowRight,
+  Car,
   CheckCircle2,
-  Truck,
-  RotateCcw,
+  Clock,
   FileText,
   HelpCircle,
-  ArrowRight,
   Package,
-  UtensilsCrossed,
   Pill,
-  Car
+  RotateCcw,
+  ShoppingBag,
+  Truck,
+  UtensilsCrossed,
 } from "lucide-react";
+import { useState } from "react";
+import Layout from "../components/Layout";
 
 interface OrderItem {
   id: string;
@@ -33,7 +33,11 @@ const SAMPLE_ORDERS: OrderItem[] = [
     id: "EZY-ORD-8821",
     category: "Grocery",
     providerName: "Sharma Kirana Store",
-    items: ["Aashirvaad Atta (5kg)", "Amul Butter (100g)", "Tata Toor Dal (1kg)"],
+    items: [
+      "Aashirvaad Atta (5kg)",
+      "Amul Butter (100g)",
+      "Tata Toor Dal (1kg)",
+    ],
     totalAmount: 468,
     date: "Today, 02:15 PM",
     status: "ON_THE_WAY",
@@ -85,24 +89,27 @@ export default function MyOrdersPage() {
               My Orders & Activity
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Track live deliveries, review order details, download invoices, and reorder with 1-click.
+              Track live deliveries, review order details, download invoices,
+              and reorder with 1-click.
             </p>
 
             {/* Filter Tabs */}
             <div className="flex items-center gap-2 pt-6 overflow-x-auto scrollbar-hide text-xs">
-              {["All", "Grocery", "Food", "Pharmacy", "Ride", "Parcel"].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setSelectedTab(tab)}
-                  className={`px-4 py-2 rounded-xl font-semibold transition-smooth whitespace-nowrap ${
-                    selectedTab === tab
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "bg-muted/70 hover:bg-muted text-muted-foreground"
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
+              {["All", "Grocery", "Food", "Pharmacy", "Ride", "Parcel"].map(
+                (tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setSelectedTab(tab)}
+                    className={`px-4 py-2 rounded-xl font-semibold transition-smooth whitespace-nowrap ${
+                      selectedTab === tab
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "bg-muted/70 hover:bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ),
+              )}
             </div>
           </div>
         </div>
@@ -112,7 +119,9 @@ export default function MyOrdersPage() {
           {filteredOrders.length === 0 ? (
             <div className="text-center py-20">
               <Package className="w-12 h-12 text-muted-foreground/50 mx-auto mb-3" />
-              <h3 className="font-bold text-base text-foreground mb-1">No orders found</h3>
+              <h3 className="font-bold text-base text-foreground mb-1">
+                No orders found
+              </h3>
               <p className="text-xs text-muted-foreground">
                 You have not placed any orders in this category yet.
               </p>
@@ -129,7 +138,9 @@ export default function MyOrdersPage() {
                       <span className="font-mono text-xs font-bold text-primary">
                         {ord.id}
                       </span>
-                      <span className="text-xs text-muted-foreground">• {ord.date}</span>
+                      <span className="text-xs text-muted-foreground">
+                        • {ord.date}
+                      </span>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -166,7 +177,9 @@ export default function MyOrdersPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => alert(`Downloading official invoice for ${ord.id}...`)}
+                        onClick={() =>
+                          alert(`Downloading official invoice for ${ord.id}...`)
+                        }
                         className="rounded-xl h-8 px-3 text-xs gap-1.5"
                       >
                         <FileText className="w-3.5 h-3.5" />
@@ -175,7 +188,11 @@ export default function MyOrdersPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => alert(`Connecting to 24/7 EZY Support for ${ord.id}...`)}
+                        onClick={() =>
+                          alert(
+                            `Connecting to 24/7 EZY Support for ${ord.id}...`,
+                          )
+                        }
                         className="rounded-xl h-8 px-3 text-xs gap-1.5"
                       >
                         <HelpCircle className="w-3.5 h-3.5" />
@@ -185,7 +202,9 @@ export default function MyOrdersPage() {
 
                     <Button
                       size="sm"
-                      onClick={() => alert(`Added items from ${ord.id} to cart!`)}
+                      onClick={() =>
+                        alert(`Added items from ${ord.id} to cart!`)
+                      }
                       className="rounded-xl h-8 px-4 text-xs font-bold gap-1.5 bg-primary text-primary-foreground shadow-sm"
                     >
                       <RotateCcw className="w-3.5 h-3.5" />

@@ -42,9 +42,24 @@ export function HospitalsManager() {
         refreshTrigger={refreshTrigger}
         searchPlaceholder="Search hospital name, city, department..."
         sortOptions={[
-          { label: "Hospital Name (A-Z)", value: "businessName_asc", sortBy: "businessName", sortOrder: "asc" },
-          { label: "Available Beds", value: "availableBeds_desc", sortBy: "availableBeds", sortOrder: "desc" },
-          { label: "Newest Added", value: "id_desc", sortBy: "id", sortOrder: "desc" },
+          {
+            label: "Hospital Name (A-Z)",
+            value: "businessName_asc",
+            sortBy: "businessName",
+            sortOrder: "asc",
+          },
+          {
+            label: "Available Beds",
+            value: "availableBeds_desc",
+            sortBy: "availableBeds",
+            sortOrder: "desc",
+          },
+          {
+            label: "Newest Added",
+            value: "id_desc",
+            sortBy: "id",
+            sortOrder: "desc",
+          },
         ]}
         defaultSort="businessName_asc"
         defaultPageSize={25}
@@ -91,13 +106,17 @@ export function HospitalsManager() {
 
                 <div className="p-3 rounded-2xl bg-muted/40 border border-border/60 text-xs my-3 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Emergency Contact:</span>
+                    <span className="text-muted-foreground">
+                      Emergency Contact:
+                    </span>
                     <span className="font-mono font-bold text-rose-600">
                       {hosp.emergencyPhone || hosp.phone}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">ICU Beds Available:</span>
+                    <span className="text-muted-foreground">
+                      ICU Beds Available:
+                    </span>
                     <span className="font-bold text-emerald-600">
                       {hosp.icuBedsAvailable || 0} ICU Beds
                     </span>

@@ -30,10 +30,11 @@ import {
   User,
   UserCheck,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
-import { ServerDataTable } from "../../ServerDataTable";
 import { getPartnerToken } from "../../../../lib/partnerAuthStore";
+import { ServerDataTable } from "../../ServerDataTable";
 
 interface PartnerRecord {
   id: number;
@@ -47,7 +48,14 @@ interface PartnerRecord {
   email: string;
   role?: string;
   isVerified?: boolean | number;
-  status: "ACTIVE" | "SUSPENDED" | "INACTIVE" | "approved" | "pending" | "suspended" | "active";
+  status:
+    | "ACTIVE"
+    | "SUSPENDED"
+    | "INACTIVE"
+    | "approved"
+    | "pending"
+    | "suspended"
+    | "active";
   mustChangePassword?: boolean | number;
   lastLoginAt?: string;
   createdAt?: string;
@@ -77,13 +85,20 @@ export function PartnersManager() {
 
   // Reset Password Modal State
   const [isResetPwOpen, setIsResetPwOpen] = useState(false);
-  const [targetPartner, setTargetPartner] = useState<PartnerRecord | null>(null);
+  const [targetPartner, setTargetPartner] = useState<PartnerRecord | null>(
+    null,
+  );
   const [isResetting, setIsResetting] = useState(false);
 
   // Handle Add Partner
   const handleAddPartner = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newPartnerName || !newPartnerBusiness || !newPartnerEmail || !newPartnerPhone) {
+    if (
+      !newPartnerName ||
+      !newPartnerBusiness ||
+      !newPartnerEmail ||
+      !newPartnerPhone
+    ) {
       toast.error("Please fill in all required fields.");
       return;
     }
@@ -145,13 +160,16 @@ export function PartnersManager() {
     const token = getPartnerToken();
 
     try {
-      const res = await fetch(`/api/admin/partners/${targetPartner.id}/reset-password`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      const res = await fetch(
+        `/api/admin/partners/${targetPartner.id}/reset-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
         },
-      });
+      );
 
       const data = await res.json();
       setIsResetting(false);
@@ -160,7 +178,9 @@ export function PartnersManager() {
         throw new Error(data.error || "Failed to reset password.");
       }
 
-      toast.success(`Temporary password generated for ${targetPartner.partnerUserId}`);
+      toast.success(
+        `Temporary password generated for ${targetPartner.partnerUserId}`,
+      );
       setIsResetPwOpen(false);
       setCreatedCredentials({
         partnerUserId: data.credentials.partnerUserId,
@@ -176,7 +196,10 @@ export function PartnersManager() {
 
   // Toggle Partner Status (Activate / Suspend)
   const togglePartnerStatus = async (partner: PartnerRecord) => {
-    const isCurrentlyActive = partner.status === "ACTIVE" || partner.status === "approved" || partner.status === "active";
+    const isCurrentlyActive =
+      partner.status === "ACTIVE" ||
+      partner.status === "approved" ||
+      partner.status === "active";
     const nextStatus = isCurrentlyActive ? "SUSPENDED" : "ACTIVE";
     const token = getPartnerToken();
 
@@ -195,7 +218,9 @@ export function PartnersManager() {
         throw new Error(data.error || "Status update failed.");
       }
 
-      toast.success(`Partner ${partner.partnerUserId || partner.id} is now ${nextStatus}`);
+      toast.success(
+        `Partner ${partner.partnerUserId || partner.id} is now ${nextStatus}`,
+      );
       setRefreshTrigger((prev) => prev + 1);
     } catch (err: any) {
       toast.error(err.message || "Could not update partner status.");
@@ -213,10 +238,12 @@ export function PartnersManager() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-card to-muted/40 border border-border shadow-xs">
         <div>
           <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-            <Building2 className="w-5 h-5 text-primary" /> Partner & Merchant Credentials Management
+            <Building2 className="w-5 h-5 text-primary" /> Partner & Merchant
+            Credentials Management
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Create unique Partner User IDs, assign temporary credentials, force password updates, and control access.
+            Create unique Partner User IDs, assign temporary credentials, force
+            password updates, and control access.
           </p>
         </div>
 
@@ -256,14 +283,32 @@ export function PartnersManager() {
           },
         ]}
         sortOptions={[
-          { label: "Partner User ID (Asc)", value: "id_asc", sortBy: "id", sortOrder: "asc" },
-          { label: "Partner User ID (Desc)", value: "id_desc", sortBy: "id", sortOrder: "desc" },
-          { label: "Business Name (A-Z)", value: "businessName_asc", sortBy: "businessName", sortOrder: "asc" },
+          {
+            label: "Partner User ID (Asc)",
+            value: "id_asc",
+            sortBy: "id",
+            sortOrder: "asc",
+          },
+          {
+            label: "Partner User ID (Desc)",
+            value: "id_desc",
+            sortBy: "id",
+            sortOrder: "desc",
+          },
+          {
+            label: "Business Name (A-Z)",
+            value: "businessName_asc",
+            sortBy: "businessName",
+            sortOrder: "asc",
+          },
         ]}
         defaultSort="id_asc"
         defaultPageSize={25}
         renderItem={(partner, _idx, isSelected, onToggleSelect) => {
-          const isActive = partner.status === "ACTIVE" || partner.status === "approved" || partner.status === "active";
+          const isActive =
+            partner.status === "ACTIVE" ||
+            partner.status === "approved" ||
+            partner.status === "active";
           const mustChange = Boolean(partner.mustChangePassword);
 
           return (
@@ -308,7 +353,10 @@ export function PartnersManager() {
 
                   <div className="flex items-center gap-1.5">
                     {mustChange && (
-                      <Badge variant="outline" className="text-[10px] bg-amber-500/10 text-amber-600 border-amber-500/30">
+                      <Badge
+                        variant="outline"
+                        className="text-[10px] bg-amber-500/10 text-amber-600 border-amber-500/30"
+                      >
                         Temp Password
                       </Badge>
                     )}
@@ -327,19 +375,27 @@ export function PartnersManager() {
                 {/* Partner User ID & Category Info */}
                 <div className="p-3 rounded-2xl bg-muted/40 border border-border/60 text-xs font-mono space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Partner User ID:</span>
+                    <span className="text-muted-foreground">
+                      Partner User ID:
+                    </span>
                     <span className="font-bold text-foreground text-sm tracking-wider text-primary">
                       {partner.partnerUserId || `EZY-P-${10000 + partner.id}`}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Domain Scope:</span>
-                    <span className="font-semibold text-foreground">{partner.category}</span>
+                    <span className="font-semibold text-foreground">
+                      {partner.category}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Last Portal Login:</span>
+                    <span className="text-muted-foreground">
+                      Last Portal Login:
+                    </span>
                     <span className="text-muted-foreground font-sans text-[11px]">
-                      {partner.lastLoginAt ? new Date(partner.lastLoginAt).toLocaleString("en-IN") : "Never logged in"}
+                      {partner.lastLoginAt
+                        ? new Date(partner.lastLoginAt).toLocaleString("en-IN")
+                        : "Never logged in"}
                     </span>
                   </div>
                 </div>
@@ -375,7 +431,8 @@ export function PartnersManager() {
                     }}
                     className="h-8 px-2.5 text-xs rounded-xl gap-1"
                   >
-                    <RotateCcw className="w-3.5 h-3.5 text-primary" /> Reset Password
+                    <RotateCcw className="w-3.5 h-3.5 text-primary" /> Reset
+                    Password
                   </Button>
 
                   <Button
@@ -406,13 +463,16 @@ export function PartnersManager() {
                 Register New Partner Account
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                The system will automatically generate a unique Partner User ID and temporary login credentials.
+                The system will automatically generate a unique Partner User ID
+                and temporary login credentials.
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-3 py-3">
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Business / Store Name *</Label>
+                <Label className="text-xs font-semibold">
+                  Business / Store Name *
+                </Label>
                 <Input
                   required
                   placeholder="e.g. Verma Supermarket"
@@ -423,7 +483,9 @@ export function PartnersManager() {
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Contact Person / Owner Name *</Label>
+                <Label className="text-xs font-semibold">
+                  Contact Person / Owner Name *
+                </Label>
                 <Input
                   required
                   placeholder="e.g. Anand Verma"
@@ -435,7 +497,9 @@ export function PartnersManager() {
 
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Email Address *</Label>
+                  <Label className="text-xs font-semibold">
+                    Email Address *
+                  </Label>
                   <Input
                     required
                     type="email"
@@ -446,7 +510,9 @@ export function PartnersManager() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Phone Number *</Label>
+                  <Label className="text-xs font-semibold">
+                    Phone Number *
+                  </Label>
                   <Input
                     required
                     type="tel"
@@ -460,26 +526,42 @@ export function PartnersManager() {
 
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Provider Type (RBAC) *</Label>
+                  <Label className="text-xs font-semibold">
+                    Provider Type (RBAC) *
+                  </Label>
                   <select
                     value={newProviderType}
                     onChange={(e) => {
                       setNewProviderType(e.target.value);
-                      if (e.target.value === "GROCERY") setNewPartnerCategory("Grocery");
-                      if (e.target.value === "HOSPITAL") setNewPartnerCategory("Healthcare");
-                      if (e.target.value === "PHARMACY") setNewPartnerCategory("Pharmacy");
-                      if (e.target.value === "RESTAURANT") setNewPartnerCategory("Restaurant");
-                      if (e.target.value === "DELIVERY") setNewPartnerCategory("Transport");
-                      if (e.target.value === "SERVICE_PROVIDER") setNewPartnerCategory("Services");
+                      if (e.target.value === "GROCERY")
+                        setNewPartnerCategory("Grocery");
+                      if (e.target.value === "HOSPITAL")
+                        setNewPartnerCategory("Healthcare");
+                      if (e.target.value === "PHARMACY")
+                        setNewPartnerCategory("Pharmacy");
+                      if (e.target.value === "RESTAURANT")
+                        setNewPartnerCategory("Restaurant");
+                      if (e.target.value === "DELIVERY")
+                        setNewPartnerCategory("Transport");
+                      if (e.target.value === "SERVICE_PROVIDER")
+                        setNewPartnerCategory("Services");
                     }}
                     className="w-full h-10 px-3 rounded-xl border border-border bg-background text-sm font-medium"
                   >
                     <option value="GROCERY">Grocery & Retail Partner</option>
-                    <option value="HOSPITAL">Hospital & Healthcare Partner</option>
-                    <option value="PHARMACY">Pharmacy & Medicines Partner</option>
-                    <option value="RESTAURANT">Restaurant & Food Partner</option>
+                    <option value="HOSPITAL">
+                      Hospital & Healthcare Partner
+                    </option>
+                    <option value="PHARMACY">
+                      Pharmacy & Medicines Partner
+                    </option>
+                    <option value="RESTAURANT">
+                      Restaurant & Food Partner
+                    </option>
                     <option value="DELIVERY">Delivery Fleet Partner</option>
-                    <option value="SERVICE_PROVIDER">Home & On-Demand Services</option>
+                    <option value="SERVICE_PROVIDER">
+                      Home & On-Demand Services
+                    </option>
                   </select>
                 </div>
                 <div className="space-y-1">
@@ -495,7 +577,9 @@ export function PartnersManager() {
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Business Address</Label>
+                <Label className="text-xs font-semibold">
+                  Business Address
+                </Label>
                 <Input
                   placeholder="Street / Locality"
                   value={newPartnerAddress}
@@ -519,7 +603,9 @@ export function PartnersManager() {
                 disabled={isSubmittingNew}
                 className="rounded-xl bg-primary text-primary-foreground font-semibold"
               >
-                {isSubmittingNew ? "Creating Account..." : "Generate Partner ID & Credentials"}
+                {isSubmittingNew
+                  ? "Creating Account..."
+                  : "Generate Partner ID & Credentials"}
               </Button>
             </DialogFooter>
           </form>
@@ -527,7 +613,10 @@ export function PartnersManager() {
       </Dialog>
 
       {/* Generated Credentials Modal (After Create or Password Reset) */}
-      <Dialog open={!!createdCredentials} onOpenChange={() => setCreatedCredentials(null)}>
+      <Dialog
+        open={!!createdCredentials}
+        onOpenChange={() => setCreatedCredentials(null)}
+      >
         <DialogContent className="max-w-md bg-card border-border rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold flex items-center gap-2 text-emerald-600">
@@ -535,7 +624,8 @@ export function PartnersManager() {
               Partner Credentials Generated
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Provide these initial credentials to the partner. They will be required to change their temporary password upon first login.
+              Provide these initial credentials to the partner. They will be
+              required to change their temporary password upon first login.
             </DialogDescription>
           </DialogHeader>
 
@@ -543,12 +633,18 @@ export function PartnersManager() {
             <div className="space-y-3 py-3">
               <div className="p-3 bg-muted rounded-xl space-y-2 font-mono text-sm border border-border">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">Partner User ID:</span>
+                  <span className="text-xs text-muted-foreground">
+                    Partner User ID:
+                  </span>
                   <div className="flex items-center gap-2">
-                    <strong className="text-foreground tracking-wider">{createdCredentials.partnerUserId}</strong>
+                    <strong className="text-foreground tracking-wider">
+                      {createdCredentials.partnerUserId}
+                    </strong>
                     <button
                       type="button"
-                      onClick={() => copyToClipboard(createdCredentials.partnerUserId)}
+                      onClick={() =>
+                        copyToClipboard(createdCredentials.partnerUserId)
+                      }
                       className="text-muted-foreground hover:text-primary"
                     >
                       <Copy className="w-3.5 h-3.5" />
@@ -556,12 +652,18 @@ export function PartnersManager() {
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">Temporary Password:</span>
+                  <span className="text-xs text-muted-foreground">
+                    Temporary Password:
+                  </span>
                   <div className="flex items-center gap-2">
-                    <strong className="text-primary tracking-wider">{createdCredentials.temporaryPassword}</strong>
+                    <strong className="text-primary tracking-wider">
+                      {createdCredentials.temporaryPassword}
+                    </strong>
                     <button
                       type="button"
-                      onClick={() => copyToClipboard(createdCredentials.temporaryPassword)}
+                      onClick={() =>
+                        copyToClipboard(createdCredentials.temporaryPassword)
+                      }
                       className="text-muted-foreground hover:text-primary"
                     >
                       <Copy className="w-3.5 h-3.5" />
@@ -571,7 +673,8 @@ export function PartnersManager() {
               </div>
 
               <p className="text-[11px] text-muted-foreground">
-                🔒 The temporary password is now securely hashed in the database and will not be displayed again.
+                🔒 The temporary password is now securely hashed in the database
+                and will not be displayed again.
               </p>
             </div>
           )}
@@ -597,12 +700,14 @@ export function PartnersManager() {
               Reset Partner Password
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Generate a new temporary password for {targetPartner?.businessName} ({targetPartner?.partnerUserId}).
+              Generate a new temporary password for{" "}
+              {targetPartner?.businessName} ({targetPartner?.partnerUserId}).
             </DialogDescription>
           </DialogHeader>
 
           <p className="text-xs text-muted-foreground py-2">
-            The partner will be forced to change this temporary password upon their next sign-in.
+            The partner will be forced to change this temporary password upon
+            their next sign-in.
           </p>
 
           <DialogFooter className="gap-2">

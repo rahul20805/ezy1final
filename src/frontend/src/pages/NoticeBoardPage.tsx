@@ -1,27 +1,33 @@
-import React, { useState } from "react";
-import Layout from "../components/Layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
-  ShieldCheck,
-  Mail,
   AlertTriangle,
-  Download,
-  Printer,
-  ExternalLink,
-  Search,
+  Building,
   CheckCircle2,
+  ChevronRight,
+  Download,
+  ExternalLink,
   FileText,
   Lock,
+  Mail,
   PhoneCall,
+  Printer,
+  Search,
+  Send,
+  ShieldCheck,
   Sparkles,
-  Building,
-  ChevronRight,
-  Send
 } from "lucide-react";
+import React, { useState } from "react";
 import { toast } from "sonner";
+import Layout from "../components/Layout";
 
 interface NoticeItem {
   id: string;
@@ -38,7 +44,8 @@ const NOTICES: NoticeItem[] = [
   {
     id: "notice-001",
     refNo: "EZY1/SEC/2026/09-AUTH",
-    title: "Official Public Advisory: Verified Sender Brand & Communication Directory",
+    title:
+      "Official Public Advisory: Verified Sender Brand & Communication Directory",
     category: "security",
     date: "September 24, 2026 (Active & Ongoing)",
     isImportant: true,
@@ -57,7 +64,8 @@ const NOTICES: NoticeItem[] = [
   {
     id: "notice-003",
     refNo: "EZY1/GOV/2026/08-PAY",
-    title: "Customer Protection Notice: No OTP or Sensitive PIN Sharing Advisory",
+    title:
+      "Customer Protection Notice: No OTP or Sensitive PIN Sharing Advisory",
     category: "compliance",
     date: "August 28, 2026",
     summary:
@@ -69,49 +77,58 @@ const DIRECTORY = [
   {
     dept: "Orders, Bookings & Receipts",
     email: "orders@ezy1.site",
-    purpose: "Order confirmations, digital invoices, live delivery tracking, booking confirmations",
+    purpose:
+      "Order confirmations, digital invoices, live delivery tracking, booking confirmations",
     badge: "Transactional",
     color: "text-blue-600 bg-blue-50 dark:bg-blue-950/40 border-blue-200",
   },
   {
     dept: "Customer Care & Inquiries",
     email: "support@ezy1.site",
-    purpose: "Customer support tickets, order assistance, refund requests, feedback",
+    purpose:
+      "Customer support tickets, order assistance, refund requests, feedback",
     badge: "24/7 Helpline",
     color: "text-primary bg-primary/10 border-primary/20",
   },
   {
     dept: "Merchant & Partner Onboarding",
     email: "partner@ezy1.site",
-    purpose: "Store registration, hospital tie-ups, fleet driver onboarding, vendor portal help",
+    purpose:
+      "Store registration, hospital tie-ups, fleet driver onboarding, vendor portal help",
     badge: "B2B Support",
-    color: "text-purple-600 bg-purple-50 dark:bg-purple-950/40 border-purple-200",
+    color:
+      "text-purple-600 bg-purple-50 dark:bg-purple-950/40 border-purple-200",
   },
   {
     dept: "Security, OTP & Password Reset",
     email: "no-reply@ezy1.site",
-    purpose: "Automated 6-digit signup OTP, login verification, security alerts (Do Not Reply)",
+    purpose:
+      "Automated 6-digit signup OTP, login verification, security alerts (Do Not Reply)",
     badge: "Automated",
     color: "text-amber-600 bg-amber-50 dark:bg-amber-950/40 border-amber-200",
   },
   {
     dept: "Promotions, Offers & Deals",
     email: "offers@ezy1.site",
-    purpose: "Exclusive discounts, coupon codes, festive promotions, seasonal newsletters",
+    purpose:
+      "Exclusive discounts, coupon codes, festive promotions, seasonal newsletters",
     badge: "Marketing",
-    color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200",
+    color:
+      "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200",
   },
   {
     dept: "Corporate & Executive Affairs",
     email: "owner@ezy1.site",
-    purpose: "Executive governance, legal inquiries, high-priority platform escalations",
+    purpose:
+      "Executive governance, legal inquiries, high-priority platform escalations",
     badge: "Executive",
     color: "text-rose-600 bg-rose-50 dark:bg-rose-950/40 border-rose-200",
   },
   {
     dept: "Platform Administration",
     email: "admin@ezy1.site",
-    purpose: "System administration, merchant verification approvals, security audits",
+    purpose:
+      "System administration, merchant verification approvals, security audits",
     badge: "Internal",
     color: "text-slate-600 bg-slate-50 dark:bg-slate-900 border-slate-200",
   },
@@ -131,10 +148,15 @@ export default function NoticeBoardPage() {
   };
 
   const filteredNotices = NOTICES.filter((n) => {
-    if (selectedCategory !== "all" && n.category !== selectedCategory) return false;
+    if (selectedCategory !== "all" && n.category !== selectedCategory)
+      return false;
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      return n.title.toLowerCase().includes(q) || n.refNo.toLowerCase().includes(q) || n.summary.toLowerCase().includes(q);
+      return (
+        n.title.toLowerCase().includes(q) ||
+        n.refNo.toLowerCase().includes(q) ||
+        n.summary.toLowerCase().includes(q)
+      );
     }
     return true;
   });
@@ -149,7 +171,10 @@ export default function NoticeBoardPage() {
               <Badge className="bg-primary text-primary-foreground font-semibold px-3 py-1 text-xs">
                 🏛️ EZY1 Official Bulletin
               </Badge>
-              <Badge variant="outline" className="text-xs border-emerald-500/40 text-emerald-600 flex items-center gap-1">
+              <Badge
+                variant="outline"
+                className="text-xs border-emerald-500/40 text-emerald-600 flex items-center gap-1"
+              >
                 <ShieldCheck className="w-3.5 h-3.5" /> Authenticated Notices
               </Badge>
             </div>
@@ -160,7 +185,9 @@ export default function NoticeBoardPage() {
                   Official Public Notice Board
                 </h1>
                 <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                  Certified public advisories, authenticated communication directory, and consumer protection circulars from <strong>EZY1 Platform Technologies Pvt. Ltd.</strong>
+                  Certified public advisories, authenticated communication
+                  directory, and consumer protection circulars from{" "}
+                  <strong>EZY1 Platform Technologies Pvt. Ltd.</strong>
                 </p>
               </div>
 
@@ -179,7 +206,10 @@ export default function NoticeBoardPage() {
                   download="EZY1-Official-Notice-A4.jpg"
                   className="inline-flex"
                 >
-                  <Button size="sm" className="rounded-xl text-xs gap-1.5 bg-primary text-primary-foreground font-semibold">
+                  <Button
+                    size="sm"
+                    className="rounded-xl text-xs gap-1.5 bg-primary text-primary-foreground font-semibold"
+                  >
                     <Download className="w-3.5 h-3.5" />
                     Download A4 Document
                   </Button>
@@ -211,7 +241,9 @@ export default function NoticeBoardPage() {
                 </Button>
                 <Button
                   type="button"
-                  variant={selectedCategory === "security" ? "default" : "outline"}
+                  variant={
+                    selectedCategory === "security" ? "default" : "outline"
+                  }
                   size="sm"
                   onClick={() => setSelectedCategory("security")}
                   className="rounded-xl text-xs h-8"
@@ -220,7 +252,9 @@ export default function NoticeBoardPage() {
                 </Button>
                 <Button
                   type="button"
-                  variant={selectedCategory === "partner" ? "default" : "outline"}
+                  variant={
+                    selectedCategory === "partner" ? "default" : "outline"
+                  }
                   size="sm"
                   onClick={() => setSelectedCategory("partner")}
                   className="rounded-xl text-xs h-8"
@@ -229,7 +263,9 @@ export default function NoticeBoardPage() {
                 </Button>
                 <Button
                   type="button"
-                  variant={selectedCategory === "compliance" ? "default" : "outline"}
+                  variant={
+                    selectedCategory === "compliance" ? "default" : "outline"
+                  }
                   size="sm"
                   onClick={() => setSelectedCategory("compliance")}
                   className="rounded-xl text-xs h-8"
@@ -262,10 +298,14 @@ export default function NoticeBoardPage() {
               </div>
 
               <h2 className="text-xl sm:text-2xl font-display font-extrabold text-foreground">
-                Public Advisory: Verified Sender Identities &amp; Anti-Phishing Email Directory
+                Public Advisory: Verified Sender Identities &amp; Anti-Phishing
+                Email Directory
               </h2>
               <p className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-3xl">
-                To guarantee safety across the EZY1 ecosystem, all genuine communications originate exclusively from <strong>@ezy1.site</strong>. Use this official directory to verify correspondence.
+                To guarantee safety across the EZY1 ecosystem, all genuine
+                communications originate exclusively from{" "}
+                <strong>@ezy1.site</strong>. Use this official directory to
+                verify correspondence.
               </p>
             </div>
 
@@ -303,7 +343,8 @@ export default function NoticeBoardPage() {
                     </div>
                   </div>
                   <p className="text-[11px] text-muted-foreground text-center">
-                    Contains official holographic seal and background security watermark.
+                    Contains official holographic seal and background security
+                    watermark.
                   </p>
                 </div>
 
@@ -314,7 +355,9 @@ export default function NoticeBoardPage() {
                       <Mail className="w-4 h-4 text-primary" />
                       Official Department Channels Directory
                     </span>
-                    <span className="text-[11px] font-normal text-muted-foreground">Click email to copy</span>
+                    <span className="text-[11px] font-normal text-muted-foreground">
+                      Click email to copy
+                    </span>
                   </div>
 
                   <div className="space-y-2.5">
@@ -325,8 +368,12 @@ export default function NoticeBoardPage() {
                       >
                         <div className="space-y-0.5">
                           <div className="flex items-center gap-2">
-                            <span className="font-bold text-xs text-foreground">{item.dept}</span>
-                            <span className={`text-[10px] px-2 py-0.5 rounded-md font-semibold border ${item.color}`}>
+                            <span className="font-bold text-xs text-foreground">
+                              {item.dept}
+                            </span>
+                            <span
+                              className={`text-[10px] px-2 py-0.5 rounded-md font-semibold border ${item.color}`}
+                            >
                               {item.badge}
                             </span>
                           </div>
@@ -366,7 +413,9 @@ export default function NoticeBoardPage() {
                     Always Check the Domain
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Official emails always end in <strong>@ezy1.site</strong>. EZY1 never communicates from free email providers (@gmail.com, @yahoo.com).
+                    Official emails always end in <strong>@ezy1.site</strong>.
+                    EZY1 never communicates from free email providers
+                    (@gmail.com, @yahoo.com).
                   </p>
                 </div>
 
@@ -376,7 +425,9 @@ export default function NoticeBoardPage() {
                     Zero Password &amp; OTP Requests
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    EZY1 support and delivery riders will <strong>never ask</strong> for your login password, UPI PIN, or 6-digit OTP code over phone or chat.
+                    EZY1 support and delivery riders will{" "}
+                    <strong>never ask</strong> for your login password, UPI PIN,
+                    or 6-digit OTP code over phone or chat.
                   </p>
                 </div>
 
@@ -386,7 +437,9 @@ export default function NoticeBoardPage() {
                     Report Suspicious Activity
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Forward suspicious emails to <strong>support@ezy1.site</strong> with subject line <em>[FRAUD REPORT]</em> for immediate incident response.
+                    Forward suspicious emails to{" "}
+                    <strong>support@ezy1.site</strong> with subject line{" "}
+                    <em>[FRAUD REPORT]</em> for immediate incident response.
                   </p>
                 </div>
               </div>
@@ -402,10 +455,15 @@ export default function NoticeBoardPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredNotices.slice(1).map((n) => (
-                <Card key={n.id} className="rounded-2xl border-border bg-card shadow-xs hover:border-primary/30 transition-all">
+                <Card
+                  key={n.id}
+                  className="rounded-2xl border-border bg-card shadow-xs hover:border-primary/30 transition-all"
+                >
                   <CardHeader className="p-5 pb-3">
                     <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-                      <span className="font-mono text-[11px] font-semibold">{n.refNo}</span>
+                      <span className="font-mono text-[11px] font-semibold">
+                        {n.refNo}
+                      </span>
                       <span>{n.date}</span>
                     </div>
                     <CardTitle className="text-sm font-bold text-foreground">

@@ -1,7 +1,7 @@
-import React from "react";
-import { ExternalLink, Sparkles, Palette, Gem, Gift } from "lucide-react";
-import { NAVAEIN_URL } from "../config/links";
 import { Button } from "@/components/ui/button";
+import { ExternalLink, Gem, Gift, Palette, Sparkles } from "lucide-react";
+import React from "react";
+import { NAVAEIN_URL } from "../config/links";
 
 export function NavaeInBottomAd() {
   return (
@@ -33,7 +33,8 @@ export function NavaeInBottomAd() {
               </p>
 
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                Handcrafted treasures, authentic handmade artisan gifts, bespoke lifestyle accessories, and timeless creations.
+                Handcrafted treasures, authentic handmade artisan gifts, bespoke
+                lifestyle accessories, and timeless creations.
               </p>
 
               {/* Highlights pills */}

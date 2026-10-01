@@ -1,48 +1,49 @@
-import React, { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
-  OwnerSidebar,
-  type OwnerSectionId,
-} from "../components/owner/OwnerSidebar";
-import { DashboardSection } from "../components/owner/sections/DashboardSection";
-import { InventorySection } from "../components/owner/sections/InventorySection";
-import { ClassesBookingsSection } from "../components/owner/sections/ClassesBookingsSection";
-import { OrdersSection } from "../components/owner/sections/OrdersSection";
-import { EnquiriesSection } from "../components/owner/sections/EnquiriesSection";
-import { CustomersSection } from "../components/owner/sections/CustomersSection";
-import { ServicesSection } from "../components/owner/sections/ServicesSection";
-import { GallerySection } from "../components/owner/sections/GallerySection";
-import { ReviewsSection } from "../components/owner/sections/ReviewsSection";
-import { WebsiteContentSection } from "../components/owner/sections/WebsiteContentSection";
-import { CategoriesSection } from "../components/owner/sections/CategoriesSection";
-import { OwnerSettingsSection } from "../components/owner/sections/OwnerSettingsSection";
-import { usePartnerAuth } from "../lib/partnerAuthStore";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Menu,
-  ShieldCheck,
   Building2,
-  LogOut,
   ExternalLink,
   Lock,
+  LogOut,
+  Menu,
+  ShieldCheck,
 } from "lucide-react";
+import React, { useState } from "react";
+import {
+  type OwnerSectionId,
+  OwnerSidebar,
+} from "../components/owner/OwnerSidebar";
+import { CategoriesSection } from "../components/owner/sections/CategoriesSection";
+import { ClassesBookingsSection } from "../components/owner/sections/ClassesBookingsSection";
+import { CustomersSection } from "../components/owner/sections/CustomersSection";
+import { DashboardSection } from "../components/owner/sections/DashboardSection";
+import { EnquiriesSection } from "../components/owner/sections/EnquiriesSection";
+import { GallerySection } from "../components/owner/sections/GallerySection";
+import { InventorySection } from "../components/owner/sections/InventorySection";
+import { OrdersSection } from "../components/owner/sections/OrdersSection";
+import { OwnerSettingsSection } from "../components/owner/sections/OwnerSettingsSection";
+import { ReviewsSection } from "../components/owner/sections/ReviewsSection";
+import { ServicesSection } from "../components/owner/sections/ServicesSection";
+import { WebsiteContentSection } from "../components/owner/sections/WebsiteContentSection";
+import { usePartnerAuth } from "../lib/partnerAuthStore";
 
 export default function OwnerPortalPage() {
   const navigate = useNavigate();
   const { currentPartner, isAuthenticated, logout } = usePartnerAuth();
-  const [currentSection, setCurrentSection] = useState<OwnerSectionId>("dashboard");
+  const [currentSection, setCurrentSection] =
+    useState<OwnerSectionId>("dashboard");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-  // RBAC Guard
+  // Strict RBAC Guard: Only Platform Master Owner accounts can access the Owner Control Center
   const role = (currentPartner?.role || "").toUpperCase();
+  const pt = (currentPartner?.providerType || "").toUpperCase();
   const isAuthorized =
     isAuthenticated &&
     (role === "OWNER" ||
       role === "SUPER_OWNER" ||
-      role === "ADMIN" ||
-      role === "SUPER_ADMIN");
+      pt === "OWNER");
 
   if (!isAuthorized && typeof window !== "undefined") {
     // If partner is logged in but not an owner/admin, redirect to their default dashboard
@@ -53,9 +54,12 @@ export default function OwnerPortalPage() {
             <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto">
               <ShieldCheck className="w-6 h-6" />
             </div>
-            <h2 className="text-2xl font-display font-bold text-foreground">Owner Access Restricted</h2>
+            <h2 className="text-2xl font-display font-bold text-foreground">
+              Owner Access Restricted
+            </h2>
             <p className="text-xs text-muted-foreground">
-              Your partner account ({currentPartner.partnerUserId}) does not have Platform Owner privileges.
+              Your partner account ({currentPartner.partnerUserId}) does not
+              have Platform Owner privileges.
             </p>
             <div className="flex gap-3 mt-4">
               <Button
@@ -84,7 +88,11 @@ export default function OwnerPortalPage() {
   const renderSection = () => {
     switch (currentSection) {
       case "dashboard":
-        return <DashboardSection onNavigateSection={(sec) => setCurrentSection(sec)} />;
+        return (
+          <DashboardSection
+            onNavigateSection={(sec) => setCurrentSection(sec)}
+          />
+        );
       case "inventory":
         return <InventorySection />;
       case "bookings":
@@ -108,7 +116,11 @@ export default function OwnerPortalPage() {
       case "settings":
         return <OwnerSettingsSection />;
       default:
-        return <DashboardSection onNavigateSection={(sec) => setCurrentSection(sec)} />;
+        return (
+          <DashboardSection
+            onNavigateSection={(sec) => setCurrentSection(sec)}
+          />
+        );
     }
   };
 
@@ -175,7 +187,8 @@ export default function OwnerPortalPage() {
                 </Badge>
               </div>
               <p className="text-[11px] text-muted-foreground hidden sm:block mt-0.5">
-                {currentPartner?.businessName || "EZY1 Platform Headquarters"} • ID: {currentPartner?.partnerUserId || "EZY-P-10000"}
+                {currentPartner?.businessName || "EZY1 Platform Headquarters"} •
+                ID: {currentPartner?.partnerUserId || "EZY-P-10000"}
               </p>
             </div>
           </div>
@@ -207,9 +220,7 @@ export default function OwnerPortalPage() {
 
         {/* Dynamic Workspace Container */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 custom-scrollbar bg-background/50">
-          <div className="max-w-7xl mx-auto pb-12">
-            {renderSection()}
-          </div>
+          <div className="max-w-7xl mx-auto pb-12">{renderSection()}</div>
         </main>
       </div>
     </div>

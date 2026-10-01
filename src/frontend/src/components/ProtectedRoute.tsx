@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
 import { Navigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { useIsAuthenticated, useUserRole } from "../lib/auth";
-import { usePartnerAuth, getPartnerToken } from "../lib/partnerAuthStore";
+import { getPartnerToken, usePartnerAuth } from "../lib/partnerAuthStore";
 import { hasProviderAccess } from "../lib/permissions";
 import { AccessRestrictedPage } from "../pages/AccessRestrictedPage";
 import type { UserRole } from "../types";
@@ -67,7 +67,9 @@ export function PartnerRoute({ children }: { children: React.ReactNode }) {
       <div className="min-h-screen bg-background flex items-center justify-center p-6">
         <div className="text-center space-y-3">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-xs text-muted-foreground font-medium">Verifying partner credentials...</p>
+          <p className="text-xs text-muted-foreground font-medium">
+            Verifying partner credentials...
+          </p>
         </div>
       </div>
     );
@@ -82,7 +84,11 @@ export function PartnerRoute({ children }: { children: React.ReactNode }) {
 }
 
 export function VendorRoute({ children }: { children: React.ReactNode }) {
-  return <ProviderRoute allowedTypes={["GROCERY", "VENDOR"]}>{children}</ProviderRoute>;
+  return (
+    <ProviderRoute allowedTypes={["GROCERY", "VENDOR"]}>
+      {children}
+    </ProviderRoute>
+  );
 }
 
 export function HospitalRoute({ children }: { children: React.ReactNode }) {
@@ -94,19 +100,43 @@ export function PharmacyRoute({ children }: { children: React.ReactNode }) {
 }
 
 export function DeliveryRoute({ children }: { children: React.ReactNode }) {
-  return <ProviderRoute allowedTypes={["DELIVERY", "DRIVER"]}>{children}</ProviderRoute>;
+  return (
+    <ProviderRoute allowedTypes={["DELIVERY", "DRIVER"]}>
+      {children}
+    </ProviderRoute>
+  );
 }
 
-export function ServiceProviderRoute({ children }: { children: React.ReactNode }) {
-  return <ProviderRoute allowedTypes={["SERVICE_PROVIDER"]}>{children}</ProviderRoute>;
+export function ServiceProviderRoute({
+  children,
+}: { children: React.ReactNode }) {
+  return (
+    <ProviderRoute allowedTypes={["SERVICE_PROVIDER"]}>
+      {children}
+    </ProviderRoute>
+  );
 }
 
 export function OwnerRoute({ children }: { children: React.ReactNode }) {
-  return <ProviderRoute allowedTypes={["OWNER", "SUPER_OWNER"]} redirectTo="/partner-login?portal=owner">{children}</ProviderRoute>;
+  return (
+    <ProviderRoute
+      allowedTypes={["OWNER", "SUPER_OWNER"]}
+      redirectTo="/partner-login?portal=owner"
+    >
+      {children}
+    </ProviderRoute>
+  );
 }
 
 export function AdminRoute({ children }: { children: React.ReactNode }) {
-  return <ProviderRoute allowedTypes={["ADMIN", "SUPER_ADMIN"]} redirectTo="/partner-login?portal=admin">{children}</ProviderRoute>;
+  return (
+    <ProviderRoute
+      allowedTypes={["ADMIN", "SUPER_ADMIN"]}
+      redirectTo="/partner-login?portal=admin"
+    >
+      {children}
+    </ProviderRoute>
+  );
 }
 
 export function ProviderRoute({
@@ -135,7 +165,9 @@ export function ProviderRoute({
       <div className="min-h-screen bg-background flex items-center justify-center p-6">
         <div className="text-center space-y-3">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-xs text-muted-foreground font-medium">Verifying authorization permissions...</p>
+          <p className="text-xs text-muted-foreground font-medium">
+            Verifying authorization permissions...
+          </p>
         </div>
       </div>
     );

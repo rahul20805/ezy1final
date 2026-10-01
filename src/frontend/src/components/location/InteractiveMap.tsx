@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Loader2, MapPin, ZoomIn, ZoomOut, LocateFixed } from "lucide-react";
+import { Loader2, LocateFixed, MapPin, ZoomIn, ZoomOut } from "lucide-react";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface InteractiveMapProps {
   latitude: number;
@@ -58,7 +59,9 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
         setIsLeafletLoaded(true);
       };
       script.onerror = () => {
-        setLoadError("Failed to load map tile resources. Please check your internet connection.");
+        setLoadError(
+          "Failed to load map tile resources. Please check your internet connection.",
+        );
       };
       document.body.appendChild(script);
     } else {
@@ -131,7 +134,8 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
       // OpenStreetMap Tiles with attribution
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors',
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors',
       }).addTo(map);
 
       // Draggable Marker
@@ -160,7 +164,9 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
       const marker = markerRef.current;
 
       const currentLatLng = marker.getLatLng();
-      const distance = Math.abs(currentLatLng.lat - validLat) + Math.abs(currentLatLng.lng - validLng);
+      const distance =
+        Math.abs(currentLatLng.lat - validLat) +
+        Math.abs(currentLatLng.lng - validLng);
 
       // Only flyTo and update if coordinates changed noticeably (prevent feedback loop)
       if (distance > 0.0001) {
@@ -200,8 +206,14 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
   };
 
   const handleRecenter = () => {
-    if (mapInstanceRef.current && Number.isFinite(latitude) && Number.isFinite(longitude)) {
-      mapInstanceRef.current.flyTo([latitude, longitude], 16, { duration: 0.6 });
+    if (
+      mapInstanceRef.current &&
+      Number.isFinite(latitude) &&
+      Number.isFinite(longitude)
+    ) {
+      mapInstanceRef.current.flyTo([latitude, longitude], 16, {
+        duration: 0.6,
+      });
     }
   };
 
@@ -210,7 +222,9 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
       {!isLeafletLoaded && !loadError && (
         <div className="absolute inset-0 bg-stone-100 dark:bg-stone-900 flex flex-col items-center justify-center gap-3 z-10">
           <Loader2 className="h-7 w-7 animate-spin text-orange-500" />
-          <span className="text-xs font-medium text-stone-500">Loading interactive map tiles...</span>
+          <span className="text-xs font-medium text-stone-500">
+            Loading interactive map tiles...
+          </span>
         </div>
       )}
 

@@ -59,12 +59,15 @@ import {
 import type React from "react";
 import { useState } from "react";
 import {
+  getCustomerPlatformUrl,
+  getPartnerPortalUrl,
+} from "../../config/links";
+import {
   type PartnerAccount,
   usePartnerAuth,
 } from "../../lib/partnerAuthStore";
 import { useStoreData } from "../../lib/storeData";
 import { Ezy1Logo } from "../Ezy1Logo";
-import { getCustomerPlatformUrl, getPartnerPortalUrl } from "../../config/links";
 
 export type AdminSectionId =
   // 1. Main
@@ -487,11 +490,7 @@ export function AdminSidebar({
           />
         ) : (
           <div className="mx-auto">
-            <Ezy1Logo
-              size="sm"
-              showWordmark={false}
-              to="/admin"
-            />
+            <Ezy1Logo size="sm" showWordmark={false} to="/admin" />
           </div>
         )}
 

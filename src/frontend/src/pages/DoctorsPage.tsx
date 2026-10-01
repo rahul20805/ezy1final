@@ -1,23 +1,23 @@
-import { useState } from "react";
-import Layout from "../components/Layout";
-import { doctors as mockDoctors } from "../mock-data";
-import { RelatedPagesBar } from "../components/RelatedPagesBar";
-import { useRequireAuth } from "../components/AuthPromptModal";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
-  Search,
-  Stethoscope,
-  Star,
   Calendar,
-  Clock,
-  ShieldCheck,
   CheckCircle2,
+  Clock,
+  Filter,
   MapPin,
-  Filter
+  Search,
+  ShieldCheck,
+  Star,
+  Stethoscope,
 } from "lucide-react";
+import { useState } from "react";
+import { useRequireAuth } from "../components/AuthPromptModal";
+import Layout from "../components/Layout";
+import { RelatedPagesBar } from "../components/RelatedPagesBar";
+import { doctors as mockDoctors } from "../mock-data";
 
 const SPECIALTIES = [
   "All Specialties",
@@ -28,7 +28,7 @@ const SPECIALTIES = [
   "Gynecologist",
   "Orthopedic",
   "Neurologist",
-  "Dentist"
+  "Dentist",
 ];
 
 const TIME_SLOTS = ["10:00 AM", "11:30 AM", "02:00 PM", "04:30 PM", "06:00 PM"];
@@ -42,7 +42,10 @@ export default function DoctorsPage() {
   const { requireAuth } = useRequireAuth();
 
   const filteredDoctors = mockDoctors.filter((doc) => {
-    if (selectedSpecialty !== "All Specialties" && doc.specialty !== selectedSpecialty) {
+    if (
+      selectedSpecialty !== "All Specialties" &&
+      doc.specialty !== selectedSpecialty
+    ) {
       return false;
     }
     if (searchQuery.trim()) {
@@ -63,9 +66,11 @@ export default function DoctorsPage() {
       title: `Confirm Appointment with ${doctor.name}`,
       description: `${doctor.specialty} • ${slot} • Consultation Fee ₹${doctor.fee}`,
       onSuccess: () => {
-        setBookedSuccess(`Appointment confirmed with ${doctor.name} for ${slot}! Booking ID: EZY-DOC-${Date.now().toString().slice(-4)}`);
+        setBookedSuccess(
+          `Appointment confirmed with ${doctor.name} for ${slot}! Booking ID: EZY-DOC-${Date.now().toString().slice(-4)}`,
+        );
         setTimeout(() => setBookedSuccess(null), 6000);
-      }
+      },
     });
   };
 
@@ -82,13 +87,16 @@ export default function DoctorsPage() {
                   <Badge className="bg-primary/10 text-primary border-primary/20 font-semibold">
                     Top Rated Doctors
                   </Badge>
-                  <span className="text-xs text-muted-foreground">In-Clinic & Video Consultations</span>
+                  <span className="text-xs text-muted-foreground">
+                    In-Clinic & Video Consultations
+                  </span>
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-display font-black text-foreground">
                   Find & Book Trusted Doctors
                 </h1>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Choose from experienced specialists, compare fees, and book instant appointment slots.
+                  Choose from experienced specialists, compare fees, and book
+                  instant appointment slots.
                 </p>
               </div>
 
@@ -162,7 +170,9 @@ export default function DoctorsPage() {
                         </p>
                         <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                           <MapPin className="w-3 h-3 flex-shrink-0" />
-                          <span className="truncate">{doc.hospital}, {doc.city}</span>
+                          <span className="truncate">
+                            {doc.hospital}, {doc.city}
+                          </span>
                         </p>
                       </div>
                     </div>
@@ -170,12 +180,20 @@ export default function DoctorsPage() {
                     {/* Stats & Fee */}
                     <div className="grid grid-cols-2 gap-2 my-2 py-2 px-3 rounded-xl bg-muted/40 text-xs">
                       <div>
-                        <span className="text-muted-foreground block text-[11px]">Experience</span>
-                        <strong className="text-foreground font-semibold">{doc.experience}+ Years</strong>
+                        <span className="text-muted-foreground block text-[11px]">
+                          Experience
+                        </span>
+                        <strong className="text-foreground font-semibold">
+                          {doc.experience}+ Years
+                        </strong>
                       </div>
                       <div>
-                        <span className="text-muted-foreground block text-[11px]">Consultation Fee</span>
-                        <strong className="text-emerald-600 font-bold font-display">₹{doc.fee}</strong>
+                        <span className="text-muted-foreground block text-[11px]">
+                          Consultation Fee
+                        </span>
+                        <strong className="text-emerald-600 font-bold font-display">
+                          ₹{doc.fee}
+                        </strong>
                       </div>
                     </div>
 
@@ -189,7 +207,12 @@ export default function DoctorsPage() {
                         {TIME_SLOTS.map((slot) => (
                           <button
                             key={slot}
-                            onClick={() => setSelectedSlot({ ...selectedSlot, [doc.id]: slot })}
+                            onClick={() =>
+                              setSelectedSlot({
+                                ...selectedSlot,
+                                [doc.id]: slot,
+                              })
+                            }
                             className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-smooth ${
                               currentSlot === slot
                                 ? "bg-primary text-primary-foreground border-primary shadow-sm"

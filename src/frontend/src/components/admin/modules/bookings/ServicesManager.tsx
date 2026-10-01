@@ -26,7 +26,8 @@ import {
   User,
   Wrench,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { ConfirmModal } from "../../../owner/ConfirmModal";
 import { ImageUploader } from "../../../owner/ImageUploader";
@@ -51,7 +52,9 @@ interface ServiceRecord {
 export function ServicesManager() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingService, setEditingService] = useState<ServiceRecord | null>(null);
+  const [editingService, setEditingService] = useState<ServiceRecord | null>(
+    null,
+  );
 
   // Form State
   const [name, setName] = useState("");
@@ -120,7 +123,9 @@ export function ServicesManager() {
             providerName: providerName.trim(),
             isAvailable,
             published,
-            image: image || "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80",
+            image:
+              image ||
+              "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80",
           }),
         });
 
@@ -143,7 +148,9 @@ export function ServicesManager() {
             vendorId: 3,
             isAvailable,
             published,
-            image: image || "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80",
+            image:
+              image ||
+              "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80",
           }),
         });
 
@@ -198,7 +205,9 @@ export function ServicesManager() {
       });
 
       if (!res.ok) throw new Error("Failed to update availability.");
-      toast.success(`Service is now ${nextAvail ? "AVAILABLE" : "UNAVAILABLE"}`);
+      toast.success(
+        `Service is now ${nextAvail ? "AVAILABLE" : "UNAVAILABLE"}`,
+      );
       setRefreshTrigger((prev) => prev + 1);
     } catch (err: any) {
       toast.error(err.message || "Could not toggle availability.");
@@ -229,10 +238,30 @@ export function ServicesManager() {
           },
         ]}
         sortOptions={[
-          { label: "Service Name (A-Z)", value: "name_asc", sortBy: "name", sortOrder: "asc" },
-          { label: "Price (Low to High)", value: "price_asc", sortBy: "price", sortOrder: "asc" },
-          { label: "Price (High to Low)", value: "price_desc", sortBy: "price", sortOrder: "desc" },
-          { label: "Newest Added", value: "id_desc", sortBy: "id", sortOrder: "desc" },
+          {
+            label: "Service Name (A-Z)",
+            value: "name_asc",
+            sortBy: "name",
+            sortOrder: "asc",
+          },
+          {
+            label: "Price (Low to High)",
+            value: "price_asc",
+            sortBy: "price",
+            sortOrder: "asc",
+          },
+          {
+            label: "Price (High to Low)",
+            value: "price_desc",
+            sortBy: "price",
+            sortOrder: "desc",
+          },
+          {
+            label: "Newest Added",
+            value: "id_desc",
+            sortBy: "id",
+            sortOrder: "desc",
+          },
         ]}
         defaultSort="id_asc"
         defaultPageSize={25}
@@ -243,7 +272,9 @@ export function ServicesManager() {
             <Card
               key={svc.id}
               className={`rounded-3xl border transition-all hover:shadow-md flex flex-col justify-between ${
-                isAvail ? "border-border/80 bg-card" : "border-muted bg-muted/20 opacity-75"
+                isAvail
+                  ? "border-border/80 bg-card"
+                  : "border-muted bg-muted/20 opacity-75"
               }`}
             >
               <CardContent className="p-5 space-y-4">
@@ -266,7 +297,9 @@ export function ServicesManager() {
 
                   <Badge
                     className={`text-[10px] font-bold ${
-                      isAvail ? "bg-emerald-500 text-white" : "bg-muted text-muted-foreground"
+                      isAvail
+                        ? "bg-emerald-500 text-white"
+                        : "bg-muted text-muted-foreground"
                     }`}
                   >
                     {isAvail ? "Available" : "Offline"}
@@ -279,14 +312,21 @@ export function ServicesManager() {
 
                 <div className="flex items-center justify-between p-3 rounded-2xl bg-muted/40 border border-border/60 text-xs">
                   <div>
-                    <span className="text-muted-foreground block">Base Rate:</span>
+                    <span className="text-muted-foreground block">
+                      Base Rate:
+                    </span>
                     <span className="font-display font-bold text-base text-primary">
                       ₹{displayPrice}
                     </span>
-                    <span className="text-[10px] text-muted-foreground"> / visit</span>
+                    <span className="text-[10px] text-muted-foreground">
+                      {" "}
+                      / visit
+                    </span>
                   </div>
                   <div className="text-right">
-                    <span className="text-muted-foreground block">Specialist:</span>
+                    <span className="text-muted-foreground block">
+                      Specialist:
+                    </span>
                     <span className="font-semibold text-foreground">
                       {svc.providerName || "Master Tech"}
                     </span>
@@ -340,7 +380,8 @@ export function ServicesManager() {
                 {editingService ? "Edit Service" : "Register On-Demand Service"}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                Configured rates and availability will immediately update on customer apps.
+                Configured rates and availability will immediately update on
+                customer apps.
               </DialogDescription>
             </DialogHeader>
 
@@ -378,7 +419,9 @@ export function ServicesManager() {
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Specialist / Provider Name</Label>
+                <Label className="text-xs font-semibold">
+                  Specialist / Provider Name
+                </Label>
                 <Input
                   value={providerName}
                   onChange={(e) => setProviderName(e.target.value)}

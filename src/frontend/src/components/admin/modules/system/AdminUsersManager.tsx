@@ -57,7 +57,11 @@ export function AdminUsersManager() {
     }
 
     if (
-      partners.some((p) => String(p.id || p.partnerUserId).toLowerCase() === adminId.trim().toLowerCase())
+      partners.some(
+        (p) =>
+          String(p.id || p.partnerUserId).toLowerCase() ===
+          adminId.trim().toLowerCase(),
+      )
     ) {
       toast.error("An admin account with this ID already exists.");
       return;
@@ -112,14 +116,22 @@ export function AdminUsersManager() {
         data={partners}
         searchPlaceholder="Search admin ID, name, role..."
         searchFilter={(item, query) =>
-          String(item.partnerUserId || item.id).toLowerCase().includes(query) ||
+          String(item.partnerUserId || item.id)
+            .toLowerCase()
+            .includes(query) ||
           item.ownerName.toLowerCase().includes(query) ||
           item.role.toLowerCase().includes(query)
         }
         filterOptions={[]}
         sortOptions={[{ label: "Admin ID", value: "id_asc" }]}
         defaultSort="id_asc"
-        onSort={(items) => [...items].sort((a, b) => String(a.partnerUserId || a.id).localeCompare(String(b.partnerUserId || b.id)))}
+        onSort={(items) =>
+          [...items].sort((a, b) =>
+            String(a.partnerUserId || a.id).localeCompare(
+              String(b.partnerUserId || b.id),
+            ),
+          )
+        }
         onAddNew={() => {
           setAdminId("");
           setPassword("");
@@ -164,7 +176,9 @@ export function AdminUsersManager() {
             <div className="p-3 rounded-2xl bg-muted/40 border border-border/60 text-xs font-mono space-y-1">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Auth Method:</span>
-                <span className="font-semibold text-emerald-600">PBKDF2 Secured</span>
+                <span className="font-semibold text-emerald-600">
+                  PBKDF2 Secured
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Email:</span>

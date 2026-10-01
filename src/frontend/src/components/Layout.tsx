@@ -1,6 +1,5 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,41 +8,44 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   Bell,
   Bot,
+  Calendar,
   ChevronDown,
+  CreditCard,
+  History,
+  Home,
   LogOut,
   MapPin,
   Menu,
+  Package,
   Search,
+  Settings,
   ShieldCheck,
+  ShoppingCart,
   User,
   Wallet,
   X,
-  ShoppingCart,
-  Package,
-  Calendar,
-  CreditCard,
-  Settings,
-  History,
+  Zap,
 } from "lucide-react";
 import { useState } from "react";
 import { useIsMobile } from "../hooks/use-mobile";
 import { useAuth } from "../lib/AuthContext";
 import { setCurrentRole } from "../lib/auth";
+import { useCartStore } from "../lib/cartStore";
+import { useNotificationStore } from "../lib/notificationStore";
 import { useStoreData } from "../lib/storeData";
 import { MOCK_WALLET_BALANCE } from "../mock-data";
-import { useNotificationStore } from "../lib/notificationStore";
-import { useCartStore } from "../lib/cartStore";
 
-import { useLocationStore } from "../lib/locationStore";
-import { LocationModal } from "./location/LocationModal";
 import { NAVAEIN_URL, getPartnerPortalUrl } from "../config/links";
-import { NavaeInBottomAd } from "./NavaeInBottomAd";
+import { useLocationStore } from "../lib/locationStore";
 import { Ezy1Logo } from "./Ezy1Logo";
+import { NavaeInBottomAd } from "./NavaeInBottomAd";
 import { LegalDocumentLink } from "./legal/LegalDocumentLink";
+import { LocationModal } from "./location/LocationModal";
 
 const navLinks = [
   { label: "All Services", href: "/" },
@@ -84,6 +86,9 @@ export default function Layout({ children }: LayoutProps) {
   const isMobile = useIsMobile();
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
+  const routerState = useRouterState();
+  const currentPath = routerState?.location?.pathname || "/";
+
   const handleLogin = () => {
     navigate({ to: "/login" });
   };
@@ -182,19 +187,21 @@ export default function Layout({ children }: LayoutProps) {
 
           {/* Right actions */}
           <div className="flex items-center gap-2">
-            {/* Location pill */}
+            {/* Location pill - visible on mobile and desktop */}
             <button
               type="button"
               onClick={() => setLocationDropdown(true)}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted text-xs text-muted-foreground hover:bg-primary/10 hover:text-primary transition-smooth border border-border max-w-[210px]"
+              className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-muted/80 text-[11px] sm:text-xs text-muted-foreground hover:bg-primary/10 hover:text-primary transition-smooth border border-border max-w-[125px] sm:max-w-[210px] cursor-pointer"
               data-ocid="nav.location_toggle"
               title={currentLocation.formattedAddress}
             >
               <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
               <span className="truncate font-medium">
-                {currentLocation.locality || currentLocation.city || "Select Location"}
+                {currentLocation.locality ||
+                  currentLocation.city ||
+                  "Set City"}
               </span>
-              <ChevronDown className="w-3 h-3 shrink-0" />
+              <ChevronDown className="w-3 h-3 shrink-0 opacity-70" />
             </button>
 
             <LocationModal
@@ -210,7 +217,9 @@ export default function Layout({ children }: LayoutProps) {
                 className="relative gap-1.5 rounded-full h-9 px-3 border-border hover:border-primary/50 text-xs font-semibold"
               >
                 <ShoppingCart className="w-4 h-4 text-primary" />
-                <span className="hidden sm:inline font-display font-bold">Cart</span>
+                <span className="hidden sm:inline font-display font-bold">
+                  Cart
+                </span>
                 {totalItems > 0 && (
                   <span className="flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground font-black text-[10px] shadow-sm">
                     {totalItems}
@@ -222,8 +231,16 @@ export default function Layout({ children }: LayoutProps) {
             {isAuthenticated ? (
               <div className="flex items-center gap-1.5">
                 {/* Notifications Bell */}
-                <Link to="/dashboard/notifications" data-ocid="nav.notifications_link">
-                  <Button variant="ghost" size="sm" className="relative p-2 rounded-full h-9 w-9" title="Notifications">
+                <Link
+                  to="/dashboard/notifications"
+                  data-ocid="nav.notifications_link"
+                >
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="relative p-2 rounded-full h-9 w-9"
+                    title="Notifications"
+                  >
                     <Bell className="w-4 h-4 text-foreground" />
                     {unreadCount > 0 && (
                       <span className="absolute top-1.5 right-1.5 flex items-center justify-center min-w-[15px] h-3.5 px-1 rounded-full bg-rose-500 text-white font-bold text-[8px] animate-pulse">
@@ -251,21 +268,34 @@ export default function Layout({ children }: LayoutProps) {
                       <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-60 p-1.5 shadow-elevated rounded-2xl border-border bg-card">
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-60 p-1.5 shadow-elevated rounded-2xl border-border bg-card"
+                  >
                     <DropdownMenuLabel className="px-3 py-2">
-                      <div className="text-xs font-bold text-foreground truncate">{user?.name || "Customer Account"}</div>
-                      <div className="text-[11px] text-muted-foreground font-mono truncate">{user?.phone || user?.email || "customer@ezy1.in"}</div>
+                      <div className="text-xs font-bold text-foreground truncate">
+                        {user?.name || "Customer Account"}
+                      </div>
+                      <div className="text-[11px] text-muted-foreground font-mono truncate">
+                        {user?.phone || user?.email || "customer@ezy1.in"}
+                      </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
 
                     {/* 1. Wallet */}
                     <DropdownMenuItem asChild>
-                      <Link to="/dashboard/wallet" className="flex items-center justify-between px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold">
+                      <Link
+                        to="/dashboard/wallet"
+                        className="flex items-center justify-between px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold"
+                      >
                         <span className="flex items-center gap-2">
                           <Wallet className="w-4 h-4 text-amber-500" />
                           Wallet
                         </span>
-                        <Badge variant="secondary" className="text-[10px] font-bold px-1.5 py-0 bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                        <Badge
+                          variant="secondary"
+                          className="text-[10px] font-bold px-1.5 py-0 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                        >
                           ₹{MOCK_WALLET_BALANCE.toLocaleString("en-IN")}
                         </Badge>
                       </Link>
@@ -273,13 +303,19 @@ export default function Layout({ children }: LayoutProps) {
 
                     {/* 2. Cart */}
                     <DropdownMenuItem asChild>
-                      <Link to="/dashboard/cart" className="flex items-center justify-between px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold">
+                      <Link
+                        to="/dashboard/cart"
+                        className="flex items-center justify-between px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold"
+                      >
                         <span className="flex items-center gap-2">
                           <ShoppingCart className="w-4 h-4 text-emerald-500" />
                           My Cart
                         </span>
                         {totalItems > 0 && (
-                          <Badge variant="secondary" className="text-[10px] font-bold px-1.5 py-0 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                          <Badge
+                            variant="secondary"
+                            className="text-[10px] font-bold px-1.5 py-0 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                          >
                             {totalItems} items
                           </Badge>
                         )}
@@ -288,7 +324,10 @@ export default function Layout({ children }: LayoutProps) {
 
                     {/* 3. History / Bookings */}
                     <DropdownMenuItem asChild>
-                      <Link to="/my-bookings" className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold">
+                      <Link
+                        to="/my-bookings"
+                        className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold"
+                      >
                         <History className="w-4 h-4 text-blue-500" />
                         <span>History & Bookings</span>
                       </Link>
@@ -296,7 +335,10 @@ export default function Layout({ children }: LayoutProps) {
 
                     {/* 4. Orders */}
                     <DropdownMenuItem asChild>
-                      <Link to="/my-orders" className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold">
+                      <Link
+                        to="/my-orders"
+                        className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold"
+                      >
                         <Package className="w-4 h-4 text-indigo-500" />
                         <span>My Orders</span>
                       </Link>
@@ -304,7 +346,10 @@ export default function Layout({ children }: LayoutProps) {
 
                     {/* 5. Payments */}
                     <DropdownMenuItem asChild>
-                      <Link to="/payments" className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold">
+                      <Link
+                        to="/payments"
+                        className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold"
+                      >
                         <CreditCard className="w-4 h-4 text-violet-500" />
                         <span>Payments & Cards</span>
                       </Link>
@@ -312,7 +357,10 @@ export default function Layout({ children }: LayoutProps) {
 
                     {/* 6. My Account */}
                     <DropdownMenuItem asChild>
-                      <Link to="/my-account" className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold">
+                      <Link
+                        to="/my-account"
+                        className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold"
+                      >
                         <User className="w-4 h-4 text-primary" />
                         <span>My Profile & Account</span>
                       </Link>
@@ -320,7 +368,10 @@ export default function Layout({ children }: LayoutProps) {
 
                     {/* 7. Settings */}
                     <DropdownMenuItem asChild>
-                      <Link to="/dashboard/settings" className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold">
+                      <Link
+                        to="/dashboard/settings"
+                        className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold"
+                      >
                         <Settings className="w-4 h-4 text-slate-500" />
                         <span>Account Settings</span>
                       </Link>
@@ -328,7 +379,10 @@ export default function Layout({ children }: LayoutProps) {
 
                     {/* 8. Notifications */}
                     <DropdownMenuItem asChild>
-                      <Link to="/dashboard/notifications" className="flex items-center justify-between px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold">
+                      <Link
+                        to="/dashboard/notifications"
+                        className="flex items-center justify-between px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold"
+                      >
                         <span className="flex items-center gap-2">
                           <Bell className="w-4 h-4 text-purple-500" />
                           Notifications
@@ -398,9 +452,13 @@ export default function Layout({ children }: LayoutProps) {
                     >
                       <MapPin className="w-4 h-4 text-primary shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-[10px] uppercase font-semibold text-muted-foreground">Deliver To</p>
+                        <p className="text-[10px] uppercase font-semibold text-muted-foreground">
+                          Deliver To
+                        </p>
                         <p className="text-sm text-foreground font-medium truncate">
-                          {currentLocation.locality || currentLocation.city || "Select Location"}
+                          {currentLocation.locality ||
+                            currentLocation.city ||
+                            "Select Location"}
                         </p>
                       </div>
                       <ChevronDown className="w-3.5 h-3.5 text-muted-foreground ml-auto shrink-0" />
@@ -561,7 +619,10 @@ export default function Layout({ children }: LayoutProps) {
                               Notifications
                             </span>
                             {unreadCount > 0 && (
-                              <Badge variant="destructive" className="text-[9px] px-1.5 py-0">
+                              <Badge
+                                variant="destructive"
+                                className="text-[9px] px-1.5 py-0"
+                              >
                                 {unreadCount}
                               </Badge>
                             )}
@@ -605,7 +666,9 @@ export default function Layout({ children }: LayoutProps) {
                           >
                             <ShieldCheck className="w-3.5 h-3.5 text-primary" />
                             <span>Partner Login (partner.ezy1.site)</span>
-                            <span className="text-[10px] text-muted-foreground">→</span>
+                            <span className="text-[10px] text-muted-foreground">
+                              →
+                            </span>
                           </a>
                         </div>
                       )}
@@ -618,18 +681,60 @@ export default function Layout({ children }: LayoutProps) {
         </div>
       </header>
 
-      {/* Main content */}
-      <main className="flex-1">{children}</main>
+      {/* Mobile Sub-Header Instant Search Bar (Phone Viewport Only - Hidden on pages with dedicated search or checkout) */}
+      {currentPath !== "/" && currentPath !== "/search" && currentPath !== "/checkout" && (
+        <div className="md:hidden px-3 py-2 bg-card/95 backdrop-blur-md border-b border-border shadow-2xs sticky top-16 z-30">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const trimmed = navSearchQuery.trim();
+            if (trimmed) {
+              navigate({ to: "/search", search: { q: trimmed } });
+            } else {
+              navigate({ to: "/search" });
+            }
+          }}
+          className="relative flex items-center"
+        >
+          <Search className="w-3.5 h-3.5 text-muted-foreground absolute left-3 pointer-events-none" />
+          <input
+            type="text"
+            value={navSearchQuery}
+            onChange={(e) => setNavSearchQuery(e.target.value)}
+            placeholder="Search groceries, doctors, rides, services..."
+            className="w-full h-8.5 pl-8 pr-14 rounded-full bg-muted/60 border border-border text-xs outline-none text-foreground placeholder:text-muted-foreground focus:bg-background focus:border-primary"
+          />
+          {navSearchQuery && (
+            <button
+              type="button"
+              onClick={() => setNavSearchQuery("")}
+              className="absolute right-10 text-muted-foreground hover:text-foreground text-xs p-1"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          )}
+          <button
+            type="submit"
+            className="absolute right-1 px-2.5 py-0.5 rounded-full bg-primary text-primary-foreground font-bold text-[10px]"
+          >
+            Go
+          </button>
+        </form>
+      </div>
+      )}
 
-      {/* AI Assistant Floating Button */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
+      {/* Main content with padding for mobile navigation */}
+      <main className="flex-1 pb-20 md:pb-0">{children}</main>
+
+      {/* Responsive Floating Action Buttons (Positioned Above Mobile Bottom Nav) */}
+      <div className="fixed bottom-20 md:bottom-6 right-3 md:right-6 z-30 flex flex-col gap-2">
         <Sheet>
           <SheetTrigger asChild>
             <Button
               size="icon"
-              className="w-14 h-14 rounded-full shadow-elevated bg-[#25D366] hover:bg-[#20bd5a] hover:-translate-y-1 transition-transform"
+              className="w-11 h-11 md:w-14 md:h-14 rounded-full shadow-elevated bg-[#25D366] hover:bg-[#20bd5a] hover:-translate-y-1 transition-transform flex items-center justify-center cursor-pointer"
             >
-              <span className="text-2xl text-white">💬</span>
+              <span className="text-xl md:text-2xl text-white">💬</span>
             </Button>
           </SheetTrigger>
           <SheetContent
@@ -745,9 +850,9 @@ export default function Layout({ children }: LayoutProps) {
           <SheetTrigger asChild>
             <Button
               size="icon"
-              className="w-14 h-14 rounded-full shadow-elevated bg-primary hover:bg-primary/90 hover:-translate-y-1 transition-transform"
+              className="w-11 h-11 md:w-14 md:h-14 rounded-full shadow-elevated bg-primary hover:bg-primary/90 hover:-translate-y-1 transition-transform flex items-center justify-center cursor-pointer"
             >
-              <Bot className="w-6 h-6 text-primary-foreground" />
+              <Bot className="w-5 h-5 md:w-6 md:h-6 text-primary-foreground" />
             </Button>
           </SheetTrigger>
           <SheetContent
@@ -894,7 +999,9 @@ export default function Layout({ children }: LayoutProps) {
                     className="text-sm text-muted-foreground hover:text-orange-500 transition-colors flex items-center gap-1.5"
                   >
                     <span>NavaeIn — Art • Craft</span>
-                    <span className="text-[10px] text-orange-500 font-bold">↗</span>
+                    <span className="text-[10px] text-orange-500 font-bold">
+                      ↗
+                    </span>
                   </a>
                 </li>
                 <li>
@@ -983,7 +1090,8 @@ export default function Layout({ children }: LayoutProps) {
 
           <div className="border-t border-border mt-8 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-xs text-muted-foreground text-center md:text-left">
-              © {new Date().getFullYear()} EZY1 Technologies Private Limited. All rights reserved.
+              © {new Date().getFullYear()} EZY1 Technologies Private Limited.
+              All rights reserved.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
               <a
@@ -1030,6 +1138,65 @@ export default function Layout({ children }: LayoutProps) {
           </div>
         </div>
       </footer>
+
+      {/* Native Mobile Phone Bottom Navigation Bar */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-md border-t border-border shadow-elevated px-2 py-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] flex items-center justify-around select-none">
+        <Link
+          to="/"
+          className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl text-[10px] font-bold transition-colors ${
+            currentPath === "/"
+              ? "text-primary"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Home className="w-5 h-5 mb-0.5" />
+          <span>Home</span>
+        </Link>
+        <Link
+          to={"/category/grocery" as any}
+          className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl text-[10px] font-bold transition-colors ${
+            currentPath.startsWith("/category")
+              ? "text-primary"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Zap className="w-5 h-5 mb-0.5" />
+          <span>Quick 15m</span>
+        </Link>
+        <Link
+          to="/search"
+          className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl text-[10px] font-bold transition-colors ${
+            currentPath === "/search"
+              ? "text-primary"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Search className="w-5 h-5 mb-0.5" />
+          <span>Search</span>
+        </Link>
+        <Link
+          to="/my-orders"
+          className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl text-[10px] font-bold relative transition-colors ${
+            currentPath === "/my-orders"
+              ? "text-primary"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Package className="w-5 h-5 mb-0.5" />
+          <span>Orders</span>
+        </Link>
+        <Link
+          to={isAuthenticated ? "/my-account" : "/login"}
+          className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl text-[10px] font-bold transition-colors ${
+            currentPath === "/my-account" || currentPath === "/login"
+              ? "text-primary"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <User className="w-5 h-5 mb-0.5" />
+          <span>{isAuthenticated ? "Account" : "Login"}</span>
+        </Link>
+      </nav>
     </div>
   );
 }

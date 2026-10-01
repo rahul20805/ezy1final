@@ -1,28 +1,29 @@
-import React, { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
+import { type LocationData, useLocationStore } from "@/lib/locationStore";
 import {
+  AlertCircle,
+  Building,
+  Check,
+  ChevronRight,
+  Clock,
+  Home,
+  Loader2,
+  Map,
   MapPin,
   Navigation,
   Search,
-  Check,
-  AlertCircle,
-  Clock,
-  Loader2,
-  Building,
-  Home,
-  Map,
-  ChevronRight,
   ShieldCheck,
 } from "lucide-react";
-import { useLocationStore, LocationData } from "@/lib/locationStore";
-import { InteractiveMap } from "./InteractiveMap";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { InteractiveMap } from "./InteractiveMap";
 
 interface LocationModalProps {
   open: boolean;
@@ -83,7 +84,9 @@ export const LocationModal: React.FC<LocationModalProps> = ({
     setIsSearching(true);
     searchTimeoutRef.current = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/location/search?query=${encodeURIComponent(q.trim())}`);
+        const res = await fetch(
+          `/api/location/search?query=${encodeURIComponent(q.trim())}`,
+        );
         if (res.ok) {
           const data = await res.json();
           setSearchResults(data.results || []);
@@ -183,7 +186,10 @@ export const LocationModal: React.FC<LocationModalProps> = ({
 
     const finalAddress: LocationData = {
       ...formData,
-      formattedAddress: components.length > 0 ? components.join(", ") : formData.formattedAddress,
+      formattedAddress:
+        components.length > 0
+          ? components.join(", ")
+          : formData.formattedAddress,
     };
 
     setLocation(finalAddress);
@@ -193,7 +199,9 @@ export const LocationModal: React.FC<LocationModalProps> = ({
       onSelectLocation(finalAddress);
     }
 
-    toast.success(`Active location set: ${finalAddress.city || "Selected location"}`);
+    toast.success(
+      `Active location set: ${finalAddress.city || "Selected location"}`,
+    );
     onOpenChange(false);
   };
 
@@ -214,7 +222,8 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                 Select Your Service Location
               </DialogTitle>
               <DialogDescription className="text-xs text-stone-500 dark:text-stone-400">
-                Choose your exact location to see verified local partners, instant pricing, and accurate delivery timelines.
+                Choose your exact location to see verified local partners,
+                instant pricing, and accurate delivery timelines.
               </DialogDescription>
             </div>
           </div>
@@ -246,7 +255,9 @@ export const LocationModal: React.FC<LocationModalProps> = ({
             {gpsError && (
               <div className="flex items-center gap-2 p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 rounded-xl text-xs">
                 <AlertCircle className="h-4 w-4 shrink-0" />
-                <span>{gpsError} Please type your address below or pick on the map.</span>
+                <span>
+                  {gpsError} Please type your address below or pick on the map.
+                </span>
               </div>
             )}
 
@@ -293,7 +304,10 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                     <MapPin className="h-4 w-4 text-orange-500 shrink-0 mt-0.5" />
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-semibold text-stone-900 dark:text-stone-100 truncate">
-                        {item.locality || item.city || item.addressLine1 || "Location"}
+                        {item.locality ||
+                          item.city ||
+                          item.addressLine1 ||
+                          "Location"}
                       </p>
                       <p className="text-[11px] text-stone-500 dark:text-stone-400 line-clamp-1">
                         {item.formattedAddress}
@@ -313,7 +327,8 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                 <span>Pinpoint on Map</span>
                 {isReverseGeocoding && (
                   <span className="text-[11px] text-orange-600 font-normal flex items-center gap-1">
-                    <Loader2 className="h-3 w-3 animate-spin" /> Updating address...
+                    <Loader2 className="h-3 w-3 animate-spin" /> Updating
+                    address...
                   </span>
                 )}
               </label>
@@ -351,7 +366,9 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                   type="text"
                   placeholder="e.g. Flat 402, Royal Palms"
                   value={formData.addressLine1}
-                  onChange={(e) => setFormData({ ...formData, addressLine1: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, addressLine1: e.target.value })
+                  }
                   className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 focus:outline-none focus:border-orange-500 text-xs text-stone-900 dark:text-white"
                 />
               </div>
@@ -364,7 +381,9 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                   type="text"
                   placeholder="e.g. Near Metro Station, 100ft Road"
                   value={formData.addressLine2}
-                  onChange={(e) => setFormData({ ...formData, addressLine2: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, addressLine2: e.target.value })
+                  }
                   className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 focus:outline-none focus:border-orange-500 text-xs text-stone-900 dark:text-white"
                 />
               </div>
@@ -377,7 +396,9 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                   type="text"
                   placeholder="e.g. Indiranagar"
                   value={formData.locality}
-                  onChange={(e) => setFormData({ ...formData, locality: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, locality: e.target.value })
+                  }
                   className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 focus:outline-none focus:border-orange-500 text-xs text-stone-900 dark:text-white"
                 />
               </div>
@@ -390,7 +411,9 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                   type="text"
                   placeholder="e.g. Bengaluru"
                   value={formData.city}
-                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, city: e.target.value })
+                  }
                   className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 focus:outline-none focus:border-orange-500 text-xs text-stone-900 dark:text-white"
                 />
               </div>
@@ -403,7 +426,9 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                   type="text"
                   placeholder="e.g. Karnataka"
                   value={formData.state}
-                  onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, state: e.target.value })
+                  }
                   className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 focus:outline-none focus:border-orange-500 text-xs text-stone-900 dark:text-white"
                 />
               </div>
@@ -425,7 +450,9 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                   } focus:outline-none text-xs text-stone-900 dark:text-white`}
                 />
                 {pinCodeError && (
-                  <p className="text-[11px] text-rose-500 mt-1 font-medium">{pinCodeError}</p>
+                  <p className="text-[11px] text-rose-500 mt-1 font-medium">
+                    {pinCodeError}
+                  </p>
                 )}
               </div>
             </div>
@@ -445,7 +472,9 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                     type="button"
                     onClick={() => {
                       setFormData(addr);
-                      toast.info(`Switched to ${addr.city || addr.formattedAddress}`);
+                      toast.info(
+                        `Switched to ${addr.city || addr.formattedAddress}`,
+                      );
                     }}
                     className={`text-left px-3 py-2 rounded-xl text-xs border transition-all cursor-pointer flex items-center gap-2 ${
                       formData.formattedAddress === addr.formattedAddress
@@ -455,7 +484,10 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                   >
                     <Home className="h-3.5 w-3.5 text-orange-500 shrink-0" />
                     <span className="truncate max-w-[200px] font-medium">
-                      {addr.locality || addr.city || addr.addressLine1 || "Saved Location"}
+                      {addr.locality ||
+                        addr.city ||
+                        addr.addressLine1 ||
+                        "Saved Location"}
                     </span>
                   </button>
                 ))}
@@ -484,7 +516,8 @@ export const LocationModal: React.FC<LocationModalProps> = ({
               </p>
               {formData.latitude && (
                 <p className="text-[11px] text-stone-400 font-mono mt-1">
-                  GPS: {formData.latitude.toFixed(5)}, {formData.longitude?.toFixed(5)} ({formData.source})
+                  GPS: {formData.latitude.toFixed(5)},{" "}
+                  {formData.longitude?.toFixed(5)} ({formData.source})
                 </p>
               )}
             </div>

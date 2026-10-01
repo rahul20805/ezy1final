@@ -3,20 +3,20 @@ import type React from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 import {
   type UserProfile,
-  getAuthToken,
-  getStoredUser,
-  setAuthToken,
-  setStoredUser,
-  clearAuthSession,
+  loginWithGoogle as apiLoginWithGoogle,
   requestOtp as apiRequestOtp,
   verifyOtpCode as apiVerifyOtpCode,
-  loginWithGoogle as apiLoginWithGoogle,
-  loginWithPassword,
-  registerAccount,
+  clearAuthSession,
   fetchCurrentUser,
+  getAuthToken,
+  getStoredUser,
+  loginWithPassword,
   logoutCustomer,
+  registerAccount,
+  setAuthToken,
+  setStoredUser,
 } from "./api";
-import { setCurrentRole, clearRole } from "./auth";
+import { clearRole, setCurrentRole } from "./auth";
 import { useNotificationStore } from "./notificationStore";
 
 interface AuthContextType {
@@ -24,11 +24,33 @@ interface AuthContextType {
   user: UserProfile | null;
   token: string | null;
   identity: Identity | null;
-  signInWithPassword: (username: string, password: string) => Promise<{ success: boolean; user?: UserProfile; error?: string }>;
-  signUp: (payload: { name: string; username: string; password: string; confirmPassword?: string; phone?: string; email?: string }) => Promise<{ success: boolean; user?: UserProfile; error?: string }>;
-  sendPhoneOtp: (phone: string) => Promise<{ success: boolean; message?: string; debugOtp?: string }>;
-  verifyPhoneOtp: (phone: string, otp: string, name?: string) => Promise<{ success: boolean; user?: UserProfile }>;
-  signInWithGoogle: (payload: { email?: string; name?: string; googleId?: string; avatar?: string; phone?: string }) => Promise<{ success: boolean; user?: UserProfile }>;
+  signInWithPassword: (
+    username: string,
+    password: string,
+  ) => Promise<{ success: boolean; user?: UserProfile; error?: string }>;
+  signUp: (payload: {
+    name: string;
+    username: string;
+    password: string;
+    confirmPassword?: string;
+    phone?: string;
+    email?: string;
+  }) => Promise<{ success: boolean; user?: UserProfile; error?: string }>;
+  sendPhoneOtp: (
+    phone: string,
+  ) => Promise<{ success: boolean; message?: string; debugOtp?: string }>;
+  verifyPhoneOtp: (
+    phone: string,
+    otp: string,
+    name?: string,
+  ) => Promise<{ success: boolean; user?: UserProfile }>;
+  signInWithGoogle: (payload: {
+    email?: string;
+    name?: string;
+    googleId?: string;
+    avatar?: string;
+    phone?: string;
+  }) => Promise<{ success: boolean; user?: UserProfile }>;
   login: () => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -119,7 +141,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       return { success: false, error: res.message || "Registration failed" };
     } catch (err: any) {
-      return { success: false, error: err.message || "Failed to create account" };
+      return {
+        success: false,
+        error: err.message || "Failed to create account",
+      };
     }
   };
 
@@ -207,12 +232,20 @@ export function useAuth() {
       user: null,
       token: null,
       identity: null,
-      signInWithPassword: async () => ({ success: false, error: "Not in AuthProvider" }),
+      signInWithPassword: async () => ({
+        success: false,
+        error: "Not in AuthProvider",
+      }),
       signUp: async () => ({ success: false, error: "Not in AuthProvider" }),
-      sendPhoneOtp: async () => ({ success: false, message: "Not in AuthProvider" }),
+      sendPhoneOtp: async () => ({
+        success: false,
+        message: "Not in AuthProvider",
+      }),
       verifyPhoneOtp: async () => ({ success: false }),
       signInWithGoogle: async () => ({ success: false }),
-      login: async () => { window.location.href = "/login"; },
+      login: async () => {
+        window.location.href = "/login";
+      },
       logout: async () => {},
     } as AuthContextType;
   }

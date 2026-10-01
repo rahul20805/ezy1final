@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,17 +9,24 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { Minus, Plus, ShoppingBag, Trash2, ArrowRight, Tag } from "lucide-react";
-import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
+import {
+  ArrowRight,
+  Minus,
+  Plus,
+  ShoppingBag,
+  Tag,
+  Trash2,
+} from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import UserLayout from "../components/UserLayout";
 import { useCartStore } from "../lib/cartStore";
-import { toast } from "sonner";
 
 export default function CartPage() {
   const navigate = useNavigate();
-  const { items, updateQuantity, removeItem, totalItems, totalAmount } = useCartStore();
+  const { items, updateQuantity, removeItem, totalItems, totalAmount } =
+    useCartStore();
   const [promoCode, setPromoCode] = useState("");
   const [discount, setDiscount] = useState(0);
   const [appliedPromo, setAppliedPromo] = useState<string | null>(null);
@@ -71,9 +79,12 @@ export default function CartPage() {
               <ShoppingBag className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold font-display text-foreground">Your Shopping Cart</h1>
+              <h1 className="text-2xl font-bold font-display text-foreground">
+                Your Shopping Cart
+              </h1>
               <p className="text-xs text-muted-foreground">
-                {totalItems} {totalItems === 1 ? "item" : "items"} ready for doorstep delivery
+                {totalItems} {totalItems === 1 ? "item" : "items"} ready for
+                doorstep delivery
               </p>
             </div>
           </div>
@@ -94,9 +105,12 @@ export default function CartPage() {
             <div className="w-16 h-16 rounded-full bg-muted/60 flex items-center justify-center mx-auto mb-4 text-muted-foreground">
               <ShoppingBag className="h-8 w-8" />
             </div>
-            <h2 className="text-lg font-bold font-display text-foreground mb-1">Your cart is empty</h2>
+            <h2 className="text-lg font-bold font-display text-foreground mb-1">
+              Your cart is empty
+            </h2>
             <p className="text-xs text-muted-foreground max-w-sm mx-auto mb-6">
-              Looks like you haven't added anything to your cart yet. Explore fresh groceries, food, or electronics!
+              Looks like you haven't added anything to your cart yet. Explore
+              fresh groceries, food, or electronics!
             </p>
             <Button
               onClick={() => navigate({ to: "/category/grocery" as any })}
@@ -109,36 +123,45 @@ export default function CartPage() {
           <div className="grid md:grid-cols-3 gap-6">
             <div className="md:col-span-2 space-y-3.5">
               {cartList.map(({ product, quantity }) => (
-                <Card key={product.id} className="border-border bg-card shadow-xs rounded-2xl overflow-hidden">
-                  <CardContent className="p-4 flex gap-4 items-center">
+                <Card
+                  key={product.id}
+                  className="border-border bg-card shadow-xs rounded-2xl overflow-hidden"
+                >
+                  <CardContent className="p-3 sm:p-4 flex gap-2.5 sm:gap-4 items-center">
                     {product.image?.startsWith("http") ? (
                       <img
                         src={product.image}
                         alt={product.name}
-                        className="h-16 w-16 rounded-xl object-cover bg-muted shrink-0"
+                        className="h-14 w-14 sm:h-16 sm:w-16 rounded-xl object-cover bg-muted shrink-0"
                       />
                     ) : (
-                      <div className="h-16 w-16 bg-muted/60 rounded-xl flex items-center justify-center text-2xl shrink-0">
+                      <div className="h-14 w-14 sm:h-16 sm:w-16 bg-muted/60 rounded-xl flex items-center justify-center text-xl sm:text-2xl shrink-0">
                         {product.image || "📦"}
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-sm text-foreground truncate">{product.name}</h3>
-                      <p className="text-[11px] text-muted-foreground truncate mb-1">
+                      <h3 className="font-bold text-xs sm:text-sm text-foreground truncate">
+                        {product.name}
+                      </h3>
+                      <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate mb-0.5 sm:mb-1">
                         {product.category || "General Store"}
                       </p>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-primary">₹{product.price}</span>
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <span className="font-bold text-xs sm:text-sm text-primary">
+                          ₹{product.price}
+                        </span>
                         {product.mrp && product.mrp > product.price && (
-                          <span className="text-[11px] text-muted-foreground line-through">₹{product.mrp}</span>
+                          <span className="text-[10px] sm:text-[11px] text-muted-foreground line-through">
+                            ₹{product.mrp}
+                          </span>
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 bg-muted/50 rounded-full p-1 border border-border shrink-0">
+                    <div className="flex items-center gap-1 sm:gap-2 bg-muted/50 rounded-full p-0.5 sm:p-1 border border-border shrink-0">
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 rounded-full hover:bg-background"
+                        className="h-6 w-6 sm:h-7 sm:w-7 rounded-full hover:bg-background"
                         onClick={() => {
                           if (quantity === 1) {
                             removeItem(product.id);
@@ -174,7 +197,9 @@ export default function CartPage() {
             <div>
               <Card className="sticky top-6 border-border bg-card shadow-xs rounded-3xl">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-base font-bold font-display">Order Summary</CardTitle>
+                  <CardTitle className="text-base font-bold font-display">
+                    Order Summary
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {/* Promo Code Box */}
@@ -186,7 +211,11 @@ export default function CartPage() {
                         onChange={(e) => setPromoCode(e.target.value)}
                         className="h-9 text-xs uppercase"
                       />
-                      <Button type="submit" variant="secondary" className="h-9 px-3 text-xs font-bold">
+                      <Button
+                        type="submit"
+                        variant="secondary"
+                        className="h-9 px-3 text-xs font-bold"
+                      >
                         Apply
                       </Button>
                     </div>
@@ -212,13 +241,17 @@ export default function CartPage() {
                   <div className="space-y-2 text-xs">
                     <div className="flex justify-between text-muted-foreground">
                       <span>Items Subtotal</span>
-                      <span className="font-semibold text-foreground">₹{subtotal.toLocaleString("en-IN")}</span>
+                      <span className="font-semibold text-foreground">
+                        ₹{subtotal.toLocaleString("en-IN")}
+                      </span>
                     </div>
                     <div className="flex justify-between text-muted-foreground">
                       <span>Delivery Fee</span>
                       <span>
                         {deliveryFee === 0 ? (
-                          <span className="text-emerald-600 font-bold">FREE</span>
+                          <span className="text-emerald-600 font-bold">
+                            FREE
+                          </span>
                         ) : (
                           `₹${deliveryFee}`
                         )}
@@ -226,7 +259,9 @@ export default function CartPage() {
                     </div>
                     <div className="flex justify-between text-muted-foreground">
                       <span>Taxes & Fees (5%)</span>
-                      <span className="font-semibold text-foreground">₹{taxes.toLocaleString("en-IN")}</span>
+                      <span className="font-semibold text-foreground">
+                        ₹{taxes.toLocaleString("en-IN")}
+                      </span>
                     </div>
                     {discount > 0 && (
                       <div className="flex justify-between text-emerald-600 font-semibold">
@@ -240,7 +275,9 @@ export default function CartPage() {
 
                   <div className="flex justify-between font-bold text-base">
                     <span>Total Amount</span>
-                    <span className="text-primary">₹{total.toLocaleString("en-IN")}</span>
+                    <span className="text-primary">
+                      ₹{total.toLocaleString("en-IN")}
+                    </span>
                   </div>
                 </CardContent>
                 <CardFooter>
@@ -260,4 +297,3 @@ export default function CartPage() {
     </UserLayout>
   );
 }
-

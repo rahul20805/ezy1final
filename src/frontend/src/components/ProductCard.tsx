@@ -19,7 +19,10 @@ export function ProductCard({ product }: { product: Product }) {
       <div className="aspect-square bg-muted/20 relative flex items-center justify-center p-4">
         {/* If image is an emoji (for mock), render as text. Otherwise img tag */}
         {(() => {
-          const imgUrl = (Array.isArray(product.images) && product.images[0]) || (product as any).image || "🛒";
+          const imgUrl =
+            (Array.isArray(product.images) && product.images[0]) ||
+            (product as any).image ||
+            "🛒";
           return typeof imgUrl === "string" && imgUrl.length <= 2 ? (
             <div className="text-6xl group-hover:scale-110 transition-transform duration-300">
               {imgUrl}

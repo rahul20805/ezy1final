@@ -52,7 +52,7 @@ export function HospitalBedsManager() {
       if (!res.ok) throw new Error("Failed to update bed count in database.");
 
       toast.success(
-        `Updated ${hosp.businessName || hosp.name} available beds to ${nextAvailable}`
+        `Updated ${hosp.businessName || hosp.name} available beds to ${nextAvailable}`,
       );
       setRefreshTrigger((prev) => prev + 1);
     } catch (err: any) {
@@ -69,8 +69,18 @@ export function HospitalBedsManager() {
         refreshTrigger={refreshTrigger}
         searchPlaceholder="Search hospital, city, department..."
         sortOptions={[
-          { label: "Available Beds", value: "availableBeds_desc", sortBy: "availableBeds", sortOrder: "desc" },
-          { label: "Hospital Name", value: "businessName_asc", sortBy: "businessName", sortOrder: "asc" },
+          {
+            label: "Available Beds",
+            value: "availableBeds_desc",
+            sortBy: "availableBeds",
+            sortOrder: "desc",
+          },
+          {
+            label: "Hospital Name",
+            value: "businessName_asc",
+            sortBy: "businessName",
+            sortOrder: "asc",
+          },
         ]}
         defaultSort="availableBeds_desc"
         defaultPageSize={25}
@@ -107,7 +117,9 @@ export function HospitalBedsManager() {
                   <span className="text-muted-foreground">
                     Occupancy: {percentOccupied}%
                   </span>
-                  <span className="font-mono text-muted-foreground">Live DB</span>
+                  <span className="font-mono text-muted-foreground">
+                    Live DB
+                  </span>
                 </div>
                 <div className="w-full h-2.5 rounded-full bg-muted overflow-hidden">
                   <div

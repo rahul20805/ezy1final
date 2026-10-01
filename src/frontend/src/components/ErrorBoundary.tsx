@@ -23,13 +23,8 @@ export class ErrorBoundary extends React.Component<
   }
 
   handleReload = () => {
-    // Clear any bad persisted state that might re-trigger the crash
-    try {
-      localStorage.removeItem("ezy1-cart");
-      localStorage.removeItem("ezy1_auth_token");
-      localStorage.removeItem("ezy1_user");
-    } catch {}
-    window.location.href = "/";
+    // Preserve customer session and cart items on recovery
+    window.location.reload();
   };
 
   render() {
@@ -85,8 +80,8 @@ export class ErrorBoundary extends React.Component<
               marginBottom: 28,
             }}
           >
-            Ezy1 hit an unexpected error. Tap the button below to reload the
-            app — your session will refresh automatically.
+            Ezy1 hit an unexpected error. Tap the button below to reload the app
+            — your session will refresh automatically.
           </p>
 
           <button

@@ -1,29 +1,30 @@
-import { useState, useEffect } from "react";
-import Layout from "../components/Layout";
-import { HOSPITALS_DATA, type HospitalFacility } from "../ecosystem-data";
-import { RelatedPagesBar } from "../components/RelatedPagesBar";
-import { useRequireAuth } from "../components/AuthPromptModal";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
-  Search,
-  PhoneCall,
-  Bed,
-  MapPin,
-  Star,
   Activity,
   Ambulance,
-  ShieldAlert,
   ArrowRight,
+  Bed,
   CheckCircle2,
-  Clock
+  Clock,
+  MapPin,
+  PhoneCall,
+  Search,
+  ShieldAlert,
+  Star,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useRequireAuth } from "../components/AuthPromptModal";
+import Layout from "../components/Layout";
+import { RelatedPagesBar } from "../components/RelatedPagesBar";
+import { HOSPITALS_DATA, type HospitalFacility } from "../ecosystem-data";
 
 export default function HospitalsPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [hospitals, setHospitals] = useState<HospitalFacility[]>(HOSPITALS_DATA);
+  const [hospitals, setHospitals] =
+    useState<HospitalFacility[]>(HOSPITALS_DATA);
   const [bookingSuccess, setBookingSuccess] = useState<string | null>(null);
   const { requireAuth } = useRequireAuth();
 
@@ -33,8 +34,12 @@ export default function HospitalsPage() {
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
-          const availableIcu = data.filter((b: any) => b.bedType === "ICU" && b.status === "AVAILABLE").length;
-          const availableGen = data.filter((b: any) => b.bedType === "GENERAL" && b.status === "AVAILABLE").length;
+          const availableIcu = data.filter(
+            (b: any) => b.bedType === "ICU" && b.status === "AVAILABLE",
+          ).length;
+          const availableGen = data.filter(
+            (b: any) => b.bedType === "GENERAL" && b.status === "AVAILABLE",
+          ).length;
           setHospitals((prev) => [
             {
               id: "hosp-live",
@@ -46,8 +51,17 @@ export default function HospitalsPage() {
               distanceKm: 1.2,
               rating: 4.9,
               totalBeds: data.length,
-              availableBeds: { icu: availableIcu, general: availableGen, deluxe: 2 },
-              departments: ["Cardiology", "Neurology", "General Medicine", "Emergency ICU"],
+              availableBeds: {
+                icu: availableIcu,
+                general: availableGen,
+                deluxe: 2,
+              },
+              departments: [
+                "Cardiology",
+                "Neurology",
+                "General Medicine",
+                "Emergency ICU",
+              ],
               hasAmbulance24x7: true,
               hasBloodBank: true,
               hasPharmacy24x7: true,
@@ -62,8 +76,10 @@ export default function HospitalsPage() {
   const filteredHospitals = hospitals.filter(
     (h) =>
       h.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      h.departments.some((d) => d.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      h.address.toLowerCase().includes(searchQuery.toLowerCase())
+      h.departments.some((d) =>
+        d.toLowerCase().includes(searchQuery.toLowerCase()),
+      ) ||
+      h.address.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const handleBookBed = (hospital: HospitalFacility, bedType: string) => {
@@ -71,9 +87,11 @@ export default function HospitalsPage() {
       title: `Confirm Bed Reservation at ${hospital.name}`,
       description: `Reserve an available ${bedType} bed with emergency priority intake.`,
       onSuccess: () => {
-        setBookingSuccess(`Bed successfully reserved at ${hospital.name}! Reference: EZY-BED-${Date.now().toString().slice(-4)}`);
+        setBookingSuccess(
+          `Bed successfully reserved at ${hospital.name}! Reference: EZY-BED-${Date.now().toString().slice(-4)}`,
+        );
         setTimeout(() => setBookingSuccess(null), 6000);
-      }
+      },
     });
   };
 
@@ -116,13 +134,16 @@ export default function HospitalsPage() {
                   <Badge className="bg-red-500/10 text-red-600 border-red-500/20 font-semibold">
                     Live Bed Tracking
                   </Badge>
-                  <span className="text-xs text-muted-foreground">Updated 2 mins ago</span>
+                  <span className="text-xs text-muted-foreground">
+                    Updated 2 mins ago
+                  </span>
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-display font-black text-foreground">
                   Hospitals & Emergency Care Near You
                 </h1>
                 <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
-                  Check live ICU & general bed availability, specialty departments, and reserve admission spots directly.
+                  Check live ICU & general bed availability, specialty
+                  departments, and reserve admission spots directly.
                 </p>
               </div>
 
@@ -175,16 +196,25 @@ export default function HospitalsPage() {
 
                   {/* Distance & Facility Badges */}
                   <div className="flex flex-wrap gap-1.5 my-3">
-                    <Badge variant="outline" className="text-[11px] bg-muted/40 font-medium">
+                    <Badge
+                      variant="outline"
+                      className="text-[11px] bg-muted/40 font-medium"
+                    >
                       {hosp.distanceKm} km away
                     </Badge>
                     {hosp.hasAmbulance24x7 && (
-                      <Badge variant="outline" className="text-[11px] bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
+                      <Badge
+                        variant="outline"
+                        className="text-[11px] bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                      >
                         24/7 Ambulance
                       </Badge>
                     )}
                     {hosp.hasBloodBank && (
-                      <Badge variant="outline" className="text-[11px] bg-rose-500/10 text-rose-600 border-rose-500/20">
+                      <Badge
+                        variant="outline"
+                        className="text-[11px] bg-rose-500/10 text-rose-600 border-rose-500/20"
+                      >
                         Blood Bank
                       </Badge>
                     )}
@@ -197,7 +227,9 @@ export default function HospitalsPage() {
                         <Bed className="w-4 h-4 text-primary" />
                         Live Available Beds
                       </span>
-                      <span className="text-[11px] text-emerald-600 font-semibold">Real-Time</span>
+                      <span className="text-[11px] text-emerald-600 font-semibold">
+                        Real-Time
+                      </span>
                     </div>
                     <div className="grid grid-cols-3 gap-2 text-center pt-1">
                       <div className="p-2 rounded-lg bg-card border border-border/60">
@@ -207,13 +239,17 @@ export default function HospitalsPage() {
                         </div>
                       </div>
                       <div className="p-2 rounded-lg bg-card border border-border/60">
-                        <div className="text-xs text-muted-foreground">General</div>
+                        <div className="text-xs text-muted-foreground">
+                          General
+                        </div>
                         <div className="text-base font-bold text-emerald-600 font-display">
                           {hosp.availableBeds.general}
                         </div>
                       </div>
                       <div className="p-2 rounded-lg bg-card border border-border/60">
-                        <div className="text-xs text-muted-foreground">Deluxe</div>
+                        <div className="text-xs text-muted-foreground">
+                          Deluxe
+                        </div>
                         <div className="text-base font-bold text-primary font-display">
                           {hosp.availableBeds.deluxe}
                         </div>
@@ -223,10 +259,15 @@ export default function HospitalsPage() {
 
                   {/* Departments */}
                   <div className="mt-3 text-xs text-muted-foreground">
-                    <strong className="text-foreground font-semibold block mb-1">Key Departments:</strong>
+                    <strong className="text-foreground font-semibold block mb-1">
+                      Key Departments:
+                    </strong>
                     <div className="flex flex-wrap gap-1">
                       {hosp.departments.map((dept) => (
-                        <span key={dept} className="px-2 py-0.5 rounded-md bg-muted/60 text-[11px]">
+                        <span
+                          key={dept}
+                          className="px-2 py-0.5 rounded-md bg-muted/60 text-[11px]"
+                        >
                           {dept}
                         </span>
                       ))}

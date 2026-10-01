@@ -6,13 +6,13 @@
 import { Navigate } from "@tanstack/react-router";
 import { usePartnerAuth } from "../lib/partnerAuthStore";
 
+import AdminPartnerPortal from "./partner/AdminPartnerPortal";
+import DeliveryPartnerPortal from "./partner/DeliveryPartnerPortal";
 import GroceryPartnerPortal from "./partner/GroceryPartnerPortal";
 import HospitalPartnerPortal from "./partner/HospitalPartnerPortal";
 import PharmacyPartnerPortal from "./partner/PharmacyPartnerPortal";
 import RestaurantPartnerPortal from "./partner/RestaurantPartnerPortal";
-import DeliveryPartnerPortal from "./partner/DeliveryPartnerPortal";
 import ServiceProviderPortal from "./partner/ServiceProviderPortal";
-import AdminPartnerPortal from "./partner/AdminPartnerPortal";
 
 export default function PartnerDashboardPage() {
   const { isAuthenticated, currentPartner } = usePartnerAuth();
@@ -21,7 +21,11 @@ export default function PartnerDashboardPage() {
     return <Navigate to="/partner-login" />;
   }
 
-  const pt = (currentPartner.providerType || currentPartner.partnerType || "GROCERY").toUpperCase();
+  const pt = (
+    currentPartner.providerType ||
+    currentPartner.partnerType ||
+    "GROCERY"
+  ).toUpperCase();
   const role = (currentPartner.role || "").toUpperCase();
 
   // Owners get owner control centre

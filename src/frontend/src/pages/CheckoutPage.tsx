@@ -7,28 +7,39 @@ import {
   ChevronRight,
   CreditCard,
   MapPin,
-  ShoppingBag,
   ShieldCheck,
+  ShoppingBag,
 } from "lucide-react";
 import { useState } from "react";
 import Layout from "../components/Layout";
 import { useAuth } from "../lib/AuthContext";
 
-import { useCartStore } from "../lib/cartStore";
-import { useLocationStore, LocationData } from "../lib/locationStore";
-import { LocationModal } from "../components/location/LocationModal";
 import { toast } from "sonner";
+import { LocationModal } from "../components/location/LocationModal";
+import { useCartStore } from "../lib/cartStore";
+import { type LocationData, useLocationStore } from "../lib/locationStore";
 
 export default function CheckoutPage() {
   const { isAuthenticated, user } = useAuth();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const { currentLocation, savedAddresses } = useLocationStore();
-  const [selectedLocation, setSelectedLocation] = useState<LocationData>(currentLocation);
+  const [selectedLocation, setSelectedLocation] =
+    useState<LocationData>(currentLocation);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<string>("UPI");
   const [isProcessing, setIsProcessing] = useState(false);
   const [confirmedOrder, setConfirmedOrder] = useState<any | null>(null);
   const [confirmedPaymentId, setConfirmedPaymentId] = useState<string>("");
+
+  const [customerName, setCustomerName] = useState<string>(
+    () => user?.name || (typeof window !== "undefined" ? localStorage.getItem("ezy1_customer_name") : "") || "Valued Customer"
+  );
+  const [customerEmail, setCustomerEmail] = useState<string>(
+    () => user?.email || (typeof window !== "undefined" ? localStorage.getItem("ezy1_customer_email") : "") || ""
+  );
+  const [customerPhone, setCustomerPhone] = useState<string>(
+    () => user?.phone || (typeof window !== "undefined" ? localStorage.getItem("ezy1_customer_phone") : "") || ""
+  );
 
   const { items, totalItems, totalAmount, clearCart } = useCartStore();
 
@@ -40,7 +51,9 @@ export default function CheckoutPage() {
       if ((window as any).Razorpay) {
         return resolve(true);
       }
-      const existing = document.querySelector('script[src*="checkout.razorpay.com"]');
+      const existing = document.querySelector(
+        'script[src*="checkout.razorpay.com"]',
+      );
       if (existing) {
         return resolve(true);
       }
@@ -53,15 +66,26 @@ export default function CheckoutPage() {
     });
   };
 
-  const createBackendOrder = async (payMethod: string, payStatus: string, rzpPayId?: string, rzpOrdId?: string) => {
+  const createBackendOrder = async (
+    payMethod: string,
+    payStatus: string,
+    rzpPayId?: string,
+    rzpOrdId?: string,
+  ) => {
+    if (typeof window !== "undefined") {
+      if (customerEmail) localStorage.setItem("ezy1_customer_email", customerEmail);
+      if (customerName) localStorage.setItem("ezy1_customer_name", customerName);
+      if (customerPhone) localStorage.setItem("ezy1_customer_phone", customerPhone);
+    }
+
     const res = await fetch("/api/orders", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         userId: user?.id || 1,
-        customerName: user?.name || "Valued Customer",
-        customerEmail: user?.email || "customer@ezy1.site",
-        customerPhone: user?.phone || "9876543210",
+        customerName: customerName || user?.name || "Valued Customer",
+        customerEmail: customerEmail || user?.email || "customer@ezy1.site",
+        customerPhone: customerPhone || user?.phone || "9876543210",
         vendorId: Object.values(items)[0]?.product?.vendorId || 1,
         totalAmount: toPay,
         paymentMethod: payMethod,
@@ -69,7 +93,8 @@ export default function CheckoutPage() {
         gatewayPaymentId: rzpPayId || null,
         razorpayPaymentId: rzpPayId || null,
         razorpayOrderId: rzpOrdId || null,
-        deliveryAddress: selectedLocation.formattedAddress || "Bengaluru, Karnataka",
+        deliveryAddress:
+          selectedLocation.formattedAddress || "Bengaluru, Karnataka",
         location: selectedLocation,
         items: Object.values(items).map((item) => ({
           id: item.product.id,
@@ -105,7 +130,10 @@ export default function CheckoutPage() {
     try {
       // 1. CASH ON DELIVERY
       if (paymentMethod === "COD") {
-        const orderData = await createBackendOrder("Cash on Delivery", "pending");
+        const orderData = await createBackendOrder(
+          "Cash on Delivery",
+          "pending",
+        );
         setConfirmedOrder(orderData.order);
         clearCart();
         setStep(3);
@@ -128,7 +156,9 @@ export default function CheckoutPage() {
       // 3. RAZORPAY GATEWAY (UPI, GPay, PhonePe, Cards, NetBanking)
       const scriptReady = await loadRazorpayScript();
       if (!scriptReady || !(window as any).Razorpay) {
-        throw new Error("Unable to connect to Razorpay payment gateway. Please check your internet connection.");
+        throw new Error(
+          "Unable to connect to Razorpay payment gateway. Please check your internet connection.",
+        );
       }
 
       // Create genuine Razorpay Order on server
@@ -149,7 +179,9 @@ export default function CheckoutPage() {
 
       const rzpOrderData = await rzpOrderRes.json();
       if (!rzpOrderRes.ok || !rzpOrderData.success) {
-        throw new Error(rzpOrderData.error || "Failed to initialize payment gateway order.");
+        throw new Error(
+          rzpOrderData.error || "Failed to initialize payment gateway order.",
+        );
       }
 
       const options = {
@@ -161,9 +193,9 @@ export default function CheckoutPage() {
         image: "https://ezy1.site/android-chrome-192x192.png",
         order_id: rzpOrderData.orderId,
         prefill: {
-          name: user?.name || "Customer",
-          email: user?.email || "customer@ezy1.site",
-          contact: user?.phone ? user.phone.replace(/[^0-9]/g, "").slice(-10) : "9876543210",
+          name: customerName || user?.name || "Customer",
+          email: customerEmail || user?.email || "customer@ezy1.site",
+          contact: (customerPhone || user?.phone || "9876543210").replace(/[^0-9]/g, "").slice(-10),
         },
         theme: {
           color: "#FF5100",
@@ -183,7 +215,9 @@ export default function CheckoutPage() {
 
             const verifyData = await verifyRes.json();
             if (!verifyRes.ok || !verifyData.success) {
-              throw new Error("Payment signature verification failed. Please contact support.");
+              throw new Error(
+                "Payment signature verification failed. Please contact support.",
+              );
             }
 
             // Create genuine confirmed order in backend
@@ -191,7 +225,7 @@ export default function CheckoutPage() {
               "UPI / Razorpay",
               "paid",
               response.razorpay_payment_id,
-              response.razorpay_order_id
+              response.razorpay_order_id,
             );
 
             setConfirmedOrder(orderData.order);
@@ -217,13 +251,17 @@ export default function CheckoutPage() {
       const razorpayInstance = new (window as any).Razorpay(options);
       razorpayInstance.on("payment.failed", (failResp: any) => {
         setIsProcessing(false);
-        const errMsg = failResp.error?.description || "Payment was not completed. Your order has not been confirmed. Please try again.";
+        const errMsg =
+          failResp.error?.description ||
+          "Payment was not completed. Your order has not been confirmed. Please try again.";
         toast.error(errMsg);
       });
       razorpayInstance.open();
     } catch (err: any) {
       console.error("Payment error:", err);
-      toast.error(err.message || "Payment processing failed. Please try again.");
+      toast.error(
+        err.message || "Payment processing failed. Please try again.",
+      );
       setIsProcessing(false);
     }
   };
@@ -234,9 +272,12 @@ export default function CheckoutPage() {
         <div className="container py-20 text-center max-w-md mx-auto">
           <div className="p-8 rounded-3xl bg-card border border-border shadow-md space-y-4">
             <ShoppingBag className="w-12 h-12 text-primary mx-auto opacity-80" />
-            <h2 className="text-2xl font-bold font-display">Login to Complete Order</h2>
+            <h2 className="text-2xl font-bold font-display">
+              Login to Complete Order
+            </h2>
             <p className="text-xs text-muted-foreground">
-              Please sign in with your phone or email to securely proceed to checkout and save delivery addresses.
+              Please sign in with your phone or email to securely proceed to
+              checkout and save delivery addresses.
             </p>
             <div className="pt-2">
               <Link to="/login" search={{ redirect: "/checkout" }}>
@@ -255,9 +296,12 @@ export default function CheckoutPage() {
         <div className="container py-20 text-center max-w-md mx-auto">
           <div className="p-8 rounded-3xl bg-card border border-border shadow-md space-y-4">
             <ShoppingBag className="w-12 h-12 text-muted-foreground mx-auto" />
-            <h2 className="text-2xl font-bold font-display">Your Cart is Empty</h2>
+            <h2 className="text-2xl font-bold font-display">
+              Your Cart is Empty
+            </h2>
             <p className="text-xs text-muted-foreground">
-              Explore thousands of products, groceries, and daily essentials on EZY1.
+              Explore thousands of products, groceries, and daily essentials on
+              EZY1.
             </p>
             <Link to="/">
               <Button className="mt-2">Start Shopping</Button>
@@ -299,7 +343,9 @@ export default function CheckoutPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-bold text-sm text-foreground">
-                            {selectedLocation.locality || selectedLocation.city || "Selected Address"}
+                            {selectedLocation.locality ||
+                              selectedLocation.city ||
+                              "Selected Address"}
                           </span>
                           <Badge className="text-[10px] bg-primary text-primary-foreground">
                             Active Delivery Location
@@ -316,9 +362,47 @@ export default function CheckoutPage() {
                       </div>
                     </div>
 
+                    {/* Contact Information & Email Receipt Destination */}
+                    <div className="p-4 border rounded-2xl bg-card border-border space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                          <span>📧 Order Confirmation &amp; Invoice Delivery</span>
+                        </span>
+                        <span className="text-[10px] text-primary font-medium">Delivered via Brevo</span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-[11px] font-medium text-muted-foreground block mb-1">
+                            Recipient Name
+                          </label>
+                          <input
+                            type="text"
+                            value={customerName}
+                            onChange={(e) => setCustomerName(e.target.value)}
+                            placeholder="Full Name"
+                            className="w-full text-xs px-3 py-2 rounded-lg border border-border bg-background focus:ring-1 focus:ring-primary outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[11px] font-medium text-muted-foreground block mb-1">
+                            Email Address for Order Updates
+                          </label>
+                          <input
+                            type="email"
+                            value={customerEmail}
+                            onChange={(e) => setCustomerEmail(e.target.value)}
+                            placeholder="you@example.com"
+                            className="w-full text-xs px-3 py-2 rounded-lg border border-border bg-background focus:ring-1 focus:ring-primary outline-none"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
                     {/* Saved Addresses List (if more exist) */}
                     {savedAddresses.filter(
-                      (a) => a.formattedAddress !== selectedLocation.formattedAddress
+                      (a) =>
+                        a.formattedAddress !==
+                        selectedLocation.formattedAddress,
                     ).length > 0 && (
                       <div className="space-y-2 pt-2">
                         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -326,7 +410,11 @@ export default function CheckoutPage() {
                         </p>
                         <div className="space-y-2">
                           {savedAddresses
-                            .filter((a) => a.formattedAddress !== selectedLocation.formattedAddress)
+                            .filter(
+                              (a) =>
+                                a.formattedAddress !==
+                                selectedLocation.formattedAddress,
+                            )
                             .map((addr, idx) => (
                               <div
                                 key={idx}
@@ -335,13 +423,19 @@ export default function CheckoutPage() {
                               >
                                 <div className="min-w-0 flex-1">
                                   <span className="font-semibold text-foreground">
-                                    {addr.locality || addr.city || "Saved Address"}
+                                    {addr.locality ||
+                                      addr.city ||
+                                      "Saved Address"}
                                   </span>
                                   <p className="text-muted-foreground truncate text-[11px] mt-0.5">
                                     {addr.formattedAddress}
                                   </p>
                                 </div>
-                                <Button variant="outline" size="sm" className="text-xs h-7">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-xs h-7"
+                                >
                                   Select
                                 </Button>
                               </div>
@@ -378,7 +472,9 @@ export default function CheckoutPage() {
                   <div className="pl-11 flex justify-between items-center">
                     <div className="min-w-0 flex-1 pr-3">
                       <p className="text-sm font-semibold truncate">
-                        {selectedLocation.locality || selectedLocation.city || "Delivery Address"}
+                        {selectedLocation.locality ||
+                          selectedLocation.city ||
+                          "Delivery Address"}
                       </p>
                       <p className="text-xs text-muted-foreground truncate">
                         {selectedLocation.formattedAddress}
@@ -498,7 +594,8 @@ export default function CheckoutPage() {
                       >
                         Privacy Policy
                         <span className="text-[9px]">↗</span>
-                      </a>.
+                      </a>
+                      .
                     </p>
                   </div>
                 )}
@@ -523,35 +620,53 @@ export default function CheckoutPage() {
                     Order Placed Successfully!
                   </h2>
                   <p className="text-sm text-green-800 dark:text-green-400 max-w-md mx-auto">
-                    Your order has been verified and dispatched to the partner store.
+                    Your order has been verified and dispatched to the partner
+                    store.
                   </p>
 
                   <div className="bg-white dark:bg-card border border-green-200 dark:border-green-900/60 rounded-2xl p-4 text-left text-xs space-y-2 max-w-md mx-auto shadow-xs">
                     <div className="flex justify-between items-center py-1 border-b border-border/50">
-                      <span className="text-muted-foreground font-medium">Order Number:</span>
+                      <span className="text-muted-foreground font-medium">
+                        Order Number:
+                      </span>
                       <span className="font-mono font-bold text-foreground">
-                        {confirmedOrder?.orderNumber || `EZ-${Date.now().toString().slice(-4)}`}
+                        {confirmedOrder?.orderNumber ||
+                          `EZ-${Date.now().toString().slice(-4)}`}
                       </span>
                     </div>
                     {confirmedPaymentId && (
                       <div className="flex justify-between items-center py-1 border-b border-border/50">
-                        <span className="text-muted-foreground font-medium">Razorpay Payment ID:</span>
+                        <span className="text-muted-foreground font-medium">
+                          Razorpay Payment ID:
+                        </span>
                         <span className="font-mono font-bold text-emerald-600">
                           {confirmedPaymentId}
                         </span>
                       </div>
                     )}
                     <div className="flex justify-between items-center py-1 border-b border-border/50">
-                      <span className="text-muted-foreground font-medium">Payment Method:</span>
-                      <span className="font-semibold text-foreground">{paymentMethod}</span>
+                      <span className="text-muted-foreground font-medium">
+                        Payment Method:
+                      </span>
+                      <span className="font-semibold text-foreground">
+                        {paymentMethod}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center py-1 border-b border-border/50">
-                      <span className="text-muted-foreground font-medium">Amount Paid:</span>
-                      <span className="font-bold text-primary">₹{confirmedOrder?.totalAmount || toPay}</span>
+                      <span className="text-muted-foreground font-medium">
+                        Amount Paid:
+                      </span>
+                      <span className="font-bold text-primary">
+                        ₹{confirmedOrder?.totalAmount || toPay}
+                      </span>
                     </div>
                     <div className="py-1">
-                      <span className="text-muted-foreground font-medium block mb-0.5">Delivery Address:</span>
-                      <span className="text-foreground break-words">{selectedLocation.formattedAddress}</span>
+                      <span className="text-muted-foreground font-medium block mb-0.5">
+                        Delivery Address:
+                      </span>
+                      <span className="text-foreground break-words">
+                        {selectedLocation.formattedAddress}
+                      </span>
                     </div>
                   </div>
 

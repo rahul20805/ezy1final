@@ -25,7 +25,8 @@ import {
   SlidersHorizontal,
   X,
 } from "lucide-react";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import type React from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 export interface ServerFilterOption {
@@ -71,13 +72,16 @@ interface ServerDataTableProps<T extends { id?: number | string }> {
     item: T,
     index: number,
     isSelected: boolean,
-    onToggleSelect: () => void
+    onToggleSelect: () => void,
   ) => React.ReactNode;
   renderEmptyState?: () => React.ReactNode;
   onAddNew?: () => void;
   addNewLabel?: string;
   bulkActions?: ServerBulkAction[];
-  onBulkAction?: (selectedIds: (string | number)[], action: string) => Promise<void>;
+  onBulkAction?: (
+    selectedIds: (string | number)[],
+    action: string,
+  ) => Promise<void>;
   refreshTrigger?: any;
   viewMode?: "grid" | "table" | "list";
   extraActions?: React.ReactNode;
@@ -114,9 +118,10 @@ export function ServerDataTable<T extends { id?: number | string }>({
   // Query states
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [activeFilters, setActiveFilters] = useState<Record<string, string>>(defaultFilters);
+  const [activeFilters, setActiveFilters] =
+    useState<Record<string, string>>(defaultFilters);
   const [currentSort, setCurrentSort] = useState<string>(
-    defaultSort || (sortOptions[0]?.value ?? "")
+    defaultSort || (sortOptions[0]?.value ?? ""),
   );
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(defaultPageSize);
@@ -132,7 +137,9 @@ export function ServerDataTable<T extends { id?: number | string }>({
   });
 
   // Bulk Selection
-  const [selectedIds, setSelectedIds] = useState<Set<string | number>>(new Set());
+  const [selectedIds, setSelectedIds] = useState<Set<string | number>>(
+    new Set(),
+  );
   const [isBulkExecuting, setIsBulkExecuting] = useState(false);
 
   // Abort controller ref for search race-condition prevention
@@ -188,8 +195,12 @@ export function ServerDataTable<T extends { id?: number | string }>({
     try {
       // Find sort config
       const selectedSortOpt = sortOptions.find((s) => s.value === currentSort);
-      const sortBy = selectedSortOpt?.sortBy || (currentSort ? currentSort.split("_")[0] : "");
-      const sortOrder = selectedSortOpt?.sortOrder || (currentSort?.endsWith("_desc") ? "desc" : "asc");
+      const sortBy =
+        selectedSortOpt?.sortBy ||
+        (currentSort ? currentSort.split("_")[0] : "");
+      const sortOrder =
+        selectedSortOpt?.sortOrder ||
+        (currentSort?.endsWith("_desc") ? "desc" : "asc");
 
       // Build query params
       const params = new URLSearchParams();
@@ -237,7 +248,9 @@ export function ServerDataTable<T extends { id?: number | string }>({
       });
 
       if (!res.ok) {
-        throw new Error(`Server returned HTTP ${res.status}: ${res.statusText}`);
+        throw new Error(
+          `Server returned HTTP ${res.status}: ${res.statusText}`,
+        );
       }
 
       const json = await res.json();
@@ -318,7 +331,9 @@ export function ServerDataTable<T extends { id?: number | string }>({
     });
   };
 
-  const isAllSelected = items.length > 0 && items.every((item) => item.id !== undefined && selectedIds.has(item.id));
+  const isAllSelected =
+    items.length > 0 &&
+    items.every((item) => item.id !== undefined && selectedIds.has(item.id));
 
   const toggleSelectAll = () => {
     if (isAllSelected) {
@@ -356,11 +371,15 @@ export function ServerDataTable<T extends { id?: number | string }>({
   const hasActiveFilters =
     debouncedSearch !== "" ||
     Object.keys(activeFilters).some(
-      (k) => activeFilters[k] && activeFilters[k] !== defaultFilters[k]
+      (k) => activeFilters[k] && activeFilters[k] !== defaultFilters[k],
     );
 
-  const startRecord = pagination.total === 0 ? 0 : (pagination.page - 1) * pagination.limit + 1;
-  const endRecord = Math.min(pagination.page * pagination.limit, pagination.total);
+  const startRecord =
+    pagination.total === 0 ? 0 : (pagination.page - 1) * pagination.limit + 1;
+  const endRecord = Math.min(
+    pagination.page * pagination.limit,
+    pagination.total,
+  );
 
   return (
     <div className="space-y-4">
@@ -368,13 +387,20 @@ export function ServerDataTable<T extends { id?: number | string }>({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-card/60 border border-border/70 p-5 rounded-3xl backdrop-blur-sm shadow-xs">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-display font-bold text-foreground">{title}</h2>
-            <Badge variant="secondary" className="font-mono text-xs font-semibold px-2 py-0.5">
+            <h2 className="text-xl font-display font-bold text-foreground">
+              {title}
+            </h2>
+            <Badge
+              variant="secondary"
+              className="font-mono text-xs font-semibold px-2 py-0.5"
+            >
               {pagination.total} records
             </Badge>
           </div>
           {description && (
-            <p className="text-sm text-muted-foreground mt-0.5">{description}</p>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {description}
+            </p>
           )}
         </div>
 
@@ -386,7 +412,9 @@ export function ServerDataTable<T extends { id?: number | string }>({
             disabled={loading}
             className="rounded-xl border-border/80 text-xs gap-1.5 h-9"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`}
+            />
             Refresh
           </Button>
 
@@ -503,7 +531,9 @@ export function ServerDataTable<T extends { id?: number | string }>({
                 onClick={() => handleRunBulkAction(action.action)}
                 className="rounded-xl text-xs h-8 font-medium gap-1"
               >
-                {isBulkExecuting && <Loader2 className="w-3 h-3 animate-spin" />}
+                {isBulkExecuting && (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                )}
                 {action.label}
               </Button>
             ))}
@@ -540,8 +570,12 @@ export function ServerDataTable<T extends { id?: number | string }>({
       {loading && items.length === 0 ? (
         <div className="flex flex-col items-center justify-center p-16 rounded-3xl border border-dashed border-border bg-card/30 min-h-[300px]">
           <Loader2 className="w-8 h-8 text-primary animate-spin mb-3" />
-          <p className="text-sm font-medium text-foreground">Querying live database...</p>
-          <p className="text-xs text-muted-foreground mt-1">Applying server-side pagination & indexing</p>
+          <p className="text-sm font-medium text-foreground">
+            Querying live database...
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Applying server-side pagination & indexing
+          </p>
         </div>
       ) : error ? (
         <div className="flex flex-col items-center justify-center p-12 rounded-3xl border border-destructive/30 bg-destructive/5 text-center min-h-[250px]">
@@ -563,9 +597,12 @@ export function ServerDataTable<T extends { id?: number | string }>({
         ) : (
           <div className="flex flex-col items-center justify-center p-16 rounded-3xl border border-dashed border-border bg-card/20 text-center min-h-[250px]">
             <Search className="w-8 h-8 text-muted-foreground mb-2 opacity-50" />
-            <p className="text-sm font-semibold text-foreground">No records matched your search</p>
+            <p className="text-sm font-semibold text-foreground">
+              No records matched your search
+            </p>
             <p className="text-xs text-muted-foreground mt-1 max-w-sm">
-              Try adjusting your query, clear active filters, or add a new record to the database.
+              Try adjusting your query, clear active filters, or add a new
+              record to the database.
             </p>
             {hasActiveFilters && (
               <Button
@@ -588,9 +625,13 @@ export function ServerDataTable<T extends { id?: number | string }>({
           }
         >
           {items.map((item, index) => {
-            const isSelected = item.id !== undefined && selectedIds.has(item.id);
+            const isSelected =
+              item.id !== undefined && selectedIds.has(item.id);
             return (
-              <div key={item.id ?? index} className="relative group min-w-0 overflow-hidden">
+              <div
+                key={item.id ?? index}
+                className="relative group min-w-0 overflow-hidden"
+              >
                 {renderItem(item, index, isSelected, () => {
                   if (item.id !== undefined) toggleSelect(item.id);
                 })}
@@ -604,9 +645,10 @@ export function ServerDataTable<T extends { id?: number | string }>({
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-card/40 border border-border/70 p-4 rounded-2xl text-xs text-muted-foreground">
         <div className="flex items-center gap-3">
           <span>
-            Showing <strong className="text-foreground">{startRecord}</strong> to{" "}
-            <strong className="text-foreground">{endRecord}</strong> of{" "}
-            <strong className="text-foreground">{pagination.total}</strong> records
+            Showing <strong className="text-foreground">{startRecord}</strong>{" "}
+            to <strong className="text-foreground">{endRecord}</strong> of{" "}
+            <strong className="text-foreground">{pagination.total}</strong>{" "}
+            records
           </span>
 
           <div className="flex items-center gap-1.5 ml-2 border-l border-border pl-3">

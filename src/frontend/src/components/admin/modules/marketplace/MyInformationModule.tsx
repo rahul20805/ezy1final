@@ -1,6 +1,12 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -127,7 +133,9 @@ export function MyInformationModule() {
   const [editFieldKey, setEditFieldKey] = useState<string>("");
   const [editFieldLabel, setEditFieldLabel] = useState<string>("");
   const [editFieldValue, setEditFieldValue] = useState<string>("");
-  const [editFieldType, setEditFieldType] = useState<"text" | "number" | "textarea">("text");
+  const [editFieldType, setEditFieldType] = useState<
+    "text" | "number" | "textarea"
+  >("text");
 
   // Service Modal State (Add / Edit)
   const [serviceModalOpen, setServiceModalOpen] = useState(false);
@@ -143,7 +151,10 @@ export function MyInformationModule() {
   const fetchVendorData = async () => {
     try {
       setLoading(true);
-      const vId = currentPartner?.vendorId && currentPartner.vendorId > 0 ? currentPartner.vendorId : 1;
+      const vId =
+        currentPartner?.vendorId && currentPartner.vendorId > 0
+          ? currentPartner.vendorId
+          : 1;
       const res = await fetch(`/api/vendors/${vId}`);
       if (!res.ok) throw new Error("Could not fetch vendor profile");
       const data = await res.json();
@@ -189,7 +200,9 @@ export function MyInformationModule() {
   ) => {
     setEditFieldKey(key);
     setEditFieldLabel(label);
-    setEditFieldValue(currentVal !== undefined && currentVal !== null ? String(currentVal) : "");
+    setEditFieldValue(
+      currentVal !== undefined && currentVal !== null ? String(currentVal) : "",
+    );
     setEditFieldType(type);
     setEditModalOpen(true);
   };
@@ -226,7 +239,9 @@ export function MyInformationModule() {
     try {
       setSaving(true);
       const parsedValue =
-        editFieldType === "number" ? Number(editFieldValue) : editFieldValue.trim();
+        editFieldType === "number"
+          ? Number(editFieldValue)
+          : editFieldValue.trim();
 
       const payload = {
         [editFieldKey]: parsedValue,
@@ -244,7 +259,9 @@ export function MyInformationModule() {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        throw new Error(data.error || "Unable to save your changes. Please try again.");
+        throw new Error(
+          data.error || "Unable to save your changes. Please try again.",
+        );
       }
 
       // Success
@@ -264,14 +281,19 @@ export function MyInformationModule() {
       }
     } catch (err: any) {
       console.error("Save failed:", err);
-      toast.error(err.message || "Unable to save your changes. Please try again.");
+      toast.error(
+        err.message || "Unable to save your changes. Please try again.",
+      );
     } finally {
       setSaving(false);
     }
   };
 
   // Toggle boolean fields (e.g. 24x7 emergency, available status)
-  const handleToggleBooleanField = async (key: string, currentValue: boolean) => {
+  const handleToggleBooleanField = async (
+    key: string,
+    currentValue: boolean,
+  ) => {
     if (!vendor) return;
     try {
       setSaving(true);
@@ -286,7 +308,9 @@ export function MyInformationModule() {
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
-        throw new Error(data.error || "Unable to save your changes. Please try again.");
+        throw new Error(
+          data.error || "Unable to save your changes. Please try again.",
+        );
       }
       toast.success("Changes saved successfully.");
       setVendor(data.vendor);
@@ -301,7 +325,9 @@ export function MyInformationModule() {
         }
       }
     } catch (err: any) {
-      toast.error(err.message || "Unable to save your changes. Please try again.");
+      toast.error(
+        err.message || "Unable to save your changes. Please try again.",
+      );
     } finally {
       setSaving(false);
     }
@@ -356,7 +382,8 @@ export function MyInformationModule() {
           }),
         });
         const data = await res.json();
-        if (!res.ok || !data.success) throw new Error(data.error || "Failed to update service.");
+        if (!res.ok || !data.success)
+          throw new Error(data.error || "Failed to update service.");
         toast.success("Service updated successfully.");
       } else {
         // Create
@@ -376,7 +403,8 @@ export function MyInformationModule() {
           }),
         });
         const data = await res.json();
-        if (!res.ok || !data.success) throw new Error(data.error || "Failed to create service.");
+        if (!res.ok || !data.success)
+          throw new Error(data.error || "Failed to create service.");
         toast.success("Service added successfully.");
       }
 
@@ -395,14 +423,20 @@ export function MyInformationModule() {
   };
 
   const handleDeleteService = async (serviceId: number) => {
-    if (!confirm("Are you sure you want to remove this service from your catalog?")) return;
+    if (
+      !confirm(
+        "Are you sure you want to remove this service from your catalog?",
+      )
+    )
+      return;
     try {
       const res = await fetch(`/api/services/${serviceId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.error || "Failed to delete service.");
+      if (!res.ok || !data.success)
+        throw new Error(data.error || "Failed to delete service.");
       toast.success("Service removed successfully.");
       setServices((prev) => prev.filter((s) => s.id !== serviceId));
     } catch (err: any) {
@@ -436,7 +470,9 @@ export function MyInformationModule() {
     );
   }
 
-  const isHealthcare = vendor.category?.toLowerCase() === "healthcare" || vendor.category?.toLowerCase() === "hospital";
+  const isHealthcare =
+    vendor.category?.toLowerCase() === "healthcare" ||
+    vendor.category?.toLowerCase() === "hospital";
   const isDoctor = !!vendor.doctorName || !!vendor.specialization;
   const isServices = vendor.category?.toLowerCase() === "services";
   const isTransport = vendor.category?.toLowerCase() === "transport";
@@ -449,12 +485,22 @@ export function MyInformationModule() {
           <div className="flex items-center gap-4">
             <div className="relative">
               <img
-                src={vendor.image || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80"}
+                src={
+                  vendor.image ||
+                  "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80"
+                }
                 alt={vendor.businessName}
                 className="w-20 h-20 rounded-2xl object-cover border-2 border-background shadow-md"
               />
               <button
-                onClick={() => handleOpenEdit("image", "Business Profile Image URL", vendor.image, "text")}
+                onClick={() =>
+                  handleOpenEdit(
+                    "image",
+                    "Business Profile Image URL",
+                    vendor.image,
+                    "text",
+                  )
+                }
                 className="absolute -bottom-1 -right-1 p-1.5 rounded-full bg-primary text-primary-foreground shadow-sm hover:scale-110 transition-transform"
                 title="Replace image"
               >
@@ -475,18 +521,26 @@ export function MyInformationModule() {
                     <ShieldCheck className="w-3 h-3" /> Verified Partner
                   </Badge>
                 ) : (
-                  <Badge variant="outline" className="text-xs text-muted-foreground">
+                  <Badge
+                    variant="outline"
+                    className="text-xs text-muted-foreground"
+                  >
                     Verification Pending
                   </Badge>
                 )}
               </div>
               <p className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
-                <span>Partner ID: <strong>#{vendor.id}</strong></span>
+                <span>
+                  Partner ID: <strong>#{vendor.id}</strong>
+                </span>
                 <span>•</span>
-                <span>Owner: <strong>{vendor.ownerName}</strong></span>
+                <span>
+                  Owner: <strong>{vendor.ownerName}</strong>
+                </span>
                 <span>•</span>
                 <span className="flex items-center gap-0.5 text-amber-500 font-semibold">
-                  <Star className="w-3.5 h-3.5 fill-amber-500" /> {vendor.rating.toFixed(1)}
+                  <Star className="w-3.5 h-3.5 fill-amber-500" />{" "}
+                  {vendor.rating.toFixed(1)}
                 </span>
               </p>
             </div>
@@ -507,62 +561,104 @@ export function MyInformationModule() {
         {/* Live Metrics strip */}
         <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-border border-b border-border bg-muted/20">
           <div className="p-4 text-center">
-            <p className="text-xs text-muted-foreground font-medium">Orders / Bookings</p>
-            <p className="text-lg font-bold text-foreground mt-0.5">{vendor.totalOrders || 0}</p>
+            <p className="text-xs text-muted-foreground font-medium">
+              Orders / Bookings
+            </p>
+            <p className="text-lg font-bold text-foreground mt-0.5">
+              {vendor.totalOrders || 0}
+            </p>
           </div>
           <div className="p-4 text-center">
-            <p className="text-xs text-muted-foreground font-medium">Operational Status</p>
+            <p className="text-xs text-muted-foreground font-medium">
+              Operational Status
+            </p>
             <p className="text-lg font-bold text-emerald-600 mt-0.5 capitalize">
               {vendor.status || "Active"}
             </p>
           </div>
           <div className="p-4 text-center">
-            <p className="text-xs text-muted-foreground font-medium">Operating Hours</p>
+            <p className="text-xs text-muted-foreground font-medium">
+              Operating Hours
+            </p>
             <p className="text-sm font-semibold text-foreground mt-1 truncate">
               {vendor.openingHours || "09:00 AM - 09:00 PM"}
             </p>
           </div>
           <div className="p-4 text-center">
-            <p className="text-xs text-muted-foreground font-medium">Audit History</p>
-            <p className="text-lg font-bold text-primary mt-0.5">{changes.length} Updates Logged</p>
+            <p className="text-xs text-muted-foreground font-medium">
+              Audit History
+            </p>
+            <p className="text-lg font-bold text-primary mt-0.5">
+              {changes.length} Updates Logged
+            </p>
           </div>
         </div>
       </Card>
 
       {/* 2. My Information Management Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="space-y-4"
+      >
         <TabsList className="bg-muted p-1 rounded-2xl flex-wrap h-auto gap-1">
-          <TabsTrigger value="profile" className="rounded-xl text-xs font-semibold gap-1.5 py-2">
+          <TabsTrigger
+            value="profile"
+            className="rounded-xl text-xs font-semibold gap-1.5 py-2"
+          >
             <Store className="w-3.5 h-3.5" /> Business Profile
           </TabsTrigger>
-          <TabsTrigger value="operations" className="rounded-xl text-xs font-semibold gap-1.5 py-2">
+          <TabsTrigger
+            value="operations"
+            className="rounded-xl text-xs font-semibold gap-1.5 py-2"
+          >
             <Clock className="w-3.5 h-3.5" /> Operations & Timings
           </TabsTrigger>
           {isHealthcare && (
-            <TabsTrigger value="healthcare" className="rounded-xl text-xs font-semibold gap-1.5 py-2">
+            <TabsTrigger
+              value="healthcare"
+              className="rounded-xl text-xs font-semibold gap-1.5 py-2"
+            >
               <Building2 className="w-3.5 h-3.5" /> Hospital & Beds
             </TabsTrigger>
           )}
           {isDoctor && (
-            <TabsTrigger value="doctor" className="rounded-xl text-xs font-semibold gap-1.5 py-2">
+            <TabsTrigger
+              value="doctor"
+              className="rounded-xl text-xs font-semibold gap-1.5 py-2"
+            >
               <Stethoscope className="w-3.5 h-3.5" /> Doctor Consultations
             </TabsTrigger>
           )}
           {isServices && (
-            <TabsTrigger value="services_cat" className="rounded-xl text-xs font-semibold gap-1.5 py-2">
+            <TabsTrigger
+              value="services_cat"
+              className="rounded-xl text-xs font-semibold gap-1.5 py-2"
+            >
               <Wrench className="w-3.5 h-3.5" /> Services & Rates
             </TabsTrigger>
           )}
           {isTransport && (
-            <TabsTrigger value="transport_cat" className="rounded-xl text-xs font-semibold gap-1.5 py-2">
+            <TabsTrigger
+              value="transport_cat"
+              className="rounded-xl text-xs font-semibold gap-1.5 py-2"
+            >
               <Truck className="w-3.5 h-3.5" /> Fleet & Routes
             </TabsTrigger>
           )}
-          <TabsTrigger value="catalog" className="rounded-xl text-xs font-semibold gap-1.5 py-2">
-            <Layers className="w-3.5 h-3.5" /> Services Catalog ({services.length})
+          <TabsTrigger
+            value="catalog"
+            className="rounded-xl text-xs font-semibold gap-1.5 py-2"
+          >
+            <Layers className="w-3.5 h-3.5" /> Services Catalog (
+            {services.length})
           </TabsTrigger>
-          <TabsTrigger value="history" className="rounded-xl text-xs font-semibold gap-1.5 py-2">
-            <History className="w-3.5 h-3.5" /> Change History ({changes.length})
+          <TabsTrigger
+            value="history"
+            className="rounded-xl text-xs font-semibold gap-1.5 py-2"
+          >
+            <History className="w-3.5 h-3.5" /> Change History ({changes.length}
+            )
           </TabsTrigger>
         </TabsList>
 
@@ -584,10 +680,19 @@ export function MyInformationModule() {
                   <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Business / Brand Name
                   </Label>
-                  <p className="text-base font-bold text-foreground mt-0.5">{vendor.businessName}</p>
+                  <p className="text-base font-bold text-foreground mt-0.5">
+                    {vendor.businessName}
+                  </p>
                 </div>
                 <Button
-                  onClick={() => handleOpenEdit("businessName", "Business Name", vendor.businessName, "text")}
+                  onClick={() =>
+                    handleOpenEdit(
+                      "businessName",
+                      "Business Name",
+                      vendor.businessName,
+                      "text",
+                    )
+                  }
                   variant="outline"
                   size="sm"
                   className="rounded-xl gap-1.5 text-xs self-start sm:self-auto"
@@ -607,7 +712,14 @@ export function MyInformationModule() {
                   </p>
                 </div>
                 <Button
-                  onClick={() => handleOpenEdit("description", "Public Description", vendor.description, "textarea")}
+                  onClick={() =>
+                    handleOpenEdit(
+                      "description",
+                      "Public Description",
+                      vendor.description,
+                      "textarea",
+                    )
+                  }
                   variant="outline"
                   size="sm"
                   className="rounded-xl gap-1.5 text-xs self-start sm:self-auto flex-shrink-0"
@@ -622,10 +734,19 @@ export function MyInformationModule() {
                   <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Authorized Owner / Contact Person
                   </Label>
-                  <p className="text-sm font-semibold text-foreground mt-0.5">{vendor.ownerName}</p>
+                  <p className="text-sm font-semibold text-foreground mt-0.5">
+                    {vendor.ownerName}
+                  </p>
                 </div>
                 <Button
-                  onClick={() => handleOpenEdit("ownerName", "Owner Name", vendor.ownerName, "text")}
+                  onClick={() =>
+                    handleOpenEdit(
+                      "ownerName",
+                      "Owner Name",
+                      vendor.ownerName,
+                      "text",
+                    )
+                  }
                   variant="outline"
                   size="sm"
                   className="rounded-xl gap-1.5 text-xs self-start sm:self-auto"
@@ -640,10 +761,19 @@ export function MyInformationModule() {
                   <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Customer Contact Phone
                   </Label>
-                  <p className="text-sm font-semibold text-foreground mt-0.5">{vendor.phone}</p>
+                  <p className="text-sm font-semibold text-foreground mt-0.5">
+                    {vendor.phone}
+                  </p>
                 </div>
                 <Button
-                  onClick={() => handleOpenEdit("phone", "Customer Contact Phone", vendor.phone, "text")}
+                  onClick={() =>
+                    handleOpenEdit(
+                      "phone",
+                      "Customer Contact Phone",
+                      vendor.phone,
+                      "text",
+                    )
+                  }
                   variant="outline"
                   size="sm"
                   className="rounded-xl gap-1.5 text-xs self-start sm:self-auto"
@@ -658,10 +788,19 @@ export function MyInformationModule() {
                   <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Business Email
                   </Label>
-                  <p className="text-sm font-semibold text-foreground mt-0.5">{vendor.email}</p>
+                  <p className="text-sm font-semibold text-foreground mt-0.5">
+                    {vendor.email}
+                  </p>
                 </div>
                 <Button
-                  onClick={() => handleOpenEdit("email", "Business Email", vendor.email, "text")}
+                  onClick={() =>
+                    handleOpenEdit(
+                      "email",
+                      "Business Email",
+                      vendor.email,
+                      "text",
+                    )
+                  }
                   variant="outline"
                   size="sm"
                   className="rounded-xl gap-1.5 text-xs self-start sm:self-auto"
@@ -682,7 +821,14 @@ export function MyInformationModule() {
                 </div>
                 <div className="flex gap-2 self-start sm:self-auto">
                   <Button
-                    onClick={() => handleOpenEdit("address", "Street Address", vendor.address, "text")}
+                    onClick={() =>
+                      handleOpenEdit(
+                        "address",
+                        "Street Address",
+                        vendor.address,
+                        "text",
+                      )
+                    }
                     variant="outline"
                     size="sm"
                     className="rounded-xl gap-1.5 text-xs"
@@ -690,7 +836,14 @@ export function MyInformationModule() {
                     <Edit2 className="w-3 h-3" /> Edit Address
                   </Button>
                   <Button
-                    onClick={() => handleOpenEdit("city", "Operating City", vendor.city, "text")}
+                    onClick={() =>
+                      handleOpenEdit(
+                        "city",
+                        "Operating City",
+                        vendor.city,
+                        "text",
+                      )
+                    }
                     variant="outline"
                     size="sm"
                     className="rounded-xl gap-1.5 text-xs"
@@ -707,7 +860,9 @@ export function MyInformationModule() {
         <TabsContent value="operations" className="space-y-4">
           <Card className="border-border shadow-xs">
             <CardHeader className="pb-3 border-b border-border">
-              <CardTitle className="text-base font-bold">Operational Schedules & Delivery Coverage</CardTitle>
+              <CardTitle className="text-base font-bold">
+                Operational Schedules & Delivery Coverage
+              </CardTitle>
             </CardHeader>
             <CardContent className="p-6 divide-y divide-border">
               {/* Opening Hours */}
@@ -716,10 +871,19 @@ export function MyInformationModule() {
                   <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Operating Hours / Timings
                   </Label>
-                  <p className="text-base font-bold text-foreground mt-0.5">{vendor.openingHours}</p>
+                  <p className="text-base font-bold text-foreground mt-0.5">
+                    {vendor.openingHours}
+                  </p>
                 </div>
                 <Button
-                  onClick={() => handleOpenEdit("openingHours", "Operating Hours", vendor.openingHours, "text")}
+                  onClick={() =>
+                    handleOpenEdit(
+                      "openingHours",
+                      "Operating Hours",
+                      vendor.openingHours,
+                      "text",
+                    )
+                  }
                   variant="outline"
                   size="sm"
                   className="rounded-xl gap-1.5 text-xs self-start sm:self-auto"
@@ -739,7 +903,14 @@ export function MyInformationModule() {
                   </p>
                 </div>
                 <Button
-                  onClick={() => handleOpenEdit("deliveryRadiusKm", "Service Radius (km)", vendor.deliveryRadiusKm, "number")}
+                  onClick={() =>
+                    handleOpenEdit(
+                      "deliveryRadiusKm",
+                      "Service Radius (km)",
+                      vendor.deliveryRadiusKm,
+                      "number",
+                    )
+                  }
                   variant="outline"
                   size="sm"
                   className="rounded-xl gap-1.5 text-xs self-start sm:self-auto"
@@ -757,10 +928,12 @@ export function MyInformationModule() {
             <Card className="border-border shadow-xs">
               <CardHeader className="pb-3 border-b border-border">
                 <CardTitle className="text-base font-bold flex items-center gap-2">
-                  <Building2 className="w-5 h-5 text-primary" /> Hospital Facilities & Live Bed Tracking
+                  <Building2 className="w-5 h-5 text-primary" /> Hospital
+                  Facilities & Live Bed Tracking
                 </CardTitle>
                 <CardDescription className="text-xs">
-                  Real-time bed counts and emergency information shown directly to patients
+                  Real-time bed counts and emergency information shown directly
+                  to patients
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-6 divide-y divide-border">
@@ -779,7 +952,14 @@ export function MyInformationModule() {
                   </div>
                   <div className="flex gap-2 self-start sm:self-auto">
                     <Button
-                      onClick={() => handleOpenEdit("availableBeds", "Available General Beds", vendor.availableBeds, "number")}
+                      onClick={() =>
+                        handleOpenEdit(
+                          "availableBeds",
+                          "Available General Beds",
+                          vendor.availableBeds,
+                          "number",
+                        )
+                      }
                       variant="outline"
                       size="sm"
                       className="rounded-xl gap-1.5 text-xs"
@@ -787,7 +967,14 @@ export function MyInformationModule() {
                       <Edit2 className="w-3 h-3" /> Update Available Beds
                     </Button>
                     <Button
-                      onClick={() => handleOpenEdit("totalBeds", "Total Bed Capacity", vendor.totalBeds, "number")}
+                      onClick={() =>
+                        handleOpenEdit(
+                          "totalBeds",
+                          "Total Bed Capacity",
+                          vendor.totalBeds,
+                          "number",
+                        )
+                      }
                       variant="ghost"
                       size="sm"
                       className="rounded-xl text-xs text-muted-foreground"
@@ -808,7 +995,14 @@ export function MyInformationModule() {
                     </p>
                   </div>
                   <Button
-                    onClick={() => handleOpenEdit("icuBedsAvailable", "Available ICU Beds", vendor.icuBedsAvailable, "number")}
+                    onClick={() =>
+                      handleOpenEdit(
+                        "icuBedsAvailable",
+                        "Available ICU Beds",
+                        vendor.icuBedsAvailable,
+                        "number",
+                      )
+                    }
                     variant="outline"
                     size="sm"
                     className="rounded-xl gap-1.5 text-xs self-start sm:self-auto"
@@ -824,16 +1018,25 @@ export function MyInformationModule() {
                       24x7 Emergency Trauma Unit Status
                     </Label>
                     <p className="text-sm font-bold text-foreground mt-0.5">
-                      {vendor.hasEmergency24x7 ? "Active 24x7 Emergency" : "Standard Hours Only"}
+                      {vendor.hasEmergency24x7
+                        ? "Active 24x7 Emergency"
+                        : "Standard Hours Only"}
                     </p>
                   </div>
                   <Button
-                    onClick={() => handleToggleBooleanField("hasEmergency24x7", !!vendor.hasEmergency24x7)}
+                    onClick={() =>
+                      handleToggleBooleanField(
+                        "hasEmergency24x7",
+                        !!vendor.hasEmergency24x7,
+                      )
+                    }
                     variant={vendor.hasEmergency24x7 ? "default" : "outline"}
                     size="sm"
                     className="rounded-xl text-xs self-start sm:self-auto"
                   >
-                    {vendor.hasEmergency24x7 ? "Disable 24x7 Status" : "Enable 24x7 Emergency"}
+                    {vendor.hasEmergency24x7
+                      ? "Disable 24x7 Status"
+                      : "Enable 24x7 Emergency"}
                   </Button>
                 </div>
 
@@ -848,7 +1051,14 @@ export function MyInformationModule() {
                     </p>
                   </div>
                   <Button
-                    onClick={() => handleOpenEdit("emergencyPhone", "Emergency Hotline Phone", vendor.emergencyPhone || vendor.phone, "text")}
+                    onClick={() =>
+                      handleOpenEdit(
+                        "emergencyPhone",
+                        "Emergency Hotline Phone",
+                        vendor.emergencyPhone || vendor.phone,
+                        "text",
+                      )
+                    }
                     variant="outline"
                     size="sm"
                     className="rounded-xl gap-1.5 text-xs self-start sm:self-auto"
@@ -864,11 +1074,19 @@ export function MyInformationModule() {
                       Hospital Departments
                     </Label>
                     <p className="text-sm text-foreground mt-1">
-                      {vendor.departments || "Cardiology, Emergency, ICU, General Medicine"}
+                      {vendor.departments ||
+                        "Cardiology, Emergency, ICU, General Medicine"}
                     </p>
                   </div>
                   <Button
-                    onClick={() => handleOpenEdit("departments", "Departments (comma separated)", vendor.departments, "textarea")}
+                    onClick={() =>
+                      handleOpenEdit(
+                        "departments",
+                        "Departments (comma separated)",
+                        vendor.departments,
+                        "textarea",
+                      )
+                    }
                     variant="outline"
                     size="sm"
                     className="rounded-xl gap-1.5 text-xs self-start sm:self-auto flex-shrink-0"
@@ -887,7 +1105,8 @@ export function MyInformationModule() {
             <Card className="border-border shadow-xs">
               <CardHeader className="pb-3 border-b border-border">
                 <CardTitle className="text-base font-bold flex items-center gap-2">
-                  <Stethoscope className="w-5 h-5 text-primary" /> Doctor Practice & Consultation Information
+                  <Stethoscope className="w-5 h-5 text-primary" /> Doctor
+                  Practice & Consultation Information
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 divide-y divide-border">
@@ -897,12 +1116,23 @@ export function MyInformationModule() {
                     <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       Specialization & Qualifications
                     </Label>
-                    <p className="text-base font-bold text-foreground mt-0.5">{vendor.specialization}</p>
-                    <span className="text-xs text-muted-foreground">{vendor.qualifications}</span>
+                    <p className="text-base font-bold text-foreground mt-0.5">
+                      {vendor.specialization}
+                    </p>
+                    <span className="text-xs text-muted-foreground">
+                      {vendor.qualifications}
+                    </span>
                   </div>
                   <div className="flex gap-2 self-start sm:self-auto">
                     <Button
-                      onClick={() => handleOpenEdit("specialization", "Doctor Specialization", vendor.specialization, "text")}
+                      onClick={() =>
+                        handleOpenEdit(
+                          "specialization",
+                          "Doctor Specialization",
+                          vendor.specialization,
+                          "text",
+                        )
+                      }
                       variant="outline"
                       size="sm"
                       className="rounded-xl gap-1.5 text-xs"
@@ -910,7 +1140,14 @@ export function MyInformationModule() {
                       <Edit2 className="w-3 h-3" /> Edit Specialty
                     </Button>
                     <Button
-                      onClick={() => handleOpenEdit("qualifications", "Doctor Qualifications", vendor.qualifications, "text")}
+                      onClick={() =>
+                        handleOpenEdit(
+                          "qualifications",
+                          "Doctor Qualifications",
+                          vendor.qualifications,
+                          "text",
+                        )
+                      }
                       variant="outline"
                       size="sm"
                       className="rounded-xl gap-1.5 text-xs"
@@ -931,7 +1168,14 @@ export function MyInformationModule() {
                     </p>
                   </div>
                   <Button
-                    onClick={() => handleOpenEdit("consultationFee", "Consultation Fee (₹)", vendor.consultationFee, "number")}
+                    onClick={() =>
+                      handleOpenEdit(
+                        "consultationFee",
+                        "Consultation Fee (₹)",
+                        vendor.consultationFee,
+                        "number",
+                      )
+                    }
                     variant="outline"
                     size="sm"
                     className="rounded-xl gap-1.5 text-xs self-start sm:self-auto"
@@ -951,7 +1195,14 @@ export function MyInformationModule() {
                     </p>
                   </div>
                   <Button
-                    onClick={() => handleOpenEdit("timings", "Consultation Timings", vendor.timings || vendor.openingHours, "text")}
+                    onClick={() =>
+                      handleOpenEdit(
+                        "timings",
+                        "Consultation Timings",
+                        vendor.timings || vendor.openingHours,
+                        "text",
+                      )
+                    }
                     variant="outline"
                     size="sm"
                     className="rounded-xl gap-1.5 text-xs self-start sm:self-auto"
@@ -967,16 +1218,25 @@ export function MyInformationModule() {
                       Appointment Booking Status
                     </Label>
                     <p className="text-sm font-bold text-foreground mt-0.5">
-                      {vendor.available !== false ? "Accepting Appointments" : "Currently Unavailable"}
+                      {vendor.available !== false
+                        ? "Accepting Appointments"
+                        : "Currently Unavailable"}
                     </p>
                   </div>
                   <Button
-                    onClick={() => handleToggleBooleanField("available", vendor.available !== false)}
+                    onClick={() =>
+                      handleToggleBooleanField(
+                        "available",
+                        vendor.available !== false,
+                      )
+                    }
                     variant={vendor.available !== false ? "default" : "outline"}
                     size="sm"
                     className="rounded-xl text-xs self-start sm:self-auto"
                   >
-                    {vendor.available !== false ? "Mark Unavailable" : "Mark Available"}
+                    {vendor.available !== false
+                      ? "Mark Unavailable"
+                      : "Mark Available"}
                   </Button>
                 </div>
               </CardContent>
@@ -990,7 +1250,8 @@ export function MyInformationModule() {
             <Card className="border-border shadow-xs">
               <CardHeader className="pb-3 border-b border-border">
                 <CardTitle className="text-base font-bold flex items-center gap-2">
-                  <Wrench className="w-5 h-5 text-primary" /> Service Professional Configuration
+                  <Wrench className="w-5 h-5 text-primary" /> Service
+                  Professional Configuration
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 divide-y divide-border">
@@ -1001,11 +1262,19 @@ export function MyInformationModule() {
                       Primary Trade / Service Specialty
                     </Label>
                     <p className="text-base font-bold text-foreground mt-0.5">
-                      {vendor.serviceType || "Electrician & Appliance Specialist"}
+                      {vendor.serviceType ||
+                        "Electrician & Appliance Specialist"}
                     </p>
                   </div>
                   <Button
-                    onClick={() => handleOpenEdit("serviceType", "Primary Trade", vendor.serviceType, "text")}
+                    onClick={() =>
+                      handleOpenEdit(
+                        "serviceType",
+                        "Primary Trade",
+                        vendor.serviceType,
+                        "text",
+                      )
+                    }
                     variant="outline"
                     size="sm"
                     className="rounded-xl gap-1.5 text-xs self-start sm:self-auto"
@@ -1025,7 +1294,14 @@ export function MyInformationModule() {
                     </p>
                   </div>
                   <Button
-                    onClick={() => handleOpenEdit("pricePerHour", "Hourly Rate (₹)", vendor.pricePerHour, "number")}
+                    onClick={() =>
+                      handleOpenEdit(
+                        "pricePerHour",
+                        "Hourly Rate (₹)",
+                        vendor.pricePerHour,
+                        "number",
+                      )
+                    }
                     variant="outline"
                     size="sm"
                     className="rounded-xl gap-1.5 text-xs self-start sm:self-auto"
@@ -1045,7 +1321,14 @@ export function MyInformationModule() {
                     </p>
                   </div>
                   <Button
-                    onClick={() => handleOpenEdit("serviceArea", "Service Area", vendor.serviceArea, "text")}
+                    onClick={() =>
+                      handleOpenEdit(
+                        "serviceArea",
+                        "Service Area",
+                        vendor.serviceArea,
+                        "text",
+                      )
+                    }
                     variant="outline"
                     size="sm"
                     className="rounded-xl gap-1.5 text-xs self-start sm:self-auto"
@@ -1064,7 +1347,8 @@ export function MyInformationModule() {
             <Card className="border-border shadow-xs">
               <CardHeader className="pb-3 border-b border-border">
                 <CardTitle className="text-base font-bold flex items-center gap-2">
-                  <Truck className="w-5 h-5 text-primary" /> Vehicle Fleet & Route Details
+                  <Truck className="w-5 h-5 text-primary" /> Vehicle Fleet &
+                  Route Details
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 divide-y divide-border">
@@ -1079,7 +1363,14 @@ export function MyInformationModule() {
                     </p>
                   </div>
                   <Button
-                    onClick={() => handleOpenEdit("vehicleType", "Vehicle Category", vendor.vehicleType, "text")}
+                    onClick={() =>
+                      handleOpenEdit(
+                        "vehicleType",
+                        "Vehicle Category",
+                        vendor.vehicleType,
+                        "text",
+                      )
+                    }
                     variant="outline"
                     size="sm"
                     className="rounded-xl gap-1.5 text-xs self-start sm:self-auto"
@@ -1099,7 +1390,14 @@ export function MyInformationModule() {
                     </p>
                   </div>
                   <Button
-                    onClick={() => handleOpenEdit("routeName", "Route Name", vendor.routeName, "text")}
+                    onClick={() =>
+                      handleOpenEdit(
+                        "routeName",
+                        "Route Name",
+                        vendor.routeName,
+                        "text",
+                      )
+                    }
                     variant="outline"
                     size="sm"
                     className="rounded-xl gap-1.5 text-xs self-start sm:self-auto"
@@ -1119,7 +1417,14 @@ export function MyInformationModule() {
                     </p>
                   </div>
                   <Button
-                    onClick={() => handleOpenEdit("fare", "Base Fare (₹)", vendor.fare, "number")}
+                    onClick={() =>
+                      handleOpenEdit(
+                        "fare",
+                        "Base Fare (₹)",
+                        vendor.fare,
+                        "number",
+                      )
+                    }
                     variant="outline"
                     size="sm"
                     className="rounded-xl gap-1.5 text-xs self-start sm:self-auto"
@@ -1137,12 +1442,18 @@ export function MyInformationModule() {
           <Card className="border-border shadow-xs">
             <CardHeader className="pb-3 border-b border-border flex flex-row items-center justify-between">
               <div>
-                <CardTitle className="text-base font-bold">Services Catalog</CardTitle>
+                <CardTitle className="text-base font-bold">
+                  Services Catalog
+                </CardTitle>
                 <CardDescription className="text-xs">
                   Manage individual bookable services and price offerings
                 </CardDescription>
               </div>
-              <Button onClick={handleOpenAddService} size="sm" className="rounded-xl gap-1 text-xs">
+              <Button
+                onClick={handleOpenAddService}
+                size="sm"
+                className="rounded-xl gap-1 text-xs"
+              >
                 <Plus className="w-3.5 h-3.5" /> Add Service
               </Button>
             </CardHeader>
@@ -1150,24 +1461,38 @@ export function MyInformationModule() {
               {services.length === 0 ? (
                 <div className="p-8 text-center text-muted-foreground">
                   <Layers className="w-8 h-8 mx-auto opacity-40 mb-2" />
-                  <p className="text-sm font-medium">No services registered yet.</p>
-                  <Button onClick={handleOpenAddService} variant="outline" size="sm" className="mt-3 rounded-xl text-xs">
+                  <p className="text-sm font-medium">
+                    No services registered yet.
+                  </p>
+                  <Button
+                    onClick={handleOpenAddService}
+                    variant="outline"
+                    size="sm"
+                    className="mt-3 rounded-xl text-xs"
+                  >
                     Create First Service
                   </Button>
                 </div>
               ) : (
                 <div className="divide-y divide-border">
                   {services.map((s) => (
-                    <div key={s.id} className="p-4 flex items-center justify-between gap-4 hover:bg-muted/30 transition-colors">
+                    <div
+                      key={s.id}
+                      className="p-4 flex items-center justify-between gap-4 hover:bg-muted/30 transition-colors"
+                    >
                       <div>
                         <div className="flex items-center gap-2">
-                          <h4 className="font-bold text-sm text-foreground">{s.name}</h4>
+                          <h4 className="font-bold text-sm text-foreground">
+                            {s.name}
+                          </h4>
                           <Badge variant="outline" className="text-[10px]">
                             ₹{s.price}
                           </Badge>
                           <span
                             className={`w-2 h-2 rounded-full ${
-                              s.isAvailable !== false ? "bg-emerald-500" : "bg-rose-500"
+                              s.isAvailable !== false
+                                ? "bg-emerald-500"
+                                : "bg-rose-500"
                             }`}
                           />
                         </div>
@@ -1208,17 +1533,21 @@ export function MyInformationModule() {
           <Card className="border-border shadow-xs">
             <CardHeader className="pb-3 border-b border-border">
               <CardTitle className="text-base font-bold flex items-center gap-2">
-                <History className="w-5 h-5 text-primary" /> Immutable Change Audit Log
+                <History className="w-5 h-5 text-primary" /> Immutable Change
+                Audit Log
               </CardTitle>
               <CardDescription className="text-xs">
-                Complete historical record of all profile changes made by partner #{targetVendorId}
+                Complete historical record of all profile changes made by
+                partner #{targetVendorId}
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0 overflow-x-auto">
               {changes.length === 0 ? (
                 <div className="p-8 text-center text-muted-foreground">
                   <History className="w-8 h-8 mx-auto opacity-40 mb-2" />
-                  <p className="text-sm font-medium">No historical changes recorded yet.</p>
+                  <p className="text-sm font-medium">
+                    No historical changes recorded yet.
+                  </p>
                 </div>
               ) : (
                 <table className="w-full text-xs text-left border-collapse">
@@ -1233,7 +1562,10 @@ export function MyInformationModule() {
                   </thead>
                   <tbody className="divide-y divide-border">
                     {changes.map((c) => (
-                      <tr key={c.id} className="hover:bg-muted/20 transition-colors">
+                      <tr
+                        key={c.id}
+                        className="hover:bg-muted/20 transition-colors"
+                      >
                         <td className="py-3 px-4 whitespace-nowrap text-muted-foreground">
                           {new Date(c.timestamp).toLocaleString("en-IN", {
                             day: "2-digit",
@@ -1246,10 +1578,16 @@ export function MyInformationModule() {
                         <td className="py-3 px-4 font-bold text-foreground capitalize">
                           {c.fieldChanged}
                         </td>
-                        <td className="py-3 px-4 text-muted-foreground max-w-[200px] truncate" title={c.previousValue}>
+                        <td
+                          className="py-3 px-4 text-muted-foreground max-w-[200px] truncate"
+                          title={c.previousValue}
+                        >
                           {c.previousValue || "—"}
                         </td>
-                        <td className="py-3 px-4 font-semibold text-emerald-600 max-w-[200px] truncate" title={c.newValue}>
+                        <td
+                          className="py-3 px-4 font-semibold text-emerald-600 max-w-[200px] truncate"
+                          title={c.newValue}
+                        >
                           {c.newValue}
                         </td>
                         <td className="py-3 px-4">
@@ -1271,9 +1609,12 @@ export function MyInformationModule() {
       <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
         <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-base font-bold">Edit {editFieldLabel}</DialogTitle>
+            <DialogTitle className="text-base font-bold">
+              Edit {editFieldLabel}
+            </DialogTitle>
             <DialogDescription className="text-xs">
-              Saving updates this field immediately in the database and propagates changes to customer pages.
+              Saving updates this field immediately in the database and
+              propagates changes to customer pages.
             </DialogDescription>
           </DialogHeader>
 
@@ -1401,7 +1742,11 @@ export function MyInformationModule() {
               disabled={saving}
               className="rounded-xl text-xs gap-1.5 font-bold"
             >
-              {saving ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+              {saving ? (
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Save className="w-3.5 h-3.5" />
+              )}
               {editingServiceId ? "Save Changes" : "Create Service"}
             </Button>
           </DialogFooter>

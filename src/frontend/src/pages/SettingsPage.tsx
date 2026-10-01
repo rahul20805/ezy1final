@@ -1,34 +1,41 @@
-import { useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Bell,
-  ShoppingBag,
-  Truck,
-  Bus,
-  Stethoscope,
-  Wrench,
-  Tag,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import {
   AlertCircle,
-  Smartphone,
-  Mail,
-  Shield,
-  User,
-  LogOut,
-  Save,
-  FileText,
+  Bell,
+  Bus,
   Download,
   ExternalLink,
+  FileText,
+  LogOut,
+  Mail,
+  Save,
+  Shield,
+  ShoppingBag,
+  Smartphone,
+  Stethoscope,
+  Tag,
+  Truck,
+  User,
+  Wrench,
 } from "lucide-react";
+import { useEffect } from "react";
 import UserLayout from "../components/UserLayout";
 import { useAuth } from "../lib/AuthContext";
 import { useNotificationStore } from "../lib/notificationStore";
 
 export default function SettingsPage() {
   const { user, logout } = useAuth();
-  const { preferences, loadPreferences, savePreferences } = useNotificationStore();
+  const { preferences, loadPreferences, savePreferences } =
+    useNotificationStore();
 
   useEffect(() => {
     loadPreferences();
@@ -42,49 +49,56 @@ export default function SettingsPage() {
     {
       id: "orders",
       title: "Order & Purchase Updates",
-      description: "Get notified when orders are received, prepared, and ready for pickup.",
+      description:
+        "Get notified when orders are received, prepared, and ready for pickup.",
       icon: ShoppingBag,
       color: "text-emerald-500",
     },
     {
       id: "delivery",
       title: "Delivery & Rider Tracking",
-      description: "Real-time updates when delivery partner is assigned, out for delivery, and arriving nearby.",
+      description:
+        "Real-time updates when delivery partner is assigned, out for delivery, and arriving nearby.",
       icon: Truck,
       color: "text-blue-500",
     },
     {
       id: "bus",
       title: "Bus Schedules & Delay Alerts",
-      description: "Live bus stop proximity alerts, approaching reminders, and route delay notifications.",
+      description:
+        "Live bus stop proximity alerts, approaching reminders, and route delay notifications.",
       icon: Bus,
       color: "text-amber-500",
     },
     {
       id: "doctor",
       title: "Healthcare & Doctor Appointments",
-      description: "Appointment confirmations, clinic schedule reminders, and medical alerts.",
+      description:
+        "Appointment confirmations, clinic schedule reminders, and medical alerts.",
       icon: Stethoscope,
       color: "text-rose-500",
     },
     {
       id: "services",
       title: "Home & Professional Services",
-      description: "Service expert assignment, estimated arrival time, and job completion notices.",
+      description:
+        "Service expert assignment, estimated arrival time, and job completion notices.",
       icon: Wrench,
       color: "text-teal-500",
     },
     {
       id: "offers",
       title: "Promotional Discounts & Coupons",
-      description: "Special seasonal discounts, cashbacks, and flash sale announcements.",
+      description:
+        "Special seasonal discounts, cashbacks, and flash sale announcements.",
       icon: Tag,
       color: "text-purple-500",
     },
     {
       id: "announcements",
       title: "System Alerts & Platform News",
-      description: "Important security alerts, login notifications, and platform maintenance updates.",
+      description:
+        "Important security alerts, login notifications, and platform maintenance updates.",
       icon: AlertCircle,
       color: "text-primary",
     },
@@ -100,20 +114,31 @@ export default function SettingsPage() {
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
                   {user?.avatar ? (
-                    <img src={user.avatar} alt="Avatar" className="w-full h-full rounded-2xl object-cover" />
+                    <img
+                      src={user.avatar}
+                      alt="Avatar"
+                      className="w-full h-full rounded-2xl object-cover"
+                    />
                   ) : (
                     <User className="w-6 h-6" />
                   )}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="font-bold text-lg text-foreground">{user?.name || "Customer"}</h3>
-                    <Badge variant="secondary" className="text-[10px] font-semibold bg-primary/10 text-primary uppercase">
+                    <h3 className="font-bold text-lg text-foreground">
+                      {user?.name || "Customer"}
+                    </h3>
+                    <Badge
+                      variant="secondary"
+                      className="text-[10px] font-semibold bg-primary/10 text-primary uppercase"
+                    >
                       {user?.role || "CUSTOMER"}
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    {user?.phone ? `+91 ${user.phone}` : user?.email || "Authenticated User"}
+                    {user?.phone
+                      ? `+91 ${user.phone}`
+                      : user?.email || "Authenticated User"}
                   </p>
                 </div>
               </div>
@@ -139,9 +164,12 @@ export default function SettingsPage() {
                 <Bell className="w-4 h-4 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-base">Notification Preferences</CardTitle>
+                <CardTitle className="text-base">
+                  Notification Preferences
+                </CardTitle>
                 <CardDescription className="text-xs">
-                  Choose which alerts and category updates you want to receive across EZY1.
+                  Choose which alerts and category updates you want to receive
+                  across EZY1.
                 </CardDescription>
               </div>
             </div>
@@ -165,8 +193,12 @@ export default function SettingsPage() {
                         <Icon className={`w-4 h-4 ${cat.color}`} />
                       </div>
                       <div className="space-y-0.5">
-                        <h4 className="text-sm font-semibold text-foreground">{cat.title}</h4>
-                        <p className="text-xs text-muted-foreground">{cat.description}</p>
+                        <h4 className="text-sm font-semibold text-foreground">
+                          {cat.title}
+                        </h4>
+                        <p className="text-xs text-muted-foreground">
+                          {cat.description}
+                        </p>
                       </div>
                     </div>
 
@@ -191,7 +223,8 @@ export default function SettingsPage() {
               <div>
                 <CardTitle className="text-base">Delivery Channels</CardTitle>
                 <CardDescription className="text-xs">
-                  Manage how urgent notices and transactional receipts are transmitted.
+                  Manage how urgent notices and transactional receipts are
+                  transmitted.
                 </CardDescription>
               </div>
             </div>
@@ -202,12 +235,18 @@ export default function SettingsPage() {
               <div className="flex items-center gap-3">
                 <Smartphone className="w-4 h-4 text-primary" />
                 <div>
-                  <h4 className="text-sm font-medium text-foreground">In-App & Real-Time Push</h4>
-                  <p className="text-xs text-muted-foreground">Instant SSE toasts and browser push notifications</p>
+                  <h4 className="text-sm font-medium text-foreground">
+                    In-App & Real-Time Push
+                  </h4>
+                  <p className="text-xs text-muted-foreground">
+                    Instant SSE toasts and browser push notifications
+                  </p>
                 </div>
               </div>
               <Switch
-                checked={preferences ? Boolean(preferences.pushEnabled ?? 1) : true}
+                checked={
+                  preferences ? Boolean(preferences.pushEnabled ?? 1) : true
+                }
                 onCheckedChange={(val) => handleToggle("pushEnabled", val)}
               />
             </div>
@@ -216,12 +255,18 @@ export default function SettingsPage() {
               <div className="flex items-center gap-3">
                 <Smartphone className="w-4 h-4 text-emerald-500" />
                 <div>
-                  <h4 className="text-sm font-medium text-foreground">SMS Text Alerts</h4>
-                  <p className="text-xs text-muted-foreground">Critical OTP verification and high-priority delivery codes</p>
+                  <h4 className="text-sm font-medium text-foreground">
+                    SMS Text Alerts
+                  </h4>
+                  <p className="text-xs text-muted-foreground">
+                    Critical OTP verification and high-priority delivery codes
+                  </p>
                 </div>
               </div>
               <Switch
-                checked={preferences ? Boolean(preferences.smsEnabled ?? 1) : true}
+                checked={
+                  preferences ? Boolean(preferences.smsEnabled ?? 1) : true
+                }
                 onCheckedChange={(val) => handleToggle("smsEnabled", val)}
               />
             </div>
@@ -230,12 +275,18 @@ export default function SettingsPage() {
               <div className="flex items-center gap-3">
                 <Mail className="w-4 h-4 text-blue-500" />
                 <div>
-                  <h4 className="text-sm font-medium text-foreground">Email Summaries</h4>
-                  <p className="text-xs text-muted-foreground">Monthly invoice summaries and promotional discounts</p>
+                  <h4 className="text-sm font-medium text-foreground">
+                    Email Summaries
+                  </h4>
+                  <p className="text-xs text-muted-foreground">
+                    Monthly invoice summaries and promotional discounts
+                  </p>
                 </div>
               </div>
               <Switch
-                checked={preferences ? Boolean(preferences.emailEnabled ?? 1) : true}
+                checked={
+                  preferences ? Boolean(preferences.emailEnabled ?? 1) : true
+                }
                 onCheckedChange={(val) => handleToggle("emailEnabled", val)}
               />
             </div>
@@ -250,9 +301,12 @@ export default function SettingsPage() {
                 <FileText className="w-5 h-5" />
               </div>
               <div>
-                <CardTitle className="text-base font-bold">Legal &amp; Platform Policies</CardTitle>
+                <CardTitle className="text-base font-bold">
+                  Legal &amp; Platform Policies
+                </CardTitle>
                 <CardDescription className="text-xs">
-                  Review terms of service, consumer rights, data privacy protocols, and partner covenants.
+                  Review terms of service, consumer rights, data privacy
+                  protocols, and partner covenants.
                 </CardDescription>
               </div>
             </div>
@@ -260,8 +314,13 @@ export default function SettingsPage() {
           <CardContent className="space-y-3 pt-0">
             <div className="p-3.5 rounded-xl bg-muted/40 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h4 className="text-sm font-semibold text-foreground">User Terms &amp; Conditions</h4>
-                <p className="text-xs text-muted-foreground">General marketplace rules, consumer rights &amp; refund guidelines</p>
+                <h4 className="text-sm font-semibold text-foreground">
+                  User Terms &amp; Conditions
+                </h4>
+                <p className="text-xs text-muted-foreground">
+                  General marketplace rules, consumer rights &amp; refund
+                  guidelines
+                </p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <a
@@ -284,8 +343,13 @@ export default function SettingsPage() {
 
             <div className="p-3.5 rounded-xl bg-muted/40 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h4 className="text-sm font-semibold text-foreground">Universal Privacy Policy</h4>
-                <p className="text-xs text-muted-foreground">DPDP Act 2023 compliance, data retention &amp; grievance redressal</p>
+                <h4 className="text-sm font-semibold text-foreground">
+                  Universal Privacy Policy
+                </h4>
+                <p className="text-xs text-muted-foreground">
+                  DPDP Act 2023 compliance, data retention &amp; grievance
+                  redressal
+                </p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <a
@@ -308,8 +372,13 @@ export default function SettingsPage() {
 
             <div className="p-3.5 rounded-xl bg-muted/40 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h4 className="text-sm font-semibold text-foreground">Master Partner Agreement</h4>
-                <p className="text-xs text-muted-foreground">Framework for merchants, vendors, transport operators &amp; professionals</p>
+                <h4 className="text-sm font-semibold text-foreground">
+                  Master Partner Agreement
+                </h4>
+                <p className="text-xs text-muted-foreground">
+                  Framework for merchants, vendors, transport operators &amp;
+                  professionals
+                </p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <a

@@ -78,9 +78,9 @@ import { PartnerPayouts } from "../components/admin/modules/finance/PartnerPayou
 import { PaymentsManager } from "../components/admin/modules/finance/PaymentsManager";
 import { RefundsManager } from "../components/admin/modules/finance/RefundsManager";
 
+import { NotificationsBroadcastAdmin } from "../components/admin/modules/communication/NotificationsBroadcastAdmin";
 // 8. Communication Modules
 import { WhatsAppAdmin } from "../components/admin/modules/communication/WhatsAppAdmin";
-import { NotificationsBroadcastAdmin } from "../components/admin/modules/communication/NotificationsBroadcastAdmin";
 
 // 9. Reviews & Quality Modules
 import { PartnerVerification } from "../components/admin/modules/quality/PartnerVerification";
@@ -154,11 +154,10 @@ export default function AdminPage() {
           <div className="w-12 h-12 rounded-2xl bg-destructive/10 text-destructive flex items-center justify-center mx-auto">
             <Lock className="w-6 h-6" />
           </div>
-          <h2 className="text-2xl font-display font-bold">
-            Access Restricted
-          </h2>
+          <h2 className="text-2xl font-display font-bold">Access Restricted</h2>
           <p className="text-xs text-muted-foreground">
-            Your partner account ({currentPartner.partnerUserId}) does not have Platform Administrator privileges.
+            Your partner account ({currentPartner.partnerUserId}) does not have
+            Platform Administrator privileges.
           </p>
           <div className="flex gap-3 mt-4">
             <Button
@@ -386,8 +385,14 @@ export default function AdminPage() {
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-500" />
                   <span className="truncate max-w-[120px] sm:max-w-[160px] font-semibold">
-                    {(currentPartner?.ownerName || currentPartner?.businessName || "Partner").split(" ")[0]} (
-                    {currentPartner?.partnerUserId || currentPartner?.id})
+                    {
+                      (
+                        currentPartner?.ownerName ||
+                        currentPartner?.businessName ||
+                        "Partner"
+                      ).split(" ")[0]
+                    }{" "}
+                    ({currentPartner?.partnerUserId || currentPartner?.id})
                   </span>
                   <ChevronDown className="w-3 h-3 text-muted-foreground" />
                 </Button>
@@ -400,9 +405,16 @@ export default function AdminPage() {
                   Authenticated Session
                 </DropdownMenuLabel>
                 <div className="p-2 space-y-1">
-                  <p className="font-semibold text-xs text-foreground">{currentPartner?.businessName}</p>
-                  <p className="text-[11px] font-mono text-muted-foreground">User ID: {currentPartner?.partnerUserId || currentPartner?.id}</p>
-                  <Badge className="text-[9px] uppercase font-bold bg-primary/10 text-primary">{currentPartner?.role || "PARTNER"}</Badge>
+                  <p className="font-semibold text-xs text-foreground">
+                    {currentPartner?.businessName}
+                  </p>
+                  <p className="text-[11px] font-mono text-muted-foreground">
+                    User ID:{" "}
+                    {currentPartner?.partnerUserId || currentPartner?.id}
+                  </p>
+                  <Badge className="text-[9px] uppercase font-bold bg-primary/10 text-primary">
+                    {currentPartner?.role || "PARTNER"}
+                  </Badge>
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem

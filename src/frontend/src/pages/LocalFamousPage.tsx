@@ -1,26 +1,28 @@
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Clock,
+  Compass,
+  MapPin,
+  Navigation,
+  Phone,
+  Search,
+  Sparkles,
+  Star,
+  Store,
+} from "lucide-react";
 import { useState } from "react";
 import Layout from "../components/Layout";
 import { RelatedPagesBar } from "../components/RelatedPagesBar";
 import { FAMOUS_LOCAL_SPOTS, type FamousLocalSpot } from "../ecosystem-data";
 import { vendors } from "../mock-data";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  MapPin,
-  Star,
-  Compass,
-  Clock,
-  Navigation,
-  Phone,
-  Search,
-  Sparkles,
-  Store
-} from "lucide-react";
 
 export default function LocalFamousPage() {
-  const [filterType, setFilterType] = useState<"ALL" | "FOOD" | "LANDMARK" | "SHOP">("ALL");
+  const [filterType, setFilterType] = useState<
+    "ALL" | "FOOD" | "LANDMARK" | "SHOP"
+  >("ALL");
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredSpots = FAMOUS_LOCAL_SPOTS.filter((spot) => {
@@ -50,13 +52,17 @@ export default function LocalFamousPage() {
                   <Badge className="bg-red-500/10 text-red-600 border-red-500/20 font-semibold">
                     Local Heritage & Icons
                   </Badge>
-                  <span className="text-xs text-muted-foreground">Bengaluru Edition</span>
+                  <span className="text-xs text-muted-foreground">
+                    Bengaluru Edition
+                  </span>
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-display font-black text-foreground">
                   Famous in Your City & Local Near You
                 </h1>
                 <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
-                  Discover the authentic taste, iconic heritage spots, and beloved neighbourhood markets that define the culture of your city.
+                  Discover the authentic taste, iconic heritage spots, and
+                  beloved neighbourhood markets that define the culture of your
+                  city.
                 </p>
               </div>
 
@@ -78,7 +84,7 @@ export default function LocalFamousPage() {
                 { id: "ALL", label: "🌟 All Famous Spots" },
                 { id: "FOOD", label: "🍲 Legendary Food & Sweets" },
                 { id: "LANDMARK", label: "🏛️ Tourist & Heritage Places" },
-                { id: "SHOP", label: "🛍️ Historic Markets & Artisans" }
+                { id: "SHOP", label: "🛍️ Historic Markets & Artisans" },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -133,8 +139,12 @@ export default function LocalFamousPage() {
 
                   {spot.specialtyDishOrItem && (
                     <div className="p-2.5 rounded-xl bg-muted/40 border border-border/80 text-xs mb-4">
-                      <strong className="text-foreground font-semibold">Famous For: </strong>
-                      <span className="text-primary font-medium">{spot.specialtyDishOrItem}</span>
+                      <strong className="text-foreground font-semibold">
+                        Famous For:{" "}
+                      </strong>
+                      <span className="text-primary font-medium">
+                        {spot.specialtyDishOrItem}
+                      </span>
                     </div>
                   )}
 
@@ -173,7 +183,8 @@ export default function LocalFamousPage() {
                   🏪 Verified Neighbourhood Stores
                 </h2>
                 <p className="text-xs text-muted-foreground">
-                  Order directly from your friendly corner kirana, medical stores, and fresh fruit vendors.
+                  Order directly from your friendly corner kirana, medical
+                  stores, and fresh fruit vendors.
                 </p>
               </div>
             </div>
@@ -188,9 +199,15 @@ export default function LocalFamousPage() {
                     <Store className="w-5 h-5" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h4 className="font-bold text-sm text-foreground truncate">{v.businessName}</h4>
-                    <p className="text-xs text-muted-foreground">{v.category} • {v.city}</p>
-                    <p className="text-[11px] text-muted-foreground truncate mt-0.5">{v.address}</p>
+                    <h4 className="font-bold text-sm text-foreground truncate">
+                      {v.businessName}
+                    </h4>
+                    <p className="text-xs text-muted-foreground">
+                      {v.category} • {v.city}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground truncate mt-0.5">
+                      {v.address}
+                    </p>
                     <div className="flex items-center gap-3 mt-2 text-xs">
                       <span className="font-bold text-amber-500 flex items-center gap-1">
                         ★ {v.rating || 4.5}

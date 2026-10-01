@@ -1,27 +1,33 @@
-import { useState, useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  ArrowRight,
+  Bus,
+  Calendar,
+  Check,
+  Clock,
+  MapPin,
+  QrCode,
+  Search,
+  ShieldCheck,
+  Zap,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { useRequireAuth } from "../components/AuthPromptModal";
 import Layout from "../components/Layout";
 import { RelatedPagesBar } from "../components/RelatedPagesBar";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { useRequireAuth } from "../components/AuthPromptModal";
 import { useAuth } from "../lib/AuthContext";
-import { toast } from "sonner";
-import {
-  Bus,
-  MapPin,
-  Clock,
-  ArrowRight,
-  ShieldCheck,
-  Search,
-  Check,
-  QrCode,
-  Calendar,
-  Zap
-} from "lucide-react";
 
 interface BusSchedule {
   id: number;
@@ -161,13 +167,16 @@ export default function BusTransportPage() {
               Regional Bus Schedules & Instant Seat Booking
             </h1>
             <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl">
-              Real-time route schedules, zero booking fees, confirmed seat allocation, and live GPS tracking for state and private carriers.
+              Real-time route schedules, zero booking fees, confirmed seat
+              allocation, and live GPS tracking for state and private carriers.
             </p>
 
             {/* Search Bar */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 max-w-2xl">
               <div>
-                <Label className="text-[11px] font-bold text-muted-foreground">From</Label>
+                <Label className="text-[11px] font-bold text-muted-foreground">
+                  From
+                </Label>
                 <Input
                   value={fromCity}
                   onChange={(e) => setFromCity(e.target.value)}
@@ -176,7 +185,9 @@ export default function BusTransportPage() {
                 />
               </div>
               <div>
-                <Label className="text-[11px] font-bold text-muted-foreground">To</Label>
+                <Label className="text-[11px] font-bold text-muted-foreground">
+                  To
+                </Label>
                 <Input
                   value={toCity}
                   onChange={(e) => setToCity(e.target.value)}
@@ -185,7 +196,10 @@ export default function BusTransportPage() {
                 />
               </div>
               <div className="flex items-end">
-                <Button onClick={fetchBuses} className="h-10 w-full rounded-xl font-bold text-xs bg-primary text-primary-foreground">
+                <Button
+                  onClick={fetchBuses}
+                  className="h-10 w-full rounded-xl font-bold text-xs bg-primary text-primary-foreground"
+                >
                   <Search className="w-3.5 h-3.5 mr-1.5" /> Search Buses
                 </Button>
               </div>
@@ -200,38 +214,71 @@ export default function BusTransportPage() {
               <Bus className="w-5 h-5 text-blue-600" />
               Available Buses ({buses.length})
             </h2>
-            <span className="text-xs text-muted-foreground">Showing verified departures</span>
+            <span className="text-xs text-muted-foreground">
+              Showing verified departures
+            </span>
           </div>
 
           {loading ? (
-            <div className="text-center py-12 text-sm text-muted-foreground">Finding running buses...</div>
+            <div className="text-center py-12 text-sm text-muted-foreground">
+              Finding running buses...
+            </div>
           ) : buses.length === 0 ? (
             <div className="text-center py-12 bg-card rounded-2xl border border-border p-8">
               <Bus className="w-12 h-12 text-muted-foreground mx-auto mb-2 opacity-50" />
-              <h3 className="font-bold text-base text-foreground">No buses found</h3>
-              <p className="text-xs text-muted-foreground mt-1">Try resetting From to "Bengaluru" and To to "Mysore".</p>
-              <Button onClick={() => { setFromCity("Bengaluru"); setToCity("Mysore"); fetchBuses(); }} variant="outline" className="mt-4 text-xs rounded-xl">
+              <h3 className="font-bold text-base text-foreground">
+                No buses found
+              </h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Try resetting From to "Bengaluru" and To to "Mysore".
+              </p>
+              <Button
+                onClick={() => {
+                  setFromCity("Bengaluru");
+                  setToCity("Mysore");
+                  fetchBuses();
+                }}
+                variant="outline"
+                className="mt-4 text-xs rounded-xl"
+              >
                 Reset Search
               </Button>
             </div>
           ) : (
             <div className="space-y-4">
               {buses.map((bus) => (
-                <Card key={bus.id} className="rounded-3xl border-border bg-card overflow-hidden hover:shadow-subtle transition-smooth">
+                <Card
+                  key={bus.id}
+                  className="rounded-3xl border-border bg-card overflow-hidden hover:shadow-subtle transition-smooth"
+                >
                   <CardContent className="p-6">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                       {/* Operator & Type */}
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-base text-foreground">{bus.operatorName || (bus as any).operator || "Express Bus"}</span>
-                          <Badge variant="outline" className="text-[10px] font-bold uppercase">
-                            {(bus.busType || (bus as any).type || "Bus").replace(/_/g, " ")}
+                          <span className="font-bold text-base text-foreground">
+                            {bus.operatorName ||
+                              (bus as any).operator ||
+                              "Express Bus"}
+                          </span>
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] font-bold uppercase"
+                          >
+                            {(
+                              bus.busType ||
+                              (bus as any).type ||
+                              "Bus"
+                            ).replace(/_/g, " ")}
                           </Badge>
                         </div>
-                        <p className="text-xs text-muted-foreground">Vehicle: {bus.busNumber || "Verified AC"}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Vehicle: {bus.busNumber || "Verified AC"}
+                        </p>
                         {bus.liveLocation && (
                           <div className="flex items-center gap-1 text-[11px] text-emerald-600 font-semibold pt-1">
-                            <Zap className="w-3 h-3" /> Live GPS: {bus.liveLocation}
+                            <Zap className="w-3 h-3" /> Live GPS:{" "}
+                            {bus.liveLocation}
                           </div>
                         )}
                       </div>
@@ -239,28 +286,53 @@ export default function BusTransportPage() {
                       {/* Timings */}
                       <div className="flex items-center gap-6">
                         <div className="text-center">
-                          <span className="text-lg font-black text-foreground block">{bus.departureTime || (bus as any).departure || "--:--"}</span>
-                          <span className="text-xs text-muted-foreground">{bus.sourceCity || (bus as any).from || "Boarding"}</span>
+                          <span className="text-lg font-black text-foreground block">
+                            {bus.departureTime ||
+                              (bus as any).departure ||
+                              "--:--"}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {bus.sourceCity || (bus as any).from || "Boarding"}
+                          </span>
                         </div>
                         <div className="text-center">
-                          <span className="text-[10px] text-muted-foreground block">{bus.duration || "Direct"}</span>
+                          <span className="text-[10px] text-muted-foreground block">
+                            {bus.duration || "Direct"}
+                          </span>
                           <div className="w-16 h-0.5 bg-border my-1 relative">
                             <ArrowRight className="w-3 h-3 text-muted-foreground absolute top-1/2 -right-1 -translate-y-1/2" />
                           </div>
-                          <span className="text-[9px] text-emerald-600 font-bold">{bus.runningStatus || "On Time"}</span>
+                          <span className="text-[9px] text-emerald-600 font-bold">
+                            {bus.runningStatus || "On Time"}
+                          </span>
                         </div>
                         <div className="text-center">
-                          <span className="text-lg font-black text-foreground block">{bus.arrivalTime || (bus as any).arrival || "--:--"}</span>
-                          <span className="text-xs text-muted-foreground">{bus.destinationCity || (bus as any).to || "Destination"}</span>
+                          <span className="text-lg font-black text-foreground block">
+                            {bus.arrivalTime || (bus as any).arrival || "--:--"}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {bus.destinationCity ||
+                              (bus as any).to ||
+                              "Destination"}
+                          </span>
                         </div>
                       </div>
 
                       {/* Price & Book */}
                       <div className="flex items-center justify-between md:justify-end gap-4 pt-4 md:pt-0 border-t md:border-t-0 border-border">
                         <div className="text-left md:text-right">
-                          <span className="text-[10px] text-muted-foreground block">per seat</span>
-                          <span className="text-xl font-black text-foreground">₹{bus.fare}</span>
-                          <span className="text-[10px] text-sky-600 block font-semibold">{bus.availableSeats ?? (bus as any).seatsAvailable ?? 10} seats left</span>
+                          <span className="text-[10px] text-muted-foreground block">
+                            per seat
+                          </span>
+                          <span className="text-xl font-black text-foreground">
+                            ₹{bus.fare}
+                          </span>
+                          <span className="text-[10px] text-sky-600 block font-semibold">
+                            {bus.availableSeats ??
+                              (bus as any).seatsAvailable ??
+                              10}{" "}
+                            seats left
+                          </span>
                         </div>
                         <Button
                           onClick={() => handleSelectBus(bus)}
@@ -273,7 +345,9 @@ export default function BusTransportPage() {
 
                     <div className="mt-4 pt-3 border-t border-border flex items-center gap-2 text-[11px] text-muted-foreground">
                       <MapPin className="w-3 h-3 text-primary flex-shrink-0" />
-                      <span className="truncate">Stops: {bus.stops || "Direct Express Route"}</span>
+                      <span className="truncate">
+                        Stops: {bus.stops || "Direct Express Route"}
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
@@ -287,7 +361,9 @@ export default function BusTransportPage() {
           <DialogContent className="max-w-md rounded-2xl">
             <DialogHeader>
               <DialogTitle className="font-display font-black text-lg">
-                {ticketSuccess ? "Digital Ticket Issued! 🎫" : `Select Seats — ${selectedBus?.operatorName}`}
+                {ticketSuccess
+                  ? "Digital Ticket Issued! 🎫"
+                  : `Select Seats — ${selectedBus?.operatorName}`}
               </DialogTitle>
             </DialogHeader>
 
@@ -297,19 +373,48 @@ export default function BusTransportPage() {
                   <div className="w-12 h-12 rounded-xl bg-card border border-border mx-auto flex items-center justify-center mb-1">
                     <QrCode className="w-8 h-8 text-foreground" />
                   </div>
-                  <span className="text-xs font-bold text-blue-600 block">Boarding Pass & PNR</span>
-                  <span className="text-lg font-mono font-black text-foreground">{ticketSuccess.ticketNumber}</span>
+                  <span className="text-xs font-bold text-blue-600 block">
+                    Boarding Pass & PNR
+                  </span>
+                  <span className="text-lg font-mono font-black text-foreground">
+                    {ticketSuccess.ticketNumber}
+                  </span>
                   <p className="text-xs text-muted-foreground pt-1">
-                    Passenger: {ticketSuccess.passengerName} • Seats: {ticketSuccess.seatNumbers}
+                    Passenger: {ticketSuccess.passengerName} • Seats:{" "}
+                    {ticketSuccess.seatNumbers}
                   </p>
                 </div>
                 <div className="text-xs space-y-1.5 text-muted-foreground">
-                  <div className="flex justify-between"><span>Bus:</span> <b className="text-foreground">{ticketSuccess.operatorName} ({ticketSuccess.busNumber})</b></div>
-                  <div className="flex justify-between"><span>Route:</span> <b className="text-foreground">{ticketSuccess.sourceCity} → {ticketSuccess.destinationCity}</b></div>
-                  <div className="flex justify-between"><span>Departure:</span> <b className="text-foreground">{ticketSuccess.departureTime}</b></div>
-                  <div className="flex justify-between"><span>Total Fare:</span> <b className="text-foreground font-bold">₹{ticketSuccess.totalAmount}</b></div>
+                  <div className="flex justify-between">
+                    <span>Bus:</span>{" "}
+                    <b className="text-foreground">
+                      {ticketSuccess.operatorName} ({ticketSuccess.busNumber})
+                    </b>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Route:</span>{" "}
+                    <b className="text-foreground">
+                      {ticketSuccess.sourceCity} →{" "}
+                      {ticketSuccess.destinationCity}
+                    </b>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Departure:</span>{" "}
+                    <b className="text-foreground">
+                      {ticketSuccess.departureTime}
+                    </b>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total Fare:</span>{" "}
+                    <b className="text-foreground font-bold">
+                      ₹{ticketSuccess.totalAmount}
+                    </b>
+                  </div>
                 </div>
-                <Button onClick={() => setSelectedBus(null)} className="w-full rounded-xl font-bold text-xs bg-primary text-primary-foreground">
+                <Button
+                  onClick={() => setSelectedBus(null)}
+                  className="w-full rounded-xl font-bold text-xs bg-primary text-primary-foreground"
+                >
                   Done
                 </Button>
               </div>
@@ -319,10 +424,31 @@ export default function BusTransportPage() {
                 <div className="space-y-1.5">
                   <Label className="text-xs font-bold flex justify-between">
                     <span>Choose Seat(s)</span>
-                    <span className="text-primary">{selectedSeats.join(", ")}</span>
+                    <span className="text-primary">
+                      {selectedSeats.join(", ")}
+                    </span>
                   </Label>
                   <div className="grid grid-cols-6 gap-2 p-3 bg-muted/40 rounded-xl">
-                    {["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "S10", "S11", "S12", "S13", "S14", "S15", "S16", "S17", "S18"].map((seat) => {
+                    {[
+                      "S1",
+                      "S2",
+                      "S3",
+                      "S4",
+                      "S5",
+                      "S6",
+                      "S7",
+                      "S8",
+                      "S9",
+                      "S10",
+                      "S11",
+                      "S12",
+                      "S13",
+                      "S14",
+                      "S15",
+                      "S16",
+                      "S17",
+                      "S18",
+                    ].map((seat) => {
                       const isSelected = selectedSeats.includes(seat);
                       const isOccupied = ["S2", "S5", "S9"].includes(seat);
                       return (
@@ -335,8 +461,8 @@ export default function BusTransportPage() {
                             isOccupied
                               ? "bg-muted text-muted-foreground/40 cursor-not-allowed"
                               : isSelected
-                              ? "bg-primary text-primary-foreground shadow-xs scale-105"
-                              : "bg-card border border-border hover:border-primary text-foreground"
+                                ? "bg-primary text-primary-foreground shadow-xs scale-105"
+                                : "bg-card border border-border hover:border-primary text-foreground"
                           }`}
                         >
                           {seat}
@@ -344,11 +470,15 @@ export default function BusTransportPage() {
                       );
                     })}
                   </div>
-                  <span className="text-[10px] text-muted-foreground block text-center">Driver Side ← Front</span>
+                  <span className="text-[10px] text-muted-foreground block text-center">
+                    Driver Side ← Front
+                  </span>
                 </div>
 
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold">Passenger Full Name</Label>
+                  <Label className="text-xs font-bold">
+                    Passenger Full Name
+                  </Label>
                   <Input
                     required
                     value={passengerName}
@@ -358,7 +488,9 @@ export default function BusTransportPage() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold">Mobile Phone (For SMS ticket)</Label>
+                  <Label className="text-xs font-bold">
+                    Mobile Phone (For SMS ticket)
+                  </Label>
                   <Input
                     required
                     value={passengerPhone}
@@ -369,7 +501,9 @@ export default function BusTransportPage() {
                 </div>
 
                 <div className="p-3 rounded-xl bg-muted/40 flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Total Fare ({selectedSeats.length} seats):</span>
+                  <span className="text-muted-foreground">
+                    Total Fare ({selectedSeats.length} seats):
+                  </span>
                   <span className="text-base font-bold text-foreground">
                     ₹{(selectedBus?.fare || 0) * selectedSeats.length}
                   </span>

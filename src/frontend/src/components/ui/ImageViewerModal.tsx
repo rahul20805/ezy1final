@@ -1,15 +1,16 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
-  X,
-  ZoomIn,
-  ZoomOut,
-  RotateCcw,
-  Maximize2,
-  Minimize2,
   ChevronLeft,
   ChevronRight,
   Image as ImageIcon,
+  Maximize2,
+  Minimize2,
+  RotateCcw,
+  X,
+  ZoomIn,
+  ZoomOut,
 } from "lucide-react";
+import type React from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface ImageViewerModalProps {
   isOpen: boolean;
@@ -48,7 +49,9 @@ export function ImageViewerModal({
   // Reset view when opening or switching images
   useEffect(() => {
     if (isOpen) {
-      setCurrentIndex(Math.min(initialIndex, Math.max(0, imageList.length - 1)));
+      setCurrentIndex(
+        Math.min(initialIndex, Math.max(0, imageList.length - 1)),
+      );
       setScale(1);
       setPosition({ x: 0, y: 0 });
       setImgLoaded(false);
@@ -105,15 +108,23 @@ export function ImageViewerModal({
 
   const prevImage = () => {
     if (imageList.length > 1) {
-      setCurrentIndex((prev) => (prev - 1 + imageList.length) % imageList.length);
+      setCurrentIndex(
+        (prev) => (prev - 1 + imageList.length) % imageList.length,
+      );
     }
   };
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement && containerRef.current) {
-      containerRef.current.requestFullscreen?.().then(() => setIsFullscreen(true)).catch(() => {});
+      containerRef.current
+        .requestFullscreen?.()
+        .then(() => setIsFullscreen(true))
+        .catch(() => {});
     } else {
-      document.exitFullscreen?.().then(() => setIsFullscreen(false)).catch(() => {});
+      document
+        .exitFullscreen?.()
+        .then(() => setIsFullscreen(false))
+        .catch(() => {});
     }
   };
 
@@ -152,7 +163,7 @@ export function ImageViewerModal({
     if (e.touches.length === 2) {
       const dist = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
-        e.touches[0].clientY - e.touches[1].clientY
+        e.touches[0].clientY - e.touches[1].clientY,
       );
       touchStartDistRef.current = dist;
       initialTouchScaleRef.current = scale;
@@ -169,10 +180,13 @@ export function ImageViewerModal({
     if (e.touches.length === 2 && touchStartDistRef.current !== null) {
       const dist = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
-        e.touches[0].clientY - e.touches[1].clientY
+        e.touches[0].clientY - e.touches[1].clientY,
       );
       const ratio = dist / touchStartDistRef.current;
-      const nextScale = Math.min(Math.max(initialTouchScaleRef.current * ratio, 0.75), 4);
+      const nextScale = Math.min(
+        Math.max(initialTouchScaleRef.current * ratio, 0.75),
+        4,
+      );
       setScale(nextScale);
       if (nextScale <= 1) setPosition({ x: 0, y: 0 });
     } else if (e.touches.length === 1 && isDragging && scale > 1) {
@@ -202,9 +216,13 @@ export function ImageViewerModal({
       {/* Top Header Controls */}
       <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 border-b border-white/10 bg-black/40 z-30">
         <div className="min-w-0 pr-4">
-          <h4 className="text-sm sm:text-base font-bold text-white truncate">{title}</h4>
+          <h4 className="text-sm sm:text-base font-bold text-white truncate">
+            {title}
+          </h4>
           {subtitle && (
-            <p className="text-[11px] sm:text-xs text-white/60 truncate">{subtitle}</p>
+            <p className="text-[11px] sm:text-xs text-white/60 truncate">
+              {subtitle}
+            </p>
           )}
         </div>
 
@@ -243,7 +261,11 @@ export function ImageViewerModal({
             title="Toggle Fullscreen"
             className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors text-white"
           >
-            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            {isFullscreen ? (
+              <Minimize2 className="w-4 h-4" />
+            ) : (
+              <Maximize2 className="w-4 h-4" />
+            )}
           </button>
 
           <div className="w-[1px] h-5 bg-white/20 mx-1" />
@@ -263,7 +285,11 @@ export function ImageViewerModal({
       {/* Main Image Stage */}
       <div
         className={`flex-1 relative overflow-hidden flex items-center justify-center p-2 sm:p-4 touch-none ${
-          scale > 1 ? (isDragging ? "cursor-grabbing" : "cursor-grab") : "cursor-default"
+          scale > 1
+            ? isDragging
+              ? "cursor-grabbing"
+              : "cursor-grab"
+            : "cursor-default"
         }`}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -275,7 +301,9 @@ export function ImageViewerModal({
         {!imgLoaded && !imgError && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
             <div className="w-10 h-10 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-            <span className="text-xs text-white/60">Loading high-resolution image...</span>
+            <span className="text-xs text-white/60">
+              Loading high-resolution image...
+            </span>
           </div>
         )}
 
@@ -283,8 +311,12 @@ export function ImageViewerModal({
         {imgError && (
           <div className="text-center p-8 bg-white/5 rounded-3xl border border-white/10 max-w-sm">
             <ImageIcon className="w-12 h-12 text-white/30 mx-auto mb-3" />
-            <p className="text-sm font-bold text-white mb-1">Image Preview Unavailable</p>
-            <p className="text-xs text-white/60">The requested image could not be loaded.</p>
+            <p className="text-sm font-bold text-white mb-1">
+              Image Preview Unavailable
+            </p>
+            <p className="text-xs text-white/60">
+              The requested image could not be loaded.
+            </p>
           </div>
         )}
 
@@ -356,7 +388,11 @@ export function ImageViewerModal({
                       : "border-white/20 opacity-60 hover:opacity-100"
                   }`}
                 >
-                  <img src={thumb} alt="" className="w-full h-full object-cover" />
+                  <img
+                    src={thumb}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
                 </button>
               ))}
             </div>

@@ -1,32 +1,32 @@
-import { useState, useEffect } from "react";
-import { Link } from "@tanstack/react-router";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Link } from "@tanstack/react-router";
 import {
-  Bell,
-  CheckCheck,
-  Trash2,
-  Settings,
-  ShoppingBag,
-  Truck,
-  Bus,
-  Stethoscope,
-  Wrench,
-  Tag,
   AlertCircle,
-  ExternalLink,
-  Sparkles,
-  Radio,
+  Bell,
+  Bus,
+  CheckCheck,
   CheckCircle2,
   Clock,
+  ExternalLink,
+  Radio,
   SendHorizontal,
+  Settings,
   ShieldCheck,
+  ShoppingBag,
+  Sparkles,
+  Stethoscope,
+  Tag,
+  Trash2,
+  Truck,
+  Wrench,
 } from "lucide-react";
-import UserLayout from "../components/UserLayout";
-import { useNotificationStore } from "../lib/notificationStore";
-import { triggerTestNotification, type NotificationItem } from "../lib/api";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import UserLayout from "../components/UserLayout";
+import { type NotificationItem, triggerTestNotification } from "../lib/api";
+import { useNotificationStore } from "../lib/notificationStore";
 
 const CATEGORIES = [
   { id: "all", label: "All", icon: Bell },
@@ -59,7 +59,12 @@ export default function NotificationsPage() {
     loadNotifications(filterCategory);
   }, [filterCategory]);
 
-  const handleTestEvent = async (type: string, title?: string, msg?: string, prio = "HIGH") => {
+  const handleTestEvent = async (
+    type: string,
+    title?: string,
+    msg?: string,
+    prio = "HIGH",
+  ) => {
     setIsTriggeringTest(true);
     try {
       const res = await triggerTestNotification({
@@ -120,7 +125,10 @@ export default function NotificationsPage() {
         );
       default:
         return (
-          <Badge variant="outline" className="text-[10px] uppercase text-muted-foreground">
+          <Badge
+            variant="outline"
+            className="text-[10px] uppercase text-muted-foreground"
+          >
             Update
           </Badge>
         );
@@ -154,7 +162,9 @@ export default function NotificationsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-card to-muted/40 border border-border shadow-xs">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-bold text-foreground">Intelligent Notification Center</h2>
+              <h2 className="text-xl font-bold text-foreground">
+                Intelligent Notification Center
+              </h2>
               {unreadCount > 0 && (
                 <Badge className="bg-primary text-primary-foreground font-bold px-2 py-0.5">
                   {unreadCount} Unread
@@ -167,8 +177,12 @@ export default function NotificationsPage() {
                   sseConnected ? "text-emerald-500" : "text-amber-500"
                 }`}
               >
-                <Radio className={`w-3.5 h-3.5 ${sseConnected ? "animate-pulse" : ""}`} />
-                {sseConnected ? "Live Real-Time SSE Active" : "Connecting Live Stream..."}
+                <Radio
+                  className={`w-3.5 h-3.5 ${sseConnected ? "animate-pulse" : ""}`}
+                />
+                {sseConnected
+                  ? "Live Real-Time SSE Active"
+                  : "Connecting Live Stream..."}
               </span>
               <span>•</span>
               <span>Central Event Engine</span>
@@ -188,7 +202,11 @@ export default function NotificationsPage() {
               </Button>
             )}
             <Link to="/dashboard/settings">
-              <Button variant="ghost" size="sm" className="text-xs h-9 gap-1.5 text-muted-foreground">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs h-9 gap-1.5 text-muted-foreground"
+              >
                 <Settings className="w-3.5 h-3.5" />
                 Preferences
               </Button>
@@ -204,18 +222,24 @@ export default function NotificationsPage() {
             </div>
             <div>
               <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                <span>Official EZY1 Notice Board &amp; Communication Directory</span>
+                <span>
+                  Official EZY1 Notice Board &amp; Communication Directory
+                </span>
                 <span className="px-1.5 py-0.5 rounded text-[10px] bg-primary text-primary-foreground font-bold">
                   Official
                 </span>
               </div>
               <p className="text-[11px] text-muted-foreground mt-0.5">
-                View certified public advisories, authenticated department email channels, and anti-phishing guidelines.
+                View certified public advisories, authenticated department email
+                channels, and anti-phishing guidelines.
               </p>
             </div>
           </div>
           <Link to="/notices" className="shrink-0 self-start sm:self-auto">
-            <Button size="sm" className="text-xs font-semibold rounded-xl bg-primary text-primary-foreground gap-1.5">
+            <Button
+              size="sm"
+              className="text-xs font-semibold rounded-xl bg-primary text-primary-foreground gap-1.5"
+            >
               <span>View Notice Board</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </Button>
@@ -229,7 +253,9 @@ export default function NotificationsPage() {
               <Sparkles className="w-3.5 h-3.5 text-primary" />
               Test Real-Time Event Dispatcher:
             </span>
-            <span className="text-[11px] text-muted-foreground">Simulate live system triggers</span>
+            <span className="text-[11px] text-muted-foreground">
+              Simulate live system triggers
+            </span>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button
@@ -242,7 +268,7 @@ export default function NotificationsPage() {
                   "DELIVERY_NEARBY",
                   "Rider is Arriving! 🛵",
                   "Delivery partner Manoj is 300m away with your order #ORD-8419.",
-                  "CRITICAL"
+                  "CRITICAL",
                 )
               }
             >
@@ -259,7 +285,7 @@ export default function NotificationsPage() {
                   "BUS_APPROACHING",
                   "Bus Approaching Stop! 🚌",
                   "Bus 412 (Delhi - Gurugram) will reach IFFCO Chowk in 4 mins.",
-                  "HIGH"
+                  "HIGH",
                 )
               }
             >
@@ -276,7 +302,7 @@ export default function NotificationsPage() {
                   "DOCTOR_APPOINTMENT_REMINDER",
                   "Doctor Appointment in 30 Mins 🩺",
                   "Consultation with Dr. Aditi Verma starts at 4:30 PM at City Care Hospital.",
-                  "HIGH"
+                  "HIGH",
                 )
               }
             >
@@ -293,7 +319,7 @@ export default function NotificationsPage() {
                   "COUPON_AVAILABLE",
                   "Weekend Super Sale! 🎁",
                   "Use promo code EZY50 for flat ₹50 discount on grocery orders above ₹300.",
-                  "MARKETING"
+                  "MARKETING",
                 )
               }
             >
@@ -330,7 +356,10 @@ export default function NotificationsPage() {
         {isLoading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-24 rounded-xl bg-muted/40 animate-pulse" />
+              <div
+                key={i}
+                className="h-24 rounded-xl bg-muted/40 animate-pulse"
+              />
             ))}
           </div>
         ) : notifications.length === 0 ? (
@@ -339,9 +368,12 @@ export default function NotificationsPage() {
             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-3">
               <CheckCircle2 className="w-8 h-8 text-primary" />
             </div>
-            <h3 className="text-base font-semibold text-foreground">You're all caught up!</h3>
+            <h3 className="text-base font-semibold text-foreground">
+              You're all caught up!
+            </h3>
             <p className="text-xs text-muted-foreground mt-1 max-w-xs">
-              No new alerts in this category. Live system updates and order tracking alerts will appear here in real time.
+              No new alerts in this category. Live system updates and order
+              tracking alerts will appear here in real time.
             </p>
           </div>
         ) : (
@@ -361,7 +393,9 @@ export default function NotificationsPage() {
                     {/* Category Icon Disc */}
                     <div
                       className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-2xs ${
-                        isUnread ? "bg-card border border-primary/30" : "bg-muted"
+                        isUnread
+                          ? "bg-card border border-primary/30"
+                          : "bg-muted"
                       }`}
                     >
                       {getCategoryIcon(item.category)}
@@ -371,7 +405,9 @@ export default function NotificationsPage() {
                     <div className="flex-1 min-w-0 space-y-1">
                       <div className="flex items-center gap-2 flex-wrap justify-between">
                         <div className="flex items-center gap-2">
-                          <h4 className={`text-sm font-semibold text-foreground ${isUnread ? "font-bold" : ""}`}>
+                          <h4
+                            className={`text-sm font-semibold text-foreground ${isUnread ? "font-bold" : ""}`}
+                          >
                             {item.title}
                           </h4>
                           {isUnread && (
@@ -419,7 +455,9 @@ export default function NotificationsPage() {
                               title="Mark as read"
                             >
                               <CheckCheck className="w-3.5 h-3.5" />
-                              <span className="hidden sm:inline">Mark read</span>
+                              <span className="hidden sm:inline">
+                                Mark read
+                              </span>
                             </Button>
                           )}
                           <Button

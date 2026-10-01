@@ -1,33 +1,40 @@
-import { useState, useMemo } from "react";
-import { Link, useParams } from "@tanstack/react-router";
-import Layout from "../components/Layout";
-import { RelatedPagesBar } from "../components/RelatedPagesBar";
-import { SUPER_CATEGORIES, CATALOG_ITEMS, type CatalogItem } from "../ecosystem-data";
-import { useCartStore } from "../lib/cartStore";
-import { useRequireAuth } from "../components/AuthPromptModal";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Link, useParams } from "@tanstack/react-router";
 import {
-  Search,
-  Filter,
-  Star,
-  Clock,
-  ShieldCheck,
-  Lock,
-  Plus,
-  Minus,
+  AlertCircle,
   ArrowLeft,
   CheckCircle2,
+  Clock,
+  Filter,
+  Lock,
+  Minus,
+  Plus,
+  Search,
+  ShieldCheck,
   Sparkles,
+  Star,
   Upload,
-  AlertCircle
 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useRequireAuth } from "../components/AuthPromptModal";
+import Layout from "../components/Layout";
+import { RelatedPagesBar } from "../components/RelatedPagesBar";
+import {
+  CATALOG_ITEMS,
+  type CatalogItem,
+  SUPER_CATEGORIES,
+} from "../ecosystem-data";
+import { useCartStore } from "../lib/cartStore";
 
 export default function CategoryDetailPage() {
-  const { categoryId } = useParams({ strict: false }) as { categoryId?: string };
-  const currentCat = SUPER_CATEGORIES.find((c) => c.id === categoryId) || SUPER_CATEGORIES[0];
+  const { categoryId } = useParams({ strict: false }) as {
+    categoryId?: string;
+  };
+  const currentCat =
+    SUPER_CATEGORIES.find((c) => c.id === categoryId) || SUPER_CATEGORIES[0];
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
@@ -59,14 +66,20 @@ export default function CategoryDetailPage() {
 
   // Extract unique tags for this category
   const availableTags = useMemo(() => {
-    const all = CATALOG_ITEMS.filter((i) => i.categoryId === currentCat.id).flatMap((i) => i.tags);
+    const all = CATALOG_ITEMS.filter(
+      (i) => i.categoryId === currentCat.id,
+    ).flatMap((i) => i.tags);
     return Array.from(new Set(all));
   }, [currentCat.id]);
 
   const handleAddToCart = (product: CatalogItem) => {
     // We convert CatalogItem to CartItem compatible format
     const mappedProduct: any = {
-      id: Math.abs(product.id.split("").reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 0)),
+      id: Math.abs(
+        product.id
+          .split("")
+          .reduce((a, b) => (a << 5) - a + b.charCodeAt(0), 0),
+      ),
       name: product.name,
       description: product.description,
       price: product.price,
@@ -138,7 +151,10 @@ export default function CategoryDetailPage() {
                 )}
 
                 {currentCat.isAgeRestricted && !ageConfirmed && (
-                  <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/30 text-xs">
+                  <Badge
+                    variant="outline"
+                    className="bg-amber-500/10 text-amber-600 border-amber-500/30 text-xs"
+                  >
                     18+ Age Verification Required
                   </Badge>
                 )}
@@ -150,7 +166,11 @@ export default function CategoryDetailPage() {
               <div className="mt-3 p-3 rounded-xl bg-slate-900 text-slate-200 border border-slate-800 flex items-center gap-3 text-xs">
                 <Lock className="w-4 h-4 text-emerald-400 flex-shrink-0" />
                 <div>
-                  <strong className="font-semibold text-white">100% Discreet Packaging Guarantee:</strong> Items are delivered in unbranded, opaque, tamper-evident sealed packaging with discreet billing.
+                  <strong className="font-semibold text-white">
+                    100% Discreet Packaging Guarantee:
+                  </strong>{" "}
+                  Items are delivered in unbranded, opaque, tamper-evident
+                  sealed packaging with discreet billing.
                 </div>
               </div>
             )}
@@ -177,12 +197,19 @@ export default function CategoryDetailPage() {
                       : "bg-muted/70 hover:bg-muted text-muted-foreground"
                   }`}
                 >
-                  All Items ({CATALOG_ITEMS.filter((i) => i.categoryId === currentCat.id).length})
+                  All Items (
+                  {
+                    CATALOG_ITEMS.filter((i) => i.categoryId === currentCat.id)
+                      .length
+                  }
+                  )
                 </button>
                 {availableTags.map((tag) => (
                   <button
                     key={tag}
-                    onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
+                    onClick={() =>
+                      setSelectedTag(selectedTag === tag ? null : tag)
+                    }
                     className={`px-3 py-1.5 rounded-xl font-medium whitespace-nowrap transition-smooth ${
                       selectedTag === tag
                         ? "bg-primary text-primary-foreground shadow-sm"
@@ -194,7 +221,9 @@ export default function CategoryDetailPage() {
                 ))}
 
                 {/* Pure Veg Toggle if applicable */}
-                {["restaurants", "cafe", "grocery", "sweets"].includes(currentCat.id) && (
+                {["restaurants", "cafe", "grocery", "sweets"].includes(
+                  currentCat.id,
+                ) && (
                   <button
                     onClick={() => setVegOnly(!vegOnly)}
                     className={`ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-semibold border transition-smooth whitespace-nowrap ${
@@ -222,7 +251,9 @@ export default function CategoryDetailPage() {
               Age Verification Required
             </h2>
             <p className="text-sm text-muted-foreground mb-6">
-              This category contains age-restricted products. In accordance with legal regulations, please confirm that you are 18 years of age or older to proceed.
+              This category contains age-restricted products. In accordance with
+              legal regulations, please confirm that you are 18 years of age or
+              older to proceed.
             </p>
             <div className="flex gap-3 justify-center">
               <Button variant="outline" asChild className="rounded-xl">
@@ -243,8 +274,12 @@ export default function CategoryDetailPage() {
           <div className="container max-w-7xl py-8 px-4 sm:px-6">
             {categoryItems.length === 0 ? (
               <div className="text-center py-20">
-                <div className="text-5xl mb-3 opacity-60">{currentCat.icon}</div>
-                <h3 className="text-lg font-bold text-foreground mb-1">No items found</h3>
+                <div className="text-5xl mb-3 opacity-60">
+                  {currentCat.icon}
+                </div>
+                <h3 className="text-lg font-bold text-foreground mb-1">
+                  No items found
+                </h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   Try adjusting your search or category filters.
                 </p>
@@ -263,7 +298,11 @@ export default function CategoryDetailPage() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
                 {categoryItems.map((item) => {
-                  const numId = Math.abs(item.id.split("").reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 0));
+                  const numId = Math.abs(
+                    item.id
+                      .split("")
+                      .reduce((a, b) => (a << 5) - a + b.charCodeAt(0), 0),
+                  );
                   const cartItem = items[numId];
 
                   return (
@@ -323,16 +362,24 @@ export default function CategoryDetailPage() {
                         {/* Specifications / Author if present */}
                         {item.author && (
                           <p className="text-xs text-muted-foreground font-medium mb-2">
-                            By <span className="text-foreground font-semibold">{item.author}</span>
+                            By{" "}
+                            <span className="text-foreground font-semibold">
+                              {item.author}
+                            </span>
                           </p>
                         )}
                         {item.specs && (
                           <div className="grid grid-cols-2 gap-1 mb-3 py-1 px-2 rounded-lg bg-muted/40 text-[11px] text-muted-foreground">
-                            {Object.entries(item.specs).slice(0, 2).map(([k, v]) => (
-                              <div key={k} className="truncate">
-                                <span className="font-medium text-foreground">{k}:</span> {v}
-                              </div>
-                            ))}
+                            {Object.entries(item.specs)
+                              .slice(0, 2)
+                              .map(([k, v]) => (
+                                <div key={k} className="truncate">
+                                  <span className="font-medium text-foreground">
+                                    {k}:
+                                  </span>{" "}
+                                  {v}
+                                </div>
+                              ))}
                           </div>
                         )}
 
@@ -347,7 +394,9 @@ export default function CategoryDetailPage() {
                             <Star className="w-3 h-3 fill-amber-500" />
                             {item.rating}
                           </span>
-                          <span className="text-muted-foreground">({item.reviewCount})</span>
+                          <span className="text-muted-foreground">
+                            ({item.reviewCount})
+                          </span>
                           <span className="text-muted-foreground font-medium ml-auto flex items-center gap-1">
                             <Clock className="w-3 h-3 text-emerald-500" />
                             {item.deliveryMinutes}m
@@ -373,7 +422,10 @@ export default function CategoryDetailPage() {
                               <button
                                 onClick={() => {
                                   if (cartItem.quantity > 1) {
-                                    updateQuantity(numId, cartItem.quantity - 1);
+                                    updateQuantity(
+                                      numId,
+                                      cartItem.quantity - 1,
+                                    );
                                   } else {
                                     removeItem(numId);
                                   }
@@ -386,7 +438,9 @@ export default function CategoryDetailPage() {
                                 {cartItem.quantity}
                               </span>
                               <button
-                                onClick={() => updateQuantity(numId, cartItem.quantity + 1)}
+                                onClick={() =>
+                                  updateQuantity(numId, cartItem.quantity + 1)
+                                }
                                 className="w-6 h-6 rounded-lg flex items-center justify-center hover:bg-primary-foreground/20 transition-colors"
                               >
                                 <Plus className="w-3.5 h-3.5" />
@@ -422,7 +476,8 @@ export default function CategoryDetailPage() {
                 Upload Valid Prescription
               </h3>
               <p className="text-xs text-muted-foreground mb-4">
-                Our certified pharmacist will review your prescription, verify dosages, and arrange home delivery in 15-30 minutes.
+                Our certified pharmacist will review your prescription, verify
+                dosages, and arrange home delivery in 15-30 minutes.
               </p>
 
               <div className="border-2 border-dashed border-border rounded-xl p-6 text-center hover:border-primary/50 transition-colors cursor-pointer mb-4">
@@ -449,11 +504,14 @@ export default function CategoryDetailPage() {
                   onClick={() => {
                     requireAuth({
                       title: "Sign in to Submit Prescription",
-                      description: "We need your contact and delivery address to fulfill your medicines.",
+                      description:
+                        "We need your contact and delivery address to fulfill your medicines.",
                       onSuccess: () => {
                         setPrescriptionModalOpen(false);
-                        alert("Prescription uploaded successfully! A pharmacist will call you shortly.");
-                      }
+                        alert(
+                          "Prescription uploaded successfully! A pharmacist will call you shortly.",
+                        );
+                      },
                     });
                   }}
                   className="rounded-xl text-xs font-bold bg-primary text-primary-foreground"

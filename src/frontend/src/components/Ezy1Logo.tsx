@@ -1,5 +1,5 @@
-import React from "react";
 import { Link } from "@tanstack/react-router";
+import React from "react";
 
 export interface Ezy1LogoProps {
   size?: "sm" | "md" | "lg" | "xl";
@@ -64,7 +64,13 @@ export function Ezy1IconBadge({
           <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.4" />
           <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
         </linearGradient>
-        <filter id={`ezyShadow_${size}`} x="-10%" y="-10%" width="120%" height="130%">
+        <filter
+          id={`ezyShadow_${size}`}
+          x="-10%"
+          y="-10%"
+          width="120%"
+          height="130%"
+        >
           <feDropShadow
             dx="0"
             dy="4"

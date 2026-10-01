@@ -9,7 +9,11 @@
     "build": "npm --prefix src/frontend run build",
     "typecheck": "npm --prefix src/frontend run typecheck",
     "check": "npm --prefix src/frontend run check",
-    "fix": "npm --prefix src/frontend run fix"
+    "fix": "npm --prefix src/frontend run fix",
+    "server": "npm --prefix backend start",
+    "server:dev": "npm --prefix backend run dev",
+    "server:build": "npm --prefix backend run build",
+    "server:test": "npm --prefix backend test"
   },
   "devDependencies": {
     "sharp": "^0.34.4"

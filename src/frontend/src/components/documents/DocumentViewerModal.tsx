@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -6,20 +6,21 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  FileText,
+  AlertCircle,
   Download,
   ExternalLink,
+  File,
+  FileCheck,
+  FileSpreadsheet,
+  FileText,
+  Image as ImageIcon,
+  RotateCw,
+  X,
   ZoomIn,
   ZoomOut,
-  RotateCw,
-  FileSpreadsheet,
-  FileCheck,
-  File,
-  X,
-  AlertCircle,
-  Image as ImageIcon,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import type React from "react";
+import { useState } from "react";
 
 export interface DocumentInfo {
   title: string;
@@ -94,8 +95,12 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
               </DialogTitle>
               <p className="text-xs text-stone-500 dark:text-stone-400 truncate">
                 {document.fileSize ? `${document.fileSize} • ` : ""}
-                {document.uploadedAt ? `Uploaded ${document.uploadedAt} • ` : ""}
-                <span className="uppercase font-mono font-semibold">{ext || inferredType}</span>
+                {document.uploadedAt
+                  ? `Uploaded ${document.uploadedAt} • `
+                  : ""}
+                <span className="uppercase font-mono font-semibold">
+                  {ext || inferredType}
+                </span>
               </p>
             </div>
           </div>
@@ -112,7 +117,9 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
                 >
                   <ZoomOut className="h-3.5 w-3.5" />
                 </Button>
-                <span className="text-[11px] font-mono w-10 text-center">{zoom}%</span>
+                <span className="text-[11px] font-mono w-10 text-center">
+                  {zoom}%
+                </span>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -186,7 +193,8 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
                 {document.title}
               </h3>
               <p className="text-xs text-stone-500 dark:text-stone-400 mb-6 max-w-xs">
-                This document ({ext.toUpperCase() || "File"}) can be previewed or edited in its native application.
+                This document ({ext.toUpperCase() || "File"}) can be previewed
+                or edited in its native application.
               </p>
               <div className="flex items-center gap-3">
                 <a

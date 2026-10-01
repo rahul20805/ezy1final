@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { X, ExternalLink, Sparkles } from "lucide-react";
-import { NAVAEIN_URL } from "../config/links";
 import { Button } from "@/components/ui/button";
+import { ExternalLink, Sparkles, X } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { NAVAEIN_URL } from "../config/links";
 
 const STORAGE_DISMISS_KEY = "ezy1_navaein_popup_dismissed_at";
 const COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours frequency control
@@ -27,7 +27,7 @@ export function NavaeInPopup() {
     try {
       const dismissedAt = localStorage.getItem(STORAGE_DISMISS_KEY);
       if (dismissedAt) {
-        const timeSince = Date.now() - parseInt(dismissedAt, 10);
+        const timeSince = Date.now() - Number.parseInt(dismissedAt, 10);
         if (timeSince < COOLDOWN_MS) {
           return; // Still in cooldown
         }
@@ -107,7 +107,8 @@ export function NavaeInPopup() {
           </div>
 
           <p className="text-xs text-muted-foreground leading-relaxed max-w-sm mx-auto">
-            Explore handcrafted art pieces, custom home decor, unique artisanal gifts, and curated lifestyle creations.
+            Explore handcrafted art pieces, custom home decor, unique artisanal
+            gifts, and curated lifestyle creations.
           </p>
 
           <div className="pt-2 flex flex-col items-center gap-2">
@@ -122,7 +123,9 @@ export function NavaeInPopup() {
             <div className="flex items-center gap-1 text-[11px] text-muted-foreground font-medium">
               <span>External Website</span>
               <span className="text-orange-500 font-bold">↗</span>
-              <span className="text-muted-foreground/60">• Opens in new tab</span>
+              <span className="text-muted-foreground/60">
+                • Opens in new tab
+              </span>
             </div>
           </div>
         </div>

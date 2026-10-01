@@ -1,8 +1,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import { AuthProvider } from "./lib/AuthContext";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { AuthProvider } from "./lib/AuthContext";
 import "./index.css";
 
 BigInt.prototype.toJSON = function () {

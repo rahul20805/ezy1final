@@ -25,9 +25,9 @@ import {
   Wrench,
 } from "lucide-react";
 import { useState } from "react";
+import { getCustomerPlatformUrl } from "../config/links";
 import { useIsMobile } from "../hooks/use-mobile";
 import { Ezy1Logo } from "./Ezy1Logo";
-import { getCustomerPlatformUrl } from "../config/links";
 
 const ADMIN_ITEMS = [
   { icon: LayoutDashboard, label: "Overview", href: "/admin" },
@@ -102,11 +102,13 @@ function AdminSidebarContent({
             <Link
               key={item.href}
               to={isOverview ? "/admin" : item.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-body transition-smooth ${collapsed ? "justify-center" : ""
-                } ${isActive
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-body transition-smooth ${
+                collapsed ? "justify-center" : ""
+              } ${
+                isActive
                   ? "bg-accent text-accent-foreground shadow-xs"
                   : "text-sidebar-foreground hover:bg-muted"
-                }`}
+              }`}
               onClick={onLinkClick}
               data-ocid={`admin_sidebar.link.${item.label.toLowerCase().replace(/ /g, "_")}`}
             >
@@ -128,7 +130,10 @@ function AdminSidebarContent({
 
       {!collapsed && (
         <div className="p-3">
-          <a href={getCustomerPlatformUrl()} data-ocid="admin_sidebar.home_link">
+          <a
+            href={getCustomerPlatformUrl()}
+            data-ocid="admin_sidebar.home_link"
+          >
             <Button
               variant="ghost"
               size="sm"

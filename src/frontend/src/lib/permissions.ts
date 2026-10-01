@@ -53,25 +53,98 @@ export const PROVIDER_DEFAULT_DASHBOARDS: Record<string, string> = {
 };
 
 /**
- * Checks if a partner is authorized for a given set of allowed provider types
+ * Checks if a partner is authorized for a given set of allowed provider types.
+ * Enforces strict isolation:
+ * - Owners only access Owner portals
+ * - Admins only access Admin portals
+ * - Partners only access their designated service vertical
  */
 export function hasProviderAccess(
-  partner: { role?: string; providerType?: string; partnerType?: string } | null,
-  allowedTypes: string[]
+  partner: {
+    role?: string;
+    providerType?: string;
+    partnerType?: string;
+  } | null,
+  allowedTypes: string[],
 ): boolean {
   if (!partner) return false;
 
   const role = (partner.role || "").toUpperCase();
-  if (role === "ADMIN" || role === "SUPER_ADMIN" || role === "SUPER_OWNER" || role === "OWNER") {
-    return true; // Admins and Owners have platform-wide access
-  }
-
-  const currentType = (partner.providerType || partner.partnerType || "GROCERY").toUpperCase();
+  const currentType = (
+    partner.providerType ||
+    partner.partnerType ||
+    "GROCERY"
+  ).toUpperCase();
   const normalizedAllowed = allowedTypes.map((t) => t.toUpperCase());
 
-  // Handle aliases
-  if (normalizedAllowed.includes("GROCERY") && currentType === "VENDOR") return true;
-  if (normalizedAllowed.includes("DELIVERY") && currentType === "DRIVER") return true;
+  // 1. Strict Owner Protection: Only Master Owner accounts can access Owner modules
+  if (
+    normalizedAllowed.includes("OWNER") ||
+    normalizedAllowed.includes("SUPER_OWNER")
+  ) {
+    return role === "OWNER" || role === "SUPER_OWNER" || currentType === "OWNER";
+  }
+
+  // 2. Strict Admin Protection: Only Platform Administrator accounts can access Admin modules
+  if (
+    normalizedAllowed.includes("ADMIN") ||
+    normalizedAllowed.includes("SUPER_ADMIN")
+  ) {
+    return (
+      role === "ADMIN" || role === "SUPER_ADMIN" || currentType === "ADMIN"
+    );
+  }
+
+  // 3. Platform Owners or Super Admins can audit/inspect partner modules
+  if (
+    role === "ADMIN" ||
+    role === "SUPER_ADMIN" ||
+    role === "SUPER_OWNER" ||
+    role === "OWNER"
+  ) {
+    return true;
+  }
+
+  // 4. Regular Partners: Isolated strictly to their own vertical and aliases
+  if (
+    normalizedAllowed.includes("GROCERY") &&
+    (currentType === "VENDOR" ||
+      currentType === "KIRANA" ||
+      currentType === "FRUIT" ||
+      currentType === "VEGETABLE")
+  ) {
+    return true;
+  }
+  if (
+    normalizedAllowed.includes("DELIVERY") &&
+    (currentType === "DRIVER" || currentType === "LOGISTICS")
+  ) {
+    return true;
+  }
+  if (
+    normalizedAllowed.includes("RESTAURANT") &&
+    (currentType === "FOOD" || currentType === "CAFE")
+  ) {
+    return true;
+  }
+  if (
+    normalizedAllowed.includes("PHARMACY") &&
+    (currentType === "CHEMIST" || currentType === "MEDICAL")
+  ) {
+    return true;
+  }
+  if (
+    normalizedAllowed.includes("HOSPITAL") &&
+    (currentType === "CLINIC" || currentType === "HEALTHCARE")
+  ) {
+    return true;
+  }
+  if (
+    normalizedAllowed.includes("SERVICE_PROVIDER") &&
+    (currentType === "SERVICES" || currentType === "HOME_SERVICES")
+  ) {
+    return true;
+  }
 
   return normalizedAllowed.includes(currentType);
 }
@@ -89,6 +162,5 @@ export function getProviderLabel(providerType?: string): string {
  */
 export function getProviderDashboardUrl(providerType?: string): string {
   const normalized = (providerType || "GROCERY").toUpperCase();
-  return PROVIDER_DEFAULT_DASHBOARDS[normalized] || "/owner";
+  return PROVIDER_DEFAULT_DASHBOARDS[normalized] || "/partner-dashboard";
 }
-

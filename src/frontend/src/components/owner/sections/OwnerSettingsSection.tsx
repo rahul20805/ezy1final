@@ -124,7 +124,9 @@ export function OwnerSettingsSection() {
 
     if (
       partners.some(
-        (p) => String(p.partnerUserId || p.id).toLowerCase() === newPartnerId.trim().toLowerCase(),
+        (p) =>
+          String(p.partnerUserId || p.id).toLowerCase() ===
+          newPartnerId.trim().toLowerCase(),
       )
     ) {
       toast.error("A partner with this Admin/Login ID already exists.");

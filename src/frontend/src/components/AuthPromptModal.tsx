@@ -1,9 +1,22 @@
-import React, { createContext, useContext, useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import {
+  ArrowRight,
+  CheckCircle,
+  Lock,
+  ShieldCheck,
+  Smartphone,
+} from "lucide-react";
+import type React from "react";
+import { createContext, useContext, useState } from "react";
 import { useAuth } from "../lib/AuthContext";
-import { Smartphone, CheckCircle, ArrowRight, ShieldCheck, Lock } from "lucide-react";
 
 interface PendingAction {
   title: string;
@@ -17,10 +30,14 @@ interface AuthPromptContextType {
 
 const AuthPromptContext = createContext<AuthPromptContextType | null>(null);
 
-export function AuthPromptProvider({ children }: { children: React.ReactNode }) {
+export function AuthPromptProvider({
+  children,
+}: { children: React.ReactNode }) {
   const { isAuthenticated, sendPhoneOtp, verifyPhoneOtp } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-  const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
+  const [pendingAction, setPendingAction] = useState<PendingAction | null>(
+    null,
+  );
 
   // OTP Form States
   const [phone, setPhone] = useState("");
@@ -34,7 +51,11 @@ export function AuthPromptProvider({ children }: { children: React.ReactNode }) 
   const requireAuth = (action: PendingAction | (() => void)): boolean => {
     const actObj: PendingAction =
       typeof action === "function"
-        ? { title: "Complete Action", description: "Please sign in to proceed", onSuccess: action }
+        ? {
+            title: "Complete Action",
+            description: "Please sign in to proceed",
+            onSuccess: action,
+          }
         : action;
     if (isAuthenticated) {
       actObj.onSuccess();
@@ -79,7 +100,11 @@ export function AuthPromptProvider({ children }: { children: React.ReactNode }) 
     setError(null);
     setLoading(true);
     try {
-      const res = await verifyPhoneOtp(phone.trim(), otp.trim(), name.trim() || undefined);
+      const res = await verifyPhoneOtp(
+        phone.trim(),
+        otp.trim(),
+        name.trim() || undefined,
+      );
       if (res.success) {
         setIsOpen(false);
         // Execute the pending action immediately
@@ -111,7 +136,8 @@ export function AuthPromptProvider({ children }: { children: React.ReactNode }) 
               {pendingAction?.title || "Sign in to Continue"}
             </DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
-              {pendingAction?.description || "Experience 1-click ordering, live tracking, and quick appointments."}
+              {pendingAction?.description ||
+                "Experience 1-click ordering, live tracking, and quick appointments."}
             </DialogDescription>
           </DialogHeader>
 
@@ -136,7 +162,9 @@ export function AuthPromptProvider({ children }: { children: React.ReactNode }) 
                     placeholder="98765 43210"
                     maxLength={10}
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
+                    onChange={(e) =>
+                      setPhone(e.target.value.replace(/\D/g, ""))
+                    }
                     className="pl-14 h-12 rounded-xl text-base font-medium tracking-wide bg-background border-border"
                     autoFocus
                   />

@@ -49,7 +49,15 @@ interface OrderRecord {
   vendorId?: number;
   vendorName?: string;
   totalAmount: number;
-  status: "NEW" | "ACCEPTED" | "PREPARING" | "READY" | "OUT_FOR_DELIVERY" | "DELIVERED" | "CANCELLED" | "REFUNDED";
+  status:
+    | "NEW"
+    | "ACCEPTED"
+    | "PREPARING"
+    | "READY"
+    | "OUT_FOR_DELIVERY"
+    | "DELIVERED"
+    | "CANCELLED"
+    | "REFUNDED";
   paymentMethod?: string;
   paymentStatus?: string;
   items?: OrderItem[];
@@ -63,7 +71,10 @@ export function OrdersManager() {
   const [selectedOrder, setSelectedOrder] = useState<OrderRecord | null>(null);
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
 
-  const handleStatusChange = async (orderId: number, nextStatus: OrderRecord["status"]) => {
+  const handleStatusChange = async (
+    orderId: number,
+    nextStatus: OrderRecord["status"],
+  ) => {
     try {
       const res = await fetch(`/api/orders/${orderId}/status`, {
         method: "PUT",
@@ -73,10 +84,14 @@ export function OrdersManager() {
 
       if (!res.ok) throw new Error("Failed to update status on server.");
 
-      toast.success(`Order #${orderId} updated to: ${nextStatus.replace(/_/g, " ")}`);
+      toast.success(
+        `Order #${orderId} updated to: ${nextStatus.replace(/_/g, " ")}`,
+      );
       setRefreshTrigger((prev) => prev + 1);
       if (selectedOrder && selectedOrder.id === orderId) {
-        setSelectedOrder((prev) => (prev ? { ...prev, status: nextStatus } : null));
+        setSelectedOrder((prev) =>
+          prev ? { ...prev, status: nextStatus } : null,
+        );
       }
     } catch (err: any) {
       toast.error(err.message || "Failed to update order status.");
@@ -126,9 +141,24 @@ export function OrdersManager() {
           },
         ]}
         sortOptions={[
-          { label: "Order ID (Newest)", value: "id_desc", sortBy: "id", sortOrder: "desc" },
-          { label: "Amount (High to Low)", value: "totalAmount_desc", sortBy: "totalAmount", sortOrder: "desc" },
-          { label: "Amount (Low to High)", value: "totalAmount_asc", sortBy: "totalAmount", sortOrder: "asc" },
+          {
+            label: "Order ID (Newest)",
+            value: "id_desc",
+            sortBy: "id",
+            sortOrder: "desc",
+          },
+          {
+            label: "Amount (High to Low)",
+            value: "totalAmount_desc",
+            sortBy: "totalAmount",
+            sortOrder: "desc",
+          },
+          {
+            label: "Amount (Low to High)",
+            value: "totalAmount_asc",
+            sortBy: "totalAmount",
+            sortOrder: "asc",
+          },
         ]}
         defaultSort="id_desc"
         defaultPageSize={25}
@@ -152,17 +182,27 @@ export function OrdersManager() {
                       <span className="font-mono font-black text-sm text-foreground">
                         {order.orderNumber}
                       </span>
-                      <Badge variant="outline" className="text-[9px] uppercase font-bold">
+                      <Badge
+                        variant="outline"
+                        className="text-[9px] uppercase font-bold"
+                      >
                         {order.orderSource || "WEB"}
                       </Badge>
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {order.customerName} ({order.customerPhone || "N/A"}) •{" "}
-                      {order.createdAt ? new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Just now"}
+                      {order.createdAt
+                        ? new Date(order.createdAt).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "Just now"}
                     </p>
                   </div>
 
-                  <Badge className={`text-[10px] uppercase font-bold ${getStatusColor(order.status)}`}>
+                  <Badge
+                    className={`text-[10px] uppercase font-bold ${getStatusColor(order.status)}`}
+                  >
                     {order.status.replace(/_/g, " ")}
                   </Badge>
                 </div>
@@ -174,7 +214,10 @@ export function OrdersManager() {
                     <span>Qty × Price</span>
                   </div>
                   {itemsList.map((it, idx) => (
-                    <div key={idx} className="flex items-center justify-between text-foreground">
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between text-foreground"
+                    >
                       <span className="truncate max-w-[200px]">{it.name}</span>
                       <span className="font-mono font-medium">
                         {it.quantity} × ₹{it.price} = ₹{it.quantity * it.price}
@@ -182,19 +225,24 @@ export function OrdersManager() {
                     </div>
                   ))}
                   {itemsList.length === 0 && (
-                    <p className="text-muted-foreground italic">Standard order bundle</p>
+                    <p className="text-muted-foreground italic">
+                      Standard order bundle
+                    </p>
                   )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     <MapPin className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                    <span className="truncate">{order.deliveryAddress || "Standard Delivery Address"}</span>
+                    <span className="truncate">
+                      {order.deliveryAddress || "Standard Delivery Address"}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     <CreditCard className="w-3.5 h-3.5 text-primary flex-shrink-0" />
                     <span className="truncate uppercase font-bold text-foreground">
-                      {order.paymentMethod || "UPI"} • {order.paymentStatus || "paid"}
+                      {order.paymentMethod || "UPI"} •{" "}
+                      {order.paymentStatus || "paid"}
                     </span>
                   </div>
                 </div>
@@ -202,7 +250,9 @@ export function OrdersManager() {
                 {/* Order Status Controller */}
                 <div className="flex items-center justify-between pt-3 border-t border-border/60">
                   <div className="space-y-0.5">
-                    <span className="text-[10px] text-muted-foreground block">Order Total</span>
+                    <span className="text-[10px] text-muted-foreground block">
+                      Order Total
+                    </span>
                     <span className="font-display font-black text-lg text-primary">
                       ₹{order.totalAmount}
                     </span>
@@ -223,7 +273,12 @@ export function OrdersManager() {
 
                     <Select
                       value={order.status}
-                      onValueChange={(val) => handleStatusChange(order.id, val as OrderRecord["status"])}
+                      onValueChange={(val) =>
+                        handleStatusChange(
+                          order.id,
+                          val as OrderRecord["status"],
+                        )
+                      }
                     >
                       <SelectTrigger className="h-8 w-36 rounded-xl text-xs font-semibold">
                         <SelectValue />
@@ -232,7 +287,9 @@ export function OrdersManager() {
                         <SelectItem value="NEW">New</SelectItem>
                         <SelectItem value="ACCEPTED">Accept</SelectItem>
                         <SelectItem value="PREPARING">Preparing</SelectItem>
-                        <SelectItem value="OUT_FOR_DELIVERY">Out for Delivery</SelectItem>
+                        <SelectItem value="OUT_FOR_DELIVERY">
+                          Out for Delivery
+                        </SelectItem>
                         <SelectItem value="DELIVERED">Delivered</SelectItem>
                         <SelectItem value="CANCELLED">Cancel</SelectItem>
                       </SelectContent>
@@ -250,7 +307,8 @@ export function OrdersManager() {
         <DialogContent className="max-w-md bg-card border-border shadow-2xl rounded-3xl p-6">
           <DialogHeader>
             <DialogTitle className="text-xl font-display font-bold flex items-center gap-2">
-              <FileText className="w-5 h-5 text-primary" /> Tax Invoice & Receipt
+              <FileText className="w-5 h-5 text-primary" /> Tax Invoice &
+              Receipt
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
               Official customer invoice for fulfillment and tax documentation.
@@ -281,7 +339,8 @@ export function OrdersManager() {
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Payment:</span>
                   <span className="uppercase font-mono font-bold text-emerald-600">
-                    {selectedOrder.paymentMethod} • {selectedOrder.paymentStatus}
+                    {selectedOrder.paymentMethod} •{" "}
+                    {selectedOrder.paymentStatus}
                   </span>
                 </div>
               </div>
@@ -296,7 +355,9 @@ export function OrdersManager() {
                     <span>
                       {it.name} × {it.quantity}
                     </span>
-                    <span className="font-mono font-semibold">₹{it.price * it.quantity}</span>
+                    <span className="font-mono font-semibold">
+                      ₹{it.price * it.quantity}
+                    </span>
                   </div>
                 ))}
               </div>

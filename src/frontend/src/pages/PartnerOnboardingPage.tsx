@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Clock,
   CreditCard,
+  Download,
   FileText,
   Map,
   MapPin,
@@ -20,11 +21,10 @@ import {
   Upload,
   User,
   Wrench,
-  Download,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { setCurrentRole } from "../lib/auth";
 import { Ezy1Logo } from "../components/Ezy1Logo";
+import { setCurrentRole } from "../lib/auth";
 
 const STEPS = ["Business Info", "Location & Ops", "Docs & Bank", "Review"];
 
@@ -467,7 +467,9 @@ export default function PartnerOnboardingPage() {
                     >
                       Universal Privacy Policy
                       <span className="text-[10px]">↗</span>
-                    </a>. Your account will remain in &quot;Pending Verification&quot; until an admin reviews your documents.
+                    </a>
+                    . Your account will remain in &quot;Pending
+                    Verification&quot; until an admin reviews your documents.
                   </p>
                 </div>
                 <div className="pt-2 border-t border-yellow-500/20 flex flex-wrap items-center gap-3 text-[11px]">
@@ -476,7 +478,8 @@ export default function PartnerOnboardingPage() {
                     download="EZY1_Master_Partner_Agreement.pdf"
                     className="font-semibold underline hover:text-primary inline-flex items-center gap-1 text-foreground"
                   >
-                    <Download className="w-3 h-3" /> Download Partner Agreement (PDF)
+                    <Download className="w-3 h-3" /> Download Partner Agreement
+                    (PDF)
                   </a>
                 </div>
               </div>
@@ -503,7 +506,10 @@ export default function PartnerOnboardingPage() {
 
       {/* Footer Legal Links */}
       <div className="py-6 border-t border-border mt-8 text-center text-xs text-muted-foreground space-y-1.5">
-        <p>© {new Date().getFullYear()} EZY1 Technologies Private Limited. All rights reserved.</p>
+        <p>
+          © {new Date().getFullYear()} EZY1 Technologies Private Limited. All
+          rights reserved.
+        </p>
         <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px]">
           <a
             href="/legal/ezy1-master-partner-agreement.pdf"

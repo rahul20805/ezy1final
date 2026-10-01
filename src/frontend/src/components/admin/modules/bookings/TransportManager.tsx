@@ -23,7 +23,8 @@ import {
   Truck,
   Users,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { ServerDataTable } from "../../ServerDataTable";
 
@@ -148,7 +149,9 @@ export function TransportManager() {
       });
 
       if (!res.ok) throw new Error("Could not update status.");
-      toast.success(`Transport fleet #${item.id} is now ${nextStatus.toUpperCase()}`);
+      toast.success(
+        `Transport fleet #${item.id} is now ${nextStatus.toUpperCase()}`,
+      );
       setRefreshTrigger((prev) => prev + 1);
     } catch (err: any) {
       toast.error(err.message);
@@ -166,18 +169,31 @@ export function TransportManager() {
         addNewLabel="Add Fleet / Route"
         searchPlaceholder="Search fleet name, operator, city, phone..."
         sortOptions={[
-          { label: "Fleet Name (A-Z)", value: "businessName_asc", sortBy: "businessName", sortOrder: "asc" },
-          { label: "Newest Added", value: "id_desc", sortBy: "id", sortOrder: "desc" },
+          {
+            label: "Fleet Name (A-Z)",
+            value: "businessName_asc",
+            sortBy: "businessName",
+            sortOrder: "asc",
+          },
+          {
+            label: "Newest Added",
+            value: "id_desc",
+            sortBy: "id",
+            sortOrder: "desc",
+          },
         ]}
         defaultSort="businessName_asc"
         defaultPageSize={25}
         renderItem={(fleet) => {
-          const isActive = fleet.status === "approved" || fleet.status === "active";
+          const isActive =
+            fleet.status === "approved" || fleet.status === "active";
           return (
             <Card
               key={fleet.id}
               className={`rounded-3xl border transition-all hover:shadow-md ${
-                isActive ? "border-border/80 bg-card" : "border-muted bg-muted/20 opacity-75"
+                isActive
+                  ? "border-border/80 bg-card"
+                  : "border-muted bg-muted/20 opacity-75"
               }`}
             >
               <CardContent className="p-5 space-y-4">
@@ -204,7 +220,9 @@ export function TransportManager() {
 
                   <Badge
                     className={`text-[10px] font-bold ${
-                      isActive ? "bg-emerald-500 text-white" : "bg-muted text-muted-foreground"
+                      isActive
+                        ? "bg-emerald-500 text-white"
+                        : "bg-muted text-muted-foreground"
                     }`}
                   >
                     {isActive ? "Active Route" : "Suspended"}
@@ -214,15 +232,21 @@ export function TransportManager() {
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     <MapPin className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                    <span className="truncate">{fleet.city || "Bengaluru"}</span>
+                    <span className="truncate">
+                      {fleet.city || "Bengaluru"}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     <Clock className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                    <span className="truncate">{fleet.openingHours || "Daily service"}</span>
+                    <span className="truncate">
+                      {fleet.openingHours || "Daily service"}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     <Users className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                    <span className="truncate">{fleet.totalOrders || 0} Total Trips</span>
+                    <span className="truncate">
+                      {fleet.totalOrders || 0} Total Trips
+                    </span>
                   </div>
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     <span className="font-mono text-muted-foreground">
@@ -265,16 +289,21 @@ export function TransportManager() {
           <form onSubmit={handleSave}>
             <DialogHeader>
               <DialogTitle className="text-lg font-display font-bold">
-                {editingItem ? "Edit Fleet / Route" : "Register New Transit Fleet"}
+                {editingItem
+                  ? "Edit Fleet / Route"
+                  : "Register New Transit Fleet"}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                Fleet operations and transit schedules update live across passenger apps.
+                Fleet operations and transit schedules update live across
+                passenger apps.
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-3 py-3">
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Service / Route Name *</Label>
+                <Label className="text-xs font-semibold">
+                  Service / Route Name *
+                </Label>
                 <Input
                   required
                   value={businessName}
@@ -286,7 +315,9 @@ export function TransportManager() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Fleet Operator</Label>
+                  <Label className="text-xs font-semibold">
+                    Fleet Operator
+                  </Label>
                   <Input
                     value={operatorName}
                     onChange={(e) => setOperatorName(e.target.value)}
@@ -295,7 +326,9 @@ export function TransportManager() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Operating City</Label>
+                  <Label className="text-xs font-semibold">
+                    Operating City
+                  </Label>
                   <Input
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
@@ -316,7 +349,9 @@ export function TransportManager() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Timings / Frequency</Label>
+                  <Label className="text-xs font-semibold">
+                    Timings / Frequency
+                  </Label>
                   <Input
                     value={operatingHours}
                     onChange={(e) => setOperatingHours(e.target.value)}

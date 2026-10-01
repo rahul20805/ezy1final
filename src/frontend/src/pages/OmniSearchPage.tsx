@@ -1,46 +1,59 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "@tanstack/react-router";
+import {
+  AlertCircle,
+  ArrowRight,
+  Building2,
+  Check,
+  Compass,
+  Laptop,
+  Microscope,
+  Plus,
+  RotateCcw,
+  Search,
+  ShoppingBag,
+  SlidersHorizontal,
+  Sparkles,
+  Star,
+  Stethoscope,
+  Store,
+  UtensilsCrossed,
+  Wrench,
+  X,
+} from "lucide-react";
+import type React from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import Layout from "../components/Layout";
 import {
   CATALOG_ITEMS,
-  HOSPITALS_DATA,
-  FAMOUS_LOCAL_SPOTS,
-  LAB_PACKAGES,
+  type CatalogItem,
   DIGITAL_SERVICES,
+  FAMOUS_LOCAL_SPOTS,
+  HOSPITALS_DATA,
+  LAB_PACKAGES,
   POPULAR_LOCAL_SHOPS_DATA,
-  type CatalogItem
 } from "../ecosystem-data";
-import { doctors, workers } from "../mock-data";
 import { useCartStore } from "../lib/cartStore";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
-import {
-  Search,
-  ArrowRight,
-  ShoppingBag,
-  Stethoscope,
-  Building2,
-  Wrench,
-  UtensilsCrossed,
-  Microscope,
-  Compass,
-  Star,
-  Plus,
-  SlidersHorizontal,
-  X,
-  Store,
-  Laptop,
-  Check,
-  RotateCcw,
-  Sparkles,
-  AlertCircle
-} from "lucide-react";
+import { doctors, workers } from "../mock-data";
 
-type SortOption = "relevant" | "price_asc" | "price_desc" | "rating" | "name_asc";
-type CategoryTab = "all" | "products" | "doctors" | "hospitals" | "services" | "shops" | "spots";
+type SortOption =
+  | "relevant"
+  | "price_asc"
+  | "price_desc"
+  | "rating"
+  | "name_asc";
+type CategoryTab =
+  | "all"
+  | "products"
+  | "doctors"
+  | "hospitals"
+  | "services"
+  | "shops"
+  | "spots";
 
 export default function OmniSearchPage() {
   // 1. URL Query Synchronization
@@ -56,7 +69,18 @@ export default function OmniSearchPage() {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       const cat = params.get("category") as CategoryTab;
-      if (cat && ["all", "products", "doctors", "hospitals", "services", "shops", "spots"].includes(cat)) {
+      if (
+        cat &&
+        [
+          "all",
+          "products",
+          "doctors",
+          "hospitals",
+          "services",
+          "shops",
+          "spots",
+        ].includes(cat)
+      ) {
         return cat;
       }
     }
@@ -79,7 +103,18 @@ export default function OmniSearchPage() {
       const q = params.get("q") || "";
       const cat = params.get("category") as CategoryTab;
       setQuery(q);
-      if (cat && ["all", "products", "doctors", "hospitals", "services", "shops", "spots"].includes(cat)) {
+      if (
+        cat &&
+        [
+          "all",
+          "products",
+          "doctors",
+          "hospitals",
+          "services",
+          "shops",
+          "spots",
+        ].includes(cat)
+      ) {
         setActiveTab(cat);
       }
     };
@@ -101,31 +136,37 @@ export default function OmniSearchPage() {
   };
 
   // 2. Real Backend Fetching with Fallback & Augmentation
-  const fetchSearchResults = useCallback(async (searchQuery: string, sort: SortOption) => {
-    if (!searchQuery.trim()) {
-      setBackendData(null);
-      return;
-    }
-    setIsLoading(true);
-    setApiError(null);
-    try {
-      const res = await fetch(
-        `/api/search?q=${encodeURIComponent(searchQuery.trim())}&sort=${sort}`
-      );
-      if (res.ok) {
-        const data = await res.json();
-        setBackendData(data);
-      } else {
-        // Fallback to local filtering if backend returns non-200
+  const fetchSearchResults = useCallback(
+    async (searchQuery: string, sort: SortOption) => {
+      if (!searchQuery.trim()) {
         setBackendData(null);
+        return;
       }
-    } catch (err: any) {
-      console.warn("Backend search fetch issue, using rich local engine:", err.message);
-      setBackendData(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+      setIsLoading(true);
+      setApiError(null);
+      try {
+        const res = await fetch(
+          `/api/search?q=${encodeURIComponent(searchQuery.trim())}&sort=${sort}`,
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setBackendData(data);
+        } else {
+          // Fallback to local filtering if backend returns non-200
+          setBackendData(null);
+        }
+      } catch (err: any) {
+        console.warn(
+          "Backend search fetch issue, using rich local engine:",
+          err.message,
+        );
+        setBackendData(null);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
@@ -146,7 +187,7 @@ export default function OmniSearchPage() {
         shops: [],
         spots: [],
         labs: [],
-        digital: []
+        digital: [],
       };
     }
 
@@ -167,7 +208,7 @@ export default function OmniSearchPage() {
       const score = Math.max(
         calcScore(p.name),
         calcScore(p.description),
-        ...p.tags.map((t) => calcScore(t))
+        ...p.tags.map((t) => calcScore(t)),
       );
       return { item: p, score };
     }).filter((x) => x.score > 0);
@@ -188,12 +229,14 @@ export default function OmniSearchPage() {
           deliveryTime: "15 mins",
           deliveryMinutes: 15,
           description: bp.description,
-          tags: [bp.category]
+          tags: [bp.category],
         } as unknown as CatalogItem,
-        score: calcScore(bp.name) || 50
+        score: calcScore(bp.name) || 50,
       }));
       // Merge unique by name
-      const existingNames = new Set(productsList.map((p) => p.item.name.toLowerCase()));
+      const existingNames = new Set(
+        productsList.map((p) => p.item.name.toLowerCase()),
+      );
       for (const bp of backendProds) {
         if (!existingNames.has(bp.item.name.toLowerCase())) {
           productsList.push(bp);
@@ -202,17 +245,21 @@ export default function OmniSearchPage() {
     }
 
     // 2. Doctors
-    let doctorsList = doctors.map((d) => {
-      const score = Math.max(
-        calcScore(d.name),
-        calcScore(d.specialty),
-        calcScore(d.hospital)
-      );
-      return { item: d, score };
-    }).filter((x) => x.score > 0);
+    let doctorsList = doctors
+      .map((d) => {
+        const score = Math.max(
+          calcScore(d.name),
+          calcScore(d.specialty),
+          calcScore(d.hospital),
+        );
+        return { item: d, score };
+      })
+      .filter((x) => x.score > 0);
 
     if (backendData?.results?.doctors?.length) {
-      const existingNames = new Set(doctorsList.map((d) => d.item.name.toLowerCase()));
+      const existingNames = new Set(
+        doctorsList.map((d) => d.item.name.toLowerCase()),
+      );
       for (const bd of backendData.results.doctors) {
         if (!existingNames.has(bd.name.toLowerCase())) {
           doctorsList.push({
@@ -225,9 +272,9 @@ export default function OmniSearchPage() {
               fee: bd.fee,
               rating: bd.rating,
               available: bd.available !== false,
-              city: bd.city || "Bengaluru"
+              city: bd.city || "Bengaluru",
             },
-            score: calcScore(bd.name) || 50
+            score: calcScore(bd.name) || 50,
           });
         }
       }
@@ -238,26 +285,36 @@ export default function OmniSearchPage() {
       const score = Math.max(
         calcScore(h.name),
         calcScore(h.address),
-        ...h.departments.map((d) => calcScore(d))
+        ...h.departments.map((d) => calcScore(d)),
       );
       return { item: h, score };
     }).filter((x) => x.score > 0);
 
     // 4. Home Services & Repairs
-    let servicesList = workers.map((w) => {
-      const score = Math.max(calcScore(w.name), calcScore(w.category));
-      return { item: w, score };
-    }).filter((x) => x.score > 0);
+    let servicesList = workers
+      .map((w) => {
+        const score = Math.max(calcScore(w.name), calcScore(w.category));
+        return { item: w, score };
+      })
+      .filter((x) => x.score > 0);
 
     // 5. Shops & Partners
     let shopsList = POPULAR_LOCAL_SHOPS_DATA.map((s) => {
-      const score = Math.max(calcScore(s.name), calcScore(s.category), calcScore(s.address));
+      const score = Math.max(
+        calcScore(s.name),
+        calcScore(s.category),
+        calcScore(s.address),
+      );
       return { item: s, score };
     }).filter((x) => x.score > 0);
 
     // 6. Famous Local Spots
     let spotsList = FAMOUS_LOCAL_SPOTS.map((s) => {
-      const score = Math.max(calcScore(s.name), calcScore(s.tagline), calcScore(s.address));
+      const score = Math.max(
+        calcScore(s.name),
+        calcScore(s.tagline),
+        calcScore(s.address),
+      );
       return { item: s, score };
     }).filter((x) => x.score > 0);
 
@@ -278,7 +335,7 @@ export default function OmniSearchPage() {
       list: { item: T; score: number }[],
       priceGetter?: (item: T) => number,
       ratingGetter?: (item: T) => number,
-      nameGetter?: (item: T) => string
+      nameGetter?: (item: T) => string,
     ): T[] => {
       const copy = [...list];
       if (sortBy === "price_asc" && priceGetter) {
@@ -288,7 +345,9 @@ export default function OmniSearchPage() {
       } else if (sortBy === "rating" && ratingGetter) {
         copy.sort((a, b) => ratingGetter(b.item) - ratingGetter(a.item));
       } else if (sortBy === "name_asc" && nameGetter) {
-        copy.sort((a, b) => nameGetter(a.item).localeCompare(nameGetter(b.item)));
+        copy.sort((a, b) =>
+          nameGetter(a.item).localeCompare(nameGetter(b.item)),
+        );
       } else {
         // Relevant (highest score / exact match first)
         copy.sort((a, b) => b.score - a.score);
@@ -297,14 +356,54 @@ export default function OmniSearchPage() {
     };
 
     return {
-      products: sortList(productsList, (p) => p.price, (p) => p.rating, (p) => p.name),
-      doctors: sortList(doctorsList, (d) => d.fee, (d) => d.rating, (d) => d.name),
-      hospitals: sortList(hospitalsList, () => 0, (h) => h.rating, (h) => h.name),
-      services: sortList(servicesList, (s) => s.pricePerHour, (s) => s.rating, (s) => s.name),
-      shops: sortList(shopsList, () => 0, (s) => s.rating, (s) => s.name),
-      spots: sortList(spotsList, () => 0, (s) => s.rating, (s) => s.name),
-      labs: sortList(labsList, (l) => l.price, () => 4.8, (l) => l.name),
-      digital: sortList(digitalList, () => 0, () => 4.9, (d) => d.title)
+      products: sortList(
+        productsList,
+        (p) => p.price,
+        (p) => p.rating,
+        (p) => p.name,
+      ),
+      doctors: sortList(
+        doctorsList,
+        (d) => d.fee,
+        (d) => d.rating,
+        (d) => d.name,
+      ),
+      hospitals: sortList(
+        hospitalsList,
+        () => 0,
+        (h) => h.rating,
+        (h) => h.name,
+      ),
+      services: sortList(
+        servicesList,
+        (s) => s.pricePerHour,
+        (s) => s.rating,
+        (s) => s.name,
+      ),
+      shops: sortList(
+        shopsList,
+        () => 0,
+        (s) => s.rating,
+        (s) => s.name,
+      ),
+      spots: sortList(
+        spotsList,
+        () => 0,
+        (s) => s.rating,
+        (s) => s.name,
+      ),
+      labs: sortList(
+        labsList,
+        (l) => l.price,
+        () => 4.8,
+        (l) => l.name,
+      ),
+      digital: sortList(
+        digitalList,
+        () => 0,
+        () => 4.9,
+        (d) => d.title,
+      ),
     };
   }, [query, sortBy, backendData]);
 
@@ -331,7 +430,7 @@ export default function OmniSearchPage() {
 
   const handleAddToCart = (product: CatalogItem) => {
     const numId = Math.abs(
-      product.id.split("").reduce((a, b) => (a << 5) - a + b.charCodeAt(0), 0)
+      product.id.split("").reduce((a, b) => (a << 5) - a + b.charCodeAt(0), 0),
     );
     addItem({
       id: numId,
@@ -347,7 +446,7 @@ export default function OmniSearchPage() {
       stockCount: 50,
       isAvailable: true,
       rating: product.rating,
-      totalReviews: product.reviewCount
+      totalReviews: product.reviewCount,
     });
     toast.success(`Added ${product.name} to cart`);
   };
@@ -359,7 +458,10 @@ export default function OmniSearchPage() {
         <div className="border-b border-border bg-card/95 backdrop-blur-md sticky top-16 z-20 shadow-xs">
           <div className="container max-w-5xl py-4 px-4 sm:px-6 space-y-3">
             {/* Primary Search Form */}
-            <form onSubmit={handleSearchSubmit} className="relative flex items-center">
+            <form
+              onSubmit={handleSearchSubmit}
+              className="relative flex items-center"
+            >
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
               <Input
                 autoFocus
@@ -517,7 +619,7 @@ export default function OmniSearchPage() {
                   "Earbuds",
                   "Filter Coffee",
                   "Homestay",
-                  "Volvo Bus"
+                  "Volvo Bus",
                 ].map((chip) => (
                   <button
                     key={chip}
@@ -540,7 +642,10 @@ export default function OmniSearchPage() {
             <div className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="p-4 rounded-2xl border border-border bg-card space-y-3">
+                  <div
+                    key={i}
+                    className="p-4 rounded-2xl border border-border bg-card space-y-3"
+                  >
                     <div className="flex items-center gap-3">
                       <Skeleton className="w-16 h-16 rounded-xl shrink-0" />
                       <div className="space-y-2 flex-1">
@@ -568,11 +673,20 @@ export default function OmniSearchPage() {
                 No matching results found for "{query}"
               </h3>
               <p className="text-xs text-muted-foreground mb-6 max-w-md mx-auto">
-                We couldn't find an exact match. Try searching for common grocery items, cuisines, medical specialties, or home repair services.
+                We couldn't find an exact match. Try searching for common
+                grocery items, cuisines, medical specialties, or home repair
+                services.
               </p>
 
               <div className="flex flex-wrap justify-center gap-2">
-                {["Atta", "Biryani", "Doctor", "ICU Bed", "Electrician", "Fruits"].map((tag) => (
+                {[
+                  "Atta",
+                  "Biryani",
+                  "Doctor",
+                  "ICU Bed",
+                  "Electrician",
+                  "Fruits",
+                ].map((tag) => (
                   <Button
                     key={tag}
                     variant="outline"
@@ -619,8 +733,12 @@ export default function OmniSearchPage() {
                           loading="lazy"
                         />
                         <div className="min-w-0 flex-1">
-                          <h4 className="font-bold text-xs text-foreground truncate">{p.name}</h4>
-                          <p className="text-[11px] text-muted-foreground truncate">{p.unit}</p>
+                          <h4 className="font-bold text-xs text-foreground truncate">
+                            {p.name}
+                          </h4>
+                          <p className="text-[11px] text-muted-foreground truncate">
+                            {p.unit}
+                          </p>
                           <div className="flex items-center gap-1 text-[11px] text-amber-500 font-bold mt-0.5">
                             <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
                             <span>{p.rating}</span>
@@ -633,7 +751,9 @@ export default function OmniSearchPage() {
 
                       <div className="flex items-center justify-between mt-3 pt-2 border-t border-border/50">
                         <div>
-                          <span className="font-extrabold text-sm text-foreground">₹{p.price}</span>
+                          <span className="font-extrabold text-sm text-foreground">
+                            ₹{p.price}
+                          </span>
                           {p.mrp && p.mrp > p.price && (
                             <span className="text-[10px] text-muted-foreground line-through ml-1.5">
                               ₹{p.mrp}
@@ -665,7 +785,10 @@ export default function OmniSearchPage() {
                     <Stethoscope className="w-4 h-4 text-cyan-600" />
                     Doctors & Specialists ({combinedResults.doctors.length})
                   </h2>
-                  <Link to="/doctors" className="text-xs font-semibold text-primary hover:underline">
+                  <Link
+                    to="/doctors"
+                    className="text-xs font-semibold text-primary hover:underline"
+                  >
                     View All Doctors →
                   </Link>
                 </div>
@@ -678,17 +801,25 @@ export default function OmniSearchPage() {
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <h4 className="font-bold text-sm text-foreground truncate">{d.name}</h4>
+                          <h4 className="font-bold text-sm text-foreground truncate">
+                            {d.name}
+                          </h4>
                           <Badge className="bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-0 text-[10px] font-bold px-1.5 py-0">
                             {d.experience}
                           </Badge>
                         </div>
-                        <p className="text-xs text-primary font-medium mt-0.5">{d.specialty}</p>
+                        <p className="text-xs text-primary font-medium mt-0.5">
+                          {d.specialty}
+                        </p>
                         <p className="text-[11px] text-muted-foreground truncate">
                           {d.hospital} • Consultation: ₹{d.fee}
                         </p>
                       </div>
-                      <Button size="sm" asChild className="rounded-xl text-xs font-bold shrink-0">
+                      <Button
+                        size="sm"
+                        asChild
+                        className="rounded-xl text-xs font-bold shrink-0"
+                      >
                         <Link to="/doctors">Book Appointment</Link>
                       </Button>
                     </div>
@@ -722,11 +853,15 @@ export default function OmniSearchPage() {
                       className="p-4 rounded-2xl border border-border bg-card flex items-center justify-between gap-3 hover:border-rose-500/40 transition-colors"
                     >
                       <div className="min-w-0 flex-1">
-                        <h4 className="font-bold text-sm text-foreground truncate">{h.name}</h4>
+                        <h4 className="font-bold text-sm text-foreground truncate">
+                          {h.name}
+                        </h4>
                         <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-1">
                           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                           <span>{h.availableBeds.icu} ICU Beds Available</span>
-                          <span className="text-muted-foreground">• {h.availableBeds.general} Gen</span>
+                          <span className="text-muted-foreground">
+                            • {h.availableBeds.general} Gen
+                          </span>
                         </div>
                         <p className="text-[11px] text-muted-foreground truncate mt-0.5">
                           {h.address} • 24x7 ER
@@ -754,7 +889,8 @@ export default function OmniSearchPage() {
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-base font-bold font-display text-foreground flex items-center gap-2">
                     <Wrench className="w-4 h-4 text-blue-600" />
-                    Home Services & Specialists ({combinedResults.services.length})
+                    Home Services & Specialists (
+                    {combinedResults.services.length})
                   </h2>
                   <Link
                     to="/services"
@@ -771,8 +907,12 @@ export default function OmniSearchPage() {
                       className="p-3.5 rounded-2xl border border-border bg-card flex flex-col justify-between"
                     >
                       <div>
-                        <h4 className="font-bold text-xs text-foreground truncate">{s.name}</h4>
-                        <p className="text-[11px] text-primary font-semibold">{s.category}</p>
+                        <h4 className="font-bold text-xs text-foreground truncate">
+                          {s.name}
+                        </h4>
+                        <p className="text-[11px] text-primary font-semibold">
+                          {s.category}
+                        </p>
                         <p className="text-[11px] text-muted-foreground mt-1">
                           ₹{s.pricePerHour}/visit • Rating: {s.rating} ★
                         </p>
@@ -809,9 +949,15 @@ export default function OmniSearchPage() {
                       className="p-3.5 rounded-2xl border border-border bg-card flex items-center justify-between gap-3"
                     >
                       <div className="min-w-0">
-                        <h4 className="font-bold text-xs text-foreground truncate">{sh.name}</h4>
-                        <p className="text-[11px] text-primary font-medium">{sh.category}</p>
-                        <p className="text-[10px] text-muted-foreground truncate">{sh.address}</p>
+                        <h4 className="font-bold text-xs text-foreground truncate">
+                          {sh.name}
+                        </h4>
+                        <p className="text-[11px] text-primary font-medium">
+                          {sh.category}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground truncate">
+                          {sh.address}
+                        </p>
                       </div>
                       <Button
                         size="sm"
@@ -837,7 +983,10 @@ export default function OmniSearchPage() {
                     <Compass className="w-4 h-4 text-purple-600" />
                     Famous in City ({combinedResults.spots.length})
                   </h2>
-                  <Link to="/famous" className="text-xs font-semibold text-primary hover:underline">
+                  <Link
+                    to="/famous"
+                    className="text-xs font-semibold text-primary hover:underline"
+                  >
                     Explore City →
                   </Link>
                 </div>
@@ -849,7 +998,9 @@ export default function OmniSearchPage() {
                       className="p-3.5 rounded-2xl border border-border bg-card flex flex-col justify-between"
                     >
                       <div>
-                        <h4 className="font-bold text-xs text-foreground">{sp.name}</h4>
+                        <h4 className="font-bold text-xs text-foreground">
+                          {sp.name}
+                        </h4>
                         <p className="text-[11px] text-muted-foreground line-clamp-2 mt-0.5">
                           {sp.tagline}
                         </p>

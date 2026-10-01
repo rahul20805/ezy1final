@@ -1,6 +1,6 @@
 /**
  * Domain & Subdomain Routing Configuration for EZY1 Ecosystem
- * 
+ *
  * Domain Architecture:
  * - ezy1.site          => Customer / User Platform (Super App)
  * - partner.ezy1.site  => Partner Portal (Login, Onboarding, Dashboards)
@@ -26,7 +26,11 @@ export function getSubdomain(): SubdomainType {
   // Check query parameter override for testing in dev or demo
   const searchParams = new URLSearchParams(window.location.search);
   const override = searchParams.get("subdomain")?.toLowerCase();
-  if (override === "partner" || override === "admin" || override === "customer") {
+  if (
+    override === "partner" ||
+    override === "admin" ||
+    override === "customer"
+  ) {
     return override as SubdomainType;
   }
 
@@ -51,7 +55,7 @@ export function getSubdomain(): SubdomainType {
  * In production: links to https://partner.ezy1.site
  * In local development (localhost / 127.0.0.1): links to relative path or preserves localhost
  */
-export function getPartnerPortalUrl(path: string = "/"): string {
+export function getPartnerPortalUrl(path = "/"): string {
   if (typeof window !== "undefined") {
     const hostname = window.location.hostname.toLowerCase();
     // In local development, allow staying within same port if not using subdomains
@@ -64,7 +68,8 @@ export function getPartnerPortalUrl(path: string = "/"): string {
       return path;
     }
   }
-  const cleanPath = path === "/" ? "" : (path.startsWith("/") ? path : `/${path}`);
+  const cleanPath =
+    path === "/" ? "" : path.startsWith("/") ? path : `/${path}`;
   return `${DOMAINS.partner}${cleanPath}`;
 }
 
@@ -73,7 +78,7 @@ export function getPartnerPortalUrl(path: string = "/"): string {
  * In production: links to https://admin.ezy1.site
  * In local development: links to relative /admin
  */
-export function getAdminPortalUrl(path: string = "/"): string {
+export function getAdminPortalUrl(path = "/"): string {
   if (typeof window !== "undefined") {
     const hostname = window.location.hostname.toLowerCase();
     if (hostname === "localhost" || hostname === "127.0.0.1") {
@@ -84,7 +89,8 @@ export function getAdminPortalUrl(path: string = "/"): string {
       return path;
     }
   }
-  const cleanPath = path === "/" ? "" : (path.startsWith("/") ? path : `/${path}`);
+  const cleanPath =
+    path === "/" ? "" : path.startsWith("/") ? path : `/${path}`;
   return `${DOMAINS.admin}${cleanPath}`;
 }
 
@@ -93,7 +99,7 @@ export function getAdminPortalUrl(path: string = "/"): string {
  * In production: links to https://ezy1.site
  * In local development: links to relative path
  */
-export function getCustomerPlatformUrl(path: string = "/"): string {
+export function getCustomerPlatformUrl(path = "/"): string {
   if (typeof window !== "undefined") {
     const hostname = window.location.hostname.toLowerCase();
     if (hostname === "localhost" || hostname === "127.0.0.1") {
@@ -103,6 +109,7 @@ export function getCustomerPlatformUrl(path: string = "/"): string {
       return path;
     }
   }
-  const cleanPath = path === "/" ? "" : (path.startsWith("/") ? path : `/${path}`);
+  const cleanPath =
+    path === "/" ? "" : path.startsWith("/") ? path : `/${path}`;
   return `${DOMAINS.main}${cleanPath}`;
 }

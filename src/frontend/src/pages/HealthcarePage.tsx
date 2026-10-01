@@ -34,8 +34,8 @@ import {
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import UserLayout from "../components/UserLayout";
 import { RelatedPagesBar } from "../components/RelatedPagesBar";
+import UserLayout from "../components/UserLayout";
 import { doctors, appointments as initialAppointments } from "../mock-data";
 import type { Appointment, Doctor } from "../types";
 
@@ -608,7 +608,10 @@ export default function HealthcarePage() {
           }
         }
       } catch (err) {
-        console.warn("Failed to load dynamic healthcare records, using fallback:", err);
+        console.warn(
+          "Failed to load dynamic healthcare records, using fallback:",
+          err,
+        );
       }
     }
     loadDynamicHealthcare();
@@ -652,7 +655,11 @@ export default function HealthcarePage() {
 
   return (
     <UserLayout title="Healthcare">
-      <RelatedPagesBar domain="healthcare" activeId="pharmacy" className="mb-4 rounded-xl" />
+      <RelatedPagesBar
+        domain="healthcare"
+        activeId="pharmacy"
+        className="mb-4 rounded-xl"
+      />
       {/* Floating Emergency SOS on mobile */}
       <div className="fixed bottom-6 right-4 z-50 md:hidden">
         <EmergencySOSButton />
@@ -912,13 +919,19 @@ export default function HealthcarePage() {
           <TabsContent value="hospitals" className="mt-4 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {hospitalsList.map((hosp) => (
-                <Card key={hosp.id} className="border-border hover:shadow-md transition-shadow">
+                <Card
+                  key={hosp.id}
+                  className="border-border hover:shadow-md transition-shadow"
+                >
                   <CardContent className="p-5 space-y-4">
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <h3 className="font-bold text-base text-foreground">{hosp.businessName}</h3>
+                        <h3 className="font-bold text-base text-foreground">
+                          {hosp.businessName}
+                        </h3>
                         <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                          <MapPin className="w-3 h-3 text-primary" /> {hosp.address}, {hosp.city}
+                          <MapPin className="w-3 h-3 text-primary" />{" "}
+                          {hosp.address}, {hosp.city}
                         </p>
                       </div>
                       {hosp.hasEmergency24x7 && (
@@ -931,13 +944,20 @@ export default function HealthcarePage() {
                     {/* Bed Counts Display */}
                     <div className="grid grid-cols-2 gap-2 p-3 rounded-xl bg-muted/40 border border-border/60">
                       <div>
-                        <p className="text-[11px] text-muted-foreground font-medium">Available Beds</p>
+                        <p className="text-[11px] text-muted-foreground font-medium">
+                          Available Beds
+                        </p>
                         <p className="text-lg font-black text-emerald-600">
-                          {hosp.availableBeds ?? "—"} <span className="text-xs font-normal text-muted-foreground">/ {hosp.totalBeds ?? "—"}</span>
+                          {hosp.availableBeds ?? "—"}{" "}
+                          <span className="text-xs font-normal text-muted-foreground">
+                            / {hosp.totalBeds ?? "—"}
+                          </span>
                         </p>
                       </div>
                       <div>
-                        <p className="text-[11px] text-muted-foreground font-medium">ICU Beds</p>
+                        <p className="text-[11px] text-muted-foreground font-medium">
+                          ICU Beds
+                        </p>
                         <p className="text-lg font-black text-rose-600">
                           {hosp.icuBedsAvailable ?? "—"}
                         </p>
@@ -946,8 +966,12 @@ export default function HealthcarePage() {
 
                     {hosp.departments && (
                       <div>
-                        <p className="text-[11px] font-semibold text-muted-foreground uppercase">Key Departments</p>
-                        <p className="text-xs text-foreground mt-0.5">{hosp.departments}</p>
+                        <p className="text-[11px] font-semibold text-muted-foreground uppercase">
+                          Key Departments
+                        </p>
+                        <p className="text-xs text-foreground mt-0.5">
+                          {hosp.departments}
+                        </p>
                       </div>
                     )}
 
@@ -956,8 +980,13 @@ export default function HealthcarePage() {
                         {hosp.openingHours || "24x7"}
                       </div>
                       <a href={`tel:${hosp.emergencyPhone || hosp.phone}`}>
-                        <Button size="sm" variant="outline" className="h-8 gap-1.5 text-xs rounded-xl">
-                          <Phone className="w-3 h-3 text-primary" /> Call Hospital
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 gap-1.5 text-xs rounded-xl"
+                        >
+                          <Phone className="w-3 h-3 text-primary" /> Call
+                          Hospital
                         </Button>
                       </a>
                     </div>

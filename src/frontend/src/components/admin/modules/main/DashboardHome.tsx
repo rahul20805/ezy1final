@@ -57,7 +57,8 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
       try {
         const token =
           typeof window !== "undefined"
-            ? localStorage.getItem("ezy1_token") || localStorage.getItem("token")
+            ? localStorage.getItem("ezy1_token") ||
+              localStorage.getItem("token")
             : null;
         const res = await fetch("/api/admin/stats", {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -69,7 +70,10 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
           }
         }
       } catch (err) {
-        console.warn("Failed to fetch /api/admin/stats, falling back to local:", err);
+        console.warn(
+          "Failed to fetch /api/admin/stats, falling back to local:",
+          err,
+        );
       } finally {
         if (isMounted) setStatsLoading(false);
       }
@@ -91,38 +95,51 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
   const customers = store?.customers || [];
 
   // Server-Side Precomputed Aggregates with safe local fallbacks
-  const rawRevenue = serverStats?.overview?.totalRevenue ?? orders.reduce(
-    (acc: number, o: any) => acc + (o?.paymentStatus === "paid" ? (Number(o?.totalAmount) || 0) : 0),
-    0,
-  );
+  const rawRevenue =
+    serverStats?.overview?.totalRevenue ??
+    orders.reduce(
+      (acc: number, o: any) =>
+        acc + (o?.paymentStatus === "paid" ? Number(o?.totalAmount) || 0 : 0),
+      0,
+    );
   const totalRevenue = Number(rawRevenue) || 0;
-  const platformCommission = Number(serverStats?.overview?.platformCommission) || Math.round(totalRevenue * 0.05);
-  const partnerPayoutsTotal = Number(serverStats?.overview?.partnerPayouts) || (totalRevenue - platformCommission);
+  const platformCommission =
+    Number(serverStats?.overview?.platformCommission) ||
+    Math.round(totalRevenue * 0.05);
+  const partnerPayoutsTotal =
+    Number(serverStats?.overview?.partnerPayouts) ||
+    totalRevenue - platformCommission;
 
-  const totalOrders = Number(serverStats?.overview?.totalOrders) || orders.length;
+  const totalOrders =
+    Number(serverStats?.overview?.totalOrders) || orders.length;
   const pendingOrders = orders.filter(
     (o: any) =>
-      o?.status === "NEW" || o?.status === "ACCEPTED" || o?.status === "PREPARING",
+      o?.status === "NEW" ||
+      o?.status === "ACCEPTED" ||
+      o?.status === "PREPARING",
   ).length;
   const outForDelivery = orders.filter(
     (o: any) => o?.status === "OUT_FOR_DELIVERY",
   ).length;
-  const deliveredOrders = Number(serverStats?.overview?.deliveredOrders) || orders.filter(
-    (o: any) => o?.status === "DELIVERED",
-  ).length;
+  const deliveredOrders =
+    Number(serverStats?.overview?.deliveredOrders) ||
+    orders.filter((o: any) => o?.status === "DELIVERED").length;
   const cancelledOrders = orders.filter(
     (o: any) => o?.status === "CANCELLED",
   ).length;
 
   const totalCustomers = customers.length;
-  const activePartners = Number(serverStats?.overview?.activeVendors) || shops.filter(
-    (s: any) => s?.status === "active",
-  ).length;
-  const pendingApplications = Number(serverStats?.overview?.pendingApplications) || partnerApplications.filter(
-    (a: any) => a?.status === "PENDING" || a?.status === "UNDER_REVIEW",
-  ).length;
+  const activePartners =
+    Number(serverStats?.overview?.activeVendors) ||
+    shops.filter((s: any) => s?.status === "active").length;
+  const pendingApplications =
+    Number(serverStats?.overview?.pendingApplications) ||
+    partnerApplications.filter(
+      (a: any) => a?.status === "PENDING" || a?.status === "UNDER_REVIEW",
+    ).length;
 
-  const totalProducts = Number(serverStats?.overview?.totalProducts) || products.length;
+  const totalProducts =
+    Number(serverStats?.overview?.totalProducts) || products.length;
   const activeProducts = products.filter(
     (p: any) => p?.published && p?.inStock,
   ).length;
@@ -131,14 +148,16 @@ export function DashboardHome({ onNavigateSection }: DashboardHomeProps) {
   ).length;
 
   const totalBookings = bookings.length;
-  const activeServices = Number(serverStats?.overview?.activeServices) || services.filter(
-    (s: any) => s?.published && s?.isAvailable,
-  ).length;
+  const activeServices =
+    Number(serverStats?.overview?.activeServices) ||
+    services.filter((s: any) => s?.published && s?.isAvailable).length;
 
-  const availableBeds = Number(serverStats?.overview?.totalAvailableBeds) || hospitalBeds.reduce(
-    (acc: number, b: any) => acc + (Number(b?.availableBeds) || 0),
-    0,
-  );
+  const availableBeds =
+    Number(serverStats?.overview?.totalAvailableBeds) ||
+    hospitalBeds.reduce(
+      (acc: number, b: any) => acc + (Number(b?.availableBeds) || 0),
+      0,
+    );
 
   return (
     <div className="space-y-6">

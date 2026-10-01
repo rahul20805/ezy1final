@@ -33,7 +33,8 @@ import {
   Store,
   Trash2,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { ConfirmModal } from "../../../owner/ConfirmModal";
 import { ImageUploader } from "../../../owner/ImageUploader";
@@ -71,7 +72,9 @@ export function ShopsManager() {
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"approved" | "suspended" | "pending">("approved");
+  const [status, setStatus] = useState<"approved" | "suspended" | "pending">(
+    "approved",
+  );
   const [openingHours, setOpeningHours] = useState("07:00 AM - 10:00 PM");
   const [deliveryRadiusKm, setDeliveryRadiusKm] = useState(8);
   const [image, setImage] = useState("");
@@ -119,7 +122,9 @@ export function ShopsManager() {
 
     const token =
       typeof window !== "undefined"
-        ? localStorage.getItem("ezy1_partner_token") || localStorage.getItem("ezy1_token") || localStorage.getItem("token")
+        ? localStorage.getItem("ezy1_partner_token") ||
+          localStorage.getItem("ezy1_token") ||
+          localStorage.getItem("token")
         : null;
 
     try {
@@ -141,7 +146,9 @@ export function ShopsManager() {
             status,
             openingHours,
             deliveryRadiusKm,
-            image: image || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80",
+            image:
+              image ||
+              "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80",
           }),
         });
 
@@ -160,7 +167,9 @@ export function ShopsManager() {
             ownerName: ownerName.trim() || "Store Manager",
             category,
             partnerType: "shop_owner",
-            email: email.trim() || `${businessName.toLowerCase().replace(/\s+/g, "")}@partner.ezy1.in`,
+            email:
+              email.trim() ||
+              `${businessName.toLowerCase().replace(/\s+/g, "")}@partner.ezy1.in`,
             phone: phone.trim() || "9800000000",
             address: address.trim(),
             city,
@@ -186,7 +195,9 @@ export function ShopsManager() {
     const nextStatus = shop.status === "suspended" ? "approved" : "suspended";
     const token =
       typeof window !== "undefined"
-        ? localStorage.getItem("ezy1_partner_token") || localStorage.getItem("ezy1_token") || localStorage.getItem("token")
+        ? localStorage.getItem("ezy1_partner_token") ||
+          localStorage.getItem("ezy1_token") ||
+          localStorage.getItem("token")
         : null;
 
     try {
@@ -208,10 +219,15 @@ export function ShopsManager() {
     }
   };
 
-  const handleBulkAction = async (selectedIds: (string | number)[], action: string) => {
+  const handleBulkAction = async (
+    selectedIds: (string | number)[],
+    action: string,
+  ) => {
     const token =
       typeof window !== "undefined"
-        ? localStorage.getItem("ezy1_partner_token") || localStorage.getItem("ezy1_token") || localStorage.getItem("token")
+        ? localStorage.getItem("ezy1_partner_token") ||
+          localStorage.getItem("ezy1_token") ||
+          localStorage.getItem("token")
         : null;
 
     const res = await fetch("/api/admin/vendors/bulk-action", {
@@ -268,21 +284,46 @@ export function ShopsManager() {
           },
         ]}
         sortOptions={[
-          { label: "Store Name (A-Z)", value: "businessName_asc", sortBy: "businessName", sortOrder: "asc" },
-          { label: "Store Name (Z-A)", value: "businessName_desc", sortBy: "businessName", sortOrder: "desc" },
-          { label: "Rating (High to Low)", value: "rating_desc", sortBy: "rating", sortOrder: "desc" },
-          { label: "Newest Registered", value: "id_desc", sortBy: "id", sortOrder: "desc" },
+          {
+            label: "Store Name (A-Z)",
+            value: "businessName_asc",
+            sortBy: "businessName",
+            sortOrder: "asc",
+          },
+          {
+            label: "Store Name (Z-A)",
+            value: "businessName_desc",
+            sortBy: "businessName",
+            sortOrder: "desc",
+          },
+          {
+            label: "Rating (High to Low)",
+            value: "rating_desc",
+            sortBy: "rating",
+            sortOrder: "desc",
+          },
+          {
+            label: "Newest Registered",
+            value: "id_desc",
+            sortBy: "id",
+            sortOrder: "desc",
+          },
         ]}
         defaultSort="id_asc"
         defaultPageSize={25}
         bulkActions={[
           { label: "Approve Selected", action: "approve" },
-          { label: "Suspend Selected", action: "suspend", variant: "destructive" },
+          {
+            label: "Suspend Selected",
+            action: "suspend",
+            variant: "destructive",
+          },
           { label: "Verify Selected", action: "verify" },
         ]}
         onBulkAction={handleBulkAction}
         renderItem={(shop, _idx, isSelected, onToggleSelect) => {
-          const isActive = shop.status === "approved" || shop.status === "active";
+          const isActive =
+            shop.status === "approved" || shop.status === "active";
           return (
             <Card
               key={shop.id}
@@ -325,7 +366,9 @@ export function ShopsManager() {
 
                 <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
                   <div className="text-white">
-                    <p className="text-xs font-semibold opacity-90">{shop.category}</p>
+                    <p className="text-xs font-semibold opacity-90">
+                      {shop.category}
+                    </p>
                     <h3 className="font-display font-bold text-base leading-tight drop-shadow-sm line-clamp-1">
                       {shop.businessName}
                     </h3>
@@ -343,7 +386,9 @@ export function ShopsManager() {
                 <div className="space-y-1.5 text-xs">
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     <MapPin className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                    <span className="truncate">{shop.address || shop.city || "Bengaluru"}</span>
+                    <span className="truncate">
+                      {shop.address || shop.city || "Bengaluru"}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     <Phone className="w-3.5 h-3.5 text-primary flex-shrink-0" />
@@ -351,7 +396,9 @@ export function ShopsManager() {
                   </div>
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     <Clock className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                    <span className="truncate">{shop.openingHours || "07:00 AM - 10:00 PM"}</span>
+                    <span className="truncate">
+                      {shop.openingHours || "07:00 AM - 10:00 PM"}
+                    </span>
                   </div>
                 </div>
 
@@ -389,10 +436,13 @@ export function ShopsManager() {
           <form onSubmit={handleSave}>
             <DialogHeader>
               <DialogTitle className="text-xl font-display font-bold">
-                {editingShop ? "Edit Store Listing" : "Register New Physical Store"}
+                {editingShop
+                  ? "Edit Store Listing"
+                  : "Register New Physical Store"}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                Ensure details are verified. Updates will persist directly to the database.
+                Ensure details are verified. Updates will persist directly to
+                the database.
               </DialogDescription>
             </DialogHeader>
 
@@ -409,7 +459,9 @@ export function ShopsManager() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Business Name *</Label>
+                  <Label className="text-xs font-semibold">
+                    Business Name *
+                  </Label>
                   <Input
                     required
                     value={businessName}
@@ -420,7 +472,9 @@ export function ShopsManager() {
                 </div>
 
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Owner / Manager Name</Label>
+                  <Label className="text-xs font-semibold">
+                    Owner / Manager Name
+                  </Label>
                   <Input
                     value={ownerName}
                     onChange={(e) => setOwnerName(e.target.value)}
@@ -437,9 +491,13 @@ export function ShopsManager() {
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-border">
                       <SelectItem value="Grocery">Grocery & Staples</SelectItem>
-                      <SelectItem value="Pharmacy">Pharmacy & Health</SelectItem>
+                      <SelectItem value="Pharmacy">
+                        Pharmacy & Health
+                      </SelectItem>
                       <SelectItem value="Services">Services</SelectItem>
-                      <SelectItem value="Healthcare">Healthcare Clinic</SelectItem>
+                      <SelectItem value="Healthcare">
+                        Healthcare Clinic
+                      </SelectItem>
                       <SelectItem value="Transport">Transport</SelectItem>
                     </SelectContent>
                   </Select>
@@ -487,7 +545,9 @@ export function ShopsManager() {
                 </div>
 
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Operating Hours</Label>
+                  <Label className="text-xs font-semibold">
+                    Operating Hours
+                  </Label>
                   <Input
                     value={openingHours}
                     onChange={(e) => setOpeningHours(e.target.value)}
@@ -497,11 +557,15 @@ export function ShopsManager() {
                 </div>
 
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Delivery Radius (km)</Label>
+                  <Label className="text-xs font-semibold">
+                    Delivery Radius (km)
+                  </Label>
                   <Input
                     type="number"
                     value={deliveryRadiusKm}
-                    onChange={(e) => setDeliveryRadiusKm(Number(e.target.value))}
+                    onChange={(e) =>
+                      setDeliveryRadiusKm(Number(e.target.value))
+                    }
                     className="rounded-xl"
                   />
                 </div>

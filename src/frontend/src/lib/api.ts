@@ -84,7 +84,7 @@ export function clearAuthSession(): void {
 // Universal API Fetcher
 export async function apiRequest<T = any>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<T> {
   const token = getAuthToken();
   const headers: Record<string, string> = {
@@ -100,8 +100,8 @@ export async function apiRequest<T = any>(
   const url = endpoint.startsWith("http")
     ? endpoint
     : endpoint.startsWith("/api")
-    ? endpoint
-    : `/api${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
+      ? endpoint
+      : `/api${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
 
   const response = await fetch(url, {
     ...options,
@@ -111,7 +111,11 @@ export async function apiRequest<T = any>(
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new Error(data.error || data.message || `Request failed with status ${response.status}`);
+    throw new Error(
+      data.error ||
+        data.message ||
+        `Request failed with status ${response.status}`,
+    );
   }
 
   return data as T;
@@ -125,7 +129,11 @@ export async function requestOtp(phone: string): Promise<AuthResponse> {
   });
 }
 
-export async function verifyOtpCode(phone: string, otp: string, name?: string): Promise<AuthResponse> {
+export async function verifyOtpCode(
+  phone: string,
+  otp: string,
+  name?: string,
+): Promise<AuthResponse> {
   const data = await apiRequest<AuthResponse>("/api/auth/verify-otp", {
     method: "POST",
     body: JSON.stringify({ phone, otp, name }),
@@ -137,7 +145,10 @@ export async function verifyOtpCode(phone: string, otp: string, name?: string): 
   return data;
 }
 
-export async function loginWithPassword(username: string, password: string): Promise<AuthResponse> {
+export async function loginWithPassword(
+  username: string,
+  password: string,
+): Promise<AuthResponse> {
   const data = await apiRequest<AuthResponse>("/api/auth/login", {
     method: "POST",
     body: JSON.stringify({ username, password }),
@@ -168,12 +179,13 @@ export async function registerAccount(payload: {
   return data;
 }
 
-export async function checkUsernameAvailability(username: string): Promise<{ available: boolean; message?: string }> {
+export async function checkUsernameAvailability(
+  username: string,
+): Promise<{ available: boolean; message?: string }> {
   return apiRequest<{ available: boolean; message?: string }>(
-    `/api/auth/check-username?username=${encodeURIComponent(username)}`
+    `/api/auth/check-username?username=${encodeURIComponent(username)}`,
   );
 }
-
 
 export async function loginWithGoogle(payload: {
   email?: string;
@@ -223,41 +235,51 @@ export async function fetchNotifications(params?: {
 
   const qs = query.toString();
   return apiRequest<{ notifications: NotificationItem[]; unreadCount: number }>(
-    `/api/notifications${qs ? `?${qs}` : ""}`
+    `/api/notifications${qs ? `?${qs}` : ""}`,
   );
 }
 
-export async function markNotificationAsRead(id: number): Promise<{ success: boolean }> {
+export async function markNotificationAsRead(
+  id: number,
+): Promise<{ success: boolean }> {
   return apiRequest<{ success: boolean }>(`/api/notifications/${id}/read`, {
     method: "PATCH",
   });
 }
 
-export async function markAllNotificationsAsRead(): Promise<{ success: boolean }> {
+export async function markAllNotificationsAsRead(): Promise<{
+  success: boolean;
+}> {
   return apiRequest<{ success: boolean }>("/api/notifications/read-all", {
     method: "POST",
   });
 }
 
-export async function deleteNotificationById(id: number): Promise<{ success: boolean }> {
+export async function deleteNotificationById(
+  id: number,
+): Promise<{ success: boolean }> {
   return apiRequest<{ success: boolean }>(`/api/notifications/${id}`, {
     method: "DELETE",
   });
 }
 
-export async function fetchNotificationPreferences(): Promise<{ preferences: NotificationPreferences }> {
-  return apiRequest<{ preferences: NotificationPreferences }>("/api/notifications/preferences");
+export async function fetchNotificationPreferences(): Promise<{
+  preferences: NotificationPreferences;
+}> {
+  return apiRequest<{ preferences: NotificationPreferences }>(
+    "/api/notifications/preferences",
+  );
 }
 
 export async function updateNotificationPreferences(
-  preferences: Partial<NotificationPreferences>
+  preferences: Partial<NotificationPreferences>,
 ): Promise<{ success: boolean; preferences: NotificationPreferences }> {
   return apiRequest<{ success: boolean; preferences: NotificationPreferences }>(
     "/api/notifications/preferences",
     {
       method: "PUT",
       body: JSON.stringify(preferences),
-    }
+    },
   );
 }
 
@@ -274,6 +296,6 @@ export async function triggerTestNotification(payload: {
     {
       method: "POST",
       body: JSON.stringify(payload),
-    }
+    },
   );
 }

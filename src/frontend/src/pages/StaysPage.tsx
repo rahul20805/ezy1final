@@ -1,29 +1,35 @@
-import { useState, useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  BedDouble,
+  Building,
+  Calendar,
+  Check,
+  ChevronRight,
+  Coffee,
+  MapPin,
+  Search,
+  ShieldCheck,
+  Star,
+  Users,
+  Wifi,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { useRequireAuth } from "../components/AuthPromptModal";
 import Layout from "../components/Layout";
 import { RelatedPagesBar } from "../components/RelatedPagesBar";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { useRequireAuth } from "../components/AuthPromptModal";
 import { useAuth } from "../lib/AuthContext";
-import { toast } from "sonner";
-import {
-  Building,
-  MapPin,
-  Star,
-  Search,
-  Wifi,
-  Coffee,
-  Check,
-  Calendar,
-  Users,
-  BedDouble,
-  ShieldCheck,
-  ChevronRight
-} from "lucide-react";
 
 interface Hotel {
   id: number;
@@ -146,7 +152,8 @@ export default function StaysPage() {
               Book Verified Stays with Instant Confirmation
             </h1>
             <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl">
-              Clean rooms, zero hidden charges, transparent check-in policies, and verified guest reviews.
+              Clean rooms, zero hidden charges, transparent check-in policies,
+              and verified guest reviews.
             </p>
 
             {/* City Search Bar */}
@@ -161,7 +168,10 @@ export default function StaysPage() {
                   onKeyDown={(e) => e.key === "Enter" && fetchHotels()}
                 />
               </div>
-              <Button onClick={fetchHotels} className="h-11 px-6 rounded-xl font-bold text-xs bg-primary text-primary-foreground">
+              <Button
+                onClick={fetchHotels}
+                className="h-11 px-6 rounded-xl font-bold text-xs bg-primary text-primary-foreground"
+              >
                 Find Stays
               </Button>
             </div>
@@ -178,7 +188,9 @@ export default function StaysPage() {
                       : "bg-card text-muted-foreground border-border hover:border-primary/50"
                   }`}
                 >
-                  {type === "ALL" ? "All Accommodations" : type.charAt(0) + type.slice(1).toLowerCase() + "s"}
+                  {type === "ALL"
+                    ? "All Accommodations"
+                    : type.charAt(0) + type.slice(1).toLowerCase() + "s"}
                 </button>
               ))}
             </div>
@@ -192,23 +204,39 @@ export default function StaysPage() {
               <Building className="w-5 h-5 text-amber-500" />
               Available Accommodations ({hotels.length})
             </h2>
-            <span className="text-xs text-muted-foreground">Price includes taxes & WiFi</span>
+            <span className="text-xs text-muted-foreground">
+              Price includes taxes & WiFi
+            </span>
           </div>
 
           {loading ? (
-            <div className="text-center py-12 text-sm text-muted-foreground">Loading verified stays...</div>
+            <div className="text-center py-12 text-sm text-muted-foreground">
+              Loading verified stays...
+            </div>
           ) : hotels.length === 0 ? (
             <div className="text-center py-12 bg-card rounded-2xl border border-border p-8">
               <Building className="w-12 h-12 text-muted-foreground mx-auto mb-2 opacity-50" />
-              <h3 className="font-bold text-base text-foreground">No stays found</h3>
-              <p className="text-xs text-muted-foreground mt-1">Try searching for "Bengaluru" or "Coorg".</p>
+              <h3 className="font-bold text-base text-foreground">
+                No stays found
+              </h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Try searching for "Bengaluru" or "Coorg".
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {hotels.map((hotel) => (
-                <Card key={hotel.id} className="rounded-3xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col">
+                <Card
+                  key={hotel.id}
+                  className="rounded-3xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col"
+                >
                   <div className="relative aspect-video w-full bg-muted">
-                    <img src={hotel.image} alt={hotel.name} className="w-full h-full object-cover" loading="lazy" />
+                    <img
+                      src={hotel.image}
+                      alt={hotel.name}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
                     <span className="absolute top-3 left-3 px-2 py-0.5 rounded-lg bg-black/70 text-white text-[10px] font-bold backdrop-blur-sm uppercase">
                       {hotel.type}
                     </span>
@@ -218,9 +246,12 @@ export default function StaysPage() {
                   </div>
                   <CardContent className="p-5 flex-1 flex flex-col">
                     <div className="flex items-center justify-between gap-2 mb-1">
-                      <h3 className="font-bold text-base text-foreground line-clamp-1">{hotel.name}</h3>
+                      <h3 className="font-bold text-base text-foreground line-clamp-1">
+                        {hotel.name}
+                      </h3>
                       <span className="flex items-center gap-1 text-xs font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-lg flex-shrink-0">
-                        <Star className="w-3.5 h-3.5 fill-amber-500" /> {hotel.rating}
+                        <Star className="w-3.5 h-3.5 fill-amber-500" />{" "}
+                        {hotel.rating}
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-3">
@@ -230,7 +261,10 @@ export default function StaysPage() {
 
                     <div className="flex flex-wrap gap-1.5 mb-4">
                       {hotel.amenities?.split(",").map((amenity, i) => (
-                        <span key={i} className="text-[10px] bg-muted/60 text-muted-foreground px-2 py-0.5 rounded-md font-medium">
+                        <span
+                          key={i}
+                          className="text-[10px] bg-muted/60 text-muted-foreground px-2 py-0.5 rounded-md font-medium"
+                        >
                           {amenity.trim()}
                         </span>
                       ))}
@@ -238,11 +272,17 @@ export default function StaysPage() {
 
                     <div className="mt-auto pt-3 border-t border-border flex items-center justify-between">
                       <div>
-                        <span className="text-[10px] text-muted-foreground block">per night</span>
+                        <span className="text-[10px] text-muted-foreground block">
+                          per night
+                        </span>
                         <div className="flex items-baseline gap-1.5">
-                          <span className="text-lg font-black text-foreground">₹{hotel.pricePerNight}</span>
+                          <span className="text-lg font-black text-foreground">
+                            ₹{hotel.pricePerNight}
+                          </span>
                           {hotel.originalPrice && (
-                            <span className="text-xs text-muted-foreground line-through">₹{hotel.originalPrice}</span>
+                            <span className="text-xs text-muted-foreground line-through">
+                              ₹{hotel.originalPrice}
+                            </span>
                           )}
                         </div>
                       </div>
@@ -261,36 +301,65 @@ export default function StaysPage() {
         </div>
 
         {/* Booking Dialog */}
-        <Dialog open={!!selectedHotel} onOpenChange={() => setSelectedHotel(null)}>
+        <Dialog
+          open={!!selectedHotel}
+          onOpenChange={() => setSelectedHotel(null)}
+        >
           <DialogContent className="max-w-md rounded-2xl">
             <DialogHeader>
               <DialogTitle className="font-display font-black text-lg">
-                {bookingSuccess ? "Booking Confirmed! 🎉" : `Book ${selectedHotel?.name}`}
+                {bookingSuccess
+                  ? "Booking Confirmed! 🎉"
+                  : `Book ${selectedHotel?.name}`}
               </DialogTitle>
             </DialogHeader>
 
             {bookingSuccess ? (
               <div className="space-y-4 py-3">
                 <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-center space-y-1">
-                  <span className="text-xs font-bold text-emerald-600 block">Booking Reference</span>
+                  <span className="text-xs font-bold text-emerald-600 block">
+                    Booking Reference
+                  </span>
                   <span className="text-lg font-mono font-black text-foreground">
                     EZY-STAY-{bookingSuccess.id.toString().padStart(5, "0")}
                   </span>
                   <p className="text-xs text-muted-foreground pt-1">
-                    Confirmed for {bookingSuccess.guestName} at {bookingSuccess.hotelName}
+                    Confirmed for {bookingSuccess.guestName} at{" "}
+                    {bookingSuccess.hotelName}
                   </p>
                 </div>
                 <div className="text-xs space-y-1.5 text-muted-foreground">
-                  <div className="flex justify-between"><span>Check-In:</span> <b className="text-foreground">{bookingSuccess.checkInDate}</b></div>
-                  <div className="flex justify-between"><span>Check-Out:</span> <b className="text-foreground">{bookingSuccess.checkOutDate}</b></div>
-                  <div className="flex justify-between"><span>Total Amount:</span> <b className="text-foreground font-bold">₹{bookingSuccess.totalAmount}</b></div>
+                  <div className="flex justify-between">
+                    <span>Check-In:</span>{" "}
+                    <b className="text-foreground">
+                      {bookingSuccess.checkInDate}
+                    </b>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Check-Out:</span>{" "}
+                    <b className="text-foreground">
+                      {bookingSuccess.checkOutDate}
+                    </b>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total Amount:</span>{" "}
+                    <b className="text-foreground font-bold">
+                      ₹{bookingSuccess.totalAmount}
+                    </b>
+                  </div>
                 </div>
-                <Button onClick={() => setSelectedHotel(null)} className="w-full rounded-xl font-bold text-xs bg-primary text-primary-foreground">
+                <Button
+                  onClick={() => setSelectedHotel(null)}
+                  className="w-full rounded-xl font-bold text-xs bg-primary text-primary-foreground"
+                >
                   Done
                 </Button>
               </div>
             ) : (
-              <form onSubmit={handleConfirmBooking} className="space-y-3.5 py-2">
+              <form
+                onSubmit={handleConfirmBooking}
+                className="space-y-3.5 py-2"
+              >
                 <div className="space-y-1">
                   <Label className="text-xs font-bold">Guest Full Name</Label>
                   <Input
@@ -342,7 +411,9 @@ export default function StaysPage() {
                 </div>
 
                 <div className="p-3 rounded-xl bg-muted/40 flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Total to Pay (Pay at Hotel):</span>
+                  <span className="text-muted-foreground">
+                    Total to Pay (Pay at Hotel):
+                  </span>
                   <span className="text-base font-bold text-foreground">
                     ₹{(selectedHotel?.pricePerNight || 0) * roomsCount}
                   </span>

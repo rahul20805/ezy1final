@@ -210,28 +210,76 @@ export default function DashboardPage() {
             <h3 className="text-xs sm:text-sm font-bold font-display text-foreground flex items-center gap-1.5">
               <span>⚡</span> Customer Navigation & Services
             </h3>
-            <span className="text-[10px] text-muted-foreground font-medium">Quick 1-Click Access</span>
+            <span className="text-[10px] text-muted-foreground font-medium">
+              Quick 1-Click Access
+            </span>
           </div>
 
           <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
             {[
-              { label: "Wallet", icon: "💰", href: "/dashboard/wallet", sub: "₹" + (wallet?.balance?.toLocaleString() ?? "0") },
-              { label: "Orders", icon: "📦", href: "/my-orders", sub: "Active & Past" },
-              { label: "History", icon: "📜", href: "/my-bookings", sub: "Bookings" },
-              { label: "Payments", icon: "💳", href: "/dashboard", sub: "UPI & Cards" },
-              { label: "Cart", icon: "🛒", href: "/dashboard/cart", sub: "Items" },
-              { label: "My Account", icon: "👤", href: "/my-dashboard", sub: "Profile" },
-              { label: "Settings", icon: "⚙️", href: "/dashboard/settings", sub: "Preferences" },
-              { label: "Alerts", icon: "🔔", href: "/dashboard/notifications", sub: "Updates" },
+              {
+                label: "Wallet",
+                icon: "💰",
+                href: "/dashboard/wallet",
+                sub: "₹" + (wallet?.balance?.toLocaleString() ?? "0"),
+              },
+              {
+                label: "Orders",
+                icon: "📦",
+                href: "/my-orders",
+                sub: "Active & Past",
+              },
+              {
+                label: "History",
+                icon: "📜",
+                href: "/my-bookings",
+                sub: "Bookings",
+              },
+              {
+                label: "Payments",
+                icon: "💳",
+                href: "/dashboard",
+                sub: "UPI & Cards",
+              },
+              {
+                label: "Cart",
+                icon: "🛒",
+                href: "/dashboard/cart",
+                sub: "Items",
+              },
+              {
+                label: "My Account",
+                icon: "👤",
+                href: "/my-dashboard",
+                sub: "Profile",
+              },
+              {
+                label: "Settings",
+                icon: "⚙️",
+                href: "/dashboard/settings",
+                sub: "Preferences",
+              },
+              {
+                label: "Alerts",
+                icon: "🔔",
+                href: "/dashboard/notifications",
+                sub: "Updates",
+              },
             ].map((tab) => (
               <Link
                 key={tab.label}
                 to={tab.href as any}
                 className="flex flex-col items-center justify-center p-2.5 rounded-xl border border-border/70 hover:border-primary/50 hover:bg-muted/60 transition-all text-center group bg-background/50"
               >
-                <span className="text-xl sm:text-2xl mb-1 group-hover:scale-110 transition-transform">{tab.icon}</span>
-                <span className="text-xs font-bold text-foreground line-clamp-1">{tab.label}</span>
-                <span className="text-[9px] text-muted-foreground font-medium truncate w-full">{tab.sub}</span>
+                <span className="text-xl sm:text-2xl mb-1 group-hover:scale-110 transition-transform">
+                  {tab.icon}
+                </span>
+                <span className="text-xs font-bold text-foreground line-clamp-1">
+                  {tab.label}
+                </span>
+                <span className="text-[9px] text-muted-foreground font-medium truncate w-full">
+                  {tab.sub}
+                </span>
               </Link>
             ))}
           </div>
@@ -379,7 +427,7 @@ export default function DashboardPage() {
           <h3 className="font-display font-semibold text-lg text-foreground mb-3">
             Trending Services
           </h3>
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
+          <div className="w-full flex gap-2 overflow-x-auto pb-2 scrollbar-hide touch-pan-x">
             {trendingChips.map((chip, i) => (
               <Link
                 key={chip.label}

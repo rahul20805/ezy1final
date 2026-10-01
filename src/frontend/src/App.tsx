@@ -1,26 +1,26 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  type ErrorComponentProps,
+  Navigate,
   Outlet,
   RouterProvider,
   createRootRoute,
   createRoute,
   createRouter,
-  Navigate,
-  type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { Suspense, lazy } from "react";
+import { AuthPromptProvider } from "./components/AuthPromptModal";
 import {
   AdminRoute,
+  DeliveryRoute,
+  HospitalRoute,
+  OwnerRoute,
+  PartnerRoute,
+  PharmacyRoute,
+  ServiceProviderRoute,
   UserRoute,
   VendorRoute,
-  PartnerRoute,
-  HospitalRoute,
-  PharmacyRoute,
-  DeliveryRoute,
-  ServiceProviderRoute,
-  OwnerRoute,
 } from "./components/ProtectedRoute";
-import { AuthPromptProvider } from "./components/AuthPromptModal";
 import { getSubdomain } from "./lib/domain";
 import { usePartnerAuth } from "./lib/partnerAuthStore";
 
@@ -89,13 +89,8 @@ function PageLoader() {
 
 function RouterErrorFallback({ error }: ErrorComponentProps) {
   const handleReload = () => {
-    try {
-      localStorage.removeItem("ezy1-cart");
-      localStorage.removeItem("ezy1_auth_token");
-      localStorage.removeItem("ezy1_customer_user");
-      localStorage.removeItem("ezy1_complete_platform_os_v3");
-    } catch {}
-    window.location.href = "/";
+    // Preserve customer session and cart items on error recovery
+    window.location.reload();
   };
 
   return (
@@ -149,8 +144,8 @@ function RouterErrorFallback({ error }: ErrorComponentProps) {
           marginBottom: 28,
         }}
       >
-        Ezy1 hit an unexpected error. Tap the button below — this will clear
-        any bad cached data and reload the app fresh.
+        Ezy1 hit an unexpected error. Tap the button below — this will clear any
+        bad cached data and reload the app fresh.
       </p>
 
       <button
@@ -252,12 +247,16 @@ function PartnerLoginDispatcher() {
     const hostname = window.location.hostname.toLowerCase();
     // On the main customer domain ezy1.site, hand off directly to partner.ezy1.site
     if (hostname === "ezy1.site" || hostname === "www.ezy1.site") {
-      window.location.replace(`https://partner.ezy1.site${window.location.search}`);
+      window.location.replace(
+        `https://partner.ezy1.site${window.location.search}`,
+      );
       return (
         <div className="min-h-screen bg-background flex items-center justify-center p-6 text-center">
           <div className="space-y-2">
             <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin mx-auto" />
-            <p className="text-sm font-semibold text-foreground">Redirecting to Partner Portal (partner.ezy1.site)...</p>
+            <p className="text-sm font-semibold text-foreground">
+              Redirecting to Partner Portal (partner.ezy1.site)...
+            </p>
           </div>
         </div>
       );
@@ -534,6 +533,16 @@ const cartDirectRoute = createRoute({
   component: () => <CartPage />,
 });
 
+const checkoutDirectRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/checkout",
+  component: () => (
+    <UserRoute>
+      <CheckoutPage />
+    </UserRoute>
+  ),
+});
+
 const notificationsDirectRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/notifications",
@@ -658,12 +667,16 @@ function AdminDispatcher() {
     const hostname = window.location.hostname.toLowerCase();
     // On the main customer domain ezy1.site, hand off directly to admin.ezy1.site
     if (hostname === "ezy1.site" || hostname === "www.ezy1.site") {
-      window.location.replace(`https://admin.ezy1.site${window.location.search}`);
+      window.location.replace(
+        `https://admin.ezy1.site${window.location.search}`,
+      );
       return (
         <div className="min-h-screen bg-background flex items-center justify-center p-6 text-center">
           <div className="space-y-2">
             <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin mx-auto" />
-            <p className="text-sm font-semibold text-foreground">Redirecting to Admin Portal (admin.ezy1.site)...</p>
+            <p className="text-sm font-semibold text-foreground">
+              Redirecting to Admin Portal (admin.ezy1.site)...
+            </p>
           </div>
         </div>
       );
@@ -691,7 +704,9 @@ const navaeRedirectRoute = createRoute({
     }
     return (
       <div className="min-h-screen flex items-center justify-center p-6 text-center">
-        <p className="text-sm font-medium">Redirecting to NavaeIn ({NAVAEIN_URL})...</p>
+        <p className="text-sm font-medium">
+          Redirecting to NavaeIn ({NAVAEIN_URL})...
+        </p>
       </div>
     );
   },
@@ -738,6 +753,7 @@ const routeTree = rootRoute.addChildren([
   settingsRoute,
   walletDirectRoute,
   cartDirectRoute,
+  checkoutDirectRoute,
   notificationsDirectRoute,
   settingsDirectRoute,
   myAccountRoute,
@@ -779,4 +795,3 @@ declare module "@tanstack/react-router" {
 export default function App() {
   return <RouterProvider router={router} />;
 }
-

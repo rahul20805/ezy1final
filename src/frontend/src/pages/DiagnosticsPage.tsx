@@ -1,23 +1,25 @@
-import { useState } from "react";
-import Layout from "../components/Layout";
-import { LAB_PACKAGES, type LabPackage } from "../ecosystem-data";
-import { RelatedPagesBar } from "../components/RelatedPagesBar";
-import { useRequireAuth } from "../components/AuthPromptModal";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  Microscope,
-  Clock,
-  Home,
+  Calendar,
   CheckCircle2,
+  Clock,
   FileText,
+  Home,
+  Microscope,
   ShieldCheck,
-  Calendar
 } from "lucide-react";
+import { useState } from "react";
+import { useRequireAuth } from "../components/AuthPromptModal";
+import Layout from "../components/Layout";
+import { RelatedPagesBar } from "../components/RelatedPagesBar";
+import { LAB_PACKAGES, type LabPackage } from "../ecosystem-data";
 
 export default function DiagnosticsPage() {
-  const [selectedSlot, setSelectedSlot] = useState("Tomorrow 07:00 AM - 08:00 AM (Fasting)");
+  const [selectedSlot, setSelectedSlot] = useState(
+    "Tomorrow 07:00 AM - 08:00 AM (Fasting)",
+  );
   const [bookedSuccess, setBookedSuccess] = useState<string | null>(null);
   const { requireAuth } = useRequireAuth();
 
@@ -26,9 +28,11 @@ export default function DiagnosticsPage() {
       title: `Book ${pkg.name}`,
       description: `Home Sample Collection • ${selectedSlot} • ₹${pkg.price}`,
       onSuccess: () => {
-        setBookedSuccess(`Booking confirmed for ${pkg.name}! Phlebotomist assigned for home collection. Reference: EZY-LAB-${Date.now().toString().slice(-4)}`);
+        setBookedSuccess(
+          `Booking confirmed for ${pkg.name}! Phlebotomist assigned for home collection. Reference: EZY-LAB-${Date.now().toString().slice(-4)}`,
+        );
         setTimeout(() => setBookedSuccess(null), 6000);
-      }
+      },
     });
   };
 
@@ -43,13 +47,16 @@ export default function DiagnosticsPage() {
               <Badge className="bg-violet-500/10 text-violet-600 border-violet-500/20 font-semibold">
                 NABL Accredited Labs
               </Badge>
-              <span className="text-xs text-muted-foreground">Free Home Sample Collection</span>
+              <span className="text-xs text-muted-foreground">
+                Free Home Sample Collection
+              </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-display font-black text-foreground">
               Lab Tests & Preventive Health Checkups
             </h1>
             <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
-              Certified phlebotomists collect blood/urine samples from your home safely. Digital reports delivered within 12-24 hours.
+              Certified phlebotomists collect blood/urine samples from your home
+              safely. Digital reports delivered within 12-24 hours.
             </p>
 
             {bookedSuccess && (
@@ -66,14 +73,16 @@ export default function DiagnosticsPage() {
           <div className="p-4 rounded-2xl bg-card border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-primary" />
-              <span className="text-xs font-bold text-foreground">Choose Home Collection Slot:</span>
+              <span className="text-xs font-bold text-foreground">
+                Choose Home Collection Slot:
+              </span>
             </div>
             <div className="flex flex-wrap gap-2 text-xs">
               {[
                 "Tomorrow 07:00 AM - 08:00 AM (Fasting)",
                 "Tomorrow 08:30 AM - 09:30 AM (Fasting)",
                 "Tomorrow 10:00 AM - 11:00 AM",
-                "Day After Tomorrow 07:30 AM"
+                "Day After Tomorrow 07:30 AM",
               ].map((slot) => (
                 <button
                   key={slot}
@@ -137,10 +146,15 @@ export default function DiagnosticsPage() {
 
                   {/* Parameters */}
                   <div className="text-xs mb-4 flex-1">
-                    <strong className="text-foreground block mb-1">Includes:</strong>
+                    <strong className="text-foreground block mb-1">
+                      Includes:
+                    </strong>
                     <div className="flex flex-wrap gap-1">
                       {pkg.includedParameters.map((p) => (
-                        <span key={p} className="px-2 py-0.5 rounded-md bg-muted text-[11px]">
+                        <span
+                          key={p}
+                          className="px-2 py-0.5 rounded-md bg-muted text-[11px]"
+                        >
                           {p}
                         </span>
                       ))}

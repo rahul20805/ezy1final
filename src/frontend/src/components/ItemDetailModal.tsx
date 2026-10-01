@@ -1,37 +1,37 @@
-import React, { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useNavigate } from "@tanstack/react-router";
+import {
+  ArrowRight,
+  BedDouble,
+  Building2,
+  Bus,
+  Calendar,
+  Car,
+  CheckCircle2,
+  Clock,
+  Compass,
+  Info,
+  MapPin,
+  Maximize2,
+  Minus,
+  Package,
+  PhoneCall,
+  Plus,
+  RotateCcw,
+  ShieldCheck,
+  ShoppingBag,
+  Sparkles,
+  Star,
+  Tag,
+  Wrench,
+  X,
+} from "lucide-react";
+import React, { useState } from "react";
+import { toast } from "sonner";
 import { useCartStore } from "../lib/cartStore";
 import { useRequireAuth } from "./AuthPromptModal";
 import { ImageViewerModal } from "./ui/ImageViewerModal";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
-import {
-  X,
-  Star,
-  Clock,
-  MapPin,
-  ShieldCheck,
-  RotateCcw,
-  Sparkles,
-  ShoppingBag,
-  Plus,
-  Minus,
-  Maximize2,
-  CheckCircle2,
-  PhoneCall,
-  Calendar,
-  Building2,
-  Car,
-  Package,
-  Wrench,
-  Bus,
-  Compass,
-  BedDouble,
-  Tag,
-  ArrowRight,
-  Info,
-} from "lucide-react";
 
 export type DetailItemType =
   | "product"
@@ -87,7 +87,12 @@ export interface ItemDetailData {
   experience?: string;
   availability?: string;
   // Hospital specific
-  availableBeds?: { icu?: number; oxygen?: number; general?: number; ventilator?: number };
+  availableBeds?: {
+    icu?: number;
+    oxygen?: number;
+    general?: number;
+    ventilator?: number;
+  };
   emergencyPhone?: string;
   address?: string;
   city?: string;
@@ -135,7 +140,11 @@ interface ItemDetailModalProps {
   item: ItemDetailData | null;
 }
 
-export function ItemDetailModal({ isOpen, onClose, item }: ItemDetailModalProps) {
+export function ItemDetailModal({
+  isOpen,
+  onClose,
+  item,
+}: ItemDetailModalProps) {
   const navigate = useNavigate();
   const { items, addItem, updateQuantity, removeItem } = useCartStore();
   const { requireAuth } = useRequireAuth();
@@ -146,7 +155,10 @@ export function ItemDetailModal({ isOpen, onClose, item }: ItemDetailModalProps)
   if (!isOpen || !item) return null;
 
   // Determine normalized properties
-  const itemName = item.name || item.title || (item.code ? `Coupon ${item.code}` : "Item Details");
+  const itemName =
+    item.name ||
+    item.title ||
+    (item.code ? `Coupon ${item.code}` : "Item Details");
   const itemPrice = item.price ?? item.fare ?? item.pricePerNight ?? item.fee;
   const itemType: DetailItemType =
     item.type ||
@@ -165,7 +177,7 @@ export function ItemDetailModal({ isOpen, onClose, item }: ItemDetailModalProps)
   // Calculate cart numeric id
   const rawId = String(item.id || item.code || itemName);
   const numId = Math.abs(
-    rawId.split("").reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 0)
+    rawId.split("").reduce((a, b) => (a << 5) - a + b.charCodeAt(0), 0),
   );
   const cartItem = items[numId];
   const currentQty = cartItem ? cartItem.quantity : 0;
@@ -176,7 +188,8 @@ export function ItemDetailModal({ isOpen, onClose, item }: ItemDetailModalProps)
     (item.images && item.images[0]) ||
     "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80";
 
-  const allImages = item.images && item.images.length > 0 ? item.images : [primaryImg];
+  const allImages =
+    item.images && item.images.length > 0 ? item.images : [primaryImg];
 
   const handleAddToCart = () => {
     addItem({
@@ -361,7 +374,11 @@ export function ItemDetailModal({ isOpen, onClose, item }: ItemDetailModalProps)
                             : "border-border opacity-70 hover:opacity-100"
                         }`}
                       >
-                        <img src={img} alt="" className="w-full h-full object-cover" />
+                        <img
+                          src={img}
+                          alt=""
+                          className="w-full h-full object-cover"
+                        />
                       </button>
                     ))}
                   </div>
@@ -388,7 +405,8 @@ export function ItemDetailModal({ isOpen, onClose, item }: ItemDetailModalProps)
 
                   {(item.unit || item.weightOrUnit) && (
                     <span className="text-xs text-muted-foreground block mt-0.5">
-                      Net Qty / Pack: <strong>{item.unit || item.weightOrUnit}</strong>
+                      Net Qty / Pack:{" "}
+                      <strong>{item.unit || item.weightOrUnit}</strong>
                     </span>
                   )}
 
@@ -410,7 +428,9 @@ export function ItemDetailModal({ isOpen, onClose, item }: ItemDetailModalProps)
                   {/* Price Section */}
                   {itemPrice !== undefined && (
                     <div className="flex items-baseline gap-2.5 mt-3 pt-3 border-t border-border">
-                      <span className="text-2xl font-black text-foreground">₹{itemPrice}</span>
+                      <span className="text-2xl font-black text-foreground">
+                        ₹{itemPrice}
+                      </span>
                       {item.originalPrice && item.originalPrice > itemPrice && (
                         <>
                           <span className="text-sm line-through text-muted-foreground">
@@ -474,24 +494,41 @@ export function ItemDetailModal({ isOpen, onClose, item }: ItemDetailModalProps)
             {itemType === "doctor" && (
               <div className="p-4 rounded-2xl bg-muted/40 border border-border space-y-2">
                 <h4 className="font-bold text-sm text-foreground flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-primary" /> Specialist Credentials
+                  <Sparkles className="w-4 h-4 text-primary" /> Specialist
+                  Credentials
                 </h4>
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div>
-                    <span className="text-muted-foreground block">Specialty:</span>
-                    <span className="font-bold text-foreground">{item.specialty}</span>
+                    <span className="text-muted-foreground block">
+                      Specialty:
+                    </span>
+                    <span className="font-bold text-foreground">
+                      {item.specialty}
+                    </span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground block">Hospital Affiliation:</span>
-                    <span className="font-bold text-foreground">{item.hospital || "EZY Health Network"}</span>
+                    <span className="text-muted-foreground block">
+                      Hospital Affiliation:
+                    </span>
+                    <span className="font-bold text-foreground">
+                      {item.hospital || "EZY Health Network"}
+                    </span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground block">Consultation Fee:</span>
-                    <span className="font-bold text-foreground">₹{item.fee}</span>
+                    <span className="text-muted-foreground block">
+                      Consultation Fee:
+                    </span>
+                    <span className="font-bold text-foreground">
+                      ₹{item.fee}
+                    </span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground block">Daily Slots:</span>
-                    <span className="font-bold text-emerald-600">Available Today (10 AM - 7 PM)</span>
+                    <span className="text-muted-foreground block">
+                      Daily Slots:
+                    </span>
+                    <span className="font-bold text-emerald-600">
+                      Available Today (10 AM - 7 PM)
+                    </span>
                   </div>
                 </div>
               </div>
@@ -501,23 +538,30 @@ export function ItemDetailModal({ isOpen, onClose, item }: ItemDetailModalProps)
             {itemType === "hospital" && (
               <div className="p-4 rounded-2xl bg-rose-500/5 border border-rose-500/20 space-y-3">
                 <h4 className="font-bold text-sm text-foreground flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-rose-600" /> Live Hospital Bed Telemetry
+                  <Building2 className="w-4 h-4 text-rose-600" /> Live Hospital
+                  Bed Telemetry
                 </h4>
                 <div className="grid grid-cols-3 gap-2 text-center">
                   <div className="p-2.5 rounded-xl bg-card border border-border">
-                    <span className="text-[10px] text-muted-foreground block">ICU Beds</span>
+                    <span className="text-[10px] text-muted-foreground block">
+                      ICU Beds
+                    </span>
                     <span className="text-base font-black text-rose-600">
                       {item.availableBeds?.icu ?? 4} Available
                     </span>
                   </div>
                   <div className="p-2.5 rounded-xl bg-card border border-border">
-                    <span className="text-[10px] text-muted-foreground block">Oxygen Beds</span>
+                    <span className="text-[10px] text-muted-foreground block">
+                      Oxygen Beds
+                    </span>
                     <span className="text-base font-black text-amber-600">
                       {item.availableBeds?.oxygen ?? 12} Available
                     </span>
                   </div>
                   <div className="p-2.5 rounded-xl bg-card border border-border">
-                    <span className="text-[10px] text-muted-foreground block">General Beds</span>
+                    <span className="text-[10px] text-muted-foreground block">
+                      General Beds
+                    </span>
                     <span className="text-base font-black text-emerald-600">
                       {item.availableBeds?.general ?? 25} Available
                     </span>
@@ -536,7 +580,8 @@ export function ItemDetailModal({ isOpen, onClose, item }: ItemDetailModalProps)
             {itemType === "stay" && (
               <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 space-y-3">
                 <h4 className="font-bold text-sm text-foreground flex items-center gap-2">
-                  <BedDouble className="w-4 h-4 text-amber-600" /> Stay Highlights & Amenities
+                  <BedDouble className="w-4 h-4 text-amber-600" /> Stay
+                  Highlights & Amenities
                 </h4>
                 <div className="flex flex-wrap gap-1.5">
                   {(
@@ -558,7 +603,9 @@ export function ItemDetailModal({ isOpen, onClose, item }: ItemDetailModalProps)
                   ))}
                 </div>
                 <div className="flex items-center justify-between text-xs pt-1 border-t border-border">
-                  <span className="text-muted-foreground">Location: {item.address || "City Center"}</span>
+                  <span className="text-muted-foreground">
+                    Location: {item.address || "City Center"}
+                  </span>
                   <span className="font-bold text-emerald-600">
                     {item.availableRooms ?? 5} rooms available
                   </span>
@@ -570,15 +617,22 @@ export function ItemDetailModal({ isOpen, onClose, item }: ItemDetailModalProps)
             {itemType === "tour" && (
               <div className="p-4 rounded-2xl bg-sky-500/5 border border-sky-500/20 space-y-3">
                 <h4 className="font-bold text-sm text-foreground flex items-center gap-2">
-                  <Compass className="w-4 h-4 text-sky-600" /> Tour Itinerary & Inclusions
+                  <Compass className="w-4 h-4 text-sky-600" /> Tour Itinerary &
+                  Inclusions
                 </h4>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
-                    <span className="text-muted-foreground block">Operator:</span>
-                    <span className="font-bold">{item.agencyName || "Verified Partner"}</span>
+                    <span className="text-muted-foreground block">
+                      Operator:
+                    </span>
+                    <span className="font-bold">
+                      {item.agencyName || "Verified Partner"}
+                    </span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground block">Duration:</span>
+                    <span className="text-muted-foreground block">
+                      Duration:
+                    </span>
                     <span className="font-bold">{item.duration}</span>
                   </div>
                 </div>
@@ -597,14 +651,17 @@ export function ItemDetailModal({ isOpen, onClose, item }: ItemDetailModalProps)
             {itemType === "bus" && (
               <div className="p-4 rounded-2xl bg-blue-500/5 border border-blue-500/20 space-y-3">
                 <h4 className="font-bold text-sm text-foreground flex items-center gap-2">
-                  <Bus className="w-4 h-4 text-blue-600" /> Bus Schedule & Route Info
+                  <Bus className="w-4 h-4 text-blue-600" /> Bus Schedule & Route
+                  Info
                 </h4>
                 <div className="flex items-center justify-between p-3 rounded-xl bg-card border border-border text-center">
                   <div>
                     <span className="font-extrabold text-base text-foreground block">
                       {item.departureTime || "--:--"}
                     </span>
-                    <span className="text-xs text-muted-foreground">{item.sourceCity || "Origin"}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {item.sourceCity || "Origin"}
+                    </span>
                   </div>
                   <div className="text-[11px] text-muted-foreground">
                     <span>{item.busType || "AC Volvo Multi-Axle"}</span>
@@ -623,7 +680,9 @@ export function ItemDetailModal({ isOpen, onClose, item }: ItemDetailModalProps)
                   </div>
                 </div>
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Carrier: {item.operatorName || item.operator}</span>
+                  <span className="text-muted-foreground">
+                    Carrier: {item.operatorName || item.operator}
+                  </span>
                   <span className="font-bold text-sky-600">
                     {item.availableSeats ?? 14} seats remaining
                   </span>
@@ -647,9 +706,15 @@ export function ItemDetailModal({ isOpen, onClose, item }: ItemDetailModalProps)
             {itemType === "coupon" && item.code && (
               <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-between">
                 <div>
-                  <span className="text-xs text-muted-foreground block">Promo Code</span>
-                  <span className="font-mono font-black text-xl text-primary">{item.code}</span>
-                  <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
+                  <span className="text-xs text-muted-foreground block">
+                    Promo Code
+                  </span>
+                  <span className="font-mono font-black text-xl text-primary">
+                    {item.code}
+                  </span>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {item.desc}
+                  </p>
                 </div>
                 <Button
                   onClick={() => handleApplyCoupon(item.code!)}
@@ -671,10 +736,10 @@ export function ItemDetailModal({ isOpen, onClose, item }: ItemDetailModalProps)
                     {itemType === "stay"
                       ? "Price per night"
                       : itemType === "tour"
-                      ? "Price per person"
-                      : itemType === "bus"
-                      ? "Ticket fare"
-                      : "Total Price"}
+                        ? "Price per person"
+                        : itemType === "bus"
+                          ? "Ticket fare"
+                          : "Total Price"}
                   </span>
                   <span className="text-xl sm:text-2xl font-black text-foreground">
                     ₹{itemPrice}
@@ -808,7 +873,9 @@ export function ItemDetailModal({ isOpen, onClose, item }: ItemDetailModalProps)
               )}
 
               {/* Ride / Parcel / Service Actions */}
-              {(itemType === "ride" || itemType === "parcel" || itemType === "service") && (
+              {(itemType === "ride" ||
+                itemType === "parcel" ||
+                itemType === "service") && (
                 <Button
                   onClick={() => {
                     onClose();
@@ -828,7 +895,9 @@ export function ItemDetailModal({ isOpen, onClose, item }: ItemDetailModalProps)
                 <Button
                   onClick={() => {
                     onClose();
-                    navigate({ to: itemType === "spot" ? "/famous" : "/local-shops" });
+                    navigate({
+                      to: itemType === "spot" ? "/famous" : "/local-shops",
+                    });
                   }}
                   className="rounded-xl font-bold text-xs sm:text-sm h-11 px-6 bg-primary text-primary-foreground shadow-md gap-1.5"
                 >
@@ -848,7 +917,9 @@ export function ItemDetailModal({ isOpen, onClose, item }: ItemDetailModalProps)
         images={allImages}
         initialIndex={activeImgIndex}
         title={itemName}
-        subtitle={item.brand || item.restaurant || item.category || "EZY1 Item Preview"}
+        subtitle={
+          item.brand || item.restaurant || item.category || "EZY1 Item Preview"
+        }
       />
     </>
   );

@@ -6,8 +6,8 @@ import { Link } from "@tanstack/react-router";
 import { CheckCircle2, MapPin, Search, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
-import { workers } from "../mock-data";
 import { RelatedPagesBar } from "../components/RelatedPagesBar";
+import { workers } from "../mock-data";
 
 export default function HomeServicesPage() {
   const [searchTerm, setSearchTerm] = useState("");

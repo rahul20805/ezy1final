@@ -1,15 +1,15 @@
-import { create } from "zustand";
 import { toast } from "sonner";
+import { create } from "zustand";
 import {
   type NotificationItem,
   type NotificationPreferences,
-  fetchNotifications,
-  markNotificationAsRead,
-  markAllNotificationsAsRead,
   deleteNotificationById,
   fetchNotificationPreferences,
-  updateNotificationPreferences,
+  fetchNotifications,
   getAuthToken,
+  markAllNotificationsAsRead,
+  markNotificationAsRead,
+  updateNotificationPreferences,
 } from "./api";
 
 interface NotificationStore {
@@ -65,7 +65,8 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
   loadNotifications: async (category?: string) => {
     set({ isLoading: true });
     try {
-      const selectedCategory = category !== undefined ? category : get().filterCategory;
+      const selectedCategory =
+        category !== undefined ? category : get().filterCategory;
       const data = await fetchNotifications({
         category: selectedCategory === "all" ? undefined : selectedCategory,
       });
@@ -85,7 +86,7 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
       await markNotificationAsRead(id);
       set((state) => {
         const updated = state.notifications.map((n) =>
-          n.id === id ? { ...n, isRead: 1 } : n
+          n.id === id ? { ...n, isRead: 1 } : n,
         );
         const unread = updated.filter((n) => !n.isRead).length;
         return { notifications: updated, unreadCount: unread };

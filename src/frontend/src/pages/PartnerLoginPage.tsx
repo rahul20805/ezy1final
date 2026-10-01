@@ -1,5 +1,3 @@
-import { useState, useEffect } from "react";
-import { useNavigate, Link } from "@tanstack/react-router";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,8 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -19,33 +15,45 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
+  AlertCircle,
   ArrowRight,
+  Building2,
   CheckCircle,
+  Crown,
   Eye,
   EyeOff,
+  HelpCircle,
   KeyRound,
   Lock,
   RefreshCw,
   ShieldCheck,
   User,
-  AlertCircle,
-  HelpCircle,
-  Building2,
-  Crown,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import Layout from "../components/Layout";
+import { getAdminPortalUrl, getCustomerPlatformUrl } from "../config/links";
 import { usePartnerAuth } from "../lib/partnerAuthStore";
 import { useStoreData } from "../lib/storeData";
-import { getCustomerPlatformUrl, getAdminPortalUrl } from "../config/links";
-import { toast } from "sonner";
 
 export type PortalType = "merchant" | "owner" | "admin";
 
 export default function PartnerLoginPage() {
   const navigate = useNavigate();
   const store = useStoreData();
-  const { login, changePassword, forgotPassword, resetPassword, isAuthenticated, currentPartner, logout } = usePartnerAuth();
+  const {
+    login,
+    changePassword,
+    forgotPassword,
+    resetPassword,
+    isAuthenticated,
+    currentPartner,
+    logout,
+  } = usePartnerAuth();
 
   // Determine initial portal type from URL query string if present
   const getInitialPortal = (): PortalType => {
@@ -77,7 +85,9 @@ export default function PartnerLoginPage() {
   const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
   const [forgotIdentifier, setForgotIdentifier] = useState("");
   const [isSubmittingForgot, setIsSubmittingForgot] = useState(false);
-  const [resetTokenReceived, setResetTokenReceived] = useState<string | null>(null);
+  const [resetTokenReceived, setResetTokenReceived] = useState<string | null>(
+    null,
+  );
   const [resetNewPassword, setResetNewPassword] = useState("");
 
   // Sync portalType with URL query parameter changes
@@ -114,17 +124,22 @@ export default function PartnerLoginPage() {
     // If already authenticated, directly navigate if user has permissions
     if (isAuthenticated && currentPartner) {
       const role = (currentPartner.role || "").toUpperCase();
+      const pt = (currentPartner.providerType || "").toUpperCase();
       if (selected === "owner") {
-        if (role === "OWNER" || role === "SUPER_OWNER" || role === "ADMIN" || role === "SUPER_ADMIN") {
+        if (role === "OWNER" || role === "SUPER_OWNER" || pt === "OWNER") {
           navigate({ to: "/owner" });
         } else {
-          toast.info("Logged in as merchant. Owner credentials required for Control Centre.");
+          toast.error(
+            "Access Restricted: Owner credentials required for Owner Control Centre.",
+          );
         }
       } else if (selected === "admin") {
-        if (role === "ADMIN" || role === "SUPER_ADMIN" || role === "SUPER_OWNER") {
+        if (role === "ADMIN" || role === "SUPER_ADMIN" || pt === "ADMIN") {
           navigate({ to: "/admin" });
         } else {
-          toast.info("Logged in as partner. Admin credentials required for Super Admin Console.");
+          toast.error(
+            "Access Restricted: Admin credentials required for Super Admin Console.",
+          );
         }
       } else {
         navigate({ to: "/partner-dashboard" });
@@ -158,19 +173,23 @@ export default function PartnerLoginPage() {
           setIsForceChangeOpen(true);
           toast.info("First login detected. Please set a new password.");
         } else {
-          toast.success(`Welcome, ${partner?.name || partner?.businessName || "Partner"}!`);
-          
-          // Role-aware destination navigation
-          if (portalType === "owner" || role === "OWNER" || role === "SUPER_OWNER") {
+          toast.success(
+            `Welcome, ${partner?.name || partner?.businessName || "Partner"}!`,
+          );
+
+          // Strict role-aware destination navigation
+          const pt = (partner?.providerType || partner?.partnerType || "").toUpperCase();
+          if (role === "OWNER" || role === "SUPER_OWNER" || pt === "OWNER") {
             navigate({ to: "/owner" });
-          } else if (portalType === "admin" || role === "ADMIN" || role === "SUPER_ADMIN") {
+          } else if (role === "ADMIN" || role === "SUPER_ADMIN" || pt === "ADMIN") {
             navigate({ to: "/admin" });
           } else {
             navigate({ to: "/partner-dashboard" });
           }
         }
       } else {
-        const errorText = res.error || "Invalid credentials. Please verify ID and password.";
+        const errorText =
+          res.error || "Invalid credentials. Please verify ID and password.";
         setErrorMessage(errorText);
         toast.error(errorText);
       }
@@ -200,14 +219,24 @@ export default function PartnerLoginPage() {
       setIsChangingPassword(false);
 
       if (res.success) {
-        toast.success("Password updated successfully! Welcome to your dashboard.");
+        toast.success(
+          "Password updated successfully! Welcome to your dashboard.",
+        );
         setIsForceChangeOpen(false);
 
         const partner = usePartnerAuth.getState().currentPartner;
         const role = (partner?.role || "").toUpperCase();
-        if (portalType === "owner" || role === "OWNER" || role === "SUPER_OWNER") {
+        if (
+          portalType === "owner" ||
+          role === "OWNER" ||
+          role === "SUPER_OWNER"
+        ) {
           navigate({ to: "/owner" });
-        } else if (portalType === "admin" || role === "ADMIN" || role === "SUPER_ADMIN") {
+        } else if (
+          portalType === "admin" ||
+          role === "ADMIN" ||
+          role === "SUPER_ADMIN"
+        ) {
           navigate({ to: "/admin" });
         } else {
           navigate({ to: "/partner-dashboard" });
@@ -239,7 +268,9 @@ export default function PartnerLoginPage() {
           setResetTokenReceived(res.resetToken);
           toast.success("Identity verified! Set your new password.");
         } else {
-          toast.info(res.message || "Password recovery instructions generated.");
+          toast.info(
+            res.message || "Password recovery instructions generated.",
+          );
           setIsForgotModalOpen(false);
         }
       } else {
@@ -286,7 +317,8 @@ export default function PartnerLoginPage() {
     merchant: {
       badge: "🔒 EZY1 Merchant & Partner Portal",
       title: "Merchant & Partner Sign In",
-      description: "Enter your verified Partner User ID to manage orders, inventory, and customer fulfillment.",
+      description:
+        "Enter your verified Partner User ID to manage orders, inventory, and customer fulfillment.",
       idLabel: "Partner User ID *",
       idPlaceholder: "e.g. EZY-P-10002 or username",
       buttonText: "Sign In to Partner Portal",
@@ -302,7 +334,8 @@ export default function PartnerLoginPage() {
     owner: {
       badge: "👑 Platform Owner Control Centre",
       title: "Owner Control Centre Sign In",
-      description: "Master operations console for catalog management, multi-vendor controls, and cross-sector oversight.",
+      description:
+        "Master operations console for catalog management, multi-vendor controls, and cross-sector oversight.",
       idLabel: "Owner User ID or Username *",
       idPlaceholder: "e.g. EZY-P-10000 or owner",
       buttonText: "Sign In to Owner Control Centre",
@@ -318,7 +351,8 @@ export default function PartnerLoginPage() {
     admin: {
       badge: "⚡ Super Admin Console",
       title: "Super Admin Console Sign In",
-      description: "Centralized governance console for high-privilege system administration, security, and auditing.",
+      description:
+        "Centralized governance console for high-privilege system administration, security, and auditing.",
       idLabel: "Super Admin User ID or Username *",
       idPlaceholder: "e.g. EZY-P-10001 or admin",
       buttonText: "Sign In to Super Admin Console",
@@ -349,7 +383,10 @@ export default function PartnerLoginPage() {
               <span>← Back to Customer Platform (ezy1.site)</span>
             </a>
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-[11px] font-mono bg-primary/5 text-primary border-primary/20">
+              <Badge
+                variant="outline"
+                className="text-[11px] font-mono bg-primary/5 text-primary border-primary/20"
+              >
                 🌐 partner.ezy1.site
               </Badge>
             </div>
@@ -364,7 +401,11 @@ export default function PartnerLoginPage() {
               EZY1 Partner & Operations Portal
             </h1>
             <p className="text-xs sm:text-sm text-muted-foreground max-w-lg mx-auto">
-              Dedicated partner gateway at <span className="font-mono font-semibold text-foreground">partner.ezy1.site</span>. Sign in below with your verified credentials.
+              Dedicated partner gateway at{" "}
+              <span className="font-mono font-semibold text-foreground">
+                partner.ezy1.site
+              </span>
+              . Sign in below with your verified credentials.
             </p>
           </div>
 
@@ -390,13 +431,19 @@ export default function PartnerLoginPage() {
                 <User className="w-4 h-4" />
               </div>
               <div className="min-w-0 flex-1">
-                <span className="text-xs font-bold text-foreground block truncate">1. Merchant Login</span>
+                <span className="text-xs font-bold text-foreground block truncate">
+                  1. Merchant Login
+                </span>
                 <span
                   className={`text-[10px] font-semibold block truncate ${
-                    portalType === "merchant" ? "text-primary" : "text-muted-foreground"
+                    portalType === "merchant"
+                      ? "text-primary"
+                      : "text-muted-foreground"
                   }`}
                 >
-                  {portalType === "merchant" ? "Current Portal (Active)" : "Service & Vendor Portal"}
+                  {portalType === "merchant"
+                    ? "Current Portal (Active)"
+                    : "Service & Vendor Portal"}
                 </span>
               </div>
             </button>
@@ -423,17 +470,23 @@ export default function PartnerLoginPage() {
               <div className="min-w-0 flex-1">
                 <span
                   className={`text-xs font-bold block truncate transition-colors ${
-                    portalType === "owner" ? "text-amber-600 dark:text-amber-400" : "text-foreground group-hover:text-primary"
+                    portalType === "owner"
+                      ? "text-amber-600 dark:text-amber-400"
+                      : "text-foreground group-hover:text-primary"
                   }`}
                 >
                   2. Owner Control Centre →
                 </span>
                 <span
                   className={`text-[10px] block truncate ${
-                    portalType === "owner" ? "text-amber-600 font-semibold dark:text-amber-400" : "text-muted-foreground"
+                    portalType === "owner"
+                      ? "text-amber-600 font-semibold dark:text-amber-400"
+                      : "text-muted-foreground"
                   }`}
                 >
-                  {portalType === "owner" ? "Current Portal (Active)" : "Operations & Merchants"}
+                  {portalType === "owner"
+                    ? "Current Portal (Active)"
+                    : "Operations & Merchants"}
                 </span>
               </div>
             </button>
@@ -460,17 +513,23 @@ export default function PartnerLoginPage() {
               <div className="min-w-0 flex-1">
                 <span
                   className={`text-xs font-bold block truncate transition-colors ${
-                    portalType === "admin" ? "text-indigo-600 dark:text-indigo-400" : "text-foreground group-hover:text-primary"
+                    portalType === "admin"
+                      ? "text-indigo-600 dark:text-indigo-400"
+                      : "text-foreground group-hover:text-primary"
                   }`}
                 >
                   3. Super Admin Console →
                 </span>
                 <span
                   className={`text-[10px] block truncate ${
-                    portalType === "admin" ? "text-indigo-600 font-semibold dark:text-indigo-400" : "text-muted-foreground"
+                    portalType === "admin"
+                      ? "text-indigo-600 font-semibold dark:text-indigo-400"
+                      : "text-muted-foreground"
                   }`}
                 >
-                  {portalType === "admin" ? "Current Portal (Active)" : "System & Security"}
+                  {portalType === "admin"
+                    ? "Current Portal (Active)"
+                    : "System & Security"}
                 </span>
               </div>
             </button>
@@ -487,8 +546,8 @@ export default function PartnerLoginPage() {
                       portalType === "owner"
                         ? "bg-amber-500/10 text-amber-600 border-amber-500/30"
                         : portalType === "admin"
-                        ? "bg-indigo-500/10 text-indigo-600 border-indigo-500/30"
-                        : "bg-primary/10 text-primary border-primary/30"
+                          ? "bg-indigo-500/10 text-indigo-600 border-indigo-500/30"
+                          : "bg-primary/10 text-primary border-primary/30"
                     }`}
                   >
                     {currentConfig.badge}
@@ -507,8 +566,8 @@ export default function PartnerLoginPage() {
                       portalType === "owner"
                         ? "text-amber-500"
                         : portalType === "admin"
-                        ? "text-indigo-500"
-                        : "text-primary"
+                          ? "text-indigo-500"
+                          : "text-primary"
                     }`}
                   />
                   {currentConfig.title}
@@ -593,8 +652,8 @@ export default function PartnerLoginPage() {
                       portalType === "owner"
                         ? "bg-amber-600 hover:bg-amber-700"
                         : portalType === "admin"
-                        ? "bg-indigo-600 hover:bg-indigo-700"
-                        : "bg-primary hover:bg-primary/90 text-primary-foreground"
+                          ? "bg-indigo-600 hover:bg-indigo-700"
+                          : "bg-primary hover:bg-primary/90 text-primary-foreground"
                     }`}
                   >
                     {isLoading ? (
@@ -631,13 +690,15 @@ export default function PartnerLoginPage() {
                     >
                       Privacy Policy
                       <span className="text-[9px]">↗</span>
-                    </a>.
+                    </a>
+                    .
                   </p>
                 </form>
 
                 <div className="mt-6 pt-4 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
-                    <ShieldCheck className="w-3.5 h-3.5 text-primary" /> 256-Bit Encrypted
+                    <ShieldCheck className="w-3.5 h-3.5 text-primary" /> 256-Bit
+                    Encrypted
                   </span>
                   <span>Role-Based Access Control</span>
                 </div>
@@ -694,7 +755,9 @@ export default function PartnerLoginPage() {
                     Credential & Access Support
                   </p>
                   <p className="text-muted-foreground text-[11px] leading-relaxed">
-                    User IDs and authentication tokens are cryptographically signed. If you require role adjustments or encounter login issues, please reach out to platform governance.
+                    User IDs and authentication tokens are cryptographically
+                    signed. If you require role adjustments or encounter login
+                    issues, please reach out to platform governance.
                   </p>
                 </div>
               </Card>
@@ -712,13 +775,16 @@ export default function PartnerLoginPage() {
               Set Your New Password
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              For security reasons, temporary or initial credentials must be updated before accessing the Dashboard.
+              For security reasons, temporary or initial credentials must be
+              updated before accessing the Dashboard.
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleForceChangeSubmit} className="space-y-4 pt-2">
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">New Password * (Min. 8 characters)</Label>
+              <Label className="text-xs font-semibold">
+                New Password * (Min. 8 characters)
+              </Label>
               <Input
                 type="password"
                 required
@@ -730,7 +796,9 @@ export default function PartnerLoginPage() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">Confirm New Password *</Label>
+              <Label className="text-xs font-semibold">
+                Confirm New Password *
+              </Label>
               <Input
                 type="password"
                 required
@@ -747,7 +815,9 @@ export default function PartnerLoginPage() {
                 disabled={isChangingPassword || newPassword.length < 8}
                 className="w-full rounded-xl bg-primary text-primary-foreground font-semibold"
               >
-                {isChangingPassword ? "Saving..." : "Save Password & Proceed to Dashboard"}
+                {isChangingPassword
+                  ? "Saving..."
+                  : "Save Password & Proceed to Dashboard"}
               </Button>
             </DialogFooter>
           </form>
@@ -763,14 +833,17 @@ export default function PartnerLoginPage() {
               Account Password Recovery
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Enter your User ID, email, or registered phone to recover your account.
+              Enter your User ID, email, or registered phone to recover your
+              account.
             </DialogDescription>
           </DialogHeader>
 
           {!resetTokenReceived ? (
             <form onSubmit={handleForgotSubmit} className="space-y-4 pt-2">
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">User ID or Email *</Label>
+                <Label className="text-xs font-semibold">
+                  User ID or Email *
+                </Label>
                 <Input
                   type="text"
                   required
@@ -806,7 +879,9 @@ export default function PartnerLoginPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">New Password * (Min. 8 characters)</Label>
+                <Label className="text-xs font-semibold">
+                  New Password * (Min. 8 characters)
+                </Label>
                 <Input
                   type="password"
                   required
@@ -823,7 +898,9 @@ export default function PartnerLoginPage() {
                   disabled={isSubmittingForgot || resetNewPassword.length < 8}
                   className="w-full rounded-xl bg-primary text-primary-foreground font-semibold"
                 >
-                  {isSubmittingForgot ? "Resetting..." : "Reset Password & Login"}
+                  {isSubmittingForgot
+                    ? "Resetting..."
+                    : "Reset Password & Login"}
                 </Button>
               </DialogFooter>
             </form>

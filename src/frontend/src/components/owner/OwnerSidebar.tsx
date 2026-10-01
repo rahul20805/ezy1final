@@ -167,27 +167,69 @@ export function OwnerSidebar({
   const store = useStoreData();
 
   const role = (currentPartner?.role || "").toUpperCase();
-  const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN" || role === "SUPER_OWNER" || role === "super_owner";
-  const pType = (currentPartner?.providerType || currentPartner?.partnerType || "GROCERY").toUpperCase();
+  const isAdmin =
+    role === "ADMIN" ||
+    role === "SUPER_ADMIN" ||
+    role === "SUPER_OWNER" ||
+    role === "super_owner";
+  const pType = (
+    currentPartner?.providerType ||
+    currentPartner?.partnerType ||
+    "GROCERY"
+  ).toUpperCase();
 
   const availableItems = OWNER_SIDEBAR_ITEMS.filter((item) => {
     if (isAdmin) return true;
     if (item.id === "dashboard") return true;
 
     if (pType === "GROCERY" || pType === "VENDOR") {
-      return ["dashboard", "inventory", "orders", "customers", "reviews", "settings"].includes(item.id);
+      return [
+        "dashboard",
+        "inventory",
+        "orders",
+        "customers",
+        "reviews",
+        "settings",
+      ].includes(item.id);
     }
     if (pType === "HOSPITAL") {
-      return ["dashboard", "bookings", "enquiries", "services", "reviews", "settings"].includes(item.id);
+      return [
+        "dashboard",
+        "bookings",
+        "enquiries",
+        "services",
+        "reviews",
+        "settings",
+      ].includes(item.id);
     }
     if (pType === "SERVICE_PROVIDER") {
-      return ["dashboard", "services", "bookings", "enquiries", "reviews", "settings"].includes(item.id);
+      return [
+        "dashboard",
+        "services",
+        "bookings",
+        "enquiries",
+        "reviews",
+        "settings",
+      ].includes(item.id);
     }
     if (pType === "PHARMACY") {
-      return ["dashboard", "inventory", "orders", "customers", "reviews", "settings"].includes(item.id);
+      return [
+        "dashboard",
+        "inventory",
+        "orders",
+        "customers",
+        "reviews",
+        "settings",
+      ].includes(item.id);
     }
     if (pType === "RESTAURANT") {
-      return ["dashboard", "inventory", "orders", "reviews", "settings"].includes(item.id);
+      return [
+        "dashboard",
+        "inventory",
+        "orders",
+        "reviews",
+        "settings",
+      ].includes(item.id);
     }
     if (pType === "DELIVERY" || pType === "DRIVER") {
       return ["dashboard", "orders", "settings"].includes(item.id);
@@ -207,18 +249,15 @@ export function OwnerSidebar({
 
   return (
     <aside
-      className={`h-screen flex flex-col bg-card border-r border-border transition-all duration-300 z-30 ${collapsed ? "w-16" : "w-64 sm:w-72"
-        }`}
+      className={`h-screen flex flex-col bg-card border-r border-border transition-all duration-300 z-30 ${
+        collapsed ? "w-16" : "w-64 sm:w-72"
+      }`}
     >
       {/* Brand Header */}
       <div className="p-4 border-b border-border flex items-center justify-between gap-2">
         {!collapsed && (
           <div className="flex items-center gap-2.5 overflow-hidden">
-            <Ezy1Logo
-              size="sm"
-              showWordmark={false}
-              to="/"
-            />
+            <Ezy1Logo size="sm" showWordmark={false} to="/" />
             <div className="min-w-0">
               <h2 className="font-display font-bold text-sm text-foreground truncate leading-tight">
                 {currentPartner?.businessName || store.settings.brandName}
@@ -237,11 +276,7 @@ export function OwnerSidebar({
 
         {collapsed && (
           <div className="mx-auto">
-            <Ezy1Logo
-              size="sm"
-              showWordmark={false}
-              to="/"
-            />
+            <Ezy1Logo size="sm" showWordmark={false} to="/" />
           </div>
         )}
 
@@ -275,17 +310,19 @@ export function OwnerSidebar({
                 onSelectSection(item.id);
                 if (onCloseMobile) onCloseMobile();
               }}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all group ${isActive
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all group ${
+                isActive
                   ? "bg-primary text-primary-foreground font-semibold shadow-xs"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
-                } ${collapsed ? "justify-center px-2" : ""}`}
+              } ${collapsed ? "justify-center px-2" : ""}`}
               title={collapsed ? item.label : undefined}
             >
               <Icon
-                className={`w-4 h-4 flex-shrink-0 transition-transform ${isActive
+                className={`w-4 h-4 flex-shrink-0 transition-transform ${
+                  isActive
                     ? "text-primary-foreground scale-110"
                     : "text-muted-foreground group-hover:text-foreground"
-                  }`}
+                }`}
               />
               {!collapsed && (
                 <span className="flex-1 text-left truncate">{item.label}</span>
@@ -293,10 +330,11 @@ export function OwnerSidebar({
               {!collapsed && badgeVal !== null && (
                 <Badge
                   variant={isActive ? "outline" : "secondary"}
-                  className={`text-[10px] px-1.5 py-0 h-5 min-w-[20px] rounded-full flex items-center justify-center font-bold ${isActive
+                  className={`text-[10px] px-1.5 py-0 h-5 min-w-[20px] rounded-full flex items-center justify-center font-bold ${
+                    isActive
                       ? "border-primary-foreground/40 text-primary-foreground bg-primary-foreground/15"
                       : "bg-muted text-foreground"
-                    }`}
+                  }`}
                 >
                   {badgeVal}
                 </Badge>
@@ -312,8 +350,9 @@ export function OwnerSidebar({
           href="/"
           target="_blank"
           rel="noreferrer"
-          className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors ${collapsed ? "justify-center" : ""
-            }`}
+          className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors ${
+            collapsed ? "justify-center" : ""
+          }`}
           title="View Live Public Store"
         >
           <ExternalLink className="w-3.5 h-3.5 flex-shrink-0" />

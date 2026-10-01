@@ -1,34 +1,48 @@
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  ArrowRight,
+  CheckCircle2,
+  Clock,
+  MapPin,
+  Package,
+  ShieldCheck,
+  Truck,
+  Weight,
+} from "lucide-react";
 import { useState } from "react";
+import { useRequireAuth } from "../components/AuthPromptModal";
 import Layout from "../components/Layout";
 import { RelatedPagesBar } from "../components/RelatedPagesBar";
-import { useRequireAuth } from "../components/AuthPromptModal";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Package,
-  MapPin,
-  Clock,
-  ShieldCheck,
-  CheckCircle2,
-  ArrowRight,
-  Truck,
-  Weight
-} from "lucide-react";
 
 export default function ParcelPage() {
   const [pickup, setPickup] = useState("Indiranagar 100ft Road, Bengaluru");
   const [drop, setDrop] = useState("Bellandur Green Glen, Bengaluru");
-  const [weightCategory, setWeightCategory] = useState<"light" | "medium" | "heavy">("light");
+  const [weightCategory, setWeightCategory] = useState<
+    "light" | "medium" | "heavy"
+  >("light");
   const [bookedSuccess, setBookedSuccess] = useState<string | null>(null);
 
   const { requireAuth } = useRequireAuth();
 
   const fareMap = {
-    light: { label: "Up to 3 kg (Documents, Food, Clothes)", price: 65, eta: "35 mins" },
-    medium: { label: "3 to 10 kg (Electronics, Groceries, Boxes)", price: 110, eta: "45 mins" },
-    heavy: { label: "10 to 20 kg (Bulk items, Heavy equipment)", price: 190, eta: "60 mins" },
+    light: {
+      label: "Up to 3 kg (Documents, Food, Clothes)",
+      price: 65,
+      eta: "35 mins",
+    },
+    medium: {
+      label: "3 to 10 kg (Electronics, Groceries, Boxes)",
+      price: 110,
+      eta: "45 mins",
+    },
+    heavy: {
+      label: "10 to 20 kg (Bulk items, Heavy equipment)",
+      price: 190,
+      eta: "60 mins",
+    },
   };
 
   const handleBookParcel = (e: React.FormEvent) => {
@@ -39,9 +53,11 @@ export default function ParcelPage() {
       title: "Confirm EZY Parcel Pickup",
       description: `Pickup from ${pickup.slice(0, 20)}... • Estimated Delivery in ${fareMap[weightCategory].eta} • Total ₹${fareMap[weightCategory].price}`,
       onSuccess: () => {
-        setBookedSuccess(`Parcel delivery booked! Rider assigned in 2 mins. Tracking ID: EZY-PK-${Date.now().toString().slice(-4)}`);
+        setBookedSuccess(
+          `Parcel delivery booked! Rider assigned in 2 mins. Tracking ID: EZY-PK-${Date.now().toString().slice(-4)}`,
+        );
         setTimeout(() => setBookedSuccess(null), 6000);
-      }
+      },
     });
   };
 
@@ -56,13 +72,16 @@ export default function ParcelPage() {
               <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-semibold">
                 Instant City Courier
               </Badge>
-              <span className="text-xs text-muted-foreground">Pick up in 10 mins</span>
+              <span className="text-xs text-muted-foreground">
+                Pick up in 10 mins
+              </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-display font-black text-foreground">
               EZY Parcel — Send Packages Across City
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Deliver keys, forgotten chargers, documents, home-cooked food, or business orders instantly with live GPS tracking.
+              Deliver keys, forgotten chargers, documents, home-cooked food, or
+              business orders instantly with live GPS tracking.
             </p>
 
             {bookedSuccess && (
@@ -161,7 +180,9 @@ export default function ParcelPage() {
                 {/* Booking Summary & Submit */}
                 <div className="p-4 rounded-xl bg-muted/40 border border-border flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div>
-                    <div className="text-xs text-muted-foreground">Total Delivery Fare</div>
+                    <div className="text-xs text-muted-foreground">
+                      Total Delivery Fare
+                    </div>
                     <div className="text-2xl font-bold font-display text-foreground">
                       ₹{fareMap[weightCategory].price}
                     </div>

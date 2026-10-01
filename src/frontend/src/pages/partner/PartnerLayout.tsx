@@ -1,18 +1,32 @@
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  BarChart3,
+  Bell,
+  Building2,
+  ChevronRight,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  Package,
+  Pill,
+  Settings,
+  Shield,
+  ShoppingCart,
+  Truck,
+  User,
+  UtensilsCrossed,
+  Wrench,
+  X,
+} from "lucide-react";
 /**
  * EZY1 Partner Portal Layout
  * Shared sidebar + topbar layout for all service-specific partner portals
  */
 import { useState } from "react";
+import { getCustomerPlatformUrl } from "../../config/links";
 import { usePartnerAuth } from "../../lib/partnerAuthStore";
 import { getProviderLabel } from "../../lib/permissions";
-import { getCustomerPlatformUrl } from "../../config/links";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  LayoutDashboard, Package, ShoppingCart, BarChart3, Bell,
-  User, LogOut, Menu, X, Settings, ChevronRight,
-  Building2, Pill, UtensilsCrossed, Truck, Wrench, Shield
-} from "lucide-react";
 
 export interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
@@ -30,7 +44,10 @@ interface PartnerLayoutProps {
   portalTitle?: string;
 }
 
-const PROVIDER_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+const PROVIDER_ICONS: Record<
+  string,
+  React.ComponentType<{ className?: string }>
+> = {
   GROCERY: Package,
   VENDOR: Package,
   HOSPITAL: Building2,
@@ -54,7 +71,11 @@ export default function PartnerLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { currentPartner, logout } = usePartnerAuth();
 
-  const pt = (currentPartner?.providerType || currentPartner?.partnerType || "GROCERY").toUpperCase();
+  const pt = (
+    currentPartner?.providerType ||
+    currentPartner?.partnerType ||
+    "GROCERY"
+  ).toUpperCase();
   const DefaultIcon = PROVIDER_ICONS[pt] || LayoutDashboard;
   const FinalIcon = PortalIcon || DefaultIcon;
   const finalTitle = portalTitle || getProviderLabel(pt);
@@ -79,18 +100,29 @@ export default function PartnerLayout({
         {/* Brand */}
         <div className="p-5 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: accentColor }}>
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center"
+              style={{ background: accentColor }}
+            >
               <FinalIcon className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-xs font-bold text-foreground leading-none">EZY1</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5 leading-none">Partner Portal</p>
+              <p className="text-xs font-bold text-foreground leading-none">
+                EZY1
+              </p>
+              <p className="text-[10px] text-muted-foreground mt-0.5 leading-none">
+                Partner Portal
+              </p>
             </div>
           </div>
           {/* Partner info */}
           <div className="mt-4 p-3 rounded-xl bg-muted/60">
-            <p className="text-xs font-semibold text-foreground truncate">{currentPartner?.businessName || "Partner"}</p>
-            <p className="text-[10px] text-muted-foreground mt-0.5 truncate">{currentPartner?.partnerUserId}</p>
+            <p className="text-xs font-semibold text-foreground truncate">
+              {currentPartner?.businessName || "Partner"}
+            </p>
+            <p className="text-[10px] text-muted-foreground mt-0.5 truncate">
+              {currentPartner?.partnerUserId}
+            </p>
             <Badge variant="outline" className="mt-1.5 text-[9px] py-0 h-4">
               {getProviderLabel(pt)}
             </Badge>
@@ -105,12 +137,16 @@ export default function PartnerLayout({
             return (
               <button
                 key={item.id}
-                onClick={() => { onSectionChange(item.id); setSidebarOpen(false); }}
+                onClick={() => {
+                  onSectionChange(item.id);
+                  setSidebarOpen(false);
+                }}
                 className={`
                   w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all text-sm font-medium
-                  ${isActive
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  ${
+                    isActive
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   }
                 `}
               >
@@ -186,9 +222,13 @@ export default function PartnerLayout({
           </button>
 
           <div className="flex items-center gap-2 min-w-0">
-            <span className="text-sm font-semibold text-foreground truncate">{finalTitle}</span>
+            <span className="text-sm font-semibold text-foreground truncate">
+              {finalTitle}
+            </span>
             <ChevronRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-            <span className="text-sm text-muted-foreground capitalize truncate">{activeSection.replace("-", " ")}</span>
+            <span className="text-sm text-muted-foreground capitalize truncate">
+              {activeSection.replace("-", " ")}
+            </span>
           </div>
 
           <div className="ml-auto flex items-center gap-2">
@@ -212,9 +252,7 @@ export default function PartnerLayout({
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto p-4 md:p-6">
-          {children}
-        </main>
+        <main className="flex-1 overflow-auto p-4 md:p-6">{children}</main>
       </div>
     </div>
   );

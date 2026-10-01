@@ -1,27 +1,33 @@
-import { useState, useEffect } from "react";
-import Layout from "../components/Layout";
-import { RelatedPagesBar } from "../components/RelatedPagesBar";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { useRequireAuth } from "../components/AuthPromptModal";
-import { useAuth } from "../lib/AuthContext";
-import { toast } from "sonner";
 import {
-  Stethoscope,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Activity,
+  Calendar,
   Clock,
-  Star,
+  HeartPulse,
+  Home,
   MapPin,
   ShieldCheck,
-  Calendar,
-  Home,
-  HeartPulse,
-  Activity,
-  UserCheck
+  Star,
+  Stethoscope,
+  UserCheck,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { useRequireAuth } from "../components/AuthPromptModal";
+import Layout from "../components/Layout";
+import { RelatedPagesBar } from "../components/RelatedPagesBar";
+import { useAuth } from "../lib/AuthContext";
 
 interface HomeService {
   id: number;
@@ -41,12 +47,16 @@ export default function HomeHealthcarePage() {
   const { requireAuth } = useRequireAuth();
   const [services, setServices] = useState<HomeService[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedService, setSelectedService] = useState<HomeService | null>(null);
+  const [selectedService, setSelectedService] = useState<HomeService | null>(
+    null,
+  );
 
   // Booking Form State
   const [patientName, setPatientName] = useState(user?.name || "");
   const [patientPhone, setPatientPhone] = useState(user?.phone || "");
-  const [address, setAddress] = useState("Flat 402, Green Glen Layout, Bellandur");
+  const [address, setAddress] = useState(
+    "Flat 402, Green Glen Layout, Bellandur",
+  );
   const [appointmentDate, setAppointmentDate] = useState("Today");
   const [timeSlot, setTimeSlot] = useState("11:30 AM");
   const [bookingSuccess, setBookingSuccess] = useState<any | null>(null);
@@ -123,14 +133,17 @@ export default function HomeHealthcarePage() {
                 👨‍⚕️ EZY Doctor at Home
               </Badge>
               <span className="text-xs text-muted-foreground font-semibold">
-                Home Doctor Visits • Nurses • Physiotherapy • Elderly Care • Diagnostics
+                Home Doctor Visits • Nurses • Physiotherapy • Elderly Care •
+                Diagnostics
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-display font-black text-foreground">
               Doctor Consultations & Certified Care at Your Home
             </h1>
             <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl">
-              Skip hospital queues. Get experienced doctors, certified nurses, and licensed physiotherapists at your doorstep with verified medical credentials.
+              Skip hospital queues. Get experienced doctors, certified nurses,
+              and licensed physiotherapists at your doorstep with verified
+              medical credentials.
             </p>
           </div>
         </div>
@@ -142,45 +155,84 @@ export default function HomeHealthcarePage() {
               <Stethoscope className="w-5 h-5 text-teal-600" />
               Verified Home Healthcare Services ({services.length})
             </h2>
-            <span className="text-xs text-muted-foreground">Certified Medical Professionals</span>
+            <span className="text-xs text-muted-foreground">
+              Certified Medical Professionals
+            </span>
           </div>
 
           {loading ? (
-            <div className="text-center py-12 text-sm text-muted-foreground">Loading healthcare specialists...</div>
+            <div className="text-center py-12 text-sm text-muted-foreground">
+              Loading healthcare specialists...
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {services.map((svc) => (
-                <Card key={svc.id} className="rounded-3xl border-border bg-card overflow-hidden hover:shadow-subtle transition-smooth flex flex-col sm:flex-row">
-                  <img src={svc.image || "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=500&auto=format&fit=crop&q=60"} alt={svc.serviceName || (svc as any).title || "Healthcare"} className="w-full sm:w-48 h-48 sm:h-auto object-cover bg-muted flex-shrink-0" />
+                <Card
+                  key={svc.id}
+                  className="rounded-3xl border-border bg-card overflow-hidden hover:shadow-subtle transition-smooth flex flex-col sm:flex-row"
+                >
+                  <img
+                    src={
+                      svc.image ||
+                      "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=500&auto=format&fit=crop&q=60"
+                    }
+                    alt={svc.serviceName || (svc as any).title || "Healthcare"}
+                    className="w-full sm:w-48 h-48 sm:h-auto object-cover bg-muted flex-shrink-0"
+                  />
                   <CardContent className="p-5 flex-1 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between gap-1 mb-1">
-                        <Badge variant="outline" className="text-[10px] font-bold text-teal-600 border-teal-500/30 uppercase">
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] font-bold text-teal-600 border-teal-500/30 uppercase"
+                        >
                           {(svc.category || "General Care").replace(/_/g, " ")}
                         </Badge>
                         <span className="flex items-center gap-1 text-xs font-bold text-amber-500">
                           ★ {svc.rating || 4.8}
                         </span>
                       </div>
-                      <h3 className="font-bold text-base text-foreground mb-1">{svc.serviceName || (svc as any).title || "Home Visit"}</h3>
-                      <p className="text-xs text-muted-foreground mb-2">{svc.description || (svc as any).nurseType || "Certified healthcare professional at your doorstep"}</p>
-                      
+                      <h3 className="font-bold text-base text-foreground mb-1">
+                        {svc.serviceName || (svc as any).title || "Home Visit"}
+                      </h3>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        {svc.description ||
+                          (svc as any).nurseType ||
+                          "Certified healthcare professional at your doorstep"}
+                      </p>
+
                       <div className="text-[11px] text-muted-foreground space-y-1 bg-muted/40 p-2.5 rounded-xl">
                         <div className="flex items-center gap-1">
                           <UserCheck className="w-3.5 h-3.5 text-primary" />
-                          <span>Provider: <b>{svc.providerName || (svc as any).nurseType || "Verified Partner"}</b></span>
+                          <span>
+                            Provider:{" "}
+                            <b>
+                              {svc.providerName ||
+                                (svc as any).nurseType ||
+                                "Verified Partner"}
+                            </b>
+                          </span>
                         </div>
                         <div className="flex items-center gap-1">
                           <Clock className="w-3.5 h-3.5 text-primary" />
-                          <span>Slots: {svc.availableSlots || svc.duration || "Available Today"}</span>
+                          <span>
+                            Slots:{" "}
+                            {svc.availableSlots ||
+                              svc.duration ||
+                              "Available Today"}
+                          </span>
                         </div>
                       </div>
                     </div>
 
                     <div className="mt-4 pt-3 border-t border-border flex items-center justify-between">
                       <div>
-                        <span className="text-[10px] text-muted-foreground block">Consultation Fee</span>
-                        <span className="text-lg font-black text-foreground">₹{svc.fee ?? (svc as any).pricePerDay ?? 499}</span>
+                        <span className="text-[10px] text-muted-foreground block">
+                          Consultation Fee
+                        </span>
+                        <span className="text-lg font-black text-foreground">
+                          ₹{svc.fee ?? (svc as any).pricePerDay ?? 499}
+                        </span>
                       </div>
                       <Button
                         onClick={() => handleBookClick(svc)}
@@ -197,29 +249,56 @@ export default function HomeHealthcarePage() {
         </div>
 
         {/* Schedule Dialog */}
-        <Dialog open={!!selectedService} onOpenChange={() => setSelectedService(null)}>
+        <Dialog
+          open={!!selectedService}
+          onOpenChange={() => setSelectedService(null)}
+        >
           <DialogContent className="max-w-md rounded-2xl">
             <DialogHeader>
               <DialogTitle className="font-display font-black text-lg">
-                {bookingSuccess ? "Appointment Confirmed! 🩺" : `Schedule ${selectedService?.serviceName}`}
+                {bookingSuccess
+                  ? "Appointment Confirmed! 🩺"
+                  : `Schedule ${selectedService?.serviceName}`}
               </DialogTitle>
             </DialogHeader>
 
             {bookingSuccess ? (
               <div className="space-y-4 py-3">
                 <div className="p-4 rounded-2xl bg-teal-500/10 border border-teal-500/20 text-center space-y-1">
-                  <span className="text-xs font-bold text-teal-600 block">Home Visit Appointment ID</span>
-                  <span className="text-lg font-mono font-black text-foreground">EZY-CARE-#{bookingSuccess.bookingId}</span>
+                  <span className="text-xs font-bold text-teal-600 block">
+                    Home Visit Appointment ID
+                  </span>
+                  <span className="text-lg font-mono font-black text-foreground">
+                    EZY-CARE-#{bookingSuccess.bookingId}
+                  </span>
                   <p className="text-xs text-muted-foreground pt-1">
                     Specialist will visit {patientName} at {address}
                   </p>
                 </div>
                 <div className="text-xs space-y-1.5 text-muted-foreground">
-                  <div className="flex justify-between"><span>Service:</span> <b className="text-foreground">{selectedService?.serviceName}</b></div>
-                  <div className="flex justify-between"><span>Date & Slot:</span> <b className="text-foreground">{appointmentDate} at {timeSlot}</b></div>
-                  <div className="flex justify-between"><span>Consultation Fee:</span> <b className="text-foreground font-bold">₹{selectedService?.fee}</b></div>
+                  <div className="flex justify-between">
+                    <span>Service:</span>{" "}
+                    <b className="text-foreground">
+                      {selectedService?.serviceName}
+                    </b>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Date & Slot:</span>{" "}
+                    <b className="text-foreground">
+                      {appointmentDate} at {timeSlot}
+                    </b>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Consultation Fee:</span>{" "}
+                    <b className="text-foreground font-bold">
+                      ₹{selectedService?.fee}
+                    </b>
+                  </div>
                 </div>
-                <Button onClick={() => setSelectedService(null)} className="w-full rounded-xl font-bold text-xs bg-primary text-primary-foreground">
+                <Button
+                  onClick={() => setSelectedService(null)}
+                  className="w-full rounded-xl font-bold text-xs bg-primary text-primary-foreground"
+                >
                   Done
                 </Button>
               </div>
@@ -235,7 +314,9 @@ export default function HomeHealthcarePage() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold">Contact Phone Number</Label>
+                  <Label className="text-xs font-bold">
+                    Contact Phone Number
+                  </Label>
                   <Input
                     required
                     value={patientPhone}
@@ -244,7 +325,9 @@ export default function HomeHealthcarePage() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold">Home Address / Landmark</Label>
+                  <Label className="text-xs font-bold">
+                    Home Address / Landmark
+                  </Label>
                   <Input
                     required
                     value={address}
@@ -272,7 +355,9 @@ export default function HomeHealthcarePage() {
                 </div>
 
                 <div className="p-3 rounded-xl bg-muted/40 flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Fee (Pay Doctor at Home):</span>
+                  <span className="text-muted-foreground">
+                    Fee (Pay Doctor at Home):
+                  </span>
                   <span className="text-base font-bold text-foreground">
                     ₹{selectedService?.fee}
                   </span>

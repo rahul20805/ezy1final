@@ -15,14 +15,22 @@ export interface LegalDoc {
   version: string;
 }
 
-export const LEGAL_DOCS: Record<"userTerms" | "partnerTerms" | "privacyPolicy" | "refundPolicy" | "grievancePolicy", LegalDoc> = {
+export const LEGAL_DOCS: Record<
+  | "userTerms"
+  | "partnerTerms"
+  | "privacyPolicy"
+  | "refundPolicy"
+  | "grievancePolicy",
+  LegalDoc
+> = {
   userTerms: {
     id: "user-terms",
     title: "User Terms & Conditions",
     shortTitle: "User Terms",
     url: "/legal/ezy1-user-terms-and-conditions.pdf",
     downloadName: "EZY1_User_Terms_and_Conditions.pdf",
-    description: "General Terms of Service, Marketplace Rules & Customer Rights",
+    description:
+      "General Terms of Service, Marketplace Rules & Customer Rights",
     available: true,
     effectiveDate: "21/09/2026",
     version: "1.0",
@@ -33,7 +41,8 @@ export const LEGAL_DOCS: Record<"userTerms" | "partnerTerms" | "privacyPolicy" |
     shortTitle: "Partner Terms",
     url: "/legal/ezy1-master-partner-agreement.pdf",
     downloadName: "EZY1_Master_Partner_Agreement.pdf",
-    description: "Master Partner Agreement for Vendors, Fleet, Drivers, Healthcare & Local Merchants",
+    description:
+      "Master Partner Agreement for Vendors, Fleet, Drivers, Healthcare & Local Merchants",
     available: true,
     effectiveDate: "21/09/2026",
     version: "1.0",
@@ -44,7 +53,8 @@ export const LEGAL_DOCS: Record<"userTerms" | "partnerTerms" | "privacyPolicy" |
     shortTitle: "Privacy Policy",
     url: "/legal/ezy1-universal-privacy-policy.pdf",
     downloadName: "EZY1_Universal_Privacy_Policy.pdf",
-    description: "Privacy, Data Governance & DPDP Protection for the Entire EZY1 Ecosystem",
+    description:
+      "Privacy, Data Governance & DPDP Protection for the Entire EZY1 Ecosystem",
     available: true,
     effectiveDate: "21/09/2026",
     version: "1.0",
@@ -54,7 +64,8 @@ export const LEGAL_DOCS: Record<"userTerms" | "partnerTerms" | "privacyPolicy" |
     title: "Refund & Cancellation Policy",
     shortTitle: "Refund Policy",
     url: null, // Standalone PDF not provided/uploaded. Governed under User Terms (§§10-12) & Partner Agreement (Part K).
-    description: "Cancellation terms, return windows, and automated refund processing protocols",
+    description:
+      "Cancellation terms, return windows, and automated refund processing protocols",
     available: false,
     effectiveDate: "21/09/2026",
     version: "1.0",
@@ -64,7 +75,8 @@ export const LEGAL_DOCS: Record<"userTerms" | "partnerTerms" | "privacyPolicy" |
     title: "Grievance / Legal Policy",
     shortTitle: "Grievance Policy",
     url: null, // Standalone PDF not provided/uploaded. Governed under Universal Privacy Policy (§44) & User Terms (§45).
-    description: "Statutory Grievance Redressal Officer escalation and dispute handling mechanism",
+    description:
+      "Statutory Grievance Redressal Officer escalation and dispute handling mechanism",
     available: false,
     effectiveDate: "21/09/2026",
     version: "1.0",

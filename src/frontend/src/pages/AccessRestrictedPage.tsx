@@ -1,22 +1,31 @@
-import React from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
-import { ShieldAlert, ArrowRight, LogOut, Home, LayoutDashboard } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { usePartnerAuth } from "../lib/partnerAuthStore";
-import { getProviderLabel, getProviderDashboardUrl } from "../lib/permissions";
+import { Link, useNavigate } from "@tanstack/react-router";
+import {
+  ArrowRight,
+  Home,
+  LayoutDashboard,
+  LogOut,
+  ShieldAlert,
+} from "lucide-react";
+import React from "react";
 import { Ezy1Logo } from "../components/Ezy1Logo";
+import { usePartnerAuth } from "../lib/partnerAuthStore";
+import { getProviderDashboardUrl, getProviderLabel } from "../lib/permissions";
 
 interface AccessRestrictedPageProps {
   requiredProviderTypes?: string[];
 }
 
-export function AccessRestrictedPage({ requiredProviderTypes = [] }: AccessRestrictedPageProps) {
+export function AccessRestrictedPage({
+  requiredProviderTypes = [],
+}: AccessRestrictedPageProps) {
   const { currentPartner, logout } = usePartnerAuth();
   const navigate = useNavigate();
 
-  const providerType = currentPartner?.providerType || currentPartner?.partnerType || "GROCERY";
+  const providerType =
+    currentPartner?.providerType || currentPartner?.partnerType || "GROCERY";
   const providerLabel = getProviderLabel(providerType);
   const dashboardUrl = getProviderDashboardUrl(providerType);
 
@@ -29,7 +38,7 @@ export function AccessRestrictedPage({ requiredProviderTypes = [] }: AccessRestr
 
       <Card className="max-w-md w-full border-border/80 shadow-lg rounded-3xl bg-card overflow-hidden">
         <div className="h-2 bg-gradient-to-r from-amber-500 via-rose-500 to-primary" />
-        
+
         <CardHeader className="text-center pt-8 pb-4">
           <div className="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 mx-auto flex items-center justify-center mb-4 ring-8 ring-amber-500/5">
             <ShieldAlert className="w-8 h-8" />
@@ -50,17 +59,22 @@ export function AccessRestrictedPage({ requiredProviderTypes = [] }: AccessRestr
                 {currentPartner?.partnerUserId || currentPartner?.id || "N/A"}
               </span>
             </div>
-            
+
             <div className="flex justify-between items-center text-xs">
               <span className="text-muted-foreground">Registered Role:</span>
-              <Badge variant="secondary" className="font-semibold text-[11px] bg-primary/10 text-primary border-primary/20">
+              <Badge
+                variant="secondary"
+                className="font-semibold text-[11px] bg-primary/10 text-primary border-primary/20"
+              >
                 {providerLabel}
               </Badge>
             </div>
 
             {requiredProviderTypes.length > 0 && (
               <div className="flex justify-between items-center text-xs pt-2 border-t border-border/50">
-                <span className="text-muted-foreground">Section Requirements:</span>
+                <span className="text-muted-foreground">
+                  Section Requirements:
+                </span>
                 <span className="font-semibold text-rose-600 dark:text-rose-400">
                   {requiredProviderTypes.join(" / ")} Only
                 </span>
@@ -80,7 +94,10 @@ export function AccessRestrictedPage({ requiredProviderTypes = [] }: AccessRestr
 
             <div className="grid grid-cols-2 gap-2 pt-1">
               <Link to="/">
-                <Button variant="outline" className="w-full h-10 rounded-2xl text-xs gap-1.5 font-medium">
+                <Button
+                  variant="outline"
+                  className="w-full h-10 rounded-2xl text-xs gap-1.5 font-medium"
+                >
                   <Home className="w-3.5 h-3.5" />
                   EZY1 Home
                 </Button>

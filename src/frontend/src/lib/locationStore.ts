@@ -28,7 +28,8 @@ export const DEFAULT_INITIAL_LOCATION: LocationData = {
   country: "India",
   latitude: 12.9716,
   longitude: 77.5946,
-  formattedAddress: "12, MG Road Market, Indiranagar, Bengaluru, Karnataka 560038",
+  formattedAddress:
+    "12, MG Road Market, Indiranagar, Bengaluru, Karnataka 560038",
   source: "manual",
   accuracy: null,
 };
@@ -41,7 +42,11 @@ interface LocationState {
   savedAddresses: LocationData[];
   setLocation: (location: LocationData) => void;
   saveAddress: (location: LocationData) => void;
-  detectCurrentLocation: () => Promise<{ success: boolean; location?: LocationData; error?: string }>;
+  detectCurrentLocation: () => Promise<{
+    success: boolean;
+    location?: LocationData;
+    error?: string;
+  }>;
   clearLocation: () => void;
 }
 
@@ -66,8 +71,11 @@ export const useLocationStore = create<LocationState>()(
         const existing = get().savedAddresses;
         const exists = existing.some(
           (a) =>
-            a.formattedAddress.toLowerCase() === loc.formattedAddress.toLowerCase() ||
-            (a.latitude === loc.latitude && a.longitude === loc.longitude && a.latitude !== null)
+            a.formattedAddress.toLowerCase() ===
+              loc.formattedAddress.toLowerCase() ||
+            (a.latitude === loc.latitude &&
+              a.longitude === loc.longitude &&
+              a.latitude !== null),
         );
         if (!exists) {
           set({ savedAddresses: [loc, ...existing.slice(0, 4)] });
@@ -91,14 +99,14 @@ export const useLocationStore = create<LocationState>()(
               let accuracyWarning: string | null = null;
               if (accuracy > 200) {
                 accuracyWarning = `GPS accuracy is approximate (±${Math.round(
-                  accuracy
+                  accuracy,
                 )}m). You can adjust the pin on the map.`;
               }
 
               try {
                 // Call backend reverse geocoding proxy
                 const res = await fetch(
-                  `/api/location/reverse?lat=${latitude}&lng=${longitude}`
+                  `/api/location/reverse?lat=${latitude}&lng=${longitude}`,
                 );
                 const data = await res.json();
 
@@ -152,13 +160,16 @@ export const useLocationStore = create<LocationState>()(
               let msg = "Could not retrieve GPS location.";
               switch (error.code) {
                 case error.PERMISSION_DENIED:
-                  msg = "Location permission denied. Please allow location access or enter your address manually.";
+                  msg =
+                    "Location permission denied. Please allow location access or enter your address manually.";
                   break;
                 case error.POSITION_UNAVAILABLE:
-                  msg = "Location information is unavailable. Please check your device GPS or enter address manually.";
+                  msg =
+                    "Location information is unavailable. Please check your device GPS or enter address manually.";
                   break;
                 case error.TIMEOUT:
-                  msg = "Location request timed out. Please try again or search manually.";
+                  msg =
+                    "Location request timed out. Please try again or search manually.";
                   break;
               }
               set({ gpsError: msg, isDetectingGps: false });
@@ -168,7 +179,7 @@ export const useLocationStore = create<LocationState>()(
               enableHighAccuracy: true,
               timeout: 12000,
               maximumAge: 0,
-            }
+            },
           );
         });
       },
@@ -179,6 +190,6 @@ export const useLocationStore = create<LocationState>()(
     }),
     {
       name: "ezy1_active_location_v2",
-    }
-  )
+    },
+  ),
 );

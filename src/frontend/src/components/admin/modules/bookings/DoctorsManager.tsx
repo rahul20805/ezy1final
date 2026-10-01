@@ -23,7 +23,8 @@ import {
   Trash2,
   User,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { ConfirmModal } from "../../../owner/ConfirmModal";
 import { ImageUploader } from "../../../owner/ImageUploader";
@@ -176,10 +177,30 @@ export function DoctorsManager() {
         addNewLabel="Add Doctor Profile"
         searchPlaceholder="Search doctor name, specialty, hospital, city..."
         sortOptions={[
-          { label: "Doctor Name (A-Z)", value: "name_asc", sortBy: "name", sortOrder: "asc" },
-          { label: "Fee (Low to High)", value: "fee_asc", sortBy: "consultationFee", sortOrder: "asc" },
-          { label: "Fee (High to Low)", value: "fee_desc", sortBy: "consultationFee", sortOrder: "desc" },
-          { label: "Highest Rated", value: "rating_desc", sortBy: "rating", sortOrder: "desc" },
+          {
+            label: "Doctor Name (A-Z)",
+            value: "name_asc",
+            sortBy: "name",
+            sortOrder: "asc",
+          },
+          {
+            label: "Fee (Low to High)",
+            value: "fee_asc",
+            sortBy: "consultationFee",
+            sortOrder: "asc",
+          },
+          {
+            label: "Fee (High to Low)",
+            value: "fee_desc",
+            sortBy: "consultationFee",
+            sortOrder: "desc",
+          },
+          {
+            label: "Highest Rated",
+            value: "rating_desc",
+            sortBy: "rating",
+            sortOrder: "desc",
+          },
         ]}
         defaultSort="name_asc"
         defaultPageSize={25}
@@ -189,7 +210,9 @@ export function DoctorsManager() {
             <Card
               key={doc.id}
               className={`rounded-3xl border transition-all hover:shadow-md ${
-                isAvail ? "border-border/80 bg-card" : "border-muted bg-muted/20 opacity-75"
+                isAvail
+                  ? "border-border/80 bg-card"
+                  : "border-muted bg-muted/20 opacity-75"
               }`}
             >
               <CardContent className="p-5 space-y-4">
@@ -216,7 +239,9 @@ export function DoctorsManager() {
 
                   <Badge
                     className={`text-[10px] font-bold ${
-                      isAvail ? "bg-emerald-500 text-white" : "bg-muted text-muted-foreground"
+                      isAvail
+                        ? "bg-emerald-500 text-white"
+                        : "bg-muted text-muted-foreground"
                     }`}
                   >
                     {isAvail ? "On Duty" : "Off Duty"}
@@ -236,10 +261,14 @@ export function DoctorsManager() {
                   </div>
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     <Clock className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                    <span className="truncate">{doc.timings || "Daily: 9AM - 5PM"}</span>
+                    <span className="truncate">
+                      {doc.timings || "Daily: 9AM - 5PM"}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1.5 text-muted-foreground">
-                    <span className="font-bold text-primary">₹{doc.fee || 500}</span>
+                    <span className="font-bold text-primary">
+                      ₹{doc.fee || 500}
+                    </span>
                     <span>/ consult</span>
                   </div>
                 </div>
@@ -299,7 +328,9 @@ export function DoctorsManager() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Specialization</Label>
+                  <Label className="text-xs font-semibold">
+                    Specialization
+                  </Label>
                   <Input
                     value={specialization}
                     onChange={(e) => setSpecialization(e.target.value)}
@@ -319,7 +350,9 @@ export function DoctorsManager() {
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Hospital / Clinic Name</Label>
+                <Label className="text-xs font-semibold">
+                  Hospital / Clinic Name
+                </Label>
                 <Input
                   value={hospitalName}
                   onChange={(e) => setHospitalName(e.target.value)}
@@ -339,7 +372,9 @@ export function DoctorsManager() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Experience (Years)</Label>
+                  <Label className="text-xs font-semibold">
+                    Experience (Years)
+                  </Label>
                   <Input
                     type="number"
                     value={experienceYears}
@@ -350,7 +385,9 @@ export function DoctorsManager() {
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Availability Timings</Label>
+                <Label className="text-xs font-semibold">
+                  Availability Timings
+                </Label>
                 <Input
                   value={timings}
                   onChange={(e) => setTimings(e.target.value)}

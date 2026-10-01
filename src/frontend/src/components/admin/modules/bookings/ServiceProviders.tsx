@@ -54,7 +54,7 @@ export function ServiceProviders() {
       if (!res.ok) throw new Error("Failed to update availability.");
 
       toast.success(
-        `Provider #${specialist.id} marked ${nextAvail ? "AVAILABLE" : "UNAVAILABLE"}`
+        `Provider #${specialist.id} marked ${nextAvail ? "AVAILABLE" : "UNAVAILABLE"}`,
       );
       setRefreshTrigger((prev) => prev + 1);
     } catch (err: any) {
@@ -83,9 +83,24 @@ export function ServiceProviders() {
           },
         ]}
         sortOptions={[
-          { label: "Name (A-Z)", value: "businessName_asc", sortBy: "businessName", sortOrder: "asc" },
-          { label: "Highest Rated", value: "rating_desc", sortBy: "rating", sortOrder: "desc" },
-          { label: "Newest Joined", value: "id_desc", sortBy: "id", sortOrder: "desc" },
+          {
+            label: "Name (A-Z)",
+            value: "businessName_asc",
+            sortBy: "businessName",
+            sortOrder: "asc",
+          },
+          {
+            label: "Highest Rated",
+            value: "rating_desc",
+            sortBy: "rating",
+            sortOrder: "desc",
+          },
+          {
+            label: "Newest Joined",
+            value: "id_desc",
+            sortBy: "id",
+            sortOrder: "desc",
+          },
         ]}
         defaultSort="rating_desc"
         defaultPageSize={25}
@@ -138,7 +153,9 @@ export function ServiceProviders() {
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     <MapPin className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                    <span className="truncate">{specialist.city || "Bengaluru"}</span>
+                    <span className="truncate">
+                      {specialist.city || "Bengaluru"}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     <Phone className="w-3.5 h-3.5 text-primary flex-shrink-0" />

@@ -1,6 +1,12 @@
 import { create } from "zustand";
 
-export type AdminRole = "super_admin" | "admin" | "manager" | "editor" | "viewer" | string;
+export type AdminRole =
+  | "super_admin"
+  | "admin"
+  | "manager"
+  | "editor"
+  | "viewer"
+  | string;
 
 export interface PartnerAccount {
   id: number | string;
@@ -16,7 +22,13 @@ export interface PartnerAccount {
   email: string;
   city: string;
   address?: string;
-  status: "ACTIVE" | "SUSPENDED" | "INACTIVE" | "active" | "suspended" | "pending";
+  status:
+    | "ACTIVE"
+    | "SUSPENDED"
+    | "INACTIVE"
+    | "active"
+    | "suspended"
+    | "pending";
   isVerified?: boolean;
   mustChangePassword?: boolean;
   lastLoginAt?: string;
@@ -32,10 +44,30 @@ interface PartnerAuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
 
-  login: (partnerUserId: string, password: string) => Promise<{ success: boolean; mustChangePassword?: boolean; error?: string }>;
-  changePassword: (currentPassword: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
-  forgotPassword: (identifier: string) => Promise<{ success: boolean; message?: string; resetToken?: string; error?: string }>;
-  resetPassword: (token: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
+  login: (
+    partnerUserId: string,
+    password: string,
+  ) => Promise<{
+    success: boolean;
+    mustChangePassword?: boolean;
+    error?: string;
+  }>;
+  changePassword: (
+    currentPassword: string,
+    newPassword: string,
+  ) => Promise<{ success: boolean; error?: string }>;
+  forgotPassword: (
+    identifier: string,
+  ) => Promise<{
+    success: boolean;
+    message?: string;
+    resetToken?: string;
+    error?: string;
+  }>;
+  resetPassword: (
+    token: string,
+    newPassword: string,
+  ) => Promise<{ success: boolean; error?: string }>;
   fetchMe: () => Promise<PartnerAccount | null>;
   logout: () => void;
   fetchPartners: () => Promise<void>;
@@ -110,8 +142,10 @@ export const usePartnerAuth = create<PartnerAuthState>((set, get) => ({
         ownerName: data.partner.name,
         category: data.partner.category || "Grocery",
         role: data.partner.role || "PARTNER",
-        partnerType: data.partner.partnerType || data.partner.providerType || "GROCERY",
-        providerType: data.partner.providerType || data.partner.partnerType || "GROCERY",
+        partnerType:
+          data.partner.partnerType || data.partner.providerType || "GROCERY",
+        providerType:
+          data.partner.providerType || data.partner.partnerType || "GROCERY",
         phone: data.partner.phone || "",
         email: data.partner.email || "",
         city: data.partner.city || "",
@@ -136,7 +170,8 @@ export const usePartnerAuth = create<PartnerAuthState>((set, get) => ({
       set({ isLoading: false });
       return {
         success: false,
-        error: "Unable to connect to partner authentication service. Please try again.",
+        error:
+          "Unable to connect to partner authentication service. Please try again.",
       };
     }
   },
@@ -157,7 +192,10 @@ export const usePartnerAuth = create<PartnerAuthState>((set, get) => ({
 
       const data = await res.json();
       if (!res.ok || !data.success) {
-        return { success: false, error: data.error || "Failed to change password." };
+        return {
+          success: false,
+          error: data.error || "Failed to change password.",
+        };
       }
 
       if (get().currentPartner) {
@@ -171,7 +209,10 @@ export const usePartnerAuth = create<PartnerAuthState>((set, get) => ({
 
       return { success: true };
     } catch (err: any) {
-      return { success: false, error: err.message || "Failed to update password." };
+      return {
+        success: false,
+        error: err.message || "Failed to update password.",
+      };
     }
   },
 
@@ -189,7 +230,10 @@ export const usePartnerAuth = create<PartnerAuthState>((set, get) => ({
         resetToken: data.resetToken,
       };
     } catch (err: any) {
-      return { success: false, error: err.message || "Failed to process request." };
+      return {
+        success: false,
+        error: err.message || "Failed to process request.",
+      };
     }
   },
 
@@ -202,11 +246,17 @@ export const usePartnerAuth = create<PartnerAuthState>((set, get) => ({
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
-        return { success: false, error: data.error || "Failed to reset password." };
+        return {
+          success: false,
+          error: data.error || "Failed to reset password.",
+        };
       }
       return { success: true };
     } catch (err: any) {
-      return { success: false, error: err.message || "Failed to reset password." };
+      return {
+        success: false,
+        error: err.message || "Failed to reset password.",
+      };
     }
   },
 
@@ -231,8 +281,10 @@ export const usePartnerAuth = create<PartnerAuthState>((set, get) => ({
           ownerName: data.partner.name,
           category: data.partner.category,
           role: data.partner.role,
-          partnerType: data.partner.partnerType || data.partner.providerType || "GROCERY",
-          providerType: data.partner.providerType || data.partner.partnerType || "GROCERY",
+          partnerType:
+            data.partner.partnerType || data.partner.providerType || "GROCERY",
+          providerType:
+            data.partner.providerType || data.partner.partnerType || "GROCERY",
           phone: data.partner.phone,
           email: data.partner.email,
           city: data.partner.city,
@@ -300,7 +352,10 @@ export const usePartnerAuth = create<PartnerAuthState>((set, get) => ({
         await get().fetchPartners();
         return { success: true, data };
       }
-      return { success: false, error: data.error || "Failed to create partner" };
+      return {
+        success: false,
+        error: data.error || "Failed to create partner",
+      };
     } catch (err: any) {
       return { success: false, error: err.message };
     }

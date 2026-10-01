@@ -3,9 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "@tanstack/react-router";
 import { Clock, MapPin, ShoppingBag, Star } from "lucide-react";
+import { Ezy1IconBadge } from "../components/Ezy1Logo";
 import Layout from "../components/Layout";
 import { useStoreData } from "../lib/storeData";
-import { Ezy1IconBadge } from "../components/Ezy1Logo";
 
 export default function VendorStorefrontPage() {
   const store = useStoreData();

@@ -1,20 +1,20 @@
-import { useState } from "react";
-import Layout from "../components/Layout";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  Calendar,
-  Clock,
-  MapPin,
-  CheckCircle2,
-  Stethoscope,
   Building2,
-  Wrench,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  HelpCircle,
+  MapPin,
   Microscope,
   Phone,
-  HelpCircle
+  Stethoscope,
+  Wrench,
 } from "lucide-react";
+import { useState } from "react";
+import Layout from "../components/Layout";
 
 interface BookingItem {
   id: string;
@@ -78,7 +78,8 @@ export default function MyBookingsPage() {
               My Appointments & Bookings
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              View upcoming doctor consultations, lab test visits, hospital beds, and home service bookings.
+              View upcoming doctor consultations, lab test visits, hospital
+              beds, and home service bookings.
             </p>
 
             {/* Filter Tabs */}
@@ -105,7 +106,9 @@ export default function MyBookingsPage() {
           {filteredBookings.length === 0 ? (
             <div className="text-center py-20">
               <Calendar className="w-12 h-12 text-muted-foreground/50 mx-auto mb-3" />
-              <h3 className="font-bold text-base text-foreground mb-1">No appointments found</h3>
+              <h3 className="font-bold text-base text-foreground mb-1">
+                No appointments found
+              </h3>
               <p className="text-xs text-muted-foreground">
                 You have no active bookings in this section.
               </p>
@@ -122,7 +125,10 @@ export default function MyBookingsPage() {
                       <span className="font-mono text-xs font-bold text-primary">
                         {b.id}
                       </span>
-                      <Badge variant="outline" className="text-[11px] font-semibold bg-primary/5 text-primary border-primary/20">
+                      <Badge
+                        variant="outline"
+                        className="text-[11px] font-semibold bg-primary/5 text-primary border-primary/20"
+                      >
                         {b.type}
                       </Badge>
                     </div>
@@ -168,7 +174,9 @@ export default function MyBookingsPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => alert(`Rescheduling request submitted for ${b.id}...`)}
+                        onClick={() =>
+                          alert(`Rescheduling request submitted for ${b.id}...`)
+                        }
                         className="rounded-xl h-8 px-3 text-xs"
                       >
                         Reschedule
@@ -176,7 +184,9 @@ export default function MyBookingsPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => alert(`Contacting provider for ${b.id}...`)}
+                        onClick={() =>
+                          alert(`Contacting provider for ${b.id}...`)
+                        }
                         className="rounded-xl h-8 px-3 text-xs gap-1"
                       >
                         <Phone className="w-3 h-3" />

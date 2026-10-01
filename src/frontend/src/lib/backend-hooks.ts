@@ -187,7 +187,7 @@ export function useDoctors() {
         const res = await fetch("/api/doctors");
         if (res.ok) {
           const data = await res.json();
-          const list = Array.isArray(data) ? data : (data.items || []);
+          const list = Array.isArray(data) ? data : data.items || [];
           if (list.length > 0) return list;
         }
       } catch (err) {
@@ -214,7 +214,7 @@ export function useBusRoutes() {
         const res = await fetch("/api/transport");
         if (res.ok) {
           const data = await res.json();
-          const list = Array.isArray(data) ? data : (data.items || []);
+          const list = Array.isArray(data) ? data : data.items || [];
           if (list.length > 0) {
             return list.map((t: any) => ({
               id: String(t.id),
@@ -249,7 +249,7 @@ export function useRides() {
         const res = await fetch("/api/transport");
         if (res.ok) {
           const data = await res.json();
-          const list = Array.isArray(data) ? data : (data.items || []);
+          const list = Array.isArray(data) ? data : data.items || [];
           if (list.length > 0) {
             return list.map((t: any) => ({
               id: String(t.id),
