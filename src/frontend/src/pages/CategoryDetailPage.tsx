@@ -28,6 +28,7 @@ import {
   SUPER_CATEGORIES,
 } from "../ecosystem-data";
 import { useCartStore } from "../lib/cartStore";
+import { useDynamicCatalog } from "../lib/dynamicCatalog";
 
 export default function CategoryDetailPage() {
   const { categoryId } = useParams({ strict: false }) as {
@@ -44,10 +45,11 @@ export default function CategoryDetailPage() {
 
   const { items, addItem, updateQuantity, removeItem } = useCartStore();
   const { requireAuth } = useRequireAuth();
+  const { catalog: dynamicCatalog } = useDynamicCatalog();
 
-  // Filter items
+  // Filter items - using dynamic catalog that reflects all Admin, Owner, and Partner updates in real time
   const categoryItems = useMemo(() => {
-    return CATALOG_ITEMS.filter((item) => {
+    return dynamicCatalog.filter((item) => {
       if (item.categoryId !== currentCat.id) return false;
       if (vegOnly && item.isVeg === false) return false;
       if (selectedTag && !item.tags.includes(selectedTag)) return false;

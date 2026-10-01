@@ -63,6 +63,8 @@ import {
 import { useAuth } from "../lib/AuthContext";
 import { useCartStore } from "../lib/cartStore";
 import { useLocationStore } from "../lib/locationStore";
+import { useDynamicCatalog } from "../lib/dynamicCatalog";
+import { useStoreData } from "../lib/storeData";
 import { doctors, workers } from "../mock-data";
 
 /** Reusable Horizontal Scrollable Carousel with Arrow Nav */
@@ -113,6 +115,8 @@ export default function LandingPage() {
   const { isAuthenticated, user } = useAuth();
   const { items, addItem, updateQuantity, removeItem } = useCartStore();
   const { requireAuth } = useRequireAuth();
+  const { catalog: dynamicCatalog } = useDynamicCatalog();
+  const store = useStoreData();
 
   const [homeSearch, setHomeSearch] = useState("");
   const [searchCategory, setSearchCategory] = useState<string>("all");
@@ -203,6 +207,17 @@ export default function LandingPage() {
     e.preventDefault();
     const trimmed = homeSearch.trim();
     if (trimmed) {
+      try {
+        store.trackUserSearch({
+          query: trimmed,
+          category: searchCategory,
+          resultsCount: 10,
+          userName: user?.name || "Active Customer",
+          userPhone: user?.phone || "9876543210",
+        });
+      } catch (err) {
+        // Non-blocking
+      }
       navigate({
         to: "/search",
         search: { q: trimmed, category: searchCategory },
@@ -212,47 +227,48 @@ export default function LandingPage() {
     }
   };
 
-  // Dynamic Catalog merging Partner Portal and Store updates in real-time
+  // Dynamic Catalog merging Partner Portal, Admin, Owner, and Store updates in real-time
   const allCatalogItems = useMemo(() => {
-    if (!dynamicProducts.length) return CATALOG_ITEMS;
-
+    // Start with dynamicCatalog which contains all store.products added/edited by Admin, Owner, Partner
     const itemsMap = new Map(
-      CATALOG_ITEMS.map((item) => [String(item.id), { ...item }]),
+      dynamicCatalog.map((item) => [String(item.id), { ...item }]),
     );
 
-    dynamicProducts.forEach((p: any) => {
-      const key = String(p.id);
-      const existing = itemsMap.get(key);
-      if (existing) {
-        existing.price = Number(p.price) || existing.price;
-        if (p.mrp) existing.mrp = Number(p.mrp);
-        if (p.image) existing.image = p.image;
-        if (p.name) existing.name = p.name;
-        if (p.description) existing.description = p.description;
-      } else {
-        itemsMap.set(key, {
-          id: String(p.id),
-          categoryId: (p.category || "grocery").toLowerCase(),
-          name: p.name || "Partner Product",
-          description: p.description || p.name || "",
-          price: Number(p.price) || 0,
-          mrp: Number(p.mrp) || Number(p.price) || 0,
-          unit: p.unit || "1 unit",
-          rating: Number(p.rating) || 4.5,
-          reviewCount: Number(p.reviewCount) || 10,
-          deliveryMinutes: 15,
-          image:
-            p.image ||
-            (p.images && p.images[0]) ||
-            "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80",
-          tags: [p.category || "Grocery", "Partner Verified"],
-          isVeg: true,
-        });
-      }
-    });
+    if (dynamicProducts.length) {
+      dynamicProducts.forEach((p: any) => {
+        const key = String(p.id);
+        const existing = itemsMap.get(key);
+        if (existing) {
+          existing.price = Number(p.price) || existing.price;
+          if (p.mrp) existing.mrp = Number(p.mrp);
+          if (p.image) existing.image = p.image;
+          if (p.name) existing.name = p.name;
+          if (p.description) existing.description = p.description;
+        } else {
+          itemsMap.set(key, {
+            id: String(p.id),
+            categoryId: (p.category || "grocery").toLowerCase(),
+            name: p.name || "Partner Product",
+            description: p.description || p.name || "",
+            price: Number(p.price) || 0,
+            mrp: Number(p.mrp) || Number(p.price) || 0,
+            unit: p.unit || "1 unit",
+            rating: Number(p.rating) || 4.5,
+            reviewCount: Number(p.reviewCount) || 10,
+            deliveryMinutes: 15,
+            image:
+              p.image ||
+              (p.images && p.images[0]) ||
+              "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80",
+            tags: [p.category || "Grocery", "Partner Verified"],
+            isVeg: true,
+          });
+        }
+      });
+    }
 
     return Array.from(itemsMap.values());
-  }, [dynamicProducts]);
+  }, [dynamicCatalog, dynamicProducts]);
 
   // Live Homepage Universal Search Engine across all entities
   const liveSearchResults = useMemo(() => {
@@ -281,32 +297,90 @@ export default function LandingPage() {
             .slice(0, 10)
         : [];
 
+    const liveDocsSource =
+      store.doctors.length > 0
+        ? store.doctors.map((d) => ({
+            id: d.id,
+            name: d.name,
+            specialty: d.specialty || d.specialization || "General Medicine",
+            experience: d.experienceYears || 10,
+            hospital: d.hospital || d.hospitalName || "EZY Health Center",
+            fee: d.consultationFee || d.fee || 500,
+            rating: d.rating || 4.8,
+            available: d.isAvailable !== false,
+            city: d.city || "Bengaluru",
+          }))
+        : doctors;
+
     const docs =
       searchCategory === "all" || searchCategory === "doctors"
-        ? doctors
+        ? liveDocsSource
             .filter(
               (d) =>
                 calcScore(d.name) > 0 ||
-                calcScore(d.specialty) > 0 ||
-                calcScore(d.hospital) > 0,
+                calcScore(d.specialty || "") > 0 ||
+                calcScore(d.hospital || "") > 0,
             )
             .slice(0, 8)
         : [];
 
+    const liveHospitalsSource =
+      store.hospitals.length > 0
+        ? store.hospitals.map((h) => ({
+            id: `hosp-${h.id}`,
+            name: h.name,
+            city: h.city || "Bengaluru",
+            address: h.address || "Bengaluru, Karnataka",
+            phone: h.phone || h.emergencyPhone || "080-23456789",
+            emergencyPhone: h.emergencyPhone || "1066",
+            distanceKm: 2.1,
+            rating: h.rating || 4.8,
+            totalBeds: h.totalBeds || 120,
+            availableBeds: {
+              icu: h.availableIcuBeds ?? h.icuBedsAvailable ?? 6,
+              general: h.availableGeneralBeds ?? h.availableBeds ?? 24,
+              deluxe: 4,
+            },
+            departments: h.specialties || h.departments || [
+              "Cardiology",
+              "Emergency",
+              "General Medicine",
+            ],
+          }))
+        : (hospitalData || HOSPITALS_DATA);
+
     const hospitals =
       searchCategory === "all" || searchCategory === "hospitals"
-        ? HOSPITALS_DATA.filter(
-            (h) =>
-              calcScore(h.name) > 0 ||
-              calcScore(h.address) > 0 ||
-              h.departments.some((dept) => calcScore(dept) > 0),
-          ).slice(0, 6)
+        ? liveHospitalsSource
+            .filter(
+              (h: any) =>
+                calcScore(h.name) > 0 ||
+                calcScore(h.address) > 0 ||
+                (h.departments &&
+                  h.departments.some((dept: string) => calcScore(dept) > 0)),
+            )
+            .slice(0, 6)
         : [];
+
+    const liveServicesSource =
+      store.services.length > 0
+        ? store.services.map((s) => ({
+            id: s.id,
+            name: s.name,
+            category: s.category,
+            rating: s.rating || 4.9,
+            totalReviews: s.totalReviews || 24,
+            pricePerHour: s.pricePerHour || 299,
+            isAvailable: s.isAvailable !== false,
+            phone: "+91 98765 43210",
+            city: "Bengaluru",
+          }))
+        : workers;
 
     const services =
       searchCategory === "all" || searchCategory === "services"
-        ? workers
-            .filter((w) => calcScore(w.name) > 0 || calcScore(w.category) > 0)
+        ? liveServicesSource
+            .filter((w: any) => calcScore(w.name) > 0 || calcScore(w.category) > 0)
             .slice(0, 8)
         : [];
 

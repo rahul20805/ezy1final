@@ -15,13 +15,15 @@ import {
   ShieldAlert,
   Star,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRequireAuth } from "../components/AuthPromptModal";
 import Layout from "../components/Layout";
 import { RelatedPagesBar } from "../components/RelatedPagesBar";
 import { HOSPITALS_DATA, type HospitalFacility } from "../ecosystem-data";
+import { useStoreData } from "../lib/storeData";
 
 export default function HospitalsPage() {
+  const store = useStoreData();
   const [searchQuery, setSearchQuery] = useState("");
   const [hospitals, setHospitals] =
     useState<HospitalFacility[]>(HOSPITALS_DATA);
@@ -73,7 +75,33 @@ export default function HospitalsPage() {
       .catch(() => {});
   }, []);
 
-  const filteredHospitals = hospitals.filter(
+  const displayHospitals = useMemo(() => {
+    const fromStore = store.hospitals.map((h) => ({
+      id: `hosp-${h.id}`,
+      name: h.name,
+      city: h.city || "Bengaluru",
+      address: h.address || "Bengaluru, Karnataka",
+      phone: h.phone || h.emergencyPhone || "080-45678900",
+      emergencyPhone: h.emergencyPhone || "1066",
+      distanceKm: 1.5,
+      rating: h.rating || 4.9,
+      totalBeds: h.totalBeds || 100,
+      availableBeds: {
+        icu: h.availableIcuBeds ?? h.icuBedsAvailable ?? 6,
+        general: h.availableGeneralBeds ?? h.availableBeds ?? 20,
+        deluxe: 4,
+      },
+      departments: h.specialties || h.departments || ["Cardiology", "Neurology", "General Medicine"],
+      hasAmbulance24x7: true,
+      hasBloodBank: true,
+      hasPharmacy24x7: true,
+    }));
+    const existingNames = new Set(fromStore.map((h) => h.name.toLowerCase()));
+    const remaining = hospitals.filter((h) => !existingNames.has(h.name.toLowerCase()));
+    return [...fromStore, ...remaining];
+  }, [store.hospitals, hospitals]);
+
+  const filteredHospitals = displayHospitals.filter(
     (h) =>
       h.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       h.departments.some((d) =>

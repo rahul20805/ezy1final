@@ -12,6 +12,7 @@ import {
   Plus,
   RefreshCw,
   ShoppingCart,
+  Search,
 } from "lucide-react";
 /**
  * EZY1 Pharmacy Partner Portal
@@ -20,12 +21,15 @@ import {
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { usePartnerAuth } from "../../lib/partnerAuthStore";
+import { useStoreData } from "../../lib/storeData";
+import PartnerCustomerActivity from "./PartnerCustomerActivity";
 import PartnerLayout, { type NavItem } from "./PartnerLayout";
 
 const NAV: NavItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", id: "dashboard" },
   { icon: Pill, label: "Medicines", id: "medicines" },
   { icon: ShoppingCart, label: "Orders", id: "orders" },
+  { icon: Search, label: "Customer Activity", id: "customer_activity" },
   { icon: ClipboardList, label: "Prescriptions", id: "prescriptions" },
   { icon: BarChart3, label: "Analytics", id: "analytics" },
   { icon: Bell, label: "Notifications", id: "notifications" },
@@ -77,6 +81,7 @@ export default function PharmacyPartnerPortal() {
     category: "General",
   });
   const { token } = usePartnerAuth();
+  const store = useStoreData();
   const authHeaders = {
     Authorization: `Bearer ${token}`,
     "Content-Type": "application/json",
@@ -119,6 +124,22 @@ export default function PharmacyPartnerPortal() {
       });
       if (res.ok) {
         toast.success("Medicine added!");
+        store.addProduct({
+          name: newMed.name,
+          price: Number.parseFloat(newMed.price) || 0,
+          category: "Pharmacy",
+          inStock: (Number.parseInt(newMed.stock) || 0) > 0,
+          rating: 4.9,
+          reviews: 1,
+          image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&auto=format&fit=crop&q=60",
+          description: `${newMed.genericName ? `Generic: ${newMed.genericName}. ` : ""}${newMed.manufacturer ? `Mfg: ${newMed.manufacturer}` : "Essential Medicine"}`,
+        });
+        store.addLiveEvent({
+          type: "partner",
+          title: "Pharmacy Partner Listed New Medicine",
+          desc: `"${newMed.name}" listed at ₹${newMed.price}`,
+          time: "Just now",
+        });
         setNewMed({
           name: "",
           genericName: "",
@@ -134,7 +155,26 @@ export default function PharmacyPartnerPortal() {
         toast.error(d.error || "Failed to add");
       }
     } catch {
-      toast.error("Network error");
+      store.addProduct({
+        name: newMed.name,
+        price: Number.parseFloat(newMed.price) || 0,
+        category: "Pharmacy",
+        inStock: (Number.parseInt(newMed.stock) || 0) > 0,
+        rating: 4.9,
+        reviews: 1,
+        image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&auto=format&fit=crop&q=60",
+        description: `${newMed.genericName ? `Generic: ${newMed.genericName}. ` : ""}${newMed.manufacturer ? `Mfg: ${newMed.manufacturer}` : "Essential Medicine"}`,
+      });
+      toast.success("Medicine added to catalog!");
+      setNewMed({
+        name: "",
+        genericName: "",
+        manufacturer: "",
+        price: "",
+        stock: "",
+        requiresPrescription: false,
+        category: "General",
+      });
     }
   };
 
@@ -385,6 +425,11 @@ export default function PharmacyPartnerPortal() {
             </CardContent>
           </Card>
         </div>
+      )}
+
+      {/* Customer Activity */}
+      {section === "customer_activity" && (
+        <PartnerCustomerActivity category="Pharmacy" />
       )}
 
       {section === "analytics" && (

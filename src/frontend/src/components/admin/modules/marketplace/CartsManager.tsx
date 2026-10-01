@@ -57,10 +57,52 @@ const initialAbandonedCarts: AbandonedCartItem[] = [
   },
 ];
 
+import { useStoreData } from "@/lib/storeData";
+
 export function CartsManager() {
+  const store = useStoreData();
   const [carts, setCarts] = React.useState<AbandonedCartItem[]>(
     initialAbandonedCarts,
   );
+
+  // Compute live carts from storeData
+  const liveCarts = React.useMemo(() => {
+    const list: AbandonedCartItem[] = [];
+
+    // Add customers with active cart items
+    store.customers.forEach((cust, idx) => {
+      if (cust.activeCartItems && cust.activeCartItems.length > 0) {
+        list.push({
+          id: 1000 + idx,
+          customerName: cust.name,
+          phone: cust.phone,
+          items: cust.activeCartItems.map((it) => `${it.quantity || 1}x ${it.name} (₹${it.price})`),
+          totalValue: cust.activeCartItems.reduce((acc, cur) => acc + (cur.price * (cur.quantity || 1)), 0),
+          lastActive: cust.lastActive || "Just now",
+          status: "Abandoned",
+        });
+      }
+    });
+
+    // Add live cart activity items if not already added
+    store.cartActivity.forEach((act, idx) => {
+      const existing = list.find((c) => c.customerName === act.userName);
+      if (!existing && act.action !== "checkout") {
+        list.push({
+          id: 2000 + idx,
+          customerName: act.userName || `Shopper ${idx + 1}`,
+          phone: act.userPhone || "9876543210",
+          items: [`${act.quantity}x ${act.itemName} (₹${act.price})`],
+          totalValue: act.price * act.quantity,
+          lastActive: "Few moments ago",
+          status: "Abandoned",
+        });
+      }
+    });
+
+    // Merge with defaults
+    return [...list, ...carts.filter((c) => !list.some((l) => l.customerName === c.customerName))];
+  }, [store.customers, store.cartActivity, carts]);
 
   const sendRecoveryWhatsApp = (cart: AbandonedCartItem) => {
     toast.success(
@@ -76,7 +118,7 @@ export function CartsManager() {
       <DataTable<AbandonedCartItem>
         title="Active & Abandoned Cart Recovery"
         description="Monitor high-intent customer carts and trigger automated WhatsApp/SMS recovery nudges."
-        data={carts}
+        data={liveCarts}
         searchPlaceholder="Search customer, phone, item in cart..."
         searchFilter={(item, query) =>
           item.customerName.toLowerCase().includes(query) ||

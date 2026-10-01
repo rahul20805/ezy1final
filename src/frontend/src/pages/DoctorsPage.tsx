@@ -17,6 +17,7 @@ import { useState } from "react";
 import { useRequireAuth } from "../components/AuthPromptModal";
 import Layout from "../components/Layout";
 import { RelatedPagesBar } from "../components/RelatedPagesBar";
+import { useStoreData } from "../lib/storeData";
 import { doctors as mockDoctors } from "../mock-data";
 
 const SPECIALTIES = [
@@ -34,6 +35,7 @@ const SPECIALTIES = [
 const TIME_SLOTS = ["10:00 AM", "11:30 AM", "02:00 PM", "04:30 PM", "06:00 PM"];
 
 export default function DoctorsPage() {
+  const store = useStoreData();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState("All Specialties");
   const [selectedSlot, setSelectedSlot] = useState<Record<number, string>>({});
@@ -41,7 +43,25 @@ export default function DoctorsPage() {
 
   const { requireAuth } = useRequireAuth();
 
-  const filteredDoctors = mockDoctors.filter((doc) => {
+  const allDoctors = [
+    ...store.doctors.map((d) => ({
+      id: d.id,
+      name: d.name,
+      specialty: d.specialty || d.specialization || "General Physician",
+      experience: d.experienceYears || 10,
+      hospital: d.hospital || d.hospitalName || "EZY Health Center",
+      fee: d.consultationFee || d.fee || 500,
+      rating: d.rating || 4.8,
+      available: d.isAvailable !== false,
+      city: d.city || "Bengaluru",
+      avatar: d.image || "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=500&q=80",
+    })),
+    ...mockDoctors.filter(
+      (md) => !store.doctors.some((sd) => sd.name.toLowerCase() === md.name.toLowerCase()),
+    ),
+  ];
+
+  const filteredDoctors = allDoctors.filter((doc) => {
     if (
       selectedSpecialty !== "All Specialties" &&
       doc.specialty !== selectedSpecialty
@@ -52,9 +72,9 @@ export default function DoctorsPage() {
       const q = searchQuery.toLowerCase();
       return (
         doc.name.toLowerCase().includes(q) ||
-        doc.specialty.toLowerCase().includes(q) ||
-        doc.hospital.toLowerCase().includes(q) ||
-        doc.city.toLowerCase().includes(q)
+        (doc.specialty || "").toLowerCase().includes(q) ||
+        (doc.hospital || "").toLowerCase().includes(q) ||
+        (doc.city || "").toLowerCase().includes(q)
       );
     }
     return true;

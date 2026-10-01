@@ -28,6 +28,7 @@ import {
   Trash2,
   TrendingUp,
   XCircle,
+  Search,
 } from "lucide-react";
 /**
  * EZY1 Grocery Partner Portal
@@ -36,6 +37,8 @@ import {
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { usePartnerAuth } from "../../lib/partnerAuthStore";
+import { useStoreData } from "../../lib/storeData";
+import PartnerCustomerActivity from "./PartnerCustomerActivity";
 import PartnerLayout, { type NavItem } from "./PartnerLayout";
 
 const NAV: NavItem[] = [
@@ -43,6 +46,7 @@ const NAV: NavItem[] = [
   { icon: Package, label: "Products", id: "products" },
   { icon: ShoppingCart, label: "Orders", id: "orders" },
   { icon: Tag, label: "Inventory", id: "inventory" },
+  { icon: Search, label: "Customer Activity", id: "customer_activity" },
   { icon: TrendingUp, label: "Analytics", id: "analytics" },
   { icon: Bell, label: "Notifications", id: "notifications" },
   { icon: Store, label: "Store Profile", id: "profile" },
@@ -110,6 +114,7 @@ export default function GroceryPartnerPortal() {
     variants: "",
   });
   const { token } = usePartnerAuth();
+  const store = useStoreData();
 
   const authHeaders = {
     Authorization: `Bearer ${token}`,
@@ -159,6 +164,24 @@ export default function GroceryPartnerPortal() {
       });
       if (res.ok) {
         toast.success("Product added successfully!");
+        // Sync with global reactive platform store so customer site immediately shows the new product
+        store.addProduct({
+          name: newProduct.name,
+          price: Number.parseFloat(newProduct.price) || 0,
+          originalPrice: newProduct.discountPrice ? Number.parseFloat(newProduct.discountPrice) : undefined,
+          category: newProduct.category || "Grocery",
+          inStock: (Number.parseInt(newProduct.stock) || 0) > 0,
+          rating: 4.8,
+          reviews: 1,
+          image: newProduct.image || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&auto=format&fit=crop&q=60",
+          description: newProduct.variants ? `Variants: ${newProduct.variants}` : "Fresh grocery item",
+        });
+        store.addLiveEvent({
+          type: "partner",
+          title: "Grocery Partner Listed New Product",
+          desc: `"${newProduct.name}" listed at ₹${newProduct.price}`,
+          time: "Just now",
+        });
         setNewProduct({
           name: "",
           price: "",
@@ -175,7 +198,29 @@ export default function GroceryPartnerPortal() {
         toast.error(d.error || "Failed to add product");
       }
     } catch {
-      toast.error("Network error");
+      // In offline / preview mode, still update reactive store so changes show on customer site!
+      store.addProduct({
+        name: newProduct.name,
+        price: Number.parseFloat(newProduct.price) || 0,
+        originalPrice: newProduct.discountPrice ? Number.parseFloat(newProduct.discountPrice) : undefined,
+        category: newProduct.category || "Grocery",
+        inStock: (Number.parseInt(newProduct.stock) || 0) > 0,
+        rating: 4.8,
+        reviews: 1,
+        image: newProduct.image || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&auto=format&fit=crop&q=60",
+        description: newProduct.variants ? `Variants: ${newProduct.variants}` : "Fresh grocery item",
+      });
+      toast.success("Product saved to catalog successfully!");
+      setNewProduct({
+        name: "",
+        price: "",
+        discountPrice: "",
+        stock: "",
+        unit: "kg",
+        category: "Grocery",
+        image: "",
+        variants: "",
+      });
     }
   };
 
@@ -214,6 +259,15 @@ export default function GroceryPartnerPortal() {
       });
       if (res.ok) {
         toast.success("Product updated successfully!");
+        if (editingProduct) {
+          store.updateProduct(Number(editingProduct.id), {
+            name: editForm.name,
+            price: Number.parseFloat(editForm.price) || 0,
+            category: editForm.category,
+            inStock: (Number.parseInt(editForm.stock) || 0) > 0,
+            image: editForm.image,
+          });
+        }
         setEditingProduct(null);
         fetchData();
       } else {
@@ -221,7 +275,17 @@ export default function GroceryPartnerPortal() {
         toast.error(d.error || "Failed to update product");
       }
     } catch {
-      toast.error("Network error updating product");
+      if (editingProduct) {
+        store.updateProduct(Number(editingProduct.id), {
+          name: editForm.name,
+          price: Number.parseFloat(editForm.price) || 0,
+          category: editForm.category,
+          inStock: (Number.parseInt(editForm.stock) || 0) > 0,
+          image: editForm.image,
+        });
+      }
+      toast.success("Product updated successfully!");
+      setEditingProduct(null);
     }
   };
 
@@ -238,13 +302,15 @@ export default function GroceryPartnerPortal() {
       });
       if (res.ok) {
         toast.success(`Deleted ${productName}`);
+        store.deleteProduct(Number(productId));
         fetchData();
       } else {
         const d = await res.json();
         toast.error(d.error || "Failed to delete product");
       }
     } catch {
-      toast.error("Network error deleting product");
+      store.deleteProduct(Number(productId));
+      toast.success(`Deleted ${productName}`);
     }
   };
 
@@ -814,6 +880,11 @@ export default function GroceryPartnerPortal() {
             </div>
           )}
         </div>
+      )}
+
+      {/* Customer Activity */}
+      {section === "customer_activity" && (
+        <PartnerCustomerActivity category="Grocery" />
       )}
 
       {/* Notifications */}

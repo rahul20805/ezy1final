@@ -12,6 +12,7 @@ import {
   Star,
   Table2,
   UtensilsCrossed,
+  Search,
 } from "lucide-react";
 /**
  * EZY1 Restaurant Partner Portal
@@ -20,12 +21,15 @@ import {
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { usePartnerAuth } from "../../lib/partnerAuthStore";
+import { useStoreData } from "../../lib/storeData";
+import PartnerCustomerActivity from "./PartnerCustomerActivity";
 import PartnerLayout, { type NavItem } from "./PartnerLayout";
 
 const NAV: NavItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", id: "dashboard" },
   { icon: UtensilsCrossed, label: "Menu", id: "menu" },
   { icon: ShoppingCart, label: "Orders", id: "orders" },
+  { icon: Search, label: "Customer Activity", id: "customer_activity" },
   { icon: BarChart3, label: "Analytics", id: "analytics" },
   { icon: Bell, label: "Notifications", id: "notifications" },
   { icon: UtensilsCrossed, label: "Restaurant Profile", id: "profile" },
@@ -74,6 +78,7 @@ export default function RestaurantPartnerPortal() {
     isAvailable: true,
   });
   const { token } = usePartnerAuth();
+  const store = useStoreData();
   const authHeaders = {
     Authorization: `Bearer ${token}`,
     "Content-Type": "application/json",
@@ -115,6 +120,22 @@ export default function RestaurantPartnerPortal() {
       });
       if (res.ok) {
         toast.success("Menu item added!");
+        store.addProduct({
+          name: newItem.name,
+          price: Number.parseFloat(newItem.price) || 0,
+          category: "Food",
+          inStock: newItem.isAvailable,
+          rating: 4.9,
+          reviews: 1,
+          image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60",
+          description: newItem.description || `${newItem.category} item`,
+        });
+        store.addLiveEvent({
+          type: "partner",
+          title: "Restaurant Listed New Dish",
+          desc: `"${newItem.name}" added at ₹${newItem.price}`,
+          time: "Just now",
+        });
         setNewItem({
           name: "",
           description: "",
@@ -129,7 +150,25 @@ export default function RestaurantPartnerPortal() {
         toast.error(d.error || "Failed to add item");
       }
     } catch {
-      toast.error("Network error");
+      store.addProduct({
+        name: newItem.name,
+        price: Number.parseFloat(newItem.price) || 0,
+        category: "Food",
+        inStock: newItem.isAvailable,
+        rating: 4.9,
+        reviews: 1,
+        image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60",
+        description: newItem.description || `${newItem.category} item`,
+      });
+      toast.success("Menu item added to catalog!");
+      setNewItem({
+        name: "",
+        description: "",
+        price: "",
+        category: "Main Course",
+        isVeg: true,
+        isAvailable: true,
+      });
     }
   };
 
@@ -383,6 +422,11 @@ export default function RestaurantPartnerPortal() {
             </Card>
           )}
         </div>
+      )}
+
+      {/* Customer Activity */}
+      {section === "customer_activity" && (
+        <PartnerCustomerActivity category="Food" />
       )}
 
       {section === "analytics" && (

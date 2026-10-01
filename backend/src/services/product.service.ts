@@ -1,4 +1,4 @@
-import { query, queryOne } from "../repositories/database.adapter.js";
+import { query, queryOne, execute } from "../repositories/database.adapter.js";
 
 export const productService = {
   async getProducts(filters: {
@@ -112,5 +112,71 @@ export const productService = {
       ...vendor,
       products
     };
+  },
+
+  async createProduct(data: {
+    vendorId?: number;
+    name: string;
+    description?: string;
+    price: number;
+    category: string;
+    image?: string;
+    available?: boolean | number;
+  }) {
+    const res = await execute(
+      `INSERT INTO products (vendorId, name, description, price, category, image, available)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        data.vendorId || 1,
+        data.name,
+        data.description || "",
+        data.price,
+        data.category,
+        data.image || "",
+        data.available !== false ? 1 : 0
+      ]
+    );
+    const newId = res.lastID;
+    return this.getProductById(newId);
+  },
+
+  async updateProduct(id: number, data: Partial<{
+    name: string;
+    description?: string;
+    price: number;
+    category: string;
+    image?: string;
+    available?: boolean | number;
+  }>) {
+    const existing = await queryOne("SELECT * FROM products WHERE id = ?", [id]);
+    if (!existing) throw new Error("Product not found");
+
+    await execute(
+      `UPDATE products 
+       SET name = COALESCE(?, name),
+           description = COALESCE(?, description),
+           price = COALESCE(?, price),
+           category = COALESCE(?, category),
+           image = COALESCE(?, image),
+           available = COALESCE(?, available)
+       WHERE id = ?`,
+      [
+        data.name ?? null,
+        data.description ?? null,
+        data.price ?? null,
+        data.category ?? null,
+        data.image ?? null,
+        data.available !== undefined ? (data.available ? 1 : 0) : null,
+        id
+      ]
+    );
+    return this.getProductById(id);
+  },
+
+  async deleteProduct(id: number) {
+    const existing = await queryOne("SELECT * FROM products WHERE id = ?", [id]);
+    if (!existing) throw new Error("Product not found");
+    await execute("DELETE FROM products WHERE id = ?", [id]);
+    return { success: true, message: `Product ${id} deleted successfully` };
   }
 };

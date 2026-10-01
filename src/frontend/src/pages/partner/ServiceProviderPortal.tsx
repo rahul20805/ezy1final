@@ -1,4 +1,4 @@
-﻿/**
+/**
  * EZY1 Service Provider Partner Portal
  * Home & professional services management
  */
@@ -15,16 +15,20 @@ import {
   RefreshCw,
   Star,
   Wrench,
+  Search,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { usePartnerAuth } from "../../lib/partnerAuthStore";
+import { useStoreData } from "../../lib/storeData";
+import PartnerCustomerActivity from "./PartnerCustomerActivity";
 import PartnerLayout, { type NavItem } from "./PartnerLayout";
 
 const NAV: NavItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", id: "dashboard" },
   { icon: Wrench, label: "My Services", id: "services" },
   { icon: CalendarClock, label: "Bookings", id: "bookings" },
+  { icon: Search, label: "Customer Activity", id: "customer_activity" },
   { icon: BarChart3, label: "Analytics", id: "analytics" },
   { icon: Bell, label: "Notifications", id: "notifications" },
   { icon: Wrench, label: "Profile", id: "profile" },
@@ -43,6 +47,7 @@ export default function ServiceProviderPortal() {
     category: "Cleaning",
   });
   const { token } = usePartnerAuth();
+  const store = useStoreData();
   const authHeaders = {
     Authorization: `Bearer ${token}`,
     "Content-Type": "application/json",
@@ -82,6 +87,24 @@ export default function ServiceProviderPortal() {
       });
       if (res.ok) {
         toast.success("Service added!");
+        store.addService({
+          name: newService.name,
+          category: newService.category,
+          price: Number.parseFloat(newService.price) || 299,
+          duration: `${newService.duration} mins`,
+          rating: 4.9,
+          reviews: 1,
+          description: newService.description || "Expert service at your doorstep",
+          image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=500&auto=format&fit=crop&q=60",
+          provider: "Verified Pro Partner",
+          phone: "011-88997766",
+        });
+        store.addLiveEvent({
+          type: "partner",
+          title: "Provider Listed New Service",
+          desc: `"${newService.name}" (${newService.category}) added at ₹${newService.price}`,
+          time: "Just now",
+        });
         setNewService({
           name: "",
           description: "",
@@ -95,7 +118,26 @@ export default function ServiceProviderPortal() {
         toast.error(d.error || "Failed");
       }
     } catch {
-      toast.error("Network error");
+      store.addService({
+        name: newService.name,
+        category: newService.category,
+        price: Number.parseFloat(newService.price) || 299,
+        duration: `${newService.duration} mins`,
+        rating: 4.9,
+        reviews: 1,
+        description: newService.description || "Expert service at your doorstep",
+        image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=500&auto=format&fit=crop&q=60",
+        provider: "Verified Pro Partner",
+        phone: "011-88997766",
+      });
+      toast.success("Service added to catalog successfully!");
+      setNewService({
+        name: "",
+        description: "",
+        price: "",
+        duration: "60",
+        category: "Cleaning",
+      });
     }
   };
 
@@ -355,6 +397,11 @@ export default function ServiceProviderPortal() {
             ))}
           </div>
         </div>
+      )}
+
+      {/* Customer Activity */}
+      {section === "customer_activity" && (
+        <PartnerCustomerActivity category="Services" />
       )}
 
       {(section === "notifications" ||

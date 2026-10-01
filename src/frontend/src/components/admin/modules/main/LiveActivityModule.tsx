@@ -16,7 +16,9 @@ import {
   Package,
   Radio,
   RefreshCw,
+  Search,
   ShoppingBag,
+  ShoppingCart,
   Star,
   Stethoscope,
   Truck,
@@ -34,6 +36,10 @@ export function LiveActivityModule() {
     switch (type) {
       case "order":
         return <ShoppingBag className="w-4 h-4 text-primary" />;
+      case "search":
+        return <Search className="w-4 h-4 text-cyan-500" />;
+      case "cart":
+        return <ShoppingCart className="w-4 h-4 text-amber-500" />;
       case "payment":
         return <CreditCard className="w-4 h-4 text-emerald-500" />;
       case "delivery":
@@ -54,7 +60,7 @@ export function LiveActivityModule() {
   );
 
   const simulateNewEvent = () => {
-    toast.success("Synchronized with real-time websocket cluster!");
+    toast.success("Synchronized with real-time platform event bus!");
   };
 
   return (
@@ -72,7 +78,7 @@ export function LiveActivityModule() {
             </span>
           </div>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-            Live database events: incoming orders, payments, riders dispatched,
+            Live database events: customer searches, items added to cart, incoming orders, payments, riders dispatched,
             support queries, and partner actions.
           </p>
         </div>
@@ -89,7 +95,7 @@ export function LiveActivityModule() {
 
       {/* Filter Tabs */}
       <div className="flex items-center gap-1.5 flex-wrap bg-muted/60 p-1 rounded-2xl border border-border">
-        {["all", "order", "payment", "delivery", "partner"].map((type) => (
+        {["all", "order", "search", "cart", "payment", "delivery", "partner"].map((type) => (
           <button
             key={type}
             onClick={() => setFilterType(type)}
@@ -99,7 +105,7 @@ export function LiveActivityModule() {
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            {type === "all" ? "All Events" : type}
+            {type === "all" ? "All Events" : type === "cart" ? "Cart Additions" : type === "search" ? "User Searches" : type}
           </button>
         ))}
       </div>
@@ -131,6 +137,20 @@ export function LiveActivityModule() {
                   <p className="text-xs text-muted-foreground mt-0.5">
                     {event.description}
                   </p>
+                  {(event.user || event.amount !== undefined) && (
+                    <div className="flex items-center gap-2 mt-1.5 text-[11px]">
+                      {event.user && (
+                        <span className="font-semibold text-primary/90 bg-primary/10 px-2 py-0.5 rounded-md">
+                          👤 {event.user}
+                        </span>
+                      )}
+                      {event.amount !== undefined && (
+                        <span className="font-bold text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded-md">
+                          ₹{event.amount}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 

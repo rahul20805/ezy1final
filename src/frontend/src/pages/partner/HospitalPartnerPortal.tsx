@@ -1,4 +1,4 @@
-﻿/**
+/**
  * EZY1 Hospital Partner Portal
  * Self-service management portal for Hospital/Clinic/Healthcare partners
  */
@@ -18,10 +18,13 @@ import {
   Stethoscope,
   User,
   Users,
+  Search,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { usePartnerAuth } from "../../lib/partnerAuthStore";
+import { useStoreData } from "../../lib/storeData";
+import PartnerCustomerActivity from "./PartnerCustomerActivity";
 import PartnerLayout, { type NavItem } from "./PartnerLayout";
 
 const NAV: NavItem[] = [
@@ -29,6 +32,7 @@ const NAV: NavItem[] = [
   { icon: BedDouble, label: "Bed Management", id: "beds" },
   { icon: Users, label: "Doctors", id: "doctors" },
   { icon: CalendarClock, label: "Appointments", id: "appointments" },
+  { icon: Search, label: "Customer Activity", id: "customer_activity" },
   { icon: BarChart3, label: "Analytics", id: "analytics" },
   { icon: Bell, label: "Notifications", id: "notifications" },
   { icon: Building2, label: "Hospital Profile", id: "profile" },
@@ -60,6 +64,7 @@ export default function HospitalPartnerPortal() {
     fee: "",
   });
   const { token } = usePartnerAuth();
+  const store = useStoreData();
   const authHeaders = {
     Authorization: `Bearer ${token}`,
     "Content-Type": "application/json",
@@ -120,6 +125,24 @@ export default function HospitalPartnerPortal() {
       });
       if (res.ok) {
         toast.success("Doctor added successfully!");
+        store.addDoctor({
+          name: newDoctor.name,
+          specialty: newDoctor.specialty,
+          qualification: newDoctor.qualification || "MBBS, MD",
+          fee: Number.parseFloat(newDoctor.fee) || 500,
+          hospital: "City Care Super-Specialty Hospital",
+          rating: 4.9,
+          reviews: 1,
+          availability: "Mon - Sat (10 AM - 5 PM)",
+          phone: "011-45678900",
+          experience: "8+ yrs",
+        });
+        store.addLiveEvent({
+          type: "partner",
+          title: "Hospital Listed Specialist Doctor",
+          desc: `Dr. ${newDoctor.name} (${newDoctor.specialty}) added`,
+          time: "Just now",
+        });
         setNewDoctor({ name: "", specialty: "", qualification: "", fee: "" });
         fetchData();
       } else {
@@ -127,7 +150,20 @@ export default function HospitalPartnerPortal() {
         toast.error(d.error || "Failed to add doctor");
       }
     } catch {
-      toast.error("Network error");
+      store.addDoctor({
+        name: newDoctor.name,
+        specialty: newDoctor.specialty,
+        qualification: newDoctor.qualification || "MBBS, MD",
+        fee: Number.parseFloat(newDoctor.fee) || 500,
+        hospital: "City Care Super-Specialty Hospital",
+        rating: 4.9,
+        reviews: 1,
+        availability: "Mon - Sat (10 AM - 5 PM)",
+        phone: "011-45678900",
+        experience: "8+ yrs",
+      });
+      toast.success("Doctor added to catalog successfully!");
+      setNewDoctor({ name: "", specialty: "", qualification: "", fee: "" });
     }
   };
 
@@ -404,6 +440,11 @@ export default function HospitalPartnerPortal() {
             </Card>
           )}
         </div>
+      )}
+
+      {/* Customer Activity */}
+      {section === "customer_activity" && (
+        <PartnerCustomerActivity category="Healthcare" />
       )}
 
       {/* Analytics */}

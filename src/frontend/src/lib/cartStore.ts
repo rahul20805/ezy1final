@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Product } from "../types";
+import { useStoreData } from "./storeData";
 
 export interface CartItem {
   product: Product;
@@ -24,8 +25,30 @@ export const useCartStore = create<CartState>()(
       totalItems: 0,
       totalAmount: 0,
 
-      addItem: (product) =>
-        set((state) => {
+      addItem: (product) => {
+        try {
+          const store = useStoreData.getState();
+          const savedUser =
+            typeof localStorage !== "undefined"
+              ? JSON.parse(localStorage.getItem("ezy1_auth_user") || "null")
+              : null;
+          store.trackCartActivity({
+            action: "ADD",
+            productId: product.id,
+            productName: product.name,
+            category: (product as any).category || (product as any).categoryId || "General",
+            partnerId: (product as any).vendorId || 1,
+            partnerName: (product as any).vendorName || (product as any).brand || "Local Partner",
+            quantity: 1,
+            price: product.price,
+            userName: savedUser?.name || "Active Customer",
+            userPhone: savedUser?.phone || "9876543210",
+          });
+        } catch (e) {
+          // Non-blocking tracking
+        }
+
+        return set((state) => {
           const existing = state.items[product.id];
           const quantity = existing ? existing.quantity + 1 : 1;
           const newItems = {
@@ -38,7 +61,8 @@ export const useCartStore = create<CartState>()(
             totalItems: state.totalItems + 1,
             totalAmount: state.totalAmount + product.price,
           };
-        }),
+        });
+      },
 
       removeItem: (productId) =>
         set((state) => {

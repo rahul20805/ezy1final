@@ -38,6 +38,8 @@ import {
   POPULAR_LOCAL_SHOPS_DATA,
 } from "../ecosystem-data";
 import { useCartStore } from "../lib/cartStore";
+import { useDynamicCatalog } from "../lib/dynamicCatalog";
+import { useStoreData } from "../lib/storeData";
 import { doctors, workers } from "../mock-data";
 
 type SortOption =
@@ -95,6 +97,8 @@ export default function OmniSearchPage() {
   const [backendData, setBackendData] = useState<any>(null);
 
   const { addItem } = useCartStore();
+  const { catalog: dynamicCatalog } = useDynamicCatalog();
+  const store = useStoreData();
 
   // Keep query and category in sync if URL changes (e.g. from navbar search or back/forward)
   useEffect(() => {
@@ -171,9 +175,26 @@ export default function OmniSearchPage() {
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
       fetchSearchResults(query, sortBy);
-    }, 200);
+      if (query.trim()) {
+        try {
+          const savedUser =
+            typeof localStorage !== "undefined"
+              ? JSON.parse(localStorage.getItem("ezy1_auth_user") || "null")
+              : null;
+          store.trackUserSearch({
+            query: query.trim(),
+            category: activeTab,
+            resultsCount: 10,
+            userName: savedUser?.name || "Active Customer",
+            userPhone: savedUser?.phone || "9876543210",
+          });
+        } catch (e) {
+          // Non-blocking
+        }
+      }
+    }, 300);
     return () => clearTimeout(debounceTimer);
-  }, [query, sortBy, fetchSearchResults]);
+  }, [query, sortBy, fetchSearchResults, activeTab, store]);
 
   // 3. Exact-Match Scorer & Comprehensive Multi-Entity Engine
   const combinedResults = useMemo(() => {
@@ -203,8 +224,8 @@ export default function OmniSearchPage() {
       return 0;
     };
 
-    // 1. Products & Groceries
-    let productsList = CATALOG_ITEMS.map((p) => {
+    // 1. Products & Groceries (incorporating all Admin, Owner, and Partner created items)
+    let productsList = dynamicCatalog.map((p) => {
       const score = Math.max(
         calcScore(p.name),
         calcScore(p.description),
@@ -244,13 +265,29 @@ export default function OmniSearchPage() {
       }
     }
 
-    // 2. Doctors
-    let doctorsList = doctors
+    // 2. Doctors (incorporating all Admin & Hospital Partner added doctors)
+    const allDoctorsSource = [
+      ...store.doctors.map((doc) => ({
+        id: doc.id,
+        name: doc.name,
+        specialty: doc.specialty || doc.specialization || "General Medicine",
+        experience: doc.experienceYears || 10,
+        hospital: doc.hospital || doc.hospitalName || "EZY Health Center",
+        fee: doc.consultationFee || doc.fee || 500,
+        rating: doc.rating || 4.8,
+        available: doc.isAvailable !== false,
+        city: doc.city || "Bengaluru",
+      })),
+      ...doctors.filter(
+        (d) => !store.doctors.some((sd) => sd.name.toLowerCase() === d.name.toLowerCase()),
+      ),
+    ];
+    let doctorsList = allDoctorsSource
       .map((d) => {
         const score = Math.max(
           calcScore(d.name),
-          calcScore(d.specialty),
-          calcScore(d.hospital),
+          calcScore(d.specialty || ""),
+          calcScore(d.hospital || ""),
         );
         return { item: d, score };
       })
@@ -280,8 +317,30 @@ export default function OmniSearchPage() {
       }
     }
 
-    // 3. Hospitals
-    let hospitalsList = HOSPITALS_DATA.map((h) => {
+    // 3. Hospitals (incorporating all Admin & Hospital Partner added hospitals & live beds)
+    const allHospitalsSource = [
+      ...store.hospitals.map((h) => ({
+        id: `hosp-${h.id}`,
+        name: h.name,
+        city: h.city || "Bengaluru",
+        address: h.address || "Bengaluru, Karnataka",
+        phone: h.phone || h.emergencyPhone || "080-23456789",
+        emergencyPhone: h.emergencyPhone || "1066",
+        distanceKm: 2.1,
+        rating: h.rating || 4.8,
+        totalBeds: h.totalBeds || 120,
+        availableBeds: {
+          icu: h.availableIcuBeds ?? h.icuBedsAvailable ?? 6,
+          general: h.availableGeneralBeds ?? h.availableBeds ?? 24,
+          deluxe: 4,
+        },
+        departments: h.specialties || h.departments || ["Cardiology", "Emergency", "General Medicine"],
+      })),
+      ...HOSPITALS_DATA.filter(
+        (hd) => !store.hospitals.some((sh) => sh.name.toLowerCase() === hd.name.toLowerCase()),
+      ),
+    ];
+    let hospitalsList = allHospitalsSource.map((h) => {
       const score = Math.max(
         calcScore(h.name),
         calcScore(h.address),
@@ -290,16 +349,47 @@ export default function OmniSearchPage() {
       return { item: h, score };
     }).filter((x) => x.score > 0);
 
-    // 4. Home Services & Repairs
-    let servicesList = workers
+    // 4. Home Services & Repairs (incorporating all Service Partners & Admin listed services)
+    const allServicesSource = [
+      ...store.services.map((s) => ({
+        id: s.id,
+        name: s.name,
+        category: s.category,
+        rating: s.rating || 4.9,
+        totalReviews: s.totalReviews || 24,
+        pricePerHour: s.pricePerHour || 299,
+        isAvailable: s.isAvailable !== false,
+        phone: "+91 98765 43210",
+        city: "Bengaluru",
+      })),
+      ...workers.filter(
+        (w) => !store.services.some((ss) => ss.name.toLowerCase() === w.name.toLowerCase()),
+      ),
+    ];
+    let servicesList = allServicesSource
       .map((w) => {
         const score = Math.max(calcScore(w.name), calcScore(w.category));
         return { item: w, score };
       })
       .filter((x) => x.score > 0);
 
-    // 5. Shops & Partners
-    let shopsList = POPULAR_LOCAL_SHOPS_DATA.map((s) => {
+    // 5. Shops & Partners (incorporating all Admin & Partner listed shops)
+    const allShopsSource = [
+      ...store.shops.map((s) => ({
+        id: `shop-${s.id}`,
+        name: s.businessName,
+        category: s.category,
+        address: s.address,
+        rating: s.rating || 4.8,
+        deliveryTime: "15-20 mins",
+        image: s.image || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80",
+        minOrder: "₹99",
+      })),
+      ...POPULAR_LOCAL_SHOPS_DATA.filter(
+        (sd) => !store.shops.some((ss) => ss.businessName.toLowerCase() === sd.name.toLowerCase()),
+      ),
+    ];
+    let shopsList = allShopsSource.map((s) => {
       const score = Math.max(
         calcScore(s.name),
         calcScore(s.category),

@@ -13,12 +13,14 @@ export interface StoredProduct {
   description: string;
   price: number;
   mrp: number;
+  originalPrice?: number;
   category: string;
   subcategory?: string;
   categoryIds: number[];
   vendorId: number;
   vendorName?: string;
   stockCount: number;
+  stock?: number;
   minOrderQty?: number;
   maxOrderQty?: number;
   taxPercent?: number;
@@ -28,7 +30,9 @@ export interface StoredProduct {
   featured?: boolean;
   rating?: number;
   totalReviews?: number;
+  reviews?: number;
   images: string[];
+  image?: string;
   discountPercent?: number;
   unit?: string;
   tags?: string[];
@@ -81,14 +85,18 @@ export interface StoredService {
   description: string;
   category: string;
   pricePerHour: number;
+  price?: number;
   providerName: string;
+  provider?: string;
   vendorId: number;
   isAvailable: boolean;
   published: boolean;
   rating: number;
   totalReviews: number;
+  reviews?: number;
   image?: string;
   duration?: string;
+  phone?: string;
   tags?: string[];
   createdAt: string;
 }
@@ -142,16 +150,23 @@ export interface StoredBooking {
 export interface StoredDoctor {
   id: number;
   name: string;
-  specialization: string;
+  specialization?: string;
+  specialty?: string;
   qualification: string;
-  experienceYears: number;
-  hospitalName: string;
-  consultationFee: number;
+  experienceYears?: number;
+  experience?: string;
+  hospitalName?: string;
+  hospital?: string;
+  consultationFee?: number;
+  fee?: number;
   availability: string;
   rating: number;
-  totalReviews: number;
+  totalReviews?: number;
+  reviews?: number;
   phone: string;
-  verified: boolean;
+  verified?: boolean;
+  isAvailable?: boolean;
+  city?: string;
   image?: string;
   bio?: string;
 }
@@ -161,13 +176,20 @@ export interface StoredHospital {
   name: string;
   city: string;
   address: string;
-  emergencyPhone: string;
-  departments: string[];
+  emergencyPhone?: string;
+  phone?: string;
+  departments?: string[];
+  specialties?: string[];
   totalBeds: number;
   availableBeds: number;
-  icuBedsAvailable: number;
-  hasEmergency24x7: boolean;
-  verified: boolean;
+  availableGeneralBeds?: number;
+  icuBedsAvailable?: number;
+  availableIcuBeds?: number;
+  hasEmergency24x7?: boolean;
+  verified?: boolean;
+  rating?: number;
+  reviews?: number;
+  image?: string;
 }
 
 export interface StoredHospitalBed {
@@ -271,11 +293,66 @@ export interface StoredCustomer {
   totalOrders: number;
   totalSpent: number;
   status: "active" | "suspended" | "inactive";
+  role?: string;
   joinedAt: string;
+  lastActive?: string;
+  frequentlyOrderedItems?: Array<{
+    id: number | string;
+    name: string;
+    count: number;
+    orderCount?: number;
+    category?: string;
+    price: number;
+  }>;
+  recentSearches?: string[];
+  activeCartItems?: Array<{
+    id: number | string;
+    name: string;
+    quantity: number;
+    price: number;
+  }>;
   savedAddresses?: Array<{
     tag: string;
     address: string;
   }>;
+}
+
+export interface StoredUserSearch {
+  id: string;
+  query: string;
+  category?: string;
+  partnerId?: number | string;
+  partnerName?: string;
+  userName?: string;
+  userPhone?: string;
+  resultsCount: number;
+  timestamp: string;
+}
+
+export interface StoredCartActivity {
+  id: string;
+  action: "ADD" | "REMOVE" | "UPDATE" | "CHECKOUT" | string;
+  productId: number | string;
+  productName: string;
+  itemName?: string;
+  category: string;
+  partnerId?: number | string;
+  partnerName?: string;
+  quantity: number;
+  price: number;
+  userName?: string;
+  userPhone?: string;
+  timestamp: string;
+}
+
+export interface StoredVisitorSession {
+  id: string;
+  ip: string;
+  device: string;
+  city: string;
+  page: string;
+  visitedAt: string;
+  activeSeconds: number;
 }
 
 export interface StoredSupportTicket {
@@ -482,11 +559,18 @@ export interface StoredLiveEvent {
     | "booking"
     | "review"
     | "support"
-    | "delivery";
+    | "delivery"
+    | "search"
+    | "cart"
+    | "system";
   title: string;
   description: string;
+  desc?: string;
   timestamp: string;
-  badge: string;
+  time?: string;
+  badge?: string;
+  user?: string;
+  amount?: number;
 }
 
 export interface OwnerSettings {
@@ -1436,6 +1520,16 @@ const initialCustomers: StoredCustomer[] = [
     totalSpent: 6850,
     status: "active",
     joinedAt: "2025-11-10",
+    lastActive: "10 mins ago",
+    frequentlyOrderedItems: [
+      { id: 1, name: "Aashirvaad Shudh Chakki Atta (5kg)", count: 7, category: "Grocery", price: 240 },
+      { id: 2, name: "Amul Butter - Pasteurised (500g)", count: 5, category: "Dairy", price: 250 },
+      { id: 6, name: "Dolo 650mg Paracetamol Tablets", count: 4, category: "Pharmacy", price: 32 }
+    ],
+    recentSearches: ["atta 5kg", "amul butter", "dolo 650", "organic milk"],
+    activeCartItems: [
+      { id: 1, name: "Aashirvaad Shudh Chakki Atta (5kg)", quantity: 1, price: 240 }
+    ],
   },
   {
     id: 2,
@@ -1449,6 +1543,15 @@ const initialCustomers: StoredCustomer[] = [
     totalSpent: 4290,
     status: "active",
     joinedAt: "2025-12-05",
+    lastActive: "45 mins ago",
+    frequentlyOrderedItems: [
+      { id: 5, name: "Organic Raw Mountain Honey (500g)", count: 4, category: "Organic", price: 380 },
+      { id: 3, name: "Fresh Farm Red Onions (1kg)", count: 6, category: "Vegetables", price: 35 }
+    ],
+    recentSearches: ["honey", "onions", "dry fruits", "sanitizer"],
+    activeCartItems: [
+      { id: 5, name: "Organic Raw Mountain Honey (500g)", quantity: 2, price: 380 }
+    ],
   },
   {
     id: 3,
@@ -1462,6 +1565,169 @@ const initialCustomers: StoredCustomer[] = [
     totalSpent: 12400,
     status: "active",
     joinedAt: "2025-09-18",
+    lastActive: "2 hours ago",
+    frequentlyOrderedItems: [
+      { id: 4, name: "Lays India's Magic Masala Chips (50g)", count: 12, category: "Snacks", price: 20 },
+      { id: 2, name: "Amul Butter - Pasteurised (500g)", count: 8, category: "Dairy", price: 250 }
+    ],
+    recentSearches: ["lays masala", "ice cream", "paneer", "cold drink"],
+    activeCartItems: [],
+  },
+];
+
+const initialUserSearches: StoredUserSearch[] = [
+  {
+    id: "srch-1",
+    query: "Aashirvaad Atta 5kg",
+    category: "grocery",
+    partnerId: 1,
+    partnerName: "Sharma Kirana Store",
+    userName: "Rahul Sharma",
+    userPhone: "9876543210",
+    resultsCount: 14,
+    timestamp: "5 mins ago",
+  },
+  {
+    id: "srch-2",
+    query: "Dolo 650mg",
+    category: "pharmacy",
+    partnerId: 2,
+    partnerName: "Nair Ayurveda & Pharma",
+    userName: "Priya Nair",
+    userPhone: "9845012345",
+    resultsCount: 8,
+    timestamp: "12 mins ago",
+  },
+  {
+    id: "srch-3",
+    query: "Organic Mountain Honey",
+    category: "organic",
+    partnerId: 1,
+    partnerName: "Sharma Kirana Store",
+    userName: "Sneha Mukherjee",
+    userPhone: "9820011445",
+    resultsCount: 6,
+    timestamp: "25 mins ago",
+  },
+  {
+    id: "srch-4",
+    query: "Cardiologist Consultation",
+    category: "doctors",
+    partnerId: "hosp-1",
+    partnerName: "Manipal Hospital",
+    userName: "Vikram Malhotra",
+    userPhone: "9876500991",
+    resultsCount: 5,
+    timestamp: "40 mins ago",
+  },
+  {
+    id: "srch-5",
+    query: "Electrician AC Repair",
+    category: "services",
+    partnerId: 1,
+    partnerName: "QuickFix Electricals",
+    userName: "Ramesh Pawar",
+    userPhone: "9819001122",
+    resultsCount: 9,
+    timestamp: "1 hour ago",
+  },
+];
+
+const initialCartActivity: StoredCartActivity[] = [
+  {
+    id: "cart-1",
+    action: "ADD",
+    productId: 1,
+    productName: "Aashirvaad Shudh Chakki Atta (5kg)",
+    category: "Grocery",
+    partnerId: 1,
+    partnerName: "Sharma Kirana Store",
+    quantity: 1,
+    price: 240,
+    userName: "Rahul Sharma",
+    userPhone: "9876543210",
+    timestamp: "8 mins ago",
+  },
+  {
+    id: "cart-2",
+    action: "ADD",
+    productId: 2,
+    productName: "Amul Butter - Pasteurised (500g)",
+    category: "Dairy",
+    partnerId: 1,
+    partnerName: "Sharma Kirana Store",
+    quantity: 2,
+    price: 250,
+    userName: "Vikram Malhotra",
+    userPhone: "9876500991",
+    timestamp: "18 mins ago",
+  },
+  {
+    id: "cart-3",
+    action: "ADD",
+    productId: 5,
+    productName: "Organic Raw Mountain Honey (500g)",
+    category: "Organic",
+    partnerId: 1,
+    partnerName: "Sharma Kirana Store",
+    quantity: 1,
+    price: 380,
+    userName: "Sneha Mukherjee",
+    userPhone: "9820011445",
+    timestamp: "32 mins ago",
+  },
+  {
+    id: "cart-4",
+    action: "ADD",
+    productId: 6,
+    productName: "Dolo 650mg Paracetamol Tablets",
+    category: "Pharmacy",
+    partnerId: 2,
+    partnerName: "Nair Ayurveda & Pharma",
+    quantity: 3,
+    price: 32,
+    userName: "Priya Nair",
+    userPhone: "9845012345",
+    timestamp: "45 mins ago",
+  },
+];
+
+const initialVisitorSessions: StoredVisitorSession[] = [
+  {
+    id: "vis-1",
+    ip: "103.21.244.18",
+    device: "Mobile (iPhone 15)",
+    city: "Bengaluru",
+    page: "/category/grocery",
+    visitedAt: "Just now",
+    activeSeconds: 240,
+  },
+  {
+    id: "vis-2",
+    ip: "49.37.199.52",
+    device: "Desktop (Chrome / Windows)",
+    city: "Bengaluru",
+    page: "/search?q=atta",
+    visitedAt: "3 mins ago",
+    activeSeconds: 410,
+  },
+  {
+    id: "vis-3",
+    ip: "157.34.82.110",
+    device: "Mobile (Android / Samsung)",
+    city: "Mumbai",
+    page: "/category/pharmacy",
+    visitedAt: "9 mins ago",
+    activeSeconds: 180,
+  },
+  {
+    id: "vis-4",
+    ip: "122.161.45.90",
+    device: "Desktop (Safari / macOS)",
+    city: "Delhi NCR",
+    page: "/hospitals",
+    visitedAt: "15 mins ago",
+    activeSeconds: 520,
   },
 ];
 
@@ -1875,7 +2141,19 @@ export interface StoreState {
   faqs: StoredFaq[];
   auditLogs: StoredAuditLog[];
   liveEvents: StoredLiveEvent[];
+  userSearches: StoredUserSearch[];
+  cartActivity: StoredCartActivity[];
+  visitorSessions: StoredVisitorSession[];
   settings: OwnerSettings;
+
+  // Real-Time Activity & Analytics Methods
+  addLiveEvent: (
+    event: Partial<StoredLiveEvent> & { type: StoredLiveEvent["type"]; title: string }
+  ) => void;
+  trackUserSearch: (search: Omit<StoredUserSearch, "id" | "timestamp">) => void;
+  trackCartActivity: (activity: Omit<StoredCartActivity, "id" | "timestamp">) => void;
+  trackVisitor: (page: string, referrer?: string) => void;
+  recordOrderForCustomer: (order: StoredOrder) => void;
 
   // Shop Methods
   addShop: (shop: Omit<StoredShop, "id" | "joinedAt">) => StoredShop;
@@ -1892,7 +2170,7 @@ export interface StoreState {
 
   // Product Methods
   addProduct: (
-    product: Omit<StoredProduct, "id" | "createdAt">,
+    product: Partial<StoredProduct> & { name: string; price: number; category: string },
   ) => StoredProduct;
   updateProduct: (id: number, updates: Partial<StoredProduct>) => void;
   deleteProduct: (id: number) => void;
@@ -1901,7 +2179,7 @@ export interface StoreState {
 
   // Service & Specialist Methods
   addService: (
-    service: Omit<StoredService, "id" | "createdAt">,
+    service: Partial<StoredService> & { name: string; category: string },
   ) => StoredService;
   updateService: (id: number, updates: Partial<StoredService>) => void;
   deleteService: (id: number) => void;
@@ -2138,7 +2416,211 @@ export const useStoreData = create<StoreState>()(
       faqs: initialFaqs,
       auditLogs: initialAuditLogs,
       liveEvents: initialLiveEvents,
+      userSearches: initialUserSearches,
+      cartActivity: initialCartActivity,
+      visitorSessions: initialVisitorSessions,
       settings: initialOwnerSettings,
+
+      // Real-Time Activity & Analytics Methods
+      addLiveEvent: (event) => {
+        const nextId = Math.max(...get().liveEvents.map((e) => e.id), 0) + 1;
+        const newEvent: StoredLiveEvent = {
+          id: ("id" in event && event.id) ? Number(event.id) : nextId,
+          type: event.type,
+          title: event.title,
+          description: event.description || event.desc || event.title,
+          desc: event.desc,
+          timestamp: event.timestamp || event.time || "Just now",
+          time: event.time,
+          badge: event.badge || event.type.toUpperCase(),
+          user: event.user,
+          amount: event.amount,
+        };
+        set({ liveEvents: [newEvent, ...get().liveEvents].slice(0, 100) });
+      },
+
+      trackUserSearch: (searchData) => {
+        const id = `srch-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        const searchRecord: StoredUserSearch = {
+          ...searchData,
+          id,
+          timestamp: "Just now",
+        };
+        set({ userSearches: [searchRecord, ...get().userSearches].slice(0, 100) });
+
+        if (searchData.userPhone || searchData.userName) {
+          set({
+            customers: get().customers.map((c) => {
+              if (
+                (searchData.userPhone && c.phone === searchData.userPhone) ||
+                (searchData.userName && c.name.toLowerCase() === searchData.userName.toLowerCase())
+              ) {
+                const recent = c.recentSearches || [];
+                return {
+                  ...c,
+                  lastActive: "Just now",
+                  recentSearches: [searchData.query, ...recent.filter((q) => q !== searchData.query)].slice(0, 10),
+                };
+              }
+              return c;
+            }),
+          });
+        }
+
+        get().addLiveEvent({
+          type: "search",
+          title: "User Search",
+          description: `${searchData.userName || "Customer"} searched for "${searchData.query}" (${searchData.resultsCount} items)`,
+          badge: "SEARCH",
+          user: searchData.userName || "Customer",
+        });
+      },
+
+      trackCartActivity: (actData) => {
+        const id = `cart-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        const cartRecord: StoredCartActivity = {
+          ...actData,
+          id,
+          timestamp: "Just now",
+        };
+        set({ cartActivity: [cartRecord, ...get().cartActivity].slice(0, 100) });
+
+        if (actData.userName || actData.userPhone) {
+          set({
+            customers: get().customers.map((c) => {
+              if (
+                (actData.userPhone && c.phone === actData.userPhone) ||
+                (actData.userName && c.name.toLowerCase() === actData.userName.toLowerCase())
+              ) {
+                const currentCart = c.activeCartItems || [];
+                let updatedCart: typeof currentCart;
+                if (actData.action === "ADD") {
+                  const existing = currentCart.find((it) => String(it.id) === String(actData.productId));
+                  if (existing) {
+                    updatedCart = currentCart.map((it) =>
+                      String(it.id) === String(actData.productId) ? { ...it, quantity: it.quantity + actData.quantity } : it,
+                    );
+                  } else {
+                    updatedCart = [...currentCart, { id: actData.productId, name: actData.productName, quantity: actData.quantity, price: actData.price }];
+                  }
+                } else if (actData.action === "REMOVE") {
+                  updatedCart = currentCart.filter((it) => String(it.id) !== String(actData.productId));
+                } else {
+                  updatedCart = currentCart.map((it) =>
+                    String(it.id) === String(actData.productId) ? { ...it, quantity: actData.quantity } : it,
+                  );
+                }
+                return {
+                  ...c,
+                  lastActive: "Just now",
+                  activeCartItems: updatedCart,
+                };
+              }
+              return c;
+            }),
+          });
+        }
+
+        get().addLiveEvent({
+          type: "cart",
+          title: actData.action === "ADD" ? "Cart Item Added" : "Cart Item Updated",
+          description: `${actData.userName || "Customer"} added "${actData.productName}" to cart (₹${actData.price})`,
+          badge: "CART",
+          user: actData.userName || "Customer",
+          amount: actData.price * actData.quantity,
+        });
+      },
+
+      trackVisitor: (page, _referrer) => {
+        const id = `vis-${Date.now()}`;
+        const newSession: StoredVisitorSession = {
+          id,
+          ip: "103.21.244.18",
+          device: typeof navigator !== "undefined" && /Mobi|Android/i.test(navigator.userAgent) ? "Mobile" : "Desktop",
+          city: "Local Area",
+          page,
+          visitedAt: "Just now",
+          activeSeconds: 60,
+        };
+        set({ visitorSessions: [newSession, ...get().visitorSessions].slice(0, 50) });
+      },
+
+      recordOrderForCustomer: (order) => {
+        const customers = get().customers;
+        const matchingCustomer = customers.find(
+          (c) => c.phone === order.customerPhone || (order.customerEmail && c.email === order.customerEmail) || c.name.toLowerCase() === order.customerName.toLowerCase()
+        );
+
+        if (matchingCustomer) {
+          const freqMap = new Map<string, { id: number | string; name: string; count: number; category?: string; price: number }>();
+          (matchingCustomer.frequentlyOrderedItems || []).forEach((it) => {
+            freqMap.set(it.name, { ...it });
+          });
+          order.items.forEach((it) => {
+            const existing = freqMap.get(it.name);
+            if (existing) {
+              existing.count += it.quantity;
+            } else {
+              freqMap.set(it.name, {
+                id: it.id,
+                name: it.name,
+                count: it.quantity,
+                category: "Ordered Item",
+                price: it.price,
+              });
+            }
+          });
+
+          set({
+            customers: customers.map((c) =>
+              c.id === matchingCustomer.id
+                ? {
+                    ...c,
+                    totalOrders: c.totalOrders + 1,
+                    totalSpent: c.totalSpent + order.totalAmount,
+                    lastActive: "Just now",
+                    activeCartItems: [],
+                    frequentlyOrderedItems: Array.from(freqMap.values()).sort((a, b) => b.count - a.count),
+                  }
+                : c,
+            ),
+          });
+        } else {
+          const nextCustId = Math.max(...customers.map((c) => c.id), 0) + 1;
+          const newCust: StoredCustomer = {
+            id: nextCustId,
+            name: order.customerName,
+            email: order.customerEmail || `${order.customerName.toLowerCase().replace(/\s+/g, "")}@user.ezy1.in`,
+            phone: order.customerPhone,
+            city: "Local",
+            address: order.deliveryAddress,
+            walletBalance: 0,
+            totalOrders: 1,
+            totalSpent: order.totalAmount,
+            status: "active",
+            joinedAt: new Date().toISOString().split("T")[0],
+            lastActive: "Just now",
+            activeCartItems: [],
+            frequentlyOrderedItems: order.items.map((it) => ({
+              id: it.id,
+              name: it.name,
+              count: it.quantity,
+              category: "Ordered Item",
+              price: it.price,
+            })),
+          };
+          set({ customers: [newCust, ...customers] });
+        }
+
+        get().addLiveEvent({
+          type: "order",
+          title: "New Order Placed",
+          description: `Order #${order.orderNumber} for ₹${order.totalAmount} placed by ${order.customerName}`,
+          badge: "ORDER",
+          user: order.customerName,
+          amount: order.totalAmount,
+        });
+      },
 
       // Shops
       addShop: (data) => {
@@ -2207,6 +2689,20 @@ export const useStoreData = create<StoreState>()(
       addProduct: (data) => {
         const nextId = Math.max(...get().products.map((p) => p.id), 0) + 1;
         const newProduct: StoredProduct = {
+          sku: data.sku || `SKU-${nextId}`,
+          description: data.description || "",
+          mrp: data.mrp || (data.originalPrice ? data.originalPrice : (data.price * 1.15)),
+          categoryIds: data.categoryIds || [1],
+          vendorId: data.vendorId || 1,
+          vendorName: data.vendorName || "Verified Partner",
+          stockCount: data.stockCount ?? data.stock ?? 25,
+          inStock: data.inStock ?? true,
+          isAvailable: data.isAvailable ?? true,
+          published: data.published ?? true,
+          rating: data.rating || 4.8,
+          totalReviews: data.totalReviews || data.reviews || 1,
+          images: data.images || (data.image ? [data.image] : ["https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&auto=format&fit=crop&q=60"]),
+          unit: data.unit || "unit",
           ...data,
           id: nextId,
           createdAt: new Date().toISOString().split("T")[0],
@@ -2268,6 +2764,14 @@ export const useStoreData = create<StoreState>()(
       addService: (data) => {
         const nextId = Math.max(...get().services.map((s) => s.id), 0) + 1;
         const newSvc: StoredService = {
+          description: data.description || "",
+          pricePerHour: data.pricePerHour || data.price || 299,
+          providerName: data.providerName || data.provider || "Verified Pro Partner",
+          vendorId: data.vendorId || 1,
+          isAvailable: data.isAvailable ?? true,
+          published: data.published ?? true,
+          rating: data.rating || 4.9,
+          totalReviews: data.totalReviews || data.reviews || 1,
           ...data,
           id: nextId,
           createdAt: new Date().toISOString().split("T")[0],
@@ -2911,6 +3415,9 @@ export const useStoreData = create<StoreState>()(
           faqs: initialFaqs,
           auditLogs: initialAuditLogs,
           liveEvents: initialLiveEvents,
+          userSearches: initialUserSearches,
+          cartActivity: initialCartActivity,
+          visitorSessions: initialVisitorSessions,
           settings: initialOwnerSettings,
         });
       },
@@ -2944,6 +3451,9 @@ export const useStoreData = create<StoreState>()(
             heroSlides: state.heroSlides,
             faqs: state.faqs,
             auditLogs: state.auditLogs,
+            userSearches: state.userSearches,
+            cartActivity: state.cartActivity,
+            visitorSessions: state.visitorSessions,
             settings: state.settings,
             exportTimestamp: new Date().toISOString(),
           },
@@ -2996,6 +3506,9 @@ export const useStoreData = create<StoreState>()(
             ...(parsed.reviews ? { reviews: parsed.reviews } : {}),
             ...(parsed.heroSlides ? { heroSlides: parsed.heroSlides } : {}),
             ...(parsed.faqs ? { faqs: parsed.faqs } : {}),
+            ...(parsed.userSearches ? { userSearches: parsed.userSearches } : {}),
+            ...(parsed.cartActivity ? { cartActivity: parsed.cartActivity } : {}),
+            ...(parsed.visitorSessions ? { visitorSessions: parsed.visitorSessions } : {}),
             ...(parsed.settings ? { settings: parsed.settings } : {}),
           });
           return true;

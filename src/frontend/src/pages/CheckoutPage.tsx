@@ -110,7 +110,40 @@ export default function CheckoutPage() {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.error || "Failed to record order.");
     }
-    return await res.json();
+    const orderData = await res.json();
+    try {
+      const { useStoreData } = await import("../lib/storeData");
+      const store = useStoreData.getState();
+      const rawOrd = orderData.order || orderData;
+      store.recordOrderForCustomer({
+        id: rawOrd.id || Date.now(),
+        orderNumber: rawOrd.orderNumber || `EZY-${Date.now().toString().slice(-6)}`,
+        customerName: customerName || user?.name || "Valued Customer",
+        customerEmail: customerEmail || user?.email || "customer@ezy1.site",
+        customerPhone: customerPhone || user?.phone || "9876543210",
+        deliveryAddress: selectedLocation.formattedAddress || "Bengaluru, Karnataka",
+        items: Object.values(items).map((item) => ({
+          id: Number(item.product.id) || 1,
+          name: item.product.name,
+          price: item.product.price,
+          quantity: item.quantity,
+          image: item.product.image,
+        })),
+        totalAmount: toPay,
+        deliveryFee: 30,
+        discountAmount: 0,
+        orderSource: "WEB",
+        status: "NEW",
+        paymentMethod: (payMethod === "Cash on Delivery" ? "COD" : payMethod === "EZY1 Wallet" ? "Wallet" : "UPI") as any,
+        paymentStatus: payStatus as any,
+        vendorId: Object.values(items)[0]?.product?.vendorId || 1,
+        timeline: [{ status: "NEW", timestamp: new Date().toLocaleTimeString() }],
+        createdAt: new Date().toLocaleString(),
+      });
+    } catch (e) {
+      console.warn("Could not sync order to local intelligence store:", e);
+    }
+    return orderData;
   };
 
   const handlePayment = async () => {

@@ -14,11 +14,15 @@ import { Label } from "@/components/ui/label";
 import {
   CreditCard,
   Edit2,
+  Eye,
   Mail,
   MapPin,
   Phone,
   Power,
+  Search,
   ShoppingBag,
+  ShoppingCart,
+  Sparkles,
   Trash2,
   User,
   Users,
@@ -38,6 +42,8 @@ export function CustomersManager() {
   const [editingCustomer, setEditingCustomer] = useState<StoredCustomer | null>(
     null,
   );
+  const [detailCustomer, setDetailCustomer] = useState<StoredCustomer | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
 
   // Form State
   const [name, setName] = useState("");
@@ -237,6 +243,52 @@ export function CustomersManager() {
                 </div>
               </div>
 
+              {/* Frequently Ordered Items Breakdown */}
+              {cust.frequentlyOrderedItems && cust.frequentlyOrderedItems.length > 0 && (
+                <div className="space-y-1">
+                  <span className="text-[10px] font-bold text-muted-foreground flex items-center gap-1">
+                    <Sparkles className="w-3 h-3 text-amber-500" /> Frequently Ordered:
+                  </span>
+                  <div className="flex flex-wrap gap-1">
+                    {cust.frequentlyOrderedItems.slice(0, 3).map((it, idx) => (
+                      <span
+                        key={idx}
+                        className="bg-primary/10 text-primary border border-primary/20 text-[10px] px-2 py-0.5 rounded-full font-medium"
+                      >
+                        {it.name} <b className="text-primary font-bold">({it.count}x)</b>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Recent Searches */}
+              {cust.recentSearches && cust.recentSearches.length > 0 && (
+                <div className="space-y-1">
+                  <span className="text-[10px] font-bold text-muted-foreground flex items-center gap-1">
+                    <Search className="w-3 h-3 text-cyan-500" /> Recent Searches:
+                  </span>
+                  <div className="flex flex-wrap gap-1">
+                    {cust.recentSearches.slice(0, 3).map((q, idx) => (
+                      <span
+                        key={idx}
+                        className="bg-muted text-muted-foreground text-[10px] px-2 py-0.5 rounded-full"
+                      >
+                        "{q}"
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Active Cart State */}
+              {cust.activeCartItems && cust.activeCartItems.length > 0 && (
+                <div className="flex items-center gap-1.5 text-[11px] font-medium text-amber-600 bg-amber-500/10 px-2.5 py-1 rounded-xl">
+                  <ShoppingCart className="w-3.5 h-3.5" />
+                  <span>{cust.activeCartItems.length} items currently in cart</span>
+                </div>
+              )}
+
               <div className="flex items-center justify-between pt-2 border-t border-border/60">
                 <Button
                   variant="outline"
@@ -253,6 +305,19 @@ export function CustomersManager() {
                 </Button>
 
                 <div className="flex items-center gap-1.5">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setDetailCustomer(cust);
+                      setIsDetailOpen(true);
+                    }}
+                    className="h-8 px-2.5 text-xs rounded-xl text-primary border-primary/30 hover:bg-primary/10 font-semibold"
+                    title="View Full Customer Intelligence"
+                  >
+                    <Eye className="w-3.5 h-3.5 mr-1" />
+                    Insights
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"
@@ -369,6 +434,128 @@ export function CustomersManager() {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Customer Intelligence & Profile Detail Dialog */}
+      <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
+        <DialogContent className="max-w-lg bg-card border-border shadow-2xl rounded-3xl p-6">
+          {detailCustomer && (
+            <div className="space-y-5">
+              <DialogHeader>
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold text-xl">
+                    {detailCustomer.name.charAt(0)}
+                  </div>
+                  <div>
+                    <DialogTitle className="text-xl font-bold font-display">
+                      {detailCustomer.name}
+                    </DialogTitle>
+                    <DialogDescription className="text-xs text-muted-foreground font-mono">
+                      Customer ID: #{detailCustomer.id} • Joined: {detailCustomer.joinedAt}
+                    </DialogDescription>
+                  </div>
+                </div>
+              </DialogHeader>
+
+              {/* Contact & Spend Metrics */}
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="p-3 rounded-2xl bg-muted/50 border border-border">
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold block">Contact</span>
+                  <p className="font-semibold text-foreground mt-1 flex items-center gap-1.5">
+                    <Phone className="w-3 h-3 text-primary" /> {detailCustomer.phone}
+                  </p>
+                  <p className="text-muted-foreground text-[11px] truncate flex items-center gap-1.5 mt-0.5">
+                    <Mail className="w-3 h-3 text-primary" /> {detailCustomer.email}
+                  </p>
+                  <p className="text-muted-foreground text-[11px] flex items-center gap-1.5 mt-0.5">
+                    <MapPin className="w-3 h-3 text-primary" /> {detailCustomer.city}
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-muted/50 border border-border">
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold block">Lifetime Activity</span>
+                  <p className="font-display font-black text-lg text-emerald-600 mt-1">
+                    ₹{detailCustomer.totalSpent.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-foreground font-medium">
+                    {detailCustomer.totalOrders} Completed Orders
+                  </p>
+                  <p className="text-[11px] text-muted-foreground font-bold mt-0.5">
+                    Wallet: ₹{detailCustomer.walletBalance}
+                  </p>
+                </div>
+              </div>
+
+              {/* Frequently Ordered Items */}
+              <div className="space-y-2">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Frequently Ordered Products
+                </h4>
+                {detailCustomer.frequentlyOrderedItems && detailCustomer.frequentlyOrderedItems.length > 0 ? (
+                  <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                    {detailCustomer.frequentlyOrderedItems.map((item, idx) => (
+                      <div key={idx} className="flex items-center justify-between p-2 rounded-xl bg-muted/40 text-xs">
+                        <span className="font-medium text-foreground">{item.name}</span>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="text-[10px] font-bold">
+                            Ordered {item.count} times
+                          </Badge>
+                          <span className="font-bold text-foreground">₹{item.price * item.count}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground italic">No order history recorded yet.</p>
+                )}
+              </div>
+
+              {/* Recent Searches */}
+              <div className="space-y-2">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  <Search className="w-3.5 h-3.5 text-cyan-500" /> Recent Search Queries
+                </h4>
+                {detailCustomer.recentSearches && detailCustomer.recentSearches.length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5">
+                    {detailCustomer.recentSearches.map((q, idx) => (
+                      <Badge key={idx} variant="outline" className="text-xs font-medium py-1 px-2.5">
+                        "{q}"
+                      </Badge>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground italic">No search history recorded yet.</p>
+                )}
+              </div>
+
+              {/* Active Cart Items */}
+              {detailCustomer.activeCartItems && detailCustomer.activeCartItems.length > 0 && (
+                <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 space-y-1.5">
+                  <h4 className="text-xs font-bold text-amber-700 flex items-center gap-1.5">
+                    <ShoppingCart className="w-3.5 h-3.5" /> Items Currently In Cart (Live)
+                  </h4>
+                  <div className="space-y-1">
+                    {detailCustomer.activeCartItems.map((item, idx) => (
+                      <div key={idx} className="flex justify-between text-xs text-foreground">
+                        <span>{item.quantity}x {item.name}</span>
+                        <span className="font-bold">₹{item.price * item.quantity}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <DialogFooter>
+                <Button
+                  onClick={() => setIsDetailOpen(false)}
+                  className="w-full rounded-xl bg-primary text-primary-foreground font-semibold"
+                >
+                  Close Insights
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

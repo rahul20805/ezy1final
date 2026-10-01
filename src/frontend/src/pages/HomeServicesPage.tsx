@@ -7,11 +7,27 @@ import { CheckCircle2, MapPin, Search, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import { RelatedPagesBar } from "../components/RelatedPagesBar";
+import { useStoreData } from "../lib/storeData";
 import { workers } from "../mock-data";
 
 export default function HomeServicesPage() {
+  const store = useStoreData();
   const [searchTerm, setSearchTerm] = useState("");
-  const [workerList, setWorkerList] = useState<any[]>(workers);
+
+  const storeWorkers = store.services.map((s) => ({
+    id: s.id,
+    name: s.name,
+    category: s.category,
+    rating: s.rating || 4.9,
+    totalReviews: s.totalReviews || 24,
+    pricePerHour: s.pricePerHour || 299,
+    isAvailable: s.isAvailable !== false,
+    phone: "+91 98765 43210",
+    city: "Bengaluru",
+  }));
+
+  const initialList = storeWorkers.length > 0 ? storeWorkers : workers;
+  const [workerList, setWorkerList] = useState<any[]>(initialList);
 
   useEffect(() => {
     async function loadDynamicServices() {

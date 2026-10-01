@@ -62,5 +62,46 @@ export const productController = {
     } catch (err: any) {
       sendError(res, err.message, 404);
     }
+  },
+
+  async createProduct(req: Request, res: Response) {
+    try {
+      const { name, price, category, description, image, available, vendorId } = req.body;
+      if (!name || price === undefined || !category) {
+        return sendError(res, "Name, price, and category are required", 400);
+      }
+      const product = await productService.createProduct({
+        name,
+        price: Number(price),
+        category,
+        description,
+        image,
+        available,
+        vendorId: vendorId ? Number(vendorId) : 1
+      });
+      res.status(201).json(product);
+    } catch (err: any) {
+      sendError(res, err.message, 400);
+    }
+  },
+
+  async updateProduct(req: Request, res: Response) {
+    try {
+      const id = Number(req.params.id);
+      const product = await productService.updateProduct(id, req.body);
+      res.json(product);
+    } catch (err: any) {
+      sendError(res, err.message, 400);
+    }
+  },
+
+  async deleteProduct(req: Request, res: Response) {
+    try {
+      const id = Number(req.params.id);
+      const result = await productService.deleteProduct(id);
+      res.json(result);
+    } catch (err: any) {
+      sendError(res, err.message, 400);
+    }
   }
 };
