@@ -18,8 +18,10 @@ import { toast } from "sonner";
 import { LocationModal } from "../components/location/LocationModal";
 import { useCartStore } from "../lib/cartStore";
 import { type LocationData, useLocationStore } from "../lib/locationStore";
+import { useTranslation } from "../lib/i18n/useTranslation";
 
 export default function CheckoutPage() {
+  const { t } = useTranslation();
   const { isAuthenticated, user } = useAuth();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const { currentLocation, savedAddresses } = useLocationStore();
@@ -737,20 +739,20 @@ export default function CheckoutPage() {
             <Card className="sticky top-20 border-border">
               <CardContent className="p-5 space-y-4">
                 <h3 className="font-bold text-lg border-b pb-2">
-                  Order Summary
+                  {t("checkout.orderSummary")}
                 </h3>
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-muted-foreground">
-                    Items Total ({totalItems})
+                    {t("checkout.itemsTotal")} ({totalItems})
                   </span>
                   <span className="font-medium">₹{totalAmount}</span>
                 </div>
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-muted-foreground">Delivery Fee</span>
+                  <span className="text-muted-foreground">{t("checkout.deliveryFee")}</span>
                   <span className="font-medium">₹{deliveryFee}</span>
                 </div>
                 <div className="border-t pt-2 flex justify-between items-center font-bold text-lg">
-                  <span>To Pay</span>
+                  <span>{t("checkout.totalPayable")}</span>
                   <span className="text-primary">₹{toPay}</span>
                 </div>
 

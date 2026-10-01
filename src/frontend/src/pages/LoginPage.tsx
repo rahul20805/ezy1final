@@ -35,8 +35,10 @@ import Layout from "../components/Layout";
 import { getAdminPortalUrl, getPartnerPortalUrl } from "../config/links";
 import { useAuth } from "../lib/AuthContext";
 import { checkUsernameAvailability } from "../lib/api";
+import { useTranslation } from "../lib/i18n/useTranslation";
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const {
     signInWithPassword,
     signUp,
@@ -357,7 +359,7 @@ export default function LoginPage() {
               }`}
             >
               <LogIn className="w-3.5 h-3.5" />
-              Sign In
+              {t("auth.login")}
             </button>
             <button
               type="button"
@@ -369,7 +371,7 @@ export default function LoginPage() {
               }`}
             >
               <UserPlus className="w-3.5 h-3.5" />
-              New Account
+              {t("auth.signup")}
             </button>
             <button
               type="button"
@@ -384,7 +386,7 @@ export default function LoginPage() {
               }`}
             >
               <Smartphone className="w-3.5 h-3.5" />
-              Mobile OTP
+              {t("auth.sendOtp")}
             </button>
           </div>
 
@@ -413,13 +415,13 @@ export default function LoginPage() {
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                         <Lock className="w-3.5 h-3.5 text-muted-foreground" />
-                        Password
+                        {t("auth.password")}
                       </label>
                     </div>
                     <div className="relative">
                       <Input
                         type={showLoginPassword ? "text" : "password"}
-                        placeholder="Enter your password"
+                        placeholder={t("auth.passwordPlaceholder")}
                         value={loginPassword}
                         onChange={(e) => setLoginPassword(e.target.value)}
                         className="h-11 text-base font-medium pr-10"
@@ -449,12 +451,12 @@ export default function LoginPage() {
                     {isLoading ? (
                       <>
                         <RefreshCw className="w-4 h-4 animate-spin" />
-                        Authenticating...
+                        {t("common.loading")}
                       </>
                     ) : (
                       <>
                         <LogIn className="w-4 h-4" />
-                        Sign In
+                        {t("auth.login")}
                         <ArrowRight className="w-4 h-4 ml-auto" />
                       </>
                     )}

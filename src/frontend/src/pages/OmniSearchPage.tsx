@@ -41,6 +41,7 @@ import { useCartStore } from "../lib/cartStore";
 import { useDynamicCatalog } from "../lib/dynamicCatalog";
 import { useStoreData } from "../lib/storeData";
 import { doctors, workers } from "../mock-data";
+import { useTranslation } from "../lib/i18n/useTranslation";
 
 type SortOption =
   | "relevant"
@@ -58,6 +59,7 @@ type CategoryTab =
   | "spots";
 
 export default function OmniSearchPage() {
+  const { t } = useTranslation();
   // 1. URL Query Synchronization
   const getInitialQuery = () => {
     if (typeof window !== "undefined") {
@@ -560,7 +562,7 @@ export default function OmniSearchPage() {
                   setQuery(e.target.value);
                   updateUrlQuery(e.target.value);
                 }}
-                placeholder="Search products, food, doctors, services & more..."
+                placeholder={t("search.placeholder")}
                 className="pl-12 pr-28 h-13 rounded-2xl bg-muted/40 border-border text-base shadow-xs font-medium focus:bg-background transition-all"
               />
               {query && (
@@ -581,7 +583,7 @@ export default function OmniSearchPage() {
                 size="sm"
                 className="absolute right-2 top-1/2 -translate-y-1/2 h-9 px-4 rounded-xl text-xs font-bold bg-primary text-primary-foreground shadow-xs cursor-pointer hover:bg-primary/90"
               >
-                Search
+                {t("common.search")}
               </Button>
             </form>
 
@@ -676,7 +678,7 @@ export default function OmniSearchPage() {
               <div className="flex items-center gap-2 shrink-0">
                 <span className="text-xs text-muted-foreground font-semibold flex items-center gap-1">
                   <SlidersHorizontal className="w-3.5 h-3.5 text-primary" />
-                  Sort:
+                  {t("search.sortBy")}:
                 </span>
                 <select
                   value={sortBy}
@@ -684,9 +686,9 @@ export default function OmniSearchPage() {
                   className="bg-muted/70 hover:bg-muted text-foreground text-xs font-bold rounded-xl px-3 py-1.5 border border-border/80 outline-none cursor-pointer transition-colors shadow-2xs"
                 >
                   <option value="relevant">Relevant (Best Match)</option>
-                  <option value="price_asc">Price: Low to High</option>
-                  <option value="price_desc">Price: High to Low</option>
-                  <option value="rating">Top Rated</option>
+                  <option value="price_asc">{t("search.priceLowHigh")}</option>
+                  <option value="price_desc">{t("search.priceHighLow")}</option>
+                  <option value="rating">{t("search.highestRated")}</option>
                   <option value="name_asc">Name: A to Z</option>
                 </select>
               </div>
@@ -696,7 +698,7 @@ export default function OmniSearchPage() {
             {!query && (
               <div className="flex items-center gap-2 overflow-x-auto pt-2 pb-1 text-xs scrollbar-none">
                 <span className="text-muted-foreground font-semibold text-[11px] shrink-0">
-                  Popular Searches:
+                  {t("search.popularSearches")}
                 </span>
                 {[
                   "Atta",
@@ -760,12 +762,10 @@ export default function OmniSearchPage() {
                 🔍
               </div>
               <h3 className="text-lg font-bold font-display text-foreground mb-1">
-                No matching results found for "{query}"
+                {t("search.noResults")} &quot;{query}&quot;
               </h3>
               <p className="text-xs text-muted-foreground mb-6 max-w-md mx-auto">
-                We couldn't find an exact match. Try searching for common
-                grocery items, cuisines, medical specialties, or home repair
-                services.
+                {t("search.tryDifferent")}
               </p>
 
               <div className="flex flex-wrap justify-center gap-2">

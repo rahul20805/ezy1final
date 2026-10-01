@@ -66,6 +66,7 @@ import { useLocationStore } from "../lib/locationStore";
 import { useDynamicCatalog } from "../lib/dynamicCatalog";
 import { useStoreData } from "../lib/storeData";
 import { doctors, workers } from "../mock-data";
+import { useTranslation } from "../lib/i18n/useTranslation";
 
 /** Reusable Horizontal Scrollable Carousel with Arrow Nav */
 function ScrollableRow({
@@ -117,6 +118,7 @@ export default function LandingPage() {
   const { requireAuth } = useRequireAuth();
   const { catalog: dynamicCatalog } = useDynamicCatalog();
   const store = useStoreData();
+  const { t } = useTranslation();
 
   const [homeSearch, setHomeSearch] = useState("");
   const [searchCategory, setSearchCategory] = useState<string>("all");
@@ -613,7 +615,7 @@ export default function LandingPage() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs font-bold text-foreground truncate">
-                      Delivery Location:
+                      {t("home.deliveryTo")}:
                     </span>
                     <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-[9px] font-bold px-1.5 py-0">
                       ⚡ 15 MINS
@@ -634,7 +636,7 @@ export default function LandingPage() {
                     : "Welcome to EZY1 👋"}
                 </span>
                 <p className="text-[10px] text-primary font-bold">
-                  Local Super-App for Everything
+                  {t("home.heroSubtitle")}
                 </p>
               </div>
             </div>
@@ -645,7 +647,7 @@ export default function LandingPage() {
               <Input
                 value={homeSearch}
                 onChange={(e) => setHomeSearch(e.target.value)}
-                placeholder='Search "Atta", "Dolo 650", "Biryani", "Doctor", "Hotel", "Bus"...'
+                placeholder={t("search.placeholder")}
                 className="pl-10 pr-20 sm:pl-11 sm:pr-24 h-11 sm:h-12 rounded-2xl bg-muted/40 border-border text-xs sm:text-sm font-medium focus:bg-background transition-all shadow-inner"
               />
               <Button
@@ -653,7 +655,7 @@ export default function LandingPage() {
                 size="sm"
                 className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 h-8 rounded-xl px-3 sm:px-4 text-xs font-bold bg-primary text-primary-foreground shadow-sm"
               >
-                Search
+                {t("common.search")}
               </Button>
             </form>
 
@@ -1233,7 +1235,7 @@ export default function LandingPage() {
             <div>
               <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
                 <Zap className="w-5 h-5 text-amber-500 fill-amber-500" />
-                Quick Commerce — Delivered in 15 Mins
+                {t("home.quickCommerce")}
               </h2>
               <p className="text-xs text-muted-foreground">
                 Kitchen staples, dairy, beverages & instant snacks
@@ -1243,7 +1245,7 @@ export default function LandingPage() {
               to={"/category/grocery" as any}
               className="text-xs font-semibold text-primary hover:underline"
             >
-              See All →
+              {t("home.viewAll")} →
             </Link>
           </div>
 
@@ -1331,7 +1333,7 @@ export default function LandingPage() {
                           onClick={() => handleAddToCart(item)}
                           className="h-7 px-3 rounded-lg text-xs font-bold bg-primary text-primary-foreground"
                         >
-                          Add
+                          {t("home.addToCart")}
                         </Button>
                       )}
                     </div>
@@ -1350,7 +1352,7 @@ export default function LandingPage() {
             <div>
               <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
                 <UtensilsCrossed className="w-5 h-5 text-orange-500" />
-                Restaurants & Local Kitchens Near You
+                {t("home.popularDishes")}
               </h2>
               <p className="text-xs text-muted-foreground">
                 Authentic biryani, North Indian combos, freshly brewed coffee
@@ -1360,7 +1362,7 @@ export default function LandingPage() {
               to={"/category/restaurants" as any}
               className="text-xs font-semibold text-primary hover:underline"
             >
-              View Menu →
+              {t("home.viewAll")} →
             </Link>
           </div>
 
@@ -1424,7 +1426,7 @@ export default function LandingPage() {
                       onClick={() => handleAddToCart(dish)}
                       className="h-8 rounded-xl px-4 text-xs font-bold bg-primary text-primary-foreground"
                     >
-                      Order Food
+                      {t("home.addToCart")}
                     </Button>
                   </div>
                 </CardContent>
@@ -1441,7 +1443,7 @@ export default function LandingPage() {
             <div>
               <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
                 <span className="text-xl">🥦</span>
-                Fresh Fruits & Daily Harvest
+                {t("home.freshProduce")}
               </h2>
               <p className="text-xs text-muted-foreground">
                 Handpicked farm-fresh greens, bananas, apples & tomatoes
@@ -1451,7 +1453,7 @@ export default function LandingPage() {
               to={"/category/fruits" as any}
               className="text-xs font-semibold text-primary hover:underline"
             >
-              View Produce →
+              {t("home.viewAll")} →
             </Link>
           </div>
 

@@ -31,7 +31,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useIsMobile } from "../hooks/use-mobile";
 import { useAuth } from "../lib/AuthContext";
 import { setCurrentRole } from "../lib/auth";
@@ -46,13 +46,17 @@ import { Ezy1Logo } from "./Ezy1Logo";
 import { NavaeInBottomAd } from "./NavaeInBottomAd";
 import { LegalDocumentLink } from "./legal/LegalDocumentLink";
 import { LocationModal } from "./location/LocationModal";
+import { LanguageSelectorModal } from "./language/LanguageSelectorModal";
+import { useTranslation } from "../lib/i18n/useTranslation";
+import { SUPPORTED_LANGUAGES } from "../lib/i18n/types";
+import { Globe } from "lucide-react";
 
 const navLinks = [
-  { label: "All Services", href: "/" },
-  { label: "Quick Commerce", href: "/category/grocery" },
-  { label: "Hospitals & Care", href: "/hospitals" },
-  { label: "Rides & Parcel", href: "/dashboard/transport" },
-  { label: "Famous in City", href: "/famous" },
+  { label: "All Services", key: "nav.allServices", href: "/" },
+  { label: "Quick Commerce", key: "nav.quickCommerce", href: "/category/grocery" },
+  { label: "Hospitals & Care", key: "nav.hospitalsCare", href: "/hospitals" },
+  { label: "Rides & Parcel", key: "nav.ridesParcel", href: "/dashboard/transport" },
+  { label: "Famous in City", key: "nav.famousInCity", href: "/famous" },
 ];
 
 interface LayoutProps {
@@ -63,7 +67,25 @@ export default function Layout({ children }: LayoutProps) {
   const store = useStoreData();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [locationDropdown, setLocationDropdown] = useState(false);
+  const [languageModalOpen, setLanguageModalOpen] = useState(false);
   const { currentLocation } = useLocationStore();
+  const {
+    t,
+    currentLanguage,
+    suggestedLanguage,
+    checkLocationForSuggestion,
+    isRtl,
+  } = useTranslation();
+
+  // Check location to suggest regional language without forcing it
+  useEffect(() => {
+    if (currentLocation?.state || currentLocation?.city) {
+      checkLocationForSuggestion(currentLocation.state, currentLocation.city);
+    }
+  }, [currentLocation?.state, currentLocation?.city, checkLocationForSuggestion]);
+
+  const activeLangMeta = SUPPORTED_LANGUAGES.find((l) => l.code === currentLanguage);
+
   const { unreadCount } = useNotificationStore();
   const { totalItems } = useCartStore();
   const [navSearchQuery, setNavSearchQuery] = useState("");
@@ -130,7 +152,7 @@ export default function Layout({ children }: LayoutProps) {
                   className="px-3 py-2 text-sm font-body text-muted-foreground hover:text-foreground transition-colors duration-200 rounded-md hover:bg-muted"
                   data-ocid={`nav.link.${link.label.toLowerCase()}`}
                 >
-                  {link.label}
+                  {t(link.key)}
                 </a>
               ))}
             </nav>
@@ -162,7 +184,7 @@ export default function Layout({ children }: LayoutProps) {
                   type="text"
                   value={navSearchQuery}
                   onChange={(e) => setNavSearchQuery(e.target.value)}
-                  placeholder="Search products, food, doctors, services & more..."
+                  placeholder={t("search.placeholder")}
                   className="w-full h-9 pl-9 pr-14 rounded-full bg-muted/60 border border-border/60 hover:border-primary/50 focus:border-primary focus:bg-background transition-smooth text-xs outline-none text-foreground placeholder:text-muted-foreground"
                 />
                 {navSearchQuery && (
@@ -187,6 +209,29 @@ export default function Layout({ children }: LayoutProps) {
 
           {/* Right actions */}
           <div className="flex items-center gap-2">
+            {/* Language pill - visible on mobile and desktop */}
+            <button
+              type="button"
+              onClick={() => setLanguageModalOpen(true)}
+              className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-muted/80 text-[11px] sm:text-xs text-muted-foreground hover:bg-primary/10 hover:text-primary transition-smooth border border-border cursor-pointer shrink-0"
+              data-ocid="nav.language_toggle"
+              title="Change Language"
+            >
+              <Globe className="w-3.5 h-3.5 text-primary shrink-0" />
+              <span className="font-semibold text-foreground">
+                {activeLangMeta?.nativeName || "English"}
+              </span>
+              {suggestedLanguage && suggestedLanguage !== currentLanguage && (
+                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" title="Regional suggestion available" />
+              )}
+              <ChevronDown className="w-3 h-3 shrink-0 opacity-70" />
+            </button>
+
+            <LanguageSelectorModal
+              open={languageModalOpen}
+              onOpenChange={setLanguageModalOpen}
+            />
+
             {/* Location pill - visible on mobile and desktop */}
             <button
               type="button"
@@ -218,7 +263,7 @@ export default function Layout({ children }: LayoutProps) {
               >
                 <ShoppingCart className="w-4 h-4 text-primary" />
                 <span className="hidden sm:inline font-display font-bold">
-                  Cart
+                  {t("nav.cart")}
                 </span>
                 {totalItems > 0 && (
                   <span className="flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground font-black text-[10px] shadow-sm">
@@ -399,7 +444,7 @@ export default function Layout({ children }: LayoutProps) {
                       className="flex items-center gap-2 px-3 py-2 cursor-pointer text-rose-600 dark:text-rose-400 rounded-xl text-xs font-semibold hover:bg-rose-500/10"
                     >
                       <LogOut className="w-4 h-4" />
-                      <span>Sign Out</span>
+                      <span>{t("nav.logout")}</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -413,7 +458,7 @@ export default function Layout({ children }: LayoutProps) {
                   className="text-xs font-bold font-display rounded-full px-4 bg-primary text-primary-foreground shadow-sm"
                   data-ocid="nav.login_button"
                 >
-                  Login / Sign Up
+                  {t("nav.login")}
                 </Button>
               </div>
             )}
@@ -440,6 +485,30 @@ export default function Layout({ children }: LayoutProps) {
                     <div className="p-4 border-b border-border">
                       <Ezy1Logo size="md" />
                     </div>
+
+                    {/* Language Selector in Mobile Drawer */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMobileOpen(false);
+                        setLanguageModalOpen(true);
+                      }}
+                      className="flex items-center gap-2.5 px-4 py-3 bg-muted/30 border-b border-border text-left hover:bg-muted/70 transition-colors w-full cursor-pointer"
+                    >
+                      <Globe className="w-4 h-4 text-primary shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] uppercase font-semibold text-muted-foreground">
+                          {t("common.chooseLanguage")}
+                        </p>
+                        <p className="text-sm text-foreground font-medium truncate flex items-center gap-1.5">
+                          <span>{activeLangMeta?.nativeName || "English"} ({activeLangMeta?.name || "English"})</span>
+                          {suggestedLanguage && suggestedLanguage !== currentLanguage && (
+                            <span className="text-[10px] bg-primary text-primary-foreground px-1.5 py-0.2 rounded font-bold">New</span>
+                          )}
+                        </p>
+                      </div>
+                      <ChevronDown className="w-3.5 h-3.5 text-muted-foreground ml-auto shrink-0" />
+                    </button>
 
                     {/* Location */}
                     <button
@@ -509,7 +578,7 @@ export default function Layout({ children }: LayoutProps) {
                           onClick={() => setMobileOpen(false)}
                           data-ocid={`nav.mobile_link.${link.label.toLowerCase()}`}
                         >
-                          {link.label}
+                          {t(link.key)}
                         </a>
                       ))}
                       {isAuthenticated && (
@@ -543,7 +612,7 @@ export default function Layout({ children }: LayoutProps) {
                           >
                             <span className="flex items-center gap-2.5">
                               <ShoppingCart className="w-4 h-4 text-emerald-500" />
-                              My Cart
+                              {t("nav.cart")}
                             </span>
                             {totalItems > 0 && (
                               <Badge className="text-[10px] font-bold px-1.5 py-0 bg-primary">
@@ -644,7 +713,7 @@ export default function Layout({ children }: LayoutProps) {
                           data-ocid="nav.mobile_logout_button"
                         >
                           <LogOut className="w-4 h-4" />
-                          Sign Out
+                          {t("nav.logout")}
                         </Button>
                       ) : (
                         <div className="flex flex-col gap-2">
@@ -656,7 +725,7 @@ export default function Layout({ children }: LayoutProps) {
                             }}
                             data-ocid="nav.mobile_login_button"
                           >
-                            Login / Sign Up
+                            {t("nav.login")}
                           </Button>
                           <a
                             href={getPartnerPortalUrl()}
@@ -665,7 +734,7 @@ export default function Layout({ children }: LayoutProps) {
                             data-ocid="nav.mobile_partner_login_button"
                           >
                             <ShieldCheck className="w-3.5 h-3.5 text-primary" />
-                            <span>Partner Login (partner.ezy1.site)</span>
+                            <span>{t("partner.partnerLogin")}</span>
                             <span className="text-[10px] text-muted-foreground">
                               →
                             </span>
@@ -1048,7 +1117,7 @@ export default function Layout({ children }: LayoutProps) {
                     className="text-sm font-medium text-primary hover:underline transition-colors flex items-center gap-1"
                     data-ocid="footer.partner_login_link"
                   >
-                    <span>Partner Login</span>
+                    <span>{t("partner.partnerLogin")}</span>
                     <span className="text-xs">→</span>
                   </a>
                 </li>
@@ -1057,7 +1126,7 @@ export default function Layout({ children }: LayoutProps) {
                     to="/partner-onboarding"
                     className="text-sm text-muted-foreground hover:text-primary transition-colors"
                   >
-                    Partner Registration
+                    {t("partner.partnerRegister")}
                   </Link>
                 </li>
               </ul>
@@ -1150,7 +1219,7 @@ export default function Layout({ children }: LayoutProps) {
           }`}
         >
           <Home className="w-5 h-5 mb-0.5" />
-          <span>Home</span>
+          <span>{t("nav.home")}</span>
         </Link>
         <Link
           to={"/category/grocery" as any}
@@ -1161,7 +1230,7 @@ export default function Layout({ children }: LayoutProps) {
           }`}
         >
           <Zap className="w-5 h-5 mb-0.5" />
-          <span>Quick 15m</span>
+          <span>15m Quick</span>
         </Link>
         <Link
           to="/search"
@@ -1172,7 +1241,7 @@ export default function Layout({ children }: LayoutProps) {
           }`}
         >
           <Search className="w-5 h-5 mb-0.5" />
-          <span>Search</span>
+          <span>{t("nav.search")}</span>
         </Link>
         <Link
           to="/my-orders"
@@ -1183,7 +1252,7 @@ export default function Layout({ children }: LayoutProps) {
           }`}
         >
           <Package className="w-5 h-5 mb-0.5" />
-          <span>Orders</span>
+          <span>{t("nav.orders")}</span>
         </Link>
         <Link
           to={isAuthenticated ? "/my-account" : "/login"}
@@ -1194,7 +1263,7 @@ export default function Layout({ children }: LayoutProps) {
           }`}
         >
           <User className="w-5 h-5 mb-0.5" />
-          <span>{isAuthenticated ? "Account" : "Login"}</span>
+          <span>{isAuthenticated ? t("nav.profile") : t("nav.login")}</span>
         </Link>
       </nav>
     </div>
