@@ -291,6 +291,30 @@ export const emailService = {
     });
   },
 
+  async sendEmailVerificationOtp(email: string, otp: string, name?: string) {
+    const subject = `🔐 Verify Your EZY1 Account: ${otp}`;
+    const htmlContent = templates.tplEmailVerification({ name, otp });
+    return this.sendEmail({
+      to: email,
+      subject,
+      htmlContent,
+      type: "EMAIL_VERIFICATION",
+      idempotencyKey: `email_verif_${email}_${otp}`,
+    });
+  },
+
+  async sendPasswordResetEmail(email: string, otp: string, name?: string) {
+    const subject = `🔑 Reset Your EZY1 Password: ${otp}`;
+    const htmlContent = templates.tplPasswordReset({ name, otp });
+    return this.sendEmail({
+      to: email,
+      subject,
+      htmlContent,
+      type: "PASSWORD_RESET",
+      idempotencyKey: `pwd_reset_${email}_${otp}`,
+    });
+  },
+
   async sendBookingConfirmationEmail(params: {
     booking: any;
     customerEmail?: string;

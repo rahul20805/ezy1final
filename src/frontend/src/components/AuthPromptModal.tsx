@@ -222,21 +222,25 @@ export function AuthPromptProvider({
                   className="h-12 rounded-xl text-center text-xl font-bold tracking-widest bg-background border-border"
                   autoFocus
                 />
-                {devOtp && (
-                  <p className="text-[11px] text-primary font-mono mt-1 text-center bg-primary/10 py-1 rounded-md">
-                    Demo Mode OTP: <strong>{devOtp}</strong>
-                  </p>
-                )}
               </div>
 
               <Button
                 type="submit"
-                disabled={loading}
+                disabled={loading || otp.length < 6}
                 className="w-full h-12 rounded-xl font-bold font-display bg-primary text-primary-foreground shadow-sm hover:opacity-95"
               >
                 {loading ? "Verifying..." : "Verify & Complete Action"}
                 <CheckCircle className="w-4 h-4 ml-2" />
               </Button>
+
+              <div className="text-center pt-1">
+                <a
+                  href="/login"
+                  className="text-xs text-muted-foreground hover:text-primary hover:underline"
+                >
+                  Or sign in with email &amp; password →
+                </a>
+              </div>
             </form>
           )}
         </DialogContent>

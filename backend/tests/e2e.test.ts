@@ -4,6 +4,8 @@ import crypto from "crypto";
 import { ENV } from "../src/config/env.config.js";
 import { signJwt } from "../src/utils/jwt.utils.js";
 
+import { queryOne } from "../src/repositories/database.adapter.js";
+
 const PORT = 3099;
 let server: http.Server;
 const BASE_URL = `http://localhost:${PORT}/api`;
@@ -60,7 +62,11 @@ async function runAllTests() {
     assert(sendOtpRes.status === 200, "Request OTP returns HTTP 200");
     assert(sendOtpData.success === true, "OTP dispatch succeeds");
 
-    const receivedOtp = sendOtpData.otp || sendOtpData.debugOtp || "123456";
+    const otpDbRecord = await queryOne(
+      "SELECT * FROM otps WHERE phone = ? ORDER BY id DESC LIMIT 1",
+      [testPhone]
+    );
+    const receivedOtp = otpDbRecord?.plainOtp;
 
     // 2.2 Verify OTP
     const verifyOtpRes = await fetch(`${BASE_URL}/auth/verify-otp`, {
@@ -74,7 +80,7 @@ async function runAllTests() {
     }
     assert(verifyOtpRes.status === 200, "Verify OTP returns HTTP 200");
     assert(verifyOtpData.token !== undefined, "User JWT token generated");
-    assert(verifyOtpData.user.name === "Ananya Sharma", "User profile initialized correctly");
+    assert(verifyOtpData.user?.name === "Ananya Sharma", "User profile initialized correctly");
 
     const userToken = verifyOtpData.token;
 

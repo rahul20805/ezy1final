@@ -6,6 +6,11 @@ import {
   loginWithGoogle as apiLoginWithGoogle,
   requestOtp as apiRequestOtp,
   verifyOtpCode as apiVerifyOtpCode,
+  requestEmailOtp as apiRequestEmailOtp,
+  verifyEmailOtpCode as apiVerifyEmailOtpCode,
+  forgotPasswordRequest as apiForgotPasswordRequest,
+  verifyResetOtpCode as apiVerifyResetOtpCode,
+  resetPasswordSubmit as apiResetPasswordSubmit,
   clearAuthSession,
   fetchCurrentUser,
   getAuthToken,
@@ -35,7 +40,7 @@ interface AuthContextType {
     confirmPassword?: string;
     phone?: string;
     email?: string;
-  }) => Promise<{ success: boolean; user?: UserProfile; error?: string }>;
+  }) => Promise<{ success: boolean; user?: UserProfile; error?: string; message?: string }>;
   sendPhoneOtp: (
     phone: string,
   ) => Promise<{ success: boolean; message?: string; debugOtp?: string }>;
@@ -43,7 +48,28 @@ interface AuthContextType {
     phone: string,
     otp: string,
     name?: string,
-  ) => Promise<{ success: boolean; user?: UserProfile }>;
+  ) => Promise<{ success: boolean; user?: UserProfile; error?: string }>;
+  sendEmailOtp: (
+    email: string,
+    purpose?: "EMAIL_VERIFICATION" | "PASSWORD_RESET",
+    name?: string,
+  ) => Promise<{ success: boolean; message?: string }>;
+  verifyEmailOtp: (
+    email: string,
+    otp: string,
+  ) => Promise<{ success: boolean; user?: UserProfile; error?: string }>;
+  forgotPassword: (
+    email: string,
+  ) => Promise<{ success: boolean; message?: string }>;
+  verifyResetOtp: (
+    email: string,
+    otp: string,
+  ) => Promise<{ success: boolean; message?: string }>;
+  resetPassword: (
+    email: string,
+    otp: string,
+    newPassword: string,
+  ) => Promise<{ success: boolean; message?: string }>;
   signInWithGoogle: (payload: {
     email?: string;
     name?: string;
@@ -137,7 +163,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsAuthenticated(true);
         setCurrentRole((res.user.role?.toLowerCase() as any) || "customer");
         initSseConnection();
-        return { success: true, user: res.user };
+        return { success: true, user: res.user, message: res.message };
       }
       return { success: false, error: res.message || "Registration failed" };
     } catch (err: any) {
@@ -154,16 +180,58 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const verifyPhoneOtp = async (phone: string, otp: string, name?: string) => {
-    const res = await apiVerifyOtpCode(phone, otp, name);
-    if (res.success && res.token && res.user) {
-      setToken(res.token);
-      setUser(res.user);
-      setIsAuthenticated(true);
-      setCurrentRole((res.user.role?.toLowerCase() as any) || "customer");
-      initSseConnection();
-      return { success: true, user: res.user };
+    try {
+      const res = await apiVerifyOtpCode(phone, otp, name);
+      if (res.success && res.token && res.user) {
+        setToken(res.token);
+        setUser(res.user);
+        setIsAuthenticated(true);
+        setCurrentRole((res.user.role?.toLowerCase() as any) || "customer");
+        initSseConnection();
+        return { success: true, user: res.user };
+      }
+      return { success: false, error: res.message || "Verification failed" };
+    } catch (err: any) {
+      return { success: false, error: err.message || "Verification failed" };
     }
-    return { success: false };
+  };
+
+  const sendEmailOtp = async (
+    email: string,
+    purpose: "EMAIL_VERIFICATION" | "PASSWORD_RESET" = "EMAIL_VERIFICATION",
+    name?: string,
+  ) => {
+    const res = await apiRequestEmailOtp(email, purpose, name);
+    return res;
+  };
+
+  const verifyEmailOtp = async (email: string, otp: string) => {
+    try {
+      const res = await apiVerifyEmailOtpCode(email, otp);
+      if (res.success && res.token && res.user) {
+        setToken(res.token);
+        setUser(res.user);
+        setIsAuthenticated(true);
+        setCurrentRole((res.user.role?.toLowerCase() as any) || "customer");
+        initSseConnection();
+        return { success: true, user: res.user };
+      }
+      return { success: false, error: res.message || "Email verification failed" };
+    } catch (err: any) {
+      return { success: false, error: err.message || "Email verification failed" };
+    }
+  };
+
+  const forgotPassword = async (email: string) => {
+    return apiForgotPasswordRequest(email);
+  };
+
+  const verifyResetOtp = async (email: string, otp: string) => {
+    return apiVerifyResetOtpCode(email, otp);
+  };
+
+  const resetPassword = async (email: string, otp: string, newPassword: string) => {
+    return apiResetPasswordSubmit(email, otp, newPassword);
   };
 
   const signInWithGoogle = async (payload: {
@@ -185,7 +253,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { success: false };
   };
 
-  // Navigate directly to standard phone OTP login
+  // Navigate directly to standard login
   const login = async () => {
     window.location.href = "/login";
   };
@@ -213,6 +281,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signUp,
         sendPhoneOtp,
         verifyPhoneOtp,
+        sendEmailOtp,
+        verifyEmailOtp,
+        forgotPassword,
+        verifyResetOtp,
+        resetPassword,
         signInWithGoogle,
         login,
         logout,
@@ -226,7 +299,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    // Return a safe no-op context instead of crashing the whole app
     return {
       isAuthenticated: false,
       user: null,
@@ -242,6 +314,11 @@ export function useAuth() {
         message: "Not in AuthProvider",
       }),
       verifyPhoneOtp: async () => ({ success: false }),
+      sendEmailOtp: async () => ({ success: false }),
+      verifyEmailOtp: async () => ({ success: false }),
+      forgotPassword: async () => ({ success: false, message: "" }),
+      verifyResetOtp: async () => ({ success: false, message: "" }),
+      resetPassword: async () => ({ success: false, message: "" }),
       signInWithGoogle: async () => ({ success: false }),
       login: async () => {
         window.location.href = "/login";

@@ -179,6 +179,46 @@ export async function registerAccount(payload: {
   return data;
 }
 
+export async function requestEmailOtp(email: string, purpose: "EMAIL_VERIFICATION" | "PASSWORD_RESET" = "EMAIL_VERIFICATION", name?: string): Promise<AuthResponse> {
+  return apiRequest<AuthResponse>("/api/auth/send-email-otp", {
+    method: "POST",
+    body: JSON.stringify({ email, purpose, name }),
+  });
+}
+
+export async function verifyEmailOtpCode(email: string, otp: string): Promise<AuthResponse> {
+  const data = await apiRequest<AuthResponse>("/api/auth/verify-email-otp", {
+    method: "POST",
+    body: JSON.stringify({ email, otp }),
+  });
+  if (data.token && data.user) {
+    setAuthToken(data.token);
+    setStoredUser(data.user);
+  }
+  return data;
+}
+
+export async function forgotPasswordRequest(email: string): Promise<{ success: boolean; message: string }> {
+  return apiRequest<{ success: boolean; message: string }>("/api/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function verifyResetOtpCode(email: string, otp: string): Promise<{ success: boolean; message: string }> {
+  return apiRequest<{ success: boolean; message: string }>("/api/auth/verify-reset-otp", {
+    method: "POST",
+    body: JSON.stringify({ email, otp }),
+  });
+}
+
+export async function resetPasswordSubmit(email: string, otp: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+  return apiRequest<{ success: boolean; message: string }>("/api/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify({ email, otp, newPassword }),
+  });
+}
+
 export async function checkUsernameAvailability(
   username: string,
 ): Promise<{ available: boolean; message?: string }> {

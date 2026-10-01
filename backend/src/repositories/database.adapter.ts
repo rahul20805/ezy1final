@@ -62,13 +62,18 @@ async function initSqliteSchema(db: Database) {
       googleId TEXT,
       avatar TEXT,
       status TEXT DEFAULT 'ACTIVE',
+      emailVerified INTEGER DEFAULT 0,
+      phoneVerified INTEGER DEFAULT 0,
+      lastLoginAt DATETIME,
       createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
       updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
     CREATE TABLE IF NOT EXISTS otps (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      phone TEXT NOT NULL,
+      phone TEXT,
+      email TEXT,
+      purpose TEXT DEFAULT 'EMAIL_VERIFICATION',
       otpHash TEXT NOT NULL,
       plainOtp TEXT,
       expiresAt INTEGER NOT NULL,
@@ -225,6 +230,25 @@ async function initSqliteSchema(db: Database) {
   try {
     await db.exec("ALTER TABLE payments ADD COLUMN idempotencyKey TEXT;");
   } catch {}
+  try {
+    await db.exec("ALTER TABLE otps ADD COLUMN email TEXT;");
+  } catch {}
+  try {
+    await db.exec("ALTER TABLE otps ADD COLUMN purpose TEXT DEFAULT 'EMAIL_VERIFICATION';");
+  } catch {}
+  try {
+    await db.exec("ALTER TABLE users ADD COLUMN emailVerified INTEGER DEFAULT 0;");
+  } catch {}
+  try {
+    await db.exec("ALTER TABLE users ADD COLUMN phoneVerified INTEGER DEFAULT 0;");
+  } catch {}
+  try {
+    await db.exec("ALTER TABLE users ADD COLUMN lastLoginAt DATETIME;");
+  } catch {}
+  try {
+    await db.exec("ALTER TABLE users ADD COLUMN updatedAt DATETIME;");
+  } catch {}
+
 
   // Seed Default Partners if not existing
   const { hashPassword: hashPw } = await import("../utils/crypto.utils.js");

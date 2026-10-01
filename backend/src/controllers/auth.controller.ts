@@ -24,6 +24,56 @@ export const authController = {
     }
   },
 
+  async sendEmailOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email, purpose, name } = req.body;
+      const result = await authService.sendEmailOtp(email, purpose || "EMAIL_VERIFICATION", name);
+      sendSuccess(res, result);
+    } catch (err: any) {
+      sendError(res, err.message, 400);
+    }
+  },
+
+  async verifyEmailOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email, otp } = req.body;
+      const result = await authService.verifyEmailOtp(email, otp);
+      sendSuccess(res, result);
+    } catch (err: any) {
+      sendError(res, err.message, 400);
+    }
+  },
+
+  async forgotPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email } = req.body;
+      const result = await authService.forgotPassword(email);
+      sendSuccess(res, result);
+    } catch (err: any) {
+      sendError(res, err.message, 400);
+    }
+  },
+
+  async verifyResetOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email, otp } = req.body;
+      const result = await authService.verifyResetOtp(email, otp);
+      sendSuccess(res, result);
+    } catch (err: any) {
+      sendError(res, err.message, 400);
+    }
+  },
+
+  async resetPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email, otp, newPassword } = req.body;
+      const result = await authService.resetPassword(email, otp, newPassword);
+      sendSuccess(res, result);
+    } catch (err: any) {
+      sendError(res, err.message, 400);
+    }
+  },
+
   async register(req: Request, res: Response, next: NextFunction) {
     try {
       const { name, username, password, phone, email } = req.body;

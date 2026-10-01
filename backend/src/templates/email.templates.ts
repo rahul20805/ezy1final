@@ -188,3 +188,42 @@ export function tplPartnerApplicationReceived(data: { businessName?: string; own
   `;
   return wrapLayout({ title: "Partner Application Received", previewText: `Application received for ${data.businessName}`, content });
 }
+
+export function tplEmailVerification({ name, otp }: { name?: string; otp: string }): string {
+  const content = `
+    <p>Hi <strong>${name || "Valued User"}</strong>,</p>
+    <p>Welcome to <strong>EZY1</strong> — your local Super App for daily essentials, healthcare, transport &amp; on-demand home services.</p>
+    <p>Please enter the 6-digit security code below to verify your email address and activate your persistent user account:</p>
+    <div style="text-align: center; margin: 28px 0;">
+      <div style="background: #FFF7ED; border: 2px dashed #FF5100; border-radius: 14px; padding: 20px 32px; display: inline-block;">
+        <span style="font-size: 36px; font-weight: 900; letter-spacing: 8px; color: #FF5100; font-family: monospace;">${otp}</span>
+      </div>
+    </div>
+    <div style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 10px; padding: 12px 16px; margin: 20px 0; font-size: 12px; color: #4B5563;">
+      <p style="margin: 0;">⏱️ This verification code is valid for <strong>5 minutes</strong>.</p>
+      <p style="margin: 4px 0 0 0;">🔒 Never share this code with anyone. EZY1 representatives will never ask for your OTP or password.</p>
+    </div>
+    <p style="font-size: 12px; color: #6b7280; text-align: center;">If you did not create an account on EZY1, please ignore this email or reach us at <a href="mailto:support@ezy1.site" style="color:#FF5100;">support@ezy1.site</a>.</p>
+  `;
+  return wrapLayout({ title: "Verify Your EZY1 Account", previewText: `Your verification code is ${otp}`, content });
+}
+
+export function tplPasswordReset({ name, otp }: { name?: string; otp: string }): string {
+  const content = `
+    <p>Hi <strong>${name || "Valued User"}</strong>,</p>
+    <p>We received a request to reset the password for your <strong>EZY1</strong> account.</p>
+    <p>Enter the 6-digit password recovery code below to choose a new password:</p>
+    <div style="text-align: center; margin: 28px 0;">
+      <div style="background: #FEF2F2; border: 2px dashed #DC2626; border-radius: 14px; padding: 20px 32px; display: inline-block;">
+        <span style="font-size: 36px; font-weight: 900; letter-spacing: 8px; color: #DC2626; font-family: monospace;">${otp}</span>
+      </div>
+    </div>
+    <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 10px; padding: 12px 16px; margin: 20px 0; font-size: 12px; color: #92400E;">
+      <p style="margin: 0; font-weight: bold;">⚠️ Security Notice:</p>
+      <p style="margin: 4px 0 0 0;">This password reset code expires in <strong>5 minutes</strong>. If you did not request a password reset, someone may have entered your email by mistake. Your account remains secure and no changes have been made.</p>
+    </div>
+    <p style="font-size: 12px; color: #6b7280; text-align: center;">Need assistance? Contact our 24/7 security team at <a href="mailto:support@ezy1.site" style="color:#FF5100;">support@ezy1.site</a>.</p>
+  `;
+  return wrapLayout({ title: "Password Reset Request", previewText: `Your password recovery code is ${otp}`, content });
+}
+
