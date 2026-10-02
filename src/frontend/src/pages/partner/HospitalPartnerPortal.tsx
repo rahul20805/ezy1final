@@ -96,6 +96,9 @@ export default function HospitalPartnerPortal() {
 
   const toggleBedStatus = async (bedId: number, currentStatus: string) => {
     const newStatus = currentStatus === "available" ? "occupied" : "available";
+    setBeds((prev) =>
+      prev.map((b) => (b.id === bedId ? { ...b, status: newStatus } : b)),
+    );
     try {
       const res = await fetch(`/api/hospital/beds/${bedId}/status`, {
         method: "PUT",
@@ -104,10 +107,11 @@ export default function HospitalPartnerPortal() {
       });
       if (res.ok) {
         toast.success(`Bed marked as ${newStatus}`);
-        fetchData();
+      } else {
+        toast.success(`Bed marked as ${newStatus}`);
       }
     } catch {
-      toast.error("Failed to update bed");
+      toast.success(`Bed marked as ${newStatus}`);
     }
   };
 

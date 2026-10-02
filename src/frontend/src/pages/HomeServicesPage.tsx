@@ -11,10 +11,10 @@ import { useStoreData } from "../lib/storeData";
 import { workers } from "../mock-data";
 
 export default function HomeServicesPage() {
-  const store = useStoreData();
+  const storeServices = useStoreData((s) => s.services);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const storeWorkers = store.services.map((s) => ({
+  const storeWorkers = storeServices.map((s) => ({
     id: s.id,
     name: s.name,
     category: s.category,

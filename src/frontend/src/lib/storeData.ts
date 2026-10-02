@@ -2612,6 +2612,8 @@ export const useStoreData = create<StoreState>()(
           set({ customers: [newCust, ...customers] });
         }
 
+        set({ orders: [order, ...get().orders] });
+
         get().addLiveEvent({
           type: "order",
           title: "New Order Placed",

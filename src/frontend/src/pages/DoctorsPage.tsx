@@ -14,6 +14,8 @@ import {
   Stethoscope,
 } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { useRequireAuth } from "../components/AuthPromptModal";
 import Layout from "../components/Layout";
 import { RelatedPagesBar } from "../components/RelatedPagesBar";
@@ -35,7 +37,7 @@ const SPECIALTIES = [
 const TIME_SLOTS = ["10:00 AM", "11:30 AM", "02:00 PM", "04:30 PM", "06:00 PM"];
 
 export default function DoctorsPage() {
-  const store = useStoreData();
+  const storeDoctors = useStoreData((s) => s.doctors);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState("All Specialties");
   const [selectedSlot, setSelectedSlot] = useState<Record<number, string>>({});
@@ -44,7 +46,7 @@ export default function DoctorsPage() {
   const { requireAuth } = useRequireAuth();
 
   const allDoctors = [
-    ...store.doctors.map((d) => ({
+    ...storeDoctors.map((d) => ({
       id: d.id,
       name: d.name,
       specialty: d.specialty || d.specialization || "General Physician",
@@ -57,7 +59,7 @@ export default function DoctorsPage() {
       avatar: d.image || "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=500&q=80",
     })),
     ...mockDoctors.filter(
-      (md) => !store.doctors.some((sd) => sd.name.toLowerCase() === md.name.toLowerCase()),
+      (md) => !storeDoctors.some((sd) => sd.name.toLowerCase() === md.name.toLowerCase()),
     ),
   ];
 
@@ -80,16 +82,42 @@ export default function DoctorsPage() {
     return true;
   });
 
+  const navigate = useNavigate();
   const handleBookAppointment = (doctor: any) => {
     const slot = selectedSlot[doctor.id] || "10:30 AM Today";
     requireAuth({
       title: `Confirm Appointment with ${doctor.name}`,
       description: `${doctor.specialty} • ${slot} • Consultation Fee ₹${doctor.fee}`,
       onSuccess: () => {
+        const bookingId = `EZY-DOC-${Date.now().toString().slice(-4)}`;
+        const newBooking = {
+          id: bookingId,
+          type: "Doctor",
+          title: `${doctor.name} (${doctor.specialty})`,
+          subtitle: `Consultation at ${doctor.hospital}`,
+          timeSlot: slot,
+          location: `${doctor.hospital}, ${doctor.city}`,
+          fee: doctor.fee,
+          status: "CONFIRMED",
+        };
+
+        try {
+          const existing = JSON.parse(localStorage.getItem("ezy1_user_bookings") || "[]");
+          localStorage.setItem("ezy1_user_bookings", JSON.stringify([newBooking, ...existing]));
+        } catch {
+          // Non-blocking
+        }
+
         setBookedSuccess(
-          `Appointment confirmed with ${doctor.name} for ${slot}! Booking ID: EZY-DOC-${Date.now().toString().slice(-4)}`,
+          `Appointment confirmed with ${doctor.name} for ${slot}! Booking ID: ${bookingId}`,
         );
-        setTimeout(() => setBookedSuccess(null), 6000);
+        toast.success(`Appointment confirmed with ${doctor.name}!`, {
+          action: {
+            label: "View Bookings",
+            onClick: () => navigate({ to: "/my-bookings" as any }),
+          },
+        });
+        setTimeout(() => setBookedSuccess(null), 8000);
       },
     });
   };
@@ -133,12 +161,12 @@ export default function DoctorsPage() {
             </div>
 
             {/* Specialty Filter Rail */}
-            <div className="flex items-center gap-2 overflow-x-auto w-full pt-4 pb-1 scrollbar-hide text-xs">
+            <div className="flex items-center gap-2 overflow-x-auto w-full pt-4 pb-1 scrollbar-none touch-pan-x text-xs">
               {SPECIALTIES.map((spec) => (
                 <button
                   key={spec}
                   onClick={() => setSelectedSpecialty(spec)}
-                  className={`px-3.5 py-2 rounded-xl font-medium whitespace-nowrap transition-smooth ${
+                  className={`px-3.5 py-2 rounded-xl font-medium whitespace-nowrap transition-smooth shrink-0 ${
                     selectedSpecialty === spec
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "bg-muted/70 hover:bg-muted text-muted-foreground"

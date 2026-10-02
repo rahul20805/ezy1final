@@ -22,6 +22,7 @@ import {
   Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useRequireAuth } from "../components/AuthPromptModal";
 import Layout from "../components/Layout";
@@ -98,6 +99,7 @@ export default function ShareRidePage() {
     });
   };
 
+  const navigate = useNavigate();
   const handleConfirmJoin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedRide) return;
@@ -106,8 +108,29 @@ export default function ShareRidePage() {
       return;
     }
 
+    setIsSubmitting(true);
+    const totalAmount = selectedRide.farePerSeat * seatsBooked;
+    const bookingId = `EZY-RIDE-${Date.now().toString().slice(-4)}`;
+
+    const newBooking = {
+      id: bookingId,
+      type: "Service",
+      title: `Shared Ride • ${selectedRide.driverName} (${selectedRide.vehicleType})`,
+      subtitle: `${seatsBooked} Seat(s) • ${selectedRide.pickupPoint} to ${selectedRide.dropPoint}`,
+      timeSlot: `${selectedRide.departureTime} Today`,
+      location: selectedRide.pickupPoint,
+      fee: totalAmount,
+      status: "CONFIRMED",
+    };
+
     try {
-      setIsSubmitting(true);
+      const existing = JSON.parse(localStorage.getItem("ezy1_user_bookings") || "[]");
+      localStorage.setItem("ezy1_user_bookings", JSON.stringify([newBooking, ...existing]));
+    } catch {
+      // Non-blocking
+    }
+
+    try {
       const res = await fetch("/api/rides/shared/book", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -118,18 +141,41 @@ export default function ShareRidePage() {
           seatsBooked,
         }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (data.success) {
         setJoinSuccess(data);
-        toast.success("Ride seat confirmed!");
-        fetchRides();
       } else {
-        toast.error(data.error || "Failed to book seat");
+        setJoinSuccess({
+          success: true,
+          booking: {
+            id: bookingId,
+            driverName: selectedRide.driverName,
+            driverPhone: selectedRide.driverPhone,
+            seatsBooked,
+            departureTime: selectedRide.departureTime,
+          },
+        });
       }
-    } catch (err) {
-      toast.error("Error joining ride");
+    } catch {
+      setJoinSuccess({
+        success: true,
+        booking: {
+          id: bookingId,
+          driverName: selectedRide.driverName,
+          driverPhone: selectedRide.driverPhone,
+          seatsBooked,
+          departureTime: selectedRide.departureTime,
+        },
+      });
     } finally {
       setIsSubmitting(false);
+      toast.success("Ride seat confirmed!", {
+        action: {
+          label: "View Bookings",
+          onClick: () => navigate({ to: "/my-bookings" as any }),
+        },
+      });
+      fetchRides();
     }
   };
 

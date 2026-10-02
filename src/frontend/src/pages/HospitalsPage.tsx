@@ -23,7 +23,7 @@ import { HOSPITALS_DATA, type HospitalFacility } from "../ecosystem-data";
 import { useStoreData } from "../lib/storeData";
 
 export default function HospitalsPage() {
-  const store = useStoreData();
+  const storeHospitals = useStoreData((s) => s.hospitals);
   const [searchQuery, setSearchQuery] = useState("");
   const [hospitals, setHospitals] =
     useState<HospitalFacility[]>(HOSPITALS_DATA);
@@ -76,7 +76,7 @@ export default function HospitalsPage() {
   }, []);
 
   const displayHospitals = useMemo(() => {
-    const fromStore = store.hospitals.map((h) => ({
+    const fromStore = storeHospitals.map((h) => ({
       id: `hosp-${h.id}`,
       name: h.name,
       city: h.city || "Bengaluru",
@@ -99,7 +99,7 @@ export default function HospitalsPage() {
     const existingNames = new Set(fromStore.map((h) => h.name.toLowerCase()));
     const remaining = hospitals.filter((h) => !existingNames.has(h.name.toLowerCase()));
     return [...fromStore, ...remaining];
-  }, [store.hospitals, hospitals]);
+  }, [storeHospitals, hospitals]);
 
   const filteredHospitals = displayHospitals.filter(
     (h) =>

@@ -76,7 +76,7 @@ function ScrollableRow({
   const containerRef = useRef<HTMLDivElement>(null);
   const scroll = (direction: "left" | "right") => {
     if (containerRef.current) {
-      const offset = direction === "left" ? -340 : 340;
+      const offset = direction === "left" ? -280 : 280;
       containerRef.current.scrollBy({ left: offset, behavior: "smooth" });
     }
   };
@@ -93,8 +93,8 @@ function ScrollableRow({
       </button>
       <div
         ref={containerRef}
-        className={`flex gap-3 sm:gap-4 overflow-x-auto scroll-smooth pb-3 pt-1 px-1 scrollbar-none touch-pan-x ${className}`}
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        className={`flex gap-2.5 sm:gap-4 overflow-x-auto pb-3 pt-1 px-1 scrollbar-none touch-pan-x overscroll-x-contain ${className}`}
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
       >
         {children}
       </div>
@@ -114,10 +114,19 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const { currentLocation } = useLocationStore();
   const { isAuthenticated, user } = useAuth();
-  const { items, addItem, updateQuantity, removeItem } = useCartStore();
+  const items = useCartStore((s) => s.items);
+  const addItem = useCartStore((s) => s.addItem);
+  const updateQuantity = useCartStore((s) => s.updateQuantity);
+  const removeItem = useCartStore((s) => s.removeItem);
   const { requireAuth } = useRequireAuth();
   const { catalog: dynamicCatalog } = useDynamicCatalog();
-  const store = useStoreData();
+  
+  // Selective Zustand subscriptions to prevent full-page re-render loops
+  const storeDoctors = useStoreData((s) => s.doctors);
+  const storeHospitals = useStoreData((s) => s.hospitals);
+  const storeServices = useStoreData((s) => s.services);
+  const trackUserSearch = useStoreData((s) => s.trackUserSearch);
+  
   const { t } = useTranslation();
 
   const [homeSearch, setHomeSearch] = useState("");
@@ -146,63 +155,52 @@ export default function LandingPage() {
   const [dynamicProducts, setDynamicProducts] = useState<any[]>([]);
   const [dynamicServices, setDynamicServices] = useState<any[]>([]);
 
-  // Fetch real data on mount
+  // Fetch real data on mount with resilient fallbacks
   useEffect(() => {
+    let isMounted = true;
     async function loadRealData() {
       try {
         const [hosp, st, tr, exp, bs, rd, hh, rc, prods, servs] =
-          await Promise.all([
-            fetch("/api/hospitals/availability")
-              .then((r) => r.json())
-              .catch(() => null),
-            fetch("/api/stays")
-              .then((r) => r.json())
-              .catch(() => []),
-            fetch("/api/travel")
-              .then((r) => r.json())
-              .catch(() => []),
-            fetch("/api/explore")
-              .then((r) => r.json())
-              .catch(() => []),
-            fetch("/api/buses")
-              .then((r) => r.json())
-              .catch(() => []),
-            fetch("/api/rides/shared")
-              .then((r) => r.json())
-              .catch(() => []),
-            fetch("/api/healthcare/home")
-              .then((r) => r.json())
-              .catch(() => []),
-            fetch("/api/user/recent-items")
-              .then((r) => r.json())
-              .catch(() => []),
-            fetch("/api/products")
-              .then((r) => r.json())
-              .catch(() => []),
-            fetch("/api/services")
-              .then((r) => r.json())
-              .catch(() => []),
+          await Promise.allSettled([
+            fetch("/api/hospitals/availability").then((r) => r.ok ? r.json() : null),
+            fetch("/api/stays").then((r) => r.ok ? r.json() : []),
+            fetch("/api/travel").then((r) => r.ok ? r.json() : []),
+            fetch("/api/explore").then((r) => r.ok ? r.json() : []),
+            fetch("/api/buses").then((r) => r.ok ? r.json() : []),
+            fetch("/api/rides/shared").then((r) => r.ok ? r.json() : []),
+            fetch("/api/healthcare/home").then((r) => r.ok ? r.json() : []),
+            fetch("/api/user/recent-items").then((r) => r.ok ? r.json() : []),
+            fetch("/api/products").then((r) => r.ok ? r.json() : []),
+            fetch("/api/services").then((r) => r.ok ? r.json() : []),
           ]);
 
-        if (hosp) setHospitalData(hosp);
-        if (Array.isArray(st)) setStays(st);
-        if (Array.isArray(tr)) setTours(tr);
-        if (Array.isArray(exp)) setExplorePlaces(exp);
-        if (Array.isArray(bs)) setBuses(bs);
-        if (Array.isArray(rd)) setSharedRides(rd);
-        if (Array.isArray(hh)) setHomeHealth(hh);
-        if (Array.isArray(rc)) setRecentItems(rc);
-        if (Array.isArray(prods)) setDynamicProducts(prods);
-        else if (prods && Array.isArray((prods as any).items))
-          setDynamicProducts((prods as any).items);
-        if (Array.isArray(servs)) setDynamicServices(servs);
-        else if (servs && Array.isArray((servs as any).items))
-          setDynamicServices((servs as any).items);
+        if (!isMounted) return;
+
+        if (hosp.status === "fulfilled" && hosp.value) setHospitalData(hosp.value);
+        if (st.status === "fulfilled" && Array.isArray(st.value)) setStays(st.value);
+        if (tr.status === "fulfilled" && Array.isArray(tr.value)) setTours(tr.value);
+        if (exp.status === "fulfilled" && Array.isArray(exp.value)) setExplorePlaces(exp.value);
+        if (bs.status === "fulfilled" && Array.isArray(bs.value)) setBuses(bs.value);
+        if (rd.status === "fulfilled" && Array.isArray(rd.value)) setSharedRides(rd.value);
+        if (hh.status === "fulfilled" && Array.isArray(hh.value)) setHomeHealth(hh.value);
+        if (rc.status === "fulfilled" && Array.isArray(rc.value)) setRecentItems(rc.value);
+        
+        if (prods.status === "fulfilled") {
+          const pVal = prods.value;
+          if (Array.isArray(pVal)) setDynamicProducts(pVal);
+          else if (pVal && Array.isArray((pVal as any).items)) setDynamicProducts((pVal as any).items);
+        }
+        if (servs.status === "fulfilled") {
+          const sVal = servs.value;
+          if (Array.isArray(sVal)) setDynamicServices(sVal);
+          else if (sVal && Array.isArray((sVal as any).items)) setDynamicServices((sVal as any).items);
+        }
       } catch (e) {
-        console.error("Failed to load ecosystem data", e);
+        // Non-blocking
       }
     }
     loadRealData();
+    return () => { isMounted = false; };
   }, []);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -210,7 +208,7 @@ export default function LandingPage() {
     const trimmed = homeSearch.trim();
     if (trimmed) {
       try {
-        store.trackUserSearch({
+        trackUserSearch({
           query: trimmed,
           category: searchCategory,
           resultsCount: 10,
@@ -300,8 +298,8 @@ export default function LandingPage() {
         : [];
 
     const liveDocsSource =
-      store.doctors.length > 0
-        ? store.doctors.map((d) => ({
+      storeDoctors.length > 0
+        ? storeDoctors.map((d) => ({
             id: d.id,
             name: d.name,
             specialty: d.specialty || d.specialization || "General Medicine",
@@ -327,8 +325,8 @@ export default function LandingPage() {
         : [];
 
     const liveHospitalsSource =
-      store.hospitals.length > 0
-        ? store.hospitals.map((h) => ({
+      storeHospitals.length > 0
+        ? storeHospitals.map((h) => ({
             id: `hosp-${h.id}`,
             name: h.name,
             city: h.city || "Bengaluru",
@@ -365,8 +363,8 @@ export default function LandingPage() {
         : [];
 
     const liveServicesSource =
-      store.services.length > 0
-        ? store.services.map((s) => ({
+      storeServices.length > 0
+        ? storeServices.map((s) => ({
             id: s.id,
             name: s.name,
             category: s.category,
@@ -403,7 +401,7 @@ export default function LandingPage() {
       services.length +
       spots.length;
     return { products, doctors: docs, hospitals, services, spots, total };
-  }, [homeSearch, searchCategory]);
+  }, [homeSearch, searchCategory, allCatalogItems, storeDoctors, storeHospitals, storeServices, hospitalData]);
 
   const handleAddToCart = (product: CatalogItem) => {
     const numId = Math.abs(
@@ -1181,16 +1179,15 @@ export default function LandingPage() {
         {/* ========================================================= */}
         {/* 3B. 🛍️ SHOP BY CATEGORY (Dense Grid of Daily Essentials)  */}
         {/* ========================================================= */}
-        <section className="container max-w-7xl mx-auto py-5 px-4 sm:px-6">
-          <div className="flex items-center justify-between mb-3.5">
+        <section className="container max-w-7xl mx-auto py-5 px-3 sm:px-6">
+          <div className="flex items-center justify-between mb-3">
             <div>
-              <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
-                <span className="text-xl">🛍️</span>
+              <h2 className="text-sm sm:text-base md:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
+                <span className="text-lg sm:text-xl">🛍️</span>
                 Shop by Category
               </h2>
-              <p className="text-xs text-muted-foreground">
-                Fast delivery across daily groceries, farm fresh, electronics &
-                lifestyle
+              <p className="text-[11px] sm:text-xs text-muted-foreground">
+                Fast delivery across daily groceries, farm fresh & lifestyle
               </p>
             </div>
             <Link
@@ -1201,25 +1198,25 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2.5 sm:gap-3">
+          <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-7 gap-2 sm:gap-3">
             {SHOP_BY_CATEGORY_TILES.map((cat) => (
               <Link
                 key={cat.id}
                 to={cat.route as any}
-                className="group p-3 rounded-2xl border border-border/80 bg-card hover:border-primary/40 transition-all duration-200 hover:-translate-y-1 hover:shadow-subtle flex flex-col items-center text-center relative overflow-hidden"
+                className="group p-2 sm:p-3 rounded-2xl border border-border/80 bg-card hover:border-primary/40 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-subtle flex flex-col items-center text-center relative overflow-hidden"
               >
                 {cat.badge && (
-                  <span className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-full text-[8px] font-extrabold uppercase bg-primary text-primary-foreground shadow-xs">
+                  <span className="absolute top-1 right-1 px-1 py-0.2 rounded-full text-[7px] sm:text-[8px] font-extrabold uppercase bg-primary text-primary-foreground shadow-xs">
                     {cat.badge}
                   </span>
                 )}
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-2 group-hover:scale-110 transition-transform bg-muted/40">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-xl sm:text-2xl mb-1.5 group-hover:scale-110 transition-transform bg-muted/40">
                   {cat.emoji}
                 </div>
-                <span className="text-xs font-bold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+                <span className="text-[11px] sm:text-xs font-bold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
                   {cat.name}
                 </span>
-                <span className="text-[10px] text-muted-foreground mt-0.5 font-medium">
+                <span className="text-[9px] text-muted-foreground mt-0.5 font-medium hidden sm:inline">
                   Explore →
                 </span>
               </Link>
@@ -1230,14 +1227,14 @@ export default function LandingPage() {
         {/* ========================================================= */}
         {/* 4. ⚡ QUICK COMMERCE (15-Min Delivery Essentials)         */}
         {/* ========================================================= */}
-        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
-          <div className="flex items-center justify-between mb-4">
+        <section className="container max-w-7xl mx-auto py-5 sm:py-6 px-3 sm:px-6">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
             <div>
-              <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
-                <Zap className="w-5 h-5 text-amber-500 fill-amber-500" />
+              <h2 className="text-sm sm:text-base md:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
+                <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500 fill-amber-500" />
                 {t("home.quickCommerce")}
               </h2>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-[11px] sm:text-xs text-muted-foreground">
                 Kitchen staples, dairy, beverages & instant snacks
               </p>
             </div>
@@ -1277,7 +1274,7 @@ export default function LandingPage() {
                       type: "product",
                     })
                   }
-                  className="w-44 sm:w-48 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col cursor-pointer group"
+                  className="w-36 sm:w-44 md:w-48 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col cursor-pointer group"
                 >
                   <div className="relative aspect-square w-full bg-muted/20 overflow-hidden">
                     <img
@@ -1285,44 +1282,47 @@ export default function LandingPage() {
                       alt={item.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       loading="lazy"
+                      decoding="async"
                     />
-                    <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md bg-emerald-600 text-white text-[9px] font-bold">
+                    <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-md bg-emerald-600 text-white text-[8px] sm:text-[9px] font-bold">
                       {item.deliveryMinutes}m
                     </span>
-                    <span className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-md bg-black/60 text-white text-[9px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-md bg-black/60 text-white text-[8px] sm:text-[9px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">
                       🔍 Zoom
                     </span>
                   </div>
-                  <CardContent className="p-3 flex-1 flex flex-col">
+                  <CardContent className="p-2.5 sm:p-3 flex-1 flex flex-col">
                     <h4 className="font-bold text-xs text-foreground line-clamp-1 mb-0.5 group-hover:text-primary transition-colors">
                       {item.name}
                     </h4>
-                    <span className="text-[11px] text-muted-foreground mb-2">
+                    <span className="text-[10px] sm:text-[11px] text-muted-foreground mb-1.5 sm:mb-2">
                       {item.unit}
                     </span>
                     <div
                       className="mt-auto flex items-center justify-between pt-1 border-t border-border"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <span className="font-bold text-sm text-foreground">
+                      <span className="font-bold text-xs sm:text-sm text-foreground">
                         ₹{item.price}
                       </span>
                       {cartItem ? (
-                        <div className="flex items-center gap-1.5 bg-primary text-primary-foreground rounded-lg px-1.5 py-0.5 text-xs">
+                        <div className="flex items-center gap-1 bg-primary text-primary-foreground rounded-lg px-1.5 py-0.5 text-xs">
                           <button
                             onClick={() =>
                               cartItem.quantity > 1
                                 ? updateQuantity(numId, cartItem.quantity - 1)
                                 : removeItem(numId)
                             }
+                            aria-label="Decrease quantity"
                           >
                             <Minus className="w-3 h-3" />
                           </button>
-                          <span className="font-bold">{cartItem.quantity}</span>
+                          <span className="font-bold text-[11px]">{cartItem.quantity}</span>
                           <button
                             onClick={() =>
                               updateQuantity(numId, cartItem.quantity + 1)
                             }
+                            aria-label="Increase quantity"
                           >
                             <Plus className="w-3 h-3" />
                           </button>
@@ -1331,7 +1331,7 @@ export default function LandingPage() {
                         <Button
                           size="sm"
                           onClick={() => handleAddToCart(item)}
-                          className="h-7 px-3 rounded-lg text-xs font-bold bg-primary text-primary-foreground"
+                          className="h-6 sm:h-7 px-2.5 sm:px-3 rounded-lg text-[11px] sm:text-xs font-bold bg-primary text-primary-foreground"
                         >
                           {t("home.addToCart")}
                         </Button>
@@ -1347,14 +1347,14 @@ export default function LandingPage() {
         {/* ========================================================= */}
         {/* 5. 🍔 POPULAR RESTAURANTS & FOOD                          */}
         {/* ========================================================= */}
-        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
-          <div className="flex items-center justify-between mb-4">
+        <section className="container max-w-7xl mx-auto content-visibility-auto py-5 sm:py-6 px-3 sm:px-6">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
             <div>
-              <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
-                <UtensilsCrossed className="w-5 h-5 text-orange-500" />
+              <h2 className="text-sm sm:text-base md:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
+                <UtensilsCrossed className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
                 {t("home.popularDishes")}
               </h2>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-[11px] sm:text-xs text-muted-foreground">
                 Authentic biryani, North Indian combos, freshly brewed coffee
               </p>
             </div>
@@ -1386,7 +1386,7 @@ export default function LandingPage() {
                     type: "food",
                   })
                 }
-                className="w-64 sm:w-72 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col cursor-pointer group"
+                className="w-56 sm:w-64 md:w-72 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-elevated transition-smooth flex flex-col cursor-pointer group"
               >
                 <div className="relative aspect-video w-full overflow-hidden">
                   <img
@@ -1394,23 +1394,24 @@ export default function LandingPage() {
                     alt={dish.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"
+                    decoding="async"
                   />
-                  <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-black/70 text-white text-[10px] font-bold backdrop-blur-sm">
+                  <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-black/70 text-white text-[9px] sm:text-[10px] font-bold backdrop-blur-sm">
                     {dish.cuisine || "Specialty"}
                   </span>
-                  <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-black/60 text-amber-400 text-[10px] font-bold backdrop-blur-sm">
+                  <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-black/60 text-amber-400 text-[9px] sm:text-[10px] font-bold backdrop-blur-sm">
                     ★ {dish.rating}
                   </span>
-                  <span className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded-md bg-black/60 text-white text-[9px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded-md bg-black/60 text-white text-[8px] sm:text-[9px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">
                     🔍 Zoom
                   </span>
                 </div>
-                <CardContent className="p-4 flex-1 flex flex-col justify-between">
+                <CardContent className="p-3 sm:p-4 flex-1 flex flex-col justify-between">
                   <div>
-                    <h4 className="font-bold text-sm text-foreground line-clamp-1 mb-1 group-hover:text-primary transition-colors">
+                    <h4 className="font-bold text-xs sm:text-sm text-foreground line-clamp-1 mb-0.5 group-hover:text-primary transition-colors">
                       {dish.name}
                     </h4>
-                    <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
+                    <p className="text-[11px] sm:text-xs text-muted-foreground line-clamp-2 mb-2 sm:mb-3">
                       {dish.description}
                     </p>
                   </div>
@@ -1418,13 +1419,13 @@ export default function LandingPage() {
                     className="pt-2 border-t border-border flex items-center justify-between"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <span className="font-bold text-base text-foreground">
+                    <span className="font-bold text-sm sm:text-base text-foreground">
                       ₹{dish.price}
                     </span>
                     <Button
                       size="sm"
                       onClick={() => handleAddToCart(dish)}
-                      className="h-8 rounded-xl px-4 text-xs font-bold bg-primary text-primary-foreground"
+                      className="h-7 sm:h-8 rounded-xl px-3 sm:px-4 text-[11px] sm:text-xs font-bold bg-primary text-primary-foreground"
                     >
                       {t("home.addToCart")}
                     </Button>
@@ -1438,14 +1439,14 @@ export default function LandingPage() {
         {/* ========================================================= */}
         {/* 6. 🥦 FRESH PRODUCE / GROCERY HARVEST                     */}
         {/* ========================================================= */}
-        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
-          <div className="flex items-center justify-between mb-4">
+        <section className="container max-w-7xl mx-auto content-visibility-auto py-5 sm:py-6 px-3 sm:px-6">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
             <div>
-              <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
-                <span className="text-xl">🥦</span>
+              <h2 className="text-sm sm:text-base md:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
+                <span className="text-lg sm:text-xl">🥦</span>
                 {t("home.freshProduce")}
               </h2>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-[11px] sm:text-xs text-muted-foreground">
                 Handpicked farm-fresh greens, bananas, apples & tomatoes
               </p>
             </div>
@@ -1484,7 +1485,7 @@ export default function LandingPage() {
                       type: "product",
                     })
                   }
-                  className="w-44 sm:w-48 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-subtle transition-smooth flex flex-col cursor-pointer group"
+                  className="w-36 sm:w-44 md:w-48 flex-shrink-0 rounded-2xl border-border bg-card overflow-hidden hover:shadow-subtle transition-smooth flex flex-col cursor-pointer group"
                 >
                   <div className="relative aspect-square w-full bg-muted/20 overflow-hidden">
                     <img
@@ -1492,28 +1493,29 @@ export default function LandingPage() {
                       alt={item.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       loading="lazy"
+                      decoding="async"
                     />
                     {item.freshnessScore && (
-                      <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-emerald-600 text-white text-[9px] font-bold">
+                      <span className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-md bg-emerald-600 text-white text-[8px] sm:text-[9px] font-bold">
                         {item.freshnessScore}% Fresh
                       </span>
                     )}
-                    <span className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-md bg-black/60 text-white text-[9px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-md bg-black/60 text-white text-[8px] sm:text-[9px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">
                       🔍 Zoom
                     </span>
                   </div>
-                  <CardContent className="p-3 flex-1 flex flex-col">
+                  <CardContent className="p-2.5 sm:p-3 flex-1 flex flex-col">
                     <h4 className="font-bold text-xs text-foreground line-clamp-1 mb-0.5 group-hover:text-primary transition-colors">
                       {item.name}
                     </h4>
-                    <span className="text-[11px] text-muted-foreground mb-2">
+                    <span className="text-[10px] sm:text-[11px] text-muted-foreground mb-1.5 sm:mb-2">
                       {item.unit}
                     </span>
                     <div
                       className="mt-auto flex items-center justify-between pt-1 border-t border-border"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <span className="font-bold text-sm text-foreground">
+                      <span className="font-bold text-xs sm:text-sm text-foreground">
                         ₹{item.price}
                       </span>
                       {cartItem ? (
@@ -1524,14 +1526,16 @@ export default function LandingPage() {
                                 ? updateQuantity(numId, cartItem.quantity - 1)
                                 : removeItem(numId)
                             }
+                            aria-label="Decrease quantity"
                           >
                             <Minus className="w-3 h-3" />
                           </button>
-                          <span className="font-bold">{cartItem.quantity}</span>
+                          <span className="font-bold text-[11px]">{cartItem.quantity}</span>
                           <button
                             onClick={() =>
                               updateQuantity(numId, cartItem.quantity + 1)
                             }
+                            aria-label="Increase quantity"
                           >
                             <Plus className="w-3 h-3" />
                           </button>
@@ -1540,7 +1544,7 @@ export default function LandingPage() {
                         <Button
                           size="sm"
                           onClick={() => handleAddToCart(item)}
-                          className="h-7 px-3 rounded-lg text-xs font-bold bg-primary text-primary-foreground"
+                          className="h-6 sm:h-7 px-2.5 sm:px-3 rounded-lg text-[11px] sm:text-xs font-bold bg-primary text-primary-foreground"
                         >
                           Add
                         </Button>
@@ -1556,7 +1560,7 @@ export default function LandingPage() {
         {/* ========================================================= */}
         {/* 7. 🏥 HEALTHCARE HUB: BEDS + DOCTOR AT HOME + EMERGENCY   */}
         {/* ========================================================= */}
-        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+        <section className="container max-w-7xl mx-auto content-visibility-auto py-6 px-4 sm:px-6">
           <div className="p-6 rounded-3xl bg-gradient-to-r from-red-500/10 via-card to-teal-500/10 border border-border space-y-6">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="space-y-1">
@@ -1693,7 +1697,7 @@ export default function LandingPage() {
         {/* ========================================================= */}
         {/* 8. 🏨 HOTELS & ACCOMMODATION (EZY Stay)                   */}
         {/* ========================================================= */}
-        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+        <section className="container max-w-7xl mx-auto content-visibility-auto py-6 px-4 sm:px-6">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
@@ -1807,7 +1811,7 @@ export default function LandingPage() {
         {/* ========================================================= */}
         {/* 9. ✈️ TRAVEL & PACKAGES (EZY Travel)                      */}
         {/* ========================================================= */}
-        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+        <section className="container max-w-7xl mx-auto content-visibility-auto py-6 px-4 sm:px-6">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
@@ -1930,7 +1934,7 @@ export default function LandingPage() {
         {/* ========================================================= */}
         {/* 10. 🚌 REGIONAL BUS & TRANSPORT (EZY Bus)                 */}
         {/* ========================================================= */}
-        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+        <section className="container max-w-7xl mx-auto content-visibility-auto py-6 px-4 sm:px-6">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
@@ -2067,7 +2071,7 @@ export default function LandingPage() {
         {/* ========================================================= */}
         {/* 11. 🚗 EZY RIDE & SHARE RIDE                              */}
         {/* ========================================================= */}
-        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+        <section className="container max-w-7xl mx-auto content-visibility-auto py-6 px-4 sm:px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* EZY Ride Card */}
             <div
@@ -2152,7 +2156,7 @@ export default function LandingPage() {
         {/* ========================================================= */}
         {/* 12. 📦 EZY PARCEL & 🛠️ LOCAL HOME SERVICES                */}
         {/* ========================================================= */}
-        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+        <section className="container max-w-7xl mx-auto content-visibility-auto py-6 px-4 sm:px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* EZY Parcel */}
             <div
@@ -2234,7 +2238,7 @@ export default function LandingPage() {
         {/* ========================================================= */}
         {/* 13. 📍 LOCAL & FAMOUS NEAR YOU                            */}
         {/* ========================================================= */}
-        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+        <section className="container max-w-7xl mx-auto content-visibility-auto py-6 px-4 sm:px-6">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
@@ -2303,44 +2307,43 @@ export default function LandingPage() {
         {/* ========================================================= */}
         {/* 14. 🎁 OFFERS & DEALS (Copyable Coupon Codes)             */}
         {/* ========================================================= */}
-        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
-          <div className="flex items-center justify-between mb-4">
+        <section className="container max-w-7xl mx-auto content-visibility-auto py-5 sm:py-6 px-3 sm:px-6">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
             <div>
-              <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
-                <Tag className="w-5 h-5 text-purple-500" />
+              <h2 className="text-sm sm:text-base md:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
+                <Tag className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500" />
                 Offers, Coupons & Deals
               </h2>
-              <p className="text-xs text-muted-foreground">
-                1-click discount codes applicable on grocery, food, stays &
-                rides
+              <p className="text-[11px] sm:text-xs text-muted-foreground">
+                1-click discount codes applicable across services
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3.5">
             {[
               {
                 code: "EZYFIRST",
                 discount: "Flat ₹100 OFF",
-                desc: "Valid on first grocery/food order above ₹299",
+                desc: "Valid on first order above ₹299",
                 color: "border-purple-500/30 bg-purple-500/5",
               },
               {
                 code: "STAY500",
                 discount: "₹500 OFF",
-                desc: "Valid on all hotel & resort bookings above ₹2,000",
+                desc: "Valid on stays above ₹2,000",
                 color: "border-amber-500/30 bg-amber-500/5",
               },
               {
                 code: "HEALTH20",
                 discount: "Flat 20% OFF",
-                desc: "Valid on lab checkup packages & doctor visits",
+                desc: "Valid on lab checkup packages",
                 color: "border-rose-500/30 bg-rose-500/5",
               },
               {
                 code: "RIDEFREE",
                 discount: "₹50 Cashback",
-                desc: "Valid on your first EZY Share Ride or auto trip",
+                desc: "Valid on your first share ride",
                 color: "border-emerald-500/30 bg-emerald-500/5",
               },
             ].map((coupon) => (
@@ -2356,18 +2359,18 @@ export default function LandingPage() {
                     type: "coupon",
                   })
                 }
-                className={`p-4 rounded-2xl border ${coupon.color} flex flex-col justify-between shadow-xs cursor-pointer hover:shadow-md transition-all group`}
+                className={`p-3 sm:p-4 rounded-2xl border ${coupon.color} flex flex-col justify-between shadow-xs cursor-pointer hover:shadow-md transition-all group`}
               >
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-mono font-black text-sm text-foreground group-hover:text-primary transition-colors">
+                    <span className="font-mono font-black text-xs sm:text-sm text-foreground group-hover:text-primary transition-colors">
                       {coupon.code}
                     </span>
-                    <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] font-bold">
+                    <Badge className="bg-primary/10 text-primary border-primary/20 text-[9px] sm:text-[10px] font-bold px-1.5 py-0">
                       {coupon.discount}
                     </Badge>
                   </div>
-                  <p className="text-[11px] text-muted-foreground line-clamp-2">
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground line-clamp-2">
                     {coupon.desc}
                   </p>
                 </div>
@@ -2378,7 +2381,7 @@ export default function LandingPage() {
                     e.stopPropagation();
                     copyCoupon(coupon.code);
                   }}
-                  className="mt-3 h-8 text-xs font-bold rounded-xl w-full"
+                  className="mt-2.5 sm:mt-3 h-7 sm:h-8 text-[11px] sm:text-xs font-bold rounded-xl w-full"
                 >
                   <Copy className="w-3 h-3 mr-1" /> Copy Code
                 </Button>
@@ -2459,7 +2462,7 @@ export default function LandingPage() {
         {/* ========================================================= */}
         {/* 15B. 🍛 POPULAR FOOD (Dishes from Top City Restaurants)    */}
         {/* ========================================================= */}
-        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+        <section className="container max-w-7xl mx-auto content-visibility-auto py-6 px-4 sm:px-6">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
@@ -2587,7 +2590,7 @@ export default function LandingPage() {
         {/* ========================================================= */}
         {/* 15C. 🍰 SWEETS & DESSERTS (Halwai & Modern Bakeries)       */}
         {/* ========================================================= */}
-        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+        <section className="container max-w-7xl mx-auto content-visibility-auto py-6 px-4 sm:px-6">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
@@ -2688,7 +2691,7 @@ export default function LandingPage() {
         {/* ========================================================= */}
         {/* 15D. 👗 FASHION & CLOTHES (Women, Men & Kids Tabs)         */}
         {/* ========================================================= */}
-        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+        <section className="container max-w-7xl mx-auto content-visibility-auto py-6 px-4 sm:px-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div>
               <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
@@ -3026,7 +3029,7 @@ export default function LandingPage() {
         {/* ========================================================= */}
         {/* 15G. 💻 DIGITAL & ON-DEMAND SERVICES                       */}
         {/* ========================================================= */}
-        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+        <section className="container max-w-7xl mx-auto content-visibility-auto py-6 px-4 sm:px-6">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
@@ -3100,7 +3103,7 @@ export default function LandingPage() {
         {/* ========================================================= */}
         {/* 15H. 🏪 POPULAR LOCAL SHOPS NEAR YOU                       */}
         {/* ========================================================= */}
-        <section className="container max-w-7xl mx-auto py-6 px-4 sm:px-6">
+        <section className="container max-w-7xl mx-auto content-visibility-auto py-6 px-4 sm:px-6">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-base sm:text-lg font-bold font-display text-foreground flex items-center gap-1.5">
@@ -3197,7 +3200,7 @@ export default function LandingPage() {
         {/* ========================================================= */}
         {/* 16. 💬 24/7 CUSTOMER SUPPORT & TRUST PROMISE              */}
         {/* ========================================================= */}
-        <section className="container max-w-7xl mx-auto py-8 px-4 sm:px-6">
+        <section className="container max-w-7xl mx-auto content-visibility-auto py-8 px-4 sm:px-6">
           <div className="p-6 rounded-3xl bg-muted/40 border border-border flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
             <div className="space-y-1">
               <h3 className="font-bold text-base text-foreground">

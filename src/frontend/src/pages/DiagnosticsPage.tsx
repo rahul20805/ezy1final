@@ -11,12 +11,15 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { useRequireAuth } from "../components/AuthPromptModal";
 import Layout from "../components/Layout";
 import { RelatedPagesBar } from "../components/RelatedPagesBar";
 import { LAB_PACKAGES, type LabPackage } from "../ecosystem-data";
 
 export default function DiagnosticsPage() {
+  const navigate = useNavigate();
   const [selectedSlot, setSelectedSlot] = useState(
     "Tomorrow 07:00 AM - 08:00 AM (Fasting)",
   );
@@ -28,10 +31,35 @@ export default function DiagnosticsPage() {
       title: `Book ${pkg.name}`,
       description: `Home Sample Collection • ${selectedSlot} • ₹${pkg.price}`,
       onSuccess: () => {
+        const bookingId = `EZY-LAB-${Date.now().toString().slice(-4)}`;
+        const newBooking = {
+          id: bookingId,
+          type: "Lab Test",
+          title: pkg.name,
+          subtitle: `Home Sample Collection (${pkg.testsCount} tests)`,
+          timeSlot: selectedSlot,
+          location: "Home Address • Verified Collection",
+          fee: pkg.price,
+          status: "CONFIRMED",
+        };
+
+        try {
+          const existing = JSON.parse(localStorage.getItem("ezy1_user_bookings") || "[]");
+          localStorage.setItem("ezy1_user_bookings", JSON.stringify([newBooking, ...existing]));
+        } catch {
+          // Non-blocking
+        }
+
         setBookedSuccess(
-          `Booking confirmed for ${pkg.name}! Phlebotomist assigned for home collection. Reference: EZY-LAB-${Date.now().toString().slice(-4)}`,
+          `Booking confirmed for ${pkg.name}! Phlebotomist assigned for home collection. Reference: ${bookingId}`,
         );
-        setTimeout(() => setBookedSuccess(null), 6000);
+        toast.success(`Lab Test booked: ${pkg.name}!`, {
+          action: {
+            label: "View Bookings",
+            onClick: () => navigate({ to: "/my-bookings" as any }),
+          },
+        });
+        setTimeout(() => setBookedSuccess(null), 8000);
       },
     });
   };

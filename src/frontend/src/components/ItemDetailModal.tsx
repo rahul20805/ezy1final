@@ -879,9 +879,14 @@ export function ItemDetailModal({
                 <Button
                   onClick={() => {
                     onClose();
-                    if (item.route) {
-                      navigate({ to: item.route as any });
-                    }
+                    const targetRoute =
+                      item.route ||
+                      (itemType === "ride"
+                        ? "/dashboard/transport"
+                        : itemType === "parcel"
+                          ? "/parcel"
+                          : "/services");
+                    navigate({ to: targetRoute as any });
                   }}
                   className="rounded-xl font-bold text-xs sm:text-sm h-11 px-6 bg-primary text-primary-foreground shadow-md gap-1.5"
                 >

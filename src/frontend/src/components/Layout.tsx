@@ -64,7 +64,10 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const store = useStoreData();
+  const enableAnnouncementBar = useStoreData((s) => s.settings?.enableAnnouncementBar);
+  const announcementBarText = useStoreData((s) => s.settings?.announcementBarText);
+  const whatsappNumber = useStoreData((s) => s.settings?.whatsappNumber);
+  
   const [mobileOpen, setMobileOpen] = useState(false);
   const [locationDropdown, setLocationDropdown] = useState(false);
   const [languageModalOpen, setLanguageModalOpen] = useState(false);
@@ -121,23 +124,24 @@ export default function Layout({ children }: LayoutProps) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background selection:bg-primary/20">
       {/* Top Announcement Ticker */}
-      {store.settings.enableAnnouncementBar &&
-        store.settings.announcementBarText && (
-          <div className="bg-primary text-primary-foreground py-1.5 px-4 text-xs font-semibold text-center flex items-center justify-center gap-2">
-            <span>{store.settings.announcementBarText}</span>
-          </div>
-        )}
+      {enableAnnouncementBar && announcementBarText && (
+        <div className="bg-primary text-primary-foreground py-1.5 px-4 text-xs font-semibold text-center flex items-center justify-center gap-2">
+          <span>{announcementBarText}</span>
+        </div>
+      )}
 
       {/* Saffron accent bar */}
       <div className="h-1 bg-primary w-full" />
 
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-card border-b border-border shadow-subtle">
-        <div className="container flex items-center justify-between h-16 px-4">
+      <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-md border-b border-border shadow-subtle">
+        <div className="container max-w-7xl mx-auto flex items-center justify-between h-14 sm:h-16 px-2.5 sm:px-4 gap-1.5 sm:gap-3">
           {/* Logo */}
-          <Ezy1Logo size="md" />
+          <div className="shrink-0 flex items-center">
+            <Ezy1Logo size="md" />
+          </div>
 
           {/* Desktop Navigation */}
           {!isMobile && (
@@ -149,7 +153,7 @@ export default function Layout({ children }: LayoutProps) {
                 <a
                   key={link.href}
                   href={link.href}
-                  className="px-3 py-2 text-sm font-body text-muted-foreground hover:text-foreground transition-colors duration-200 rounded-md hover:bg-muted"
+                  className="px-2.5 lg:px-3 py-2 text-xs lg:text-sm font-body text-muted-foreground hover:text-foreground transition-colors duration-200 rounded-md hover:bg-muted whitespace-nowrap"
                   data-ocid={`nav.link.${link.label.toLowerCase()}`}
                 >
                   {t(link.key)}
@@ -158,9 +162,9 @@ export default function Layout({ children }: LayoutProps) {
             </nav>
           )}
 
-          {/* Global Search (Active & Functional with Exact Result & Sorting) */}
+          {/* Global Search (Desktop Only) */}
           {!isMobile && (
-            <div className="flex-1 max-w-md mx-3 relative hidden md:block">
+            <div className="flex-1 max-w-xs md:max-w-sm lg:max-w-md mx-2 relative hidden md:block">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -208,23 +212,23 @@ export default function Layout({ children }: LayoutProps) {
           )}
 
           {/* Right actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             {/* Language pill - visible on mobile and desktop */}
             <button
               type="button"
               onClick={() => setLanguageModalOpen(true)}
-              className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-muted/80 text-[11px] sm:text-xs text-muted-foreground hover:bg-primary/10 hover:text-primary transition-smooth border border-border cursor-pointer shrink-0"
+              className="flex items-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full bg-muted/80 text-[11px] sm:text-xs text-muted-foreground hover:bg-primary/10 hover:text-primary transition-smooth border border-border cursor-pointer shrink-0 max-w-[85px] sm:max-w-none"
               data-ocid="nav.language_toggle"
               title="Change Language"
             >
               <Globe className="w-3.5 h-3.5 text-primary shrink-0" />
-              <span className="font-semibold text-foreground">
-                {activeLangMeta?.nativeName || "English"}
+              <span className="font-semibold text-foreground truncate">
+                {activeLangMeta?.nativeName || "EN"}
               </span>
               {suggestedLanguage && suggestedLanguage !== currentLanguage && (
-                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" title="Regional suggestion available" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" title="Regional suggestion available" />
               )}
-              <ChevronDown className="w-3 h-3 shrink-0 opacity-70" />
+              <ChevronDown className="w-3 h-3 shrink-0 opacity-70 hidden sm:inline" />
             </button>
 
             <LanguageSelectorModal
@@ -236,7 +240,7 @@ export default function Layout({ children }: LayoutProps) {
             <button
               type="button"
               onClick={() => setLocationDropdown(true)}
-              className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-muted/80 text-[11px] sm:text-xs text-muted-foreground hover:bg-primary/10 hover:text-primary transition-smooth border border-border max-w-[125px] sm:max-w-[210px] cursor-pointer"
+              className="flex items-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full bg-muted/80 text-[11px] sm:text-xs text-muted-foreground hover:bg-primary/10 hover:text-primary transition-smooth border border-border max-w-[80px] sm:max-w-[130px] md:max-w-[190px] cursor-pointer"
               data-ocid="nav.location_toggle"
               title={currentLocation.formattedAddress}
             >
@@ -244,9 +248,9 @@ export default function Layout({ children }: LayoutProps) {
               <span className="truncate font-medium">
                 {currentLocation.locality ||
                   currentLocation.city ||
-                  "Set City"}
+                  "City"}
               </span>
-              <ChevronDown className="w-3 h-3 shrink-0 opacity-70" />
+              <ChevronDown className="w-3 h-3 shrink-0 opacity-70 hidden sm:inline" />
             </button>
 
             <LocationModal
@@ -259,14 +263,14 @@ export default function Layout({ children }: LayoutProps) {
               <Button
                 variant="outline"
                 size="sm"
-                className="relative gap-1.5 rounded-full h-9 px-3 border-border hover:border-primary/50 text-xs font-semibold"
+                className="relative gap-1 sm:gap-1.5 rounded-full h-8 sm:h-9 px-2 sm:px-3 border-border hover:border-primary/50 text-xs font-semibold"
               >
-                <ShoppingCart className="w-4 h-4 text-primary" />
-                <span className="hidden sm:inline font-display font-bold">
+                <ShoppingCart className="w-4 h-4 text-primary shrink-0" />
+                <span className="hidden md:inline font-display font-bold">
                   {t("nav.cart")}
                 </span>
                 {totalItems > 0 && (
-                  <span className="flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground font-black text-[10px] shadow-sm">
+                  <span className="flex items-center justify-center min-w-[17px] h-[17px] px-1 rounded-full bg-primary text-primary-foreground font-black text-[10px] shadow-sm">
                     {totalItems}
                   </span>
                 )}
@@ -274,188 +278,191 @@ export default function Layout({ children }: LayoutProps) {
             </Link>
 
             {isAuthenticated ? (
-              <div className="flex items-center gap-1.5">
-                {/* Notifications Bell */}
+              <div className="flex items-center gap-1">
+                {/* Notifications Bell (Desktop Only) */}
                 <Link
                   to="/dashboard/notifications"
                   data-ocid="nav.notifications_link"
+                  className="hidden sm:inline-flex"
                 >
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="relative p-2 rounded-full h-9 w-9"
+                    className="relative p-2 rounded-full h-8 w-8 sm:h-9 sm:w-9"
                     title="Notifications"
                   >
                     <Bell className="w-4 h-4 text-foreground" />
                     {unreadCount > 0 && (
-                      <span className="absolute top-1.5 right-1.5 flex items-center justify-center min-w-[15px] h-3.5 px-1 rounded-full bg-rose-500 text-white font-bold text-[8px] animate-pulse">
+                      <span className="absolute top-1.5 right-1.5 flex items-center justify-center min-w-[14px] h-3 px-0.5 rounded-full bg-rose-500 text-white font-bold text-[8px] animate-pulse">
                         {unreadCount}
                       </span>
                     )}
                   </Button>
                 </Link>
 
-                {/* Unified Customer Navigation Dropdown (8 Essential Sections) */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="gap-2 rounded-full h-9 px-3 border-border hover:border-primary/50 text-xs font-semibold"
-                      data-ocid="nav.user_dropdown_trigger"
+                {/* Unified Customer Navigation Dropdown (Desktop Only) */}
+                <div className="hidden sm:block">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1.5 rounded-full h-8 sm:h-9 px-2.5 sm:px-3 border-border hover:border-primary/50 text-xs font-semibold"
+                        data-ocid="nav.user_dropdown_trigger"
+                      >
+                        <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[10px]">
+                          <User className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                        </div>
+                        <span className="max-w-[90px] truncate hidden md:inline font-display">
+                          {user?.name?.split(" ")[0] || "Account"}
+                        </span>
+                        <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      className="w-60 p-1.5 shadow-elevated rounded-2xl border-border bg-card"
                     >
-                      <div className="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[11px]">
-                        <User className="w-3.5 h-3.5" />
-                      </div>
-                      <span className="max-w-[100px] truncate hidden sm:inline font-display">
-                        {user?.name?.split(" ")[0] || "My Account"}
-                      </span>
-                      <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    className="w-60 p-1.5 shadow-elevated rounded-2xl border-border bg-card"
-                  >
-                    <DropdownMenuLabel className="px-3 py-2">
-                      <div className="text-xs font-bold text-foreground truncate">
-                        {user?.name || "Customer Account"}
-                      </div>
-                      <div className="text-[11px] text-muted-foreground font-mono truncate">
-                        {user?.phone || user?.email || "customer@ezy1.in"}
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
+                      <DropdownMenuLabel className="px-3 py-2">
+                        <div className="text-xs font-bold text-foreground truncate">
+                          {user?.name || "Customer Account"}
+                        </div>
+                        <div className="text-[11px] text-muted-foreground font-mono truncate">
+                          {user?.phone || user?.email || "customer@ezy1.in"}
+                        </div>
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
 
-                    {/* 1. Wallet */}
-                    <DropdownMenuItem asChild>
-                      <Link
-                        to="/dashboard/wallet"
-                        className="flex items-center justify-between px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold"
-                      >
-                        <span className="flex items-center gap-2">
-                          <Wallet className="w-4 h-4 text-amber-500" />
-                          Wallet
-                        </span>
-                        <Badge
-                          variant="secondary"
-                          className="text-[10px] font-bold px-1.5 py-0 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                      {/* 1. Wallet */}
+                      <DropdownMenuItem asChild>
+                        <Link
+                          to="/dashboard/wallet"
+                          className="flex items-center justify-between px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold"
                         >
-                          ₹{MOCK_WALLET_BALANCE.toLocaleString("en-IN")}
-                        </Badge>
-                      </Link>
-                    </DropdownMenuItem>
-
-                    {/* 2. Cart */}
-                    <DropdownMenuItem asChild>
-                      <Link
-                        to="/dashboard/cart"
-                        className="flex items-center justify-between px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold"
-                      >
-                        <span className="flex items-center gap-2">
-                          <ShoppingCart className="w-4 h-4 text-emerald-500" />
-                          My Cart
-                        </span>
-                        {totalItems > 0 && (
+                          <span className="flex items-center gap-2">
+                            <Wallet className="w-4 h-4 text-amber-500" />
+                            Wallet
+                          </span>
                           <Badge
                             variant="secondary"
-                            className="text-[10px] font-bold px-1.5 py-0 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                            className="text-[10px] font-bold px-1.5 py-0 bg-amber-500/10 text-amber-600 dark:text-amber-400"
                           >
-                            {totalItems} items
+                            ₹{MOCK_WALLET_BALANCE.toLocaleString("en-IN")}
                           </Badge>
-                        )}
-                      </Link>
-                    </DropdownMenuItem>
+                        </Link>
+                      </DropdownMenuItem>
 
-                    {/* 3. History / Bookings */}
-                    <DropdownMenuItem asChild>
-                      <Link
-                        to="/my-bookings"
-                        className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold"
+                      {/* 2. Cart */}
+                      <DropdownMenuItem asChild>
+                        <Link
+                          to="/dashboard/cart"
+                          className="flex items-center justify-between px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold"
+                        >
+                          <span className="flex items-center gap-2">
+                            <ShoppingCart className="w-4 h-4 text-emerald-500" />
+                            My Cart
+                          </span>
+                          {totalItems > 0 && (
+                            <Badge
+                              variant="secondary"
+                              className="text-[10px] font-bold px-1.5 py-0 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                            >
+                              {totalItems} items
+                            </Badge>
+                          )}
+                        </Link>
+                      </DropdownMenuItem>
+
+                      {/* 3. History / Bookings */}
+                      <DropdownMenuItem asChild>
+                        <Link
+                          to="/my-bookings"
+                          className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold"
+                        >
+                          <History className="w-4 h-4 text-blue-500" />
+                          <span>History & Bookings</span>
+                        </Link>
+                      </DropdownMenuItem>
+
+                      {/* 4. Orders */}
+                      <DropdownMenuItem asChild>
+                        <Link
+                          to="/my-orders"
+                          className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold"
+                        >
+                          <Package className="w-4 h-4 text-indigo-500" />
+                          <span>My Orders</span>
+                        </Link>
+                      </DropdownMenuItem>
+
+                      {/* 5. Payments */}
+                      <DropdownMenuItem asChild>
+                        <Link
+                          to="/payments"
+                          className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold"
+                        >
+                          <CreditCard className="w-4 h-4 text-violet-500" />
+                          <span>Payments & Cards</span>
+                        </Link>
+                      </DropdownMenuItem>
+
+                      {/* 6. My Account */}
+                      <DropdownMenuItem asChild>
+                        <Link
+                          to="/my-account"
+                          className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold"
+                        >
+                          <User className="w-4 h-4 text-primary" />
+                          <span>My Profile & Account</span>
+                        </Link>
+                      </DropdownMenuItem>
+
+                      {/* 7. Settings */}
+                      <DropdownMenuItem asChild>
+                        <Link
+                          to="/dashboard/settings"
+                          className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold"
+                        >
+                          <Settings className="w-4 h-4 text-slate-500" />
+                          <span>Account Settings</span>
+                        </Link>
+                      </DropdownMenuItem>
+
+                      {/* 8. Notifications */}
+                      <DropdownMenuItem asChild>
+                        <Link
+                          to="/dashboard/notifications"
+                          className="flex items-center justify-between px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold"
+                        >
+                          <span className="flex items-center gap-2">
+                            <Bell className="w-4 h-4 text-purple-500" />
+                            Notifications
+                          </span>
+                          {unreadCount > 0 && (
+                            <span className="w-2 h-2 rounded-full bg-rose-500" />
+                          )}
+                        </Link>
+                      </DropdownMenuItem>
+
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={handleLogout}
+                        className="flex items-center gap-2 px-3 py-2 cursor-pointer text-rose-600 dark:text-rose-400 rounded-xl text-xs font-semibold hover:bg-rose-500/10"
                       >
-                        <History className="w-4 h-4 text-blue-500" />
-                        <span>History & Bookings</span>
-                      </Link>
-                    </DropdownMenuItem>
-
-                    {/* 4. Orders */}
-                    <DropdownMenuItem asChild>
-                      <Link
-                        to="/my-orders"
-                        className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold"
-                      >
-                        <Package className="w-4 h-4 text-indigo-500" />
-                        <span>My Orders</span>
-                      </Link>
-                    </DropdownMenuItem>
-
-                    {/* 5. Payments */}
-                    <DropdownMenuItem asChild>
-                      <Link
-                        to="/payments"
-                        className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold"
-                      >
-                        <CreditCard className="w-4 h-4 text-violet-500" />
-                        <span>Payments & Cards</span>
-                      </Link>
-                    </DropdownMenuItem>
-
-                    {/* 6. My Account */}
-                    <DropdownMenuItem asChild>
-                      <Link
-                        to="/my-account"
-                        className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold"
-                      >
-                        <User className="w-4 h-4 text-primary" />
-                        <span>My Profile & Account</span>
-                      </Link>
-                    </DropdownMenuItem>
-
-                    {/* 7. Settings */}
-                    <DropdownMenuItem asChild>
-                      <Link
-                        to="/dashboard/settings"
-                        className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold"
-                      >
-                        <Settings className="w-4 h-4 text-slate-500" />
-                        <span>Account Settings</span>
-                      </Link>
-                    </DropdownMenuItem>
-
-                    {/* 8. Notifications */}
-                    <DropdownMenuItem asChild>
-                      <Link
-                        to="/dashboard/notifications"
-                        className="flex items-center justify-between px-3 py-2 cursor-pointer rounded-xl text-xs font-semibold"
-                      >
-                        <span className="flex items-center gap-2">
-                          <Bell className="w-4 h-4 text-purple-500" />
-                          Notifications
-                        </span>
-                        {unreadCount > 0 && (
-                          <span className="w-2 h-2 rounded-full bg-rose-500" />
-                        )}
-                      </Link>
-                    </DropdownMenuItem>
-
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={handleLogout}
-                      className="flex items-center gap-2 px-3 py-2 cursor-pointer text-rose-600 dark:text-rose-400 rounded-xl text-xs font-semibold hover:bg-rose-500/10"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      <span>{t("nav.logout")}</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                        <LogOut className="w-4 h-4" />
+                        <span>{t("nav.logout")}</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="hidden sm:flex items-center gap-2">
                 <Button
                   variant="default"
                   size="sm"
                   onClick={handleLogin}
-                  className="text-xs font-bold font-display rounded-full px-4 bg-primary text-primary-foreground shadow-sm"
+                  className="text-xs font-bold font-display rounded-full px-3.5 h-8 sm:h-9 bg-primary text-primary-foreground shadow-sm"
                   data-ocid="nav.login_button"
                 >
                   {t("nav.login")}
@@ -470,7 +477,9 @@ export default function Layout({ children }: LayoutProps) {
                   <Button
                     variant="ghost"
                     size="sm"
+                    className="p-1.5 h-8 w-8 rounded-full"
                     data-ocid="nav.mobile_menu_button"
+                    aria-label="Toggle menu"
                   >
                     {mobileOpen ? (
                       <X className="w-5 h-5" />
@@ -752,7 +761,7 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* Mobile Sub-Header Instant Search Bar (Phone Viewport Only - Hidden on pages with dedicated search or checkout) */}
       {currentPath !== "/" && currentPath !== "/search" && currentPath !== "/checkout" && (
-        <div className="md:hidden px-3 py-2 bg-card/95 backdrop-blur-md border-b border-border shadow-2xs sticky top-16 z-30">
+        <div className="md:hidden px-3 py-2 bg-card/95 backdrop-blur-md border-b border-border shadow-2xs sticky top-14 sm:top-16 z-30">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -792,23 +801,23 @@ export default function Layout({ children }: LayoutProps) {
       </div>
       )}
 
-      {/* Main content with padding for mobile navigation */}
-      <main className="flex-1 pb-20 md:pb-0">{children}</main>
+      {/* Main content with padding for mobile navigation and floating buttons */}
+      <main className="flex-1 pb-24 md:pb-0">{children}</main>
 
       {/* Responsive Floating Action Buttons (Positioned Above Mobile Bottom Nav) */}
-      <div className="fixed bottom-20 md:bottom-6 right-3 md:right-6 z-30 flex flex-col gap-2">
+      <div className="fixed bottom-[68px] sm:bottom-20 md:bottom-6 right-3 sm:right-4 md:right-6 z-30 flex flex-col gap-2">
         <Sheet>
           <SheetTrigger asChild>
             <Button
               size="icon"
-              className="w-11 h-11 md:w-14 md:h-14 rounded-full shadow-elevated bg-[#25D366] hover:bg-[#20bd5a] hover:-translate-y-1 transition-transform flex items-center justify-center cursor-pointer"
+              className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full shadow-elevated bg-[#25D366] hover:bg-[#20bd5a] hover:-translate-y-1 transition-transform flex items-center justify-center cursor-pointer"
             >
-              <span className="text-xl md:text-2xl text-white">💬</span>
+              <span className="text-lg sm:text-xl md:text-2xl text-white">💬</span>
             </Button>
           </SheetTrigger>
           <SheetContent
             side="right"
-            className="w-[400px] sm:w-[540px] flex flex-col p-0 border-l border-border bg-background"
+            className="w-full max-w-[420px] sm:w-[540px] flex flex-col p-0 border-l border-border bg-background"
           >
             <div className="p-4 border-b bg-[#075E54] text-white flex items-center gap-3">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-xl">
@@ -926,7 +935,7 @@ export default function Layout({ children }: LayoutProps) {
           </SheetTrigger>
           <SheetContent
             side="right"
-            className="w-[400px] sm:w-[540px] flex flex-col p-0 border-l border-border bg-background"
+            className="w-full max-w-[420px] sm:w-[540px] flex flex-col p-0 border-l border-border bg-background"
           >
             <div className="p-4 border-b bg-primary text-primary-foreground flex items-center gap-3">
               <Bot className="w-6 h-6" />
@@ -1103,7 +1112,7 @@ export default function Layout({ children }: LayoutProps) {
                 </li>
                 <li>
                   <a
-                    href={`https://wa.me/${(store.settings.whatsappNumber || "919876543210").replace(/[^0-9]/g, "")}?text=Hello%20EZY1%20Support`}
+                    href={`https://wa.me/${(whatsappNumber || "919876543210").replace(/[^0-9]/g, "")}?text=Hello%20EZY1%20Support`}
                     target="_blank"
                     rel="noreferrer"
                     className="text-sm text-muted-foreground hover:text-emerald-600 transition-colors"

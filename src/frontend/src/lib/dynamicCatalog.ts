@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { CATALOG_ITEMS, type CatalogItem } from "../ecosystem-data";
 import { type StoredProduct, useStoreData } from "./storeData";
 
@@ -199,53 +199,53 @@ export function useDynamicCatalog() {
     return getMergedCatalog(products);
   }, [products]);
 
-  const getByCategory = (categoryId: string) => {
+  const getByCategory = useCallback((categoryId: string) => {
     return catalog.filter((item) => item.categoryId === categoryId);
-  };
+  }, [catalog]);
 
-  const getFeatured = () => {
+  const getFeatured = useCallback(() => {
     return catalog.slice(0, 12);
-  };
+  }, [catalog]);
 
-  const getFoodItems = () => {
+  const getFoodItems = useCallback(() => {
     return catalog.filter(
       (item) =>
         item.categoryId === "food" ||
         item.tags.some((t) => t.toLowerCase().includes("food") || t.toLowerCase().includes("restaurant")),
     );
-  };
+  }, [catalog]);
 
-  const getSweetsItems = () => {
+  const getSweetsItems = useCallback(() => {
     return catalog.filter(
       (item) =>
         item.categoryId === "sweets" ||
         item.tags.some((t) => t.toLowerCase().includes("sweet") || t.toLowerCase().includes("mithai")),
     );
-  };
+  }, [catalog]);
 
-  const getCosmeticsItems = () => {
+  const getCosmeticsItems = useCallback(() => {
     return catalog.filter(
       (item) =>
         item.categoryId === "beauty" ||
         item.tags.some((t) => t.toLowerCase().includes("beauty") || t.toLowerCase().includes("cosmetics")),
     );
-  };
+  }, [catalog]);
 
-  const getFashionItems = () => {
+  const getFashionItems = useCallback(() => {
     return catalog.filter(
       (item) =>
         item.categoryId === "fashion" ||
         item.tags.some((t) => t.toLowerCase().includes("fashion") || t.toLowerCase().includes("clothing")),
     );
-  };
+  }, [catalog]);
 
-  const getJewelleryItems = () => {
+  const getJewelleryItems = useCallback(() => {
     return catalog.filter(
       (item) =>
         item.categoryId === "jewellery" ||
         item.tags.some((t) => t.toLowerCase().includes("jewellery") || t.toLowerCase().includes("gold")),
     );
-  };
+  }, [catalog]);
 
   return {
     catalog,

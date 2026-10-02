@@ -19,6 +19,7 @@ import {
   Upload,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { useRequireAuth } from "../components/AuthPromptModal";
 import Layout from "../components/Layout";
 import { RelatedPagesBar } from "../components/RelatedPagesBar";
@@ -190,10 +191,10 @@ export default function CategoryDetailPage() {
               </div>
 
               {/* Tag Filters */}
-              <div className="flex items-center gap-2 overflow-x-auto w-full pb-1 scrollbar-hide text-xs">
+              <div className="flex items-center gap-2 overflow-x-auto w-full pb-1 scrollbar-none touch-pan-x text-xs">
                 <button
                   onClick={() => setSelectedTag(null)}
-                  className={`px-3 py-1.5 rounded-xl font-medium whitespace-nowrap transition-smooth ${
+                  className={`px-3 py-1.5 rounded-xl font-medium whitespace-nowrap transition-smooth shrink-0 ${
                     selectedTag === null
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "bg-muted/70 hover:bg-muted text-muted-foreground"
@@ -212,7 +213,7 @@ export default function CategoryDetailPage() {
                     onClick={() =>
                       setSelectedTag(selectedTag === tag ? null : tag)
                     }
-                    className={`px-3 py-1.5 rounded-xl font-medium whitespace-nowrap transition-smooth ${
+                    className={`px-3 py-1.5 rounded-xl font-medium whitespace-nowrap transition-smooth shrink-0 ${
                       selectedTag === tag
                         ? "bg-primary text-primary-foreground shadow-sm"
                         : "bg-muted/70 hover:bg-muted text-muted-foreground"
@@ -228,7 +229,7 @@ export default function CategoryDetailPage() {
                 ) && (
                   <button
                     onClick={() => setVegOnly(!vegOnly)}
-                    className={`ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-semibold border transition-smooth whitespace-nowrap ${
+                    className={`ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-semibold border transition-smooth whitespace-nowrap shrink-0 ${
                       vegOnly
                         ? "bg-emerald-500/10 border-emerald-500 text-emerald-600"
                         : "border-border text-muted-foreground hover:bg-muted"
@@ -273,7 +274,7 @@ export default function CategoryDetailPage() {
 
         {/* Products Grid */}
         {(!currentCat.isAgeRestricted || ageConfirmed) && (
-          <div className="container max-w-7xl py-8 px-4 sm:px-6">
+          <div className="container max-w-7xl py-6 sm:py-8 px-3 sm:px-6">
             {categoryItems.length === 0 ? (
               <div className="text-center py-20">
                 <div className="text-5xl mb-3 opacity-60">
@@ -298,7 +299,7 @@ export default function CategoryDetailPage() {
                 </Button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-6">
                 {categoryItems.map((item) => {
                   const numId = Math.abs(
                     item.id
@@ -319,12 +320,13 @@ export default function CategoryDetailPage() {
                           alt={item.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
                           loading="lazy"
+                          decoding="async"
                         />
                         {/* Veg / Non-Veg Indicator */}
                         {item.isVeg !== undefined && (
-                          <div className="absolute top-2.5 left-2.5 w-4 h-4 rounded-sm border border-border bg-card flex items-center justify-center p-0.5 shadow-sm">
+                          <div className="absolute top-2 left-2 sm:top-2.5 sm:left-2.5 w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-sm border border-border bg-card flex items-center justify-center p-0.5 shadow-sm">
                             <span
-                              className={`w-2 h-2 rounded-full ${
+                              className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
                                 item.isVeg ? "bg-emerald-600" : "bg-red-600"
                               }`}
                             />
@@ -333,14 +335,14 @@ export default function CategoryDetailPage() {
 
                         {/* Freshness Badge if Fruits / Veggies */}
                         {item.freshnessScore && (
-                          <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md bg-emerald-500/90 text-white text-[10px] font-bold shadow-sm backdrop-blur-sm">
+                          <div className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 px-1.5 py-0.5 rounded-md bg-emerald-500/90 text-white text-[9px] sm:text-[10px] font-bold shadow-sm backdrop-blur-sm">
                             {item.freshnessScore}% Fresh
                           </div>
                         )}
 
                         {/* Discreet Packaging Badge */}
                         {item.isDiscreet && (
-                          <div className="absolute bottom-2.5 left-2.5 px-2 py-0.5 rounded-md bg-slate-900/90 text-slate-200 text-[10px] font-semibold flex items-center gap-1 shadow-sm">
+                          <div className="absolute bottom-2 left-2 sm:bottom-2.5 sm:left-2.5 px-1.5 py-0.5 rounded-md bg-slate-900/90 text-slate-200 text-[9px] sm:text-[10px] font-semibold flex items-center gap-1 shadow-sm">
                             <Lock className="w-2.5 h-2.5 text-emerald-400" />
                             Discreet
                           </div>
@@ -348,22 +350,22 @@ export default function CategoryDetailPage() {
                       </div>
 
                       {/* Product Body */}
-                      <CardContent className="p-4 flex flex-col flex-1">
+                      <CardContent className="p-2.5 sm:p-4 flex flex-col flex-1">
                         {item.brand && (
-                          <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">
+                          <span className="text-[10px] sm:text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5 truncate">
                             {item.brand}
                           </span>
                         )}
-                        <h3 className="font-bold text-sm text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+                        <h3 className="font-bold text-xs sm:text-sm text-foreground line-clamp-1 group-hover:text-primary transition-colors">
                           {item.name}
                         </h3>
-                        <p className="text-xs text-muted-foreground line-clamp-2 mt-1 mb-3 flex-1">
+                        <p className="text-[11px] sm:text-xs text-muted-foreground line-clamp-2 mt-0.5 sm:mt-1 mb-2 sm:mb-3 flex-1">
                           {item.description}
                         </p>
 
                         {/* Specifications / Author if present */}
                         {item.author && (
-                          <p className="text-xs text-muted-foreground font-medium mb-2">
+                          <p className="text-[11px] sm:text-xs text-muted-foreground font-medium mb-1.5 sm:mb-2 truncate">
                             By{" "}
                             <span className="text-foreground font-semibold">
                               {item.author}
@@ -371,7 +373,7 @@ export default function CategoryDetailPage() {
                           </p>
                         )}
                         {item.specs && (
-                          <div className="grid grid-cols-2 gap-1 mb-3 py-1 px-2 rounded-lg bg-muted/40 text-[11px] text-muted-foreground">
+                          <div className="grid grid-cols-2 gap-1 mb-2 sm:mb-3 py-1 px-1.5 sm:px-2 rounded-lg bg-muted/40 text-[10px] sm:text-[11px] text-muted-foreground">
                             {Object.entries(item.specs)
                               .slice(0, 2)
                               .map(([k, v]) => (
@@ -386,21 +388,18 @@ export default function CategoryDetailPage() {
                         )}
 
                         {/* Unit / Weight */}
-                        <div className="text-xs font-semibold text-muted-foreground mb-3">
+                        <div className="text-[11px] sm:text-xs font-semibold text-muted-foreground mb-2 sm:mb-3">
                           {item.unit}
                         </div>
 
                         {/* Rating & Delivery Time */}
-                        <div className="flex items-center gap-2 mb-3 text-xs">
+                        <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3 text-[11px] sm:text-xs">
                           <span className="flex items-center gap-1 font-bold text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded-md">
-                            <Star className="w-3 h-3 fill-amber-500" />
+                            <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-amber-500" />
                             {item.rating}
                           </span>
-                          <span className="text-muted-foreground">
-                            ({item.reviewCount})
-                          </span>
                           <span className="text-muted-foreground font-medium ml-auto flex items-center gap-1">
-                            <Clock className="w-3 h-3 text-emerald-500" />
+                            <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-500" />
                             {item.deliveryMinutes}m
                           </span>
                         </div>
@@ -408,11 +407,11 @@ export default function CategoryDetailPage() {
                         {/* Price & Add to Cart */}
                         <div className="flex items-center justify-between pt-2 border-t border-border mt-auto">
                           <div>
-                            <div className="text-base font-bold text-foreground font-display">
+                            <div className="text-sm sm:text-base font-bold text-foreground font-display">
                               ₹{item.price}
                             </div>
                             {item.mrp && item.mrp > item.price && (
-                              <div className="text-[11px] text-muted-foreground line-through">
+                              <div className="text-[10px] sm:text-[11px] text-muted-foreground line-through">
                                 ₹{item.mrp}
                               </div>
                             )}
@@ -420,7 +419,7 @@ export default function CategoryDetailPage() {
 
                           {/* Cart Action */}
                           {cartItem ? (
-                            <div className="flex items-center gap-2 bg-primary text-primary-foreground rounded-xl px-2 py-1 shadow-sm">
+                            <div className="flex items-center gap-1 sm:gap-2 bg-primary text-primary-foreground rounded-xl px-1.5 sm:px-2 py-0.5 sm:py-1 shadow-sm">
                               <button
                                 onClick={() => {
                                   if (cartItem.quantity > 1) {
@@ -432,27 +431,27 @@ export default function CategoryDetailPage() {
                                     removeItem(numId);
                                   }
                                 }}
-                                className="w-6 h-6 rounded-lg flex items-center justify-center hover:bg-primary-foreground/20 transition-colors"
+                                className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg flex items-center justify-center hover:bg-primary-foreground/20 transition-colors"
                               >
-                                <Minus className="w-3.5 h-3.5" />
+                                <Minus className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                               </button>
-                              <span className="text-xs font-bold w-4 text-center">
+                              <span className="text-xs font-bold w-3.5 sm:w-4 text-center">
                                 {cartItem.quantity}
                               </span>
                               <button
                                 onClick={() =>
                                   updateQuantity(numId, cartItem.quantity + 1)
                                 }
-                                className="w-6 h-6 rounded-lg flex items-center justify-center hover:bg-primary-foreground/20 transition-colors"
+                                className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg flex items-center justify-center hover:bg-primary-foreground/20 transition-colors"
                               >
-                                <Plus className="w-3.5 h-3.5" />
+                                <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                               </button>
                             </div>
                           ) : (
                             <Button
                               size="sm"
                               onClick={() => handleAddToCart(item)}
-                              className="rounded-xl h-9 px-4 font-bold text-xs bg-primary text-primary-foreground hover:opacity-95 shadow-sm"
+                              className="rounded-xl h-7 sm:h-9 px-2.5 sm:px-4 font-bold text-[11px] sm:text-xs bg-primary text-primary-foreground hover:opacity-95 shadow-sm"
                             >
                               Add
                             </Button>
@@ -510,8 +509,8 @@ export default function CategoryDetailPage() {
                         "We need your contact and delivery address to fulfill your medicines.",
                       onSuccess: () => {
                         setPrescriptionModalOpen(false);
-                        alert(
-                          "Prescription uploaded successfully! A pharmacist will call you shortly.",
+                        toast.success(
+                          "Prescription uploaded successfully! A pharmacist will verify and contact you shortly.",
                         );
                       },
                     });

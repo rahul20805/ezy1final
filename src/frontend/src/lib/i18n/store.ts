@@ -144,8 +144,13 @@ export const useI18nStore = create<I18nState>()(
       checkLocationForSuggestion: (state?: string, city?: string) => {
         if (get().hasDismissedSuggestion) return;
         const suggested = mapLocationToLanguage(state, city);
-        // Only suggest if different from current language and not English
-        if (suggested && suggested !== get().currentLanguage && suggested !== "en") {
+        // Only suggest if different from current language, different from current suggestion, and not English
+        if (
+          suggested &&
+          suggested !== get().currentLanguage &&
+          suggested !== get().suggestedLanguage &&
+          suggested !== "en"
+        ) {
           set({ suggestedLanguage: suggested });
         }
       },

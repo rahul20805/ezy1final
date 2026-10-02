@@ -10,6 +10,7 @@ import {
   Check,
   Compass,
   Laptop,
+  Loader2,
   Microscope,
   Plus,
   RotateCcw,
@@ -100,7 +101,10 @@ export default function OmniSearchPage() {
 
   const { addItem } = useCartStore();
   const { catalog: dynamicCatalog } = useDynamicCatalog();
-  const store = useStoreData();
+  const storeDoctors = useStoreData((s) => s.doctors);
+  const storeHospitals = useStoreData((s) => s.hospitals);
+  const storeServices = useStoreData((s) => s.services);
+  const storeShops = useStoreData((s) => s.shops);
 
   // Keep query and category in sync if URL changes (e.g. from navbar search or back/forward)
   useEffect(() => {
@@ -146,6 +150,7 @@ export default function OmniSearchPage() {
     async (searchQuery: string, sort: SortOption) => {
       if (!searchQuery.trim()) {
         setBackendData(null);
+        setIsLoading(false);
         return;
       }
       setIsLoading(true);
@@ -157,16 +162,12 @@ export default function OmniSearchPage() {
         if (res.ok) {
           const data = await res.json();
           setBackendData(data);
-        } else {
-          // Fallback to local filtering if backend returns non-200
-          setBackendData(null);
         }
       } catch (err: any) {
         console.warn(
           "Backend search fetch issue, using rich local engine:",
           err.message,
         );
-        setBackendData(null);
       } finally {
         setIsLoading(false);
       }
@@ -183,7 +184,7 @@ export default function OmniSearchPage() {
             typeof localStorage !== "undefined"
               ? JSON.parse(localStorage.getItem("ezy1_auth_user") || "null")
               : null;
-          store.trackUserSearch({
+          useStoreData.getState().trackUserSearch({
             query: query.trim(),
             category: activeTab,
             resultsCount: 10,
@@ -194,9 +195,9 @@ export default function OmniSearchPage() {
           // Non-blocking
         }
       }
-    }, 300);
+    }, 250);
     return () => clearTimeout(debounceTimer);
-  }, [query, sortBy, fetchSearchResults, activeTab, store]);
+  }, [query, sortBy, fetchSearchResults, activeTab]);
 
   // 3. Exact-Match Scorer & Comprehensive Multi-Entity Engine
   const combinedResults = useMemo(() => {
@@ -269,7 +270,7 @@ export default function OmniSearchPage() {
 
     // 2. Doctors (incorporating all Admin & Hospital Partner added doctors)
     const allDoctorsSource = [
-      ...store.doctors.map((doc) => ({
+      ...storeDoctors.map((doc) => ({
         id: doc.id,
         name: doc.name,
         specialty: doc.specialty || doc.specialization || "General Medicine",
@@ -281,7 +282,7 @@ export default function OmniSearchPage() {
         city: doc.city || "Bengaluru",
       })),
       ...doctors.filter(
-        (d) => !store.doctors.some((sd) => sd.name.toLowerCase() === d.name.toLowerCase()),
+        (d) => !storeDoctors.some((sd) => sd.name.toLowerCase() === d.name.toLowerCase()),
       ),
     ];
     let doctorsList = allDoctorsSource
@@ -321,7 +322,7 @@ export default function OmniSearchPage() {
 
     // 3. Hospitals (incorporating all Admin & Hospital Partner added hospitals & live beds)
     const allHospitalsSource = [
-      ...store.hospitals.map((h) => ({
+      ...storeHospitals.map((h) => ({
         id: `hosp-${h.id}`,
         name: h.name,
         city: h.city || "Bengaluru",
@@ -339,7 +340,7 @@ export default function OmniSearchPage() {
         departments: h.specialties || h.departments || ["Cardiology", "Emergency", "General Medicine"],
       })),
       ...HOSPITALS_DATA.filter(
-        (hd) => !store.hospitals.some((sh) => sh.name.toLowerCase() === hd.name.toLowerCase()),
+        (hd) => !storeHospitals.some((sh) => sh.name.toLowerCase() === hd.name.toLowerCase()),
       ),
     ];
     let hospitalsList = allHospitalsSource.map((h) => {
@@ -353,7 +354,7 @@ export default function OmniSearchPage() {
 
     // 4. Home Services & Repairs (incorporating all Service Partners & Admin listed services)
     const allServicesSource = [
-      ...store.services.map((s) => ({
+      ...storeServices.map((s) => ({
         id: s.id,
         name: s.name,
         category: s.category,
@@ -365,7 +366,7 @@ export default function OmniSearchPage() {
         city: "Bengaluru",
       })),
       ...workers.filter(
-        (w) => !store.services.some((ss) => ss.name.toLowerCase() === w.name.toLowerCase()),
+        (w) => !storeServices.some((ss) => ss.name.toLowerCase() === w.name.toLowerCase()),
       ),
     ];
     let servicesList = allServicesSource
@@ -377,7 +378,7 @@ export default function OmniSearchPage() {
 
     // 5. Shops & Partners (incorporating all Admin & Partner listed shops)
     const allShopsSource = [
-      ...store.shops.map((s) => ({
+      ...storeShops.map((s) => ({
         id: `shop-${s.id}`,
         name: s.businessName,
         category: s.category,
@@ -388,7 +389,7 @@ export default function OmniSearchPage() {
         minOrder: "₹99",
       })),
       ...POPULAR_LOCAL_SHOPS_DATA.filter(
-        (sd) => !store.shops.some((ss) => ss.businessName.toLowerCase() === sd.name.toLowerCase()),
+        (sd) => !storeShops.some((ss) => ss.businessName.toLowerCase() === sd.name.toLowerCase()),
       ),
     ];
     let shopsList = allShopsSource.map((s) => {
@@ -497,7 +498,7 @@ export default function OmniSearchPage() {
         (d) => d.title,
       ),
     };
-  }, [query, sortBy, backendData]);
+  }, [query, sortBy, backendData, dynamicCatalog, storeDoctors, storeHospitals, storeServices, storeShops]);
 
   const totalFound =
     combinedResults.products.length +
@@ -565,19 +566,24 @@ export default function OmniSearchPage() {
                 placeholder={t("search.placeholder")}
                 className="pl-12 pr-28 h-13 rounded-2xl bg-muted/40 border-border text-base shadow-xs font-medium focus:bg-background transition-all"
               />
-              {query && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setQuery("");
-                    updateUrlQuery("");
-                  }}
-                  className="absolute right-20 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 rounded-full text-xs"
-                  title="Clear search"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
+              <div className="absolute right-20 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+                {isLoading && (
+                  <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                )}
+                {query && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQuery("");
+                      updateUrlQuery("");
+                    }}
+                    className="text-muted-foreground hover:text-foreground p-1 rounded-full text-xs"
+                    title="Clear search"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
               <Button
                 type="submit"
                 size="sm"
@@ -729,35 +735,9 @@ export default function OmniSearchPage() {
 
         {/* Results Container */}
         <div className="container max-w-5xl py-8 px-4 sm:px-6">
-          {/* Loading Skeletons */}
-          {isLoading && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div
-                    key={i}
-                    className="p-4 rounded-2xl border border-border bg-card space-y-3"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Skeleton className="w-16 h-16 rounded-xl shrink-0" />
-                      <div className="space-y-2 flex-1">
-                        <Skeleton className="h-4 w-3/4" />
-                        <Skeleton className="h-3 w-1/2" />
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between pt-2">
-                      <Skeleton className="h-5 w-16" />
-                      <Skeleton className="h-8 w-20 rounded-xl" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Empty / No Results State */}
           {!isLoading && query && totalFound === 0 && (
-            <div className="text-center py-16 px-4 bg-card/40 rounded-3xl border border-border max-w-xl mx-auto my-6">
+            <div className="text-center py-16 px-4 bg-card/40 rounded-3xl border border-border max-w-xl mx-auto my-6 animate-in fade-in duration-200">
               <div className="w-16 h-16 rounded-2xl bg-muted/60 text-muted-foreground flex items-center justify-center mx-auto mb-4 text-3xl">
                 🔍
               </div>
@@ -792,8 +772,7 @@ export default function OmniSearchPage() {
           )}
 
           {/* SECTION 1: Products & Groceries */}
-          {!isLoading &&
-            (activeTab === "all" || activeTab === "products") &&
+          {(activeTab === "all" || activeTab === "products") &&
             combinedResults.products.length > 0 && (
               <div className="mb-10">
                 <div className="flex items-center justify-between mb-4">
@@ -809,28 +788,29 @@ export default function OmniSearchPage() {
                   </Link>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-4">
                   {combinedResults.products.map((p) => (
                     <div
                       key={p.id}
-                      className="p-3.5 rounded-2xl border border-border bg-card hover:border-primary/40 hover:shadow-subtle transition-all flex flex-col justify-between"
+                      className="p-2.5 sm:p-3.5 rounded-2xl border border-border bg-card hover:border-primary/40 hover:shadow-subtle transition-all flex flex-col justify-between"
                     >
-                      <div className="flex items-start gap-3">
+                      <div className="flex flex-col sm:flex-row items-start gap-2 sm:gap-3">
                         <img
                           src={p.image}
                           alt={p.name}
-                          className="w-16 h-16 rounded-xl object-cover flex-shrink-0 bg-muted"
+                          className="w-full sm:w-16 h-28 sm:h-16 rounded-xl object-cover flex-shrink-0 bg-muted"
                           loading="lazy"
+                          decoding="async"
                         />
-                        <div className="min-w-0 flex-1">
-                          <h4 className="font-bold text-xs text-foreground truncate">
+                        <div className="min-w-0 flex-1 w-full">
+                          <h4 className="font-bold text-xs sm:text-sm text-foreground truncate">
                             {p.name}
                           </h4>
-                          <p className="text-[11px] text-muted-foreground truncate">
+                          <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate">
                             {p.unit}
                           </p>
-                          <div className="flex items-center gap-1 text-[11px] text-amber-500 font-bold mt-0.5">
-                            <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                          <div className="flex items-center gap-1 text-[10px] sm:text-[11px] text-amber-500 font-bold mt-0.5">
+                            <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-amber-500 text-amber-500" />
                             <span>{p.rating}</span>
                             <span className="text-muted-foreground font-normal">
                               ({p.reviewCount})
@@ -839,13 +819,13 @@ export default function OmniSearchPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between mt-3 pt-2 border-t border-border/50">
+                      <div className="flex items-center justify-between mt-2.5 sm:mt-3 pt-2 border-t border-border/50">
                         <div>
-                          <span className="font-extrabold text-sm text-foreground">
+                          <span className="font-extrabold text-xs sm:text-sm text-foreground">
                             ₹{p.price}
                           </span>
                           {p.mrp && p.mrp > p.price && (
-                            <span className="text-[10px] text-muted-foreground line-through ml-1.5">
+                            <span className="text-[9px] sm:text-[10px] text-muted-foreground line-through ml-1">
                               ₹{p.mrp}
                             </span>
                           )}
@@ -853,9 +833,9 @@ export default function OmniSearchPage() {
                         <Button
                           size="sm"
                           onClick={() => handleAddToCart(p)}
-                          className="h-8 px-3.5 rounded-xl text-xs font-bold bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 gap-1"
+                          className="h-7 sm:h-8 px-2 sm:px-3.5 rounded-xl text-[11px] sm:text-xs font-bold bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 gap-1"
                         >
-                          <Plus className="w-3.5 h-3.5" />
+                          <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                           <span>Add</span>
                         </Button>
                       </div>
@@ -866,8 +846,7 @@ export default function OmniSearchPage() {
             )}
 
           {/* SECTION 2: Doctors & Healthcare Specialists */}
-          {!isLoading &&
-            (activeTab === "all" || activeTab === "doctors") &&
+          {(activeTab === "all" || activeTab === "doctors") &&
             combinedResults.doctors.length > 0 && (
               <div className="mb-10">
                 <div className="flex items-center justify-between mb-4">
@@ -919,8 +898,7 @@ export default function OmniSearchPage() {
             )}
 
           {/* SECTION 3: Hospitals & Bed Availability */}
-          {!isLoading &&
-            (activeTab === "all" || activeTab === "hospitals") &&
+          {(activeTab === "all" || activeTab === "hospitals") &&
             combinedResults.hospitals.length > 0 && (
               <div className="mb-10">
                 <div className="flex items-center justify-between mb-4">
@@ -972,8 +950,7 @@ export default function OmniSearchPage() {
             )}
 
           {/* SECTION 4: Home Services & Repairs */}
-          {!isLoading &&
-            (activeTab === "all" || activeTab === "services") &&
+          {(activeTab === "all" || activeTab === "services") &&
             combinedResults.services.length > 0 && (
               <div className="mb-10">
                 <div className="flex items-center justify-between mb-4">
@@ -1021,8 +998,7 @@ export default function OmniSearchPage() {
             )}
 
           {/* SECTION 5: Verified Shops & Partners */}
-          {!isLoading &&
-            (activeTab === "all" || activeTab === "shops") &&
+          {(activeTab === "all" || activeTab === "shops") &&
             combinedResults.shops.length > 0 && (
               <div className="mb-10">
                 <div className="flex items-center justify-between mb-4">
@@ -1064,8 +1040,7 @@ export default function OmniSearchPage() {
             )}
 
           {/* SECTION 6: Local Spots & City Highlights */}
-          {!isLoading &&
-            (activeTab === "all" || activeTab === "spots") &&
+          {(activeTab === "all" || activeTab === "spots") &&
             combinedResults.spots.length > 0 && (
               <div className="mb-10">
                 <div className="flex items-center justify-between mb-4">
