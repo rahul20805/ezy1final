@@ -18,6 +18,7 @@ import {
   CreditCard,
   History,
   Home,
+  LogIn,
   LogOut,
   MapPin,
   Menu,
@@ -457,14 +458,15 @@ export default function Layout({ children }: LayoutProps) {
                 </div>
               </div>
             ) : (
-              <div className="hidden sm:flex items-center gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 <Button
                   variant="default"
                   size="sm"
                   onClick={handleLogin}
-                  className="text-xs font-bold font-display rounded-full px-3.5 h-8 sm:h-9 bg-primary text-primary-foreground shadow-sm"
+                  className="text-[11px] sm:text-xs font-bold font-display rounded-full px-2.5 sm:px-3.5 h-7.5 sm:h-9 bg-primary text-primary-foreground shadow-sm"
                   data-ocid="nav.login_button"
                 >
+                  <LogIn className="w-3 h-3 sm:hidden mr-1" />
                   {t("nav.login")}
                 </Button>
               </div>

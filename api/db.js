@@ -94,6 +94,19 @@ function getInitialSeedData() {
         status: "active",
         createdAt: "2026-01-15T00:00:00.000Z",
       },
+      {
+        id: 100,
+        username: "customer",
+        passwordHash: hashPassword("customer123"),
+        name: "Demo Customer",
+        email: "customer@ezy1.site",
+        phone: "9876543210",
+        city: "Bengaluru",
+        role: "CUSTOMER",
+        vendorId: 0,
+        status: "active",
+        createdAt: "2026-01-01T00:00:00.000Z",
+      },
     ],
     vendors: [
       {
@@ -890,9 +903,19 @@ export function getDb() {
     }
   });
   seed.users.forEach((su) => {
-    if (!memDb.users.find((u) => Number(u.id) === Number(su.id))) {
+    const existing = memDb.users.find(
+      (u) =>
+        (u.username && u.username.toLowerCase() === su.username.toLowerCase()) ||
+        Number(u.id) === Number(su.id)
+    );
+    if (!existing) {
       memDb.users.push(su);
       dbChanged = true;
+    } else if (existing.username && existing.username.toLowerCase() === su.username.toLowerCase()) {
+      if (!existing.passwordHash || existing.passwordHash !== su.passwordHash) {
+        existing.passwordHash = su.passwordHash;
+        dbChanged = true;
+      }
     }
   });
   seed.partners.forEach((sp) => {
@@ -970,14 +993,14 @@ export function findOrCreateUserByPhone(phone, name) {
   });
 }
 
-// In-memory OTP storage for serverless runtime
+// Persistent and in-memory OTP storage for serverless runtime
 if (!globalThis.__ezy1_otps) {
   globalThis.__ezy1_otps = [];
 }
 
-export function recordOtp({ phone, otpHash, expiresAt }) {
+export function recordOtp({ phone, otp, otpHash, expiresAt }) {
   const digits = phone.replace(/[^0-9]/g, "").slice(-10);
-  // Mark previous OTPs as superseded
+  // Mark previous OTPs as superseded in memory
   globalThis.__ezy1_otps.forEach((o) => {
     if (o.phone === digits && o.verified === 0) o.verified = 2;
   });
@@ -985,6 +1008,7 @@ export function recordOtp({ phone, otpHash, expiresAt }) {
   const record = {
     id: globalThis.__ezy1_otps.length + 1,
     phone: digits,
+    otp: otp || null,
     otpHash,
     expiresAt,
     attempts: 0,
@@ -993,15 +1017,37 @@ export function recordOtp({ phone, otpHash, expiresAt }) {
     createdAt: new Date().toISOString(),
   };
   globalThis.__ezy1_otps.push(record);
+
+  // Also persist in db.otps
+  try {
+    const db = getDb();
+    if (!db.otps) db.otps = [];
+    db.otps.forEach((o) => {
+      if (o.phone === digits && o.verified === 0) o.verified = 2;
+    });
+    db.otps.push(record);
+    saveDb();
+  } catch {}
+
   return record;
 }
 
 export function getLatestOtp(phone) {
   const digits = phone.replace(/[^0-9]/g, "").slice(-10);
-  const active = globalThis.__ezy1_otps
+  try {
+    const db = getDb();
+    if (db.otps && db.otps.length > 0) {
+      const active = db.otps
+        .filter((o) => o.phone === digits)
+        .sort((a, b) => b.id - a.id);
+      if (active[0]) return active[0];
+    }
+  } catch {}
+
+  const activeMem = globalThis.__ezy1_otps
     .filter((o) => o.phone === digits)
     .sort((a, b) => b.id - a.id);
-  return active[0] || null;
+  return activeMem[0] || null;
 }
 
 export function incrementOtpAttempts(id) {
@@ -1009,6 +1055,14 @@ export function incrementOtpAttempts(id) {
   if (record) {
     record.attempts = (record.attempts || 0) + 1;
   }
+  try {
+    const db = getDb();
+    if (db.otps) {
+      const rec = db.otps.find((o) => o.id === id);
+      if (rec) rec.attempts = (rec.attempts || 0) + 1;
+      saveDb();
+    }
+  } catch {}
   return record;
 }
 
@@ -1017,8 +1071,84 @@ export function markOtpVerified(id) {
   if (record) {
     record.verified = 1;
   }
+  try {
+    const db = getDb();
+    if (db.otps) {
+      const rec = db.otps.find((o) => o.id === id);
+      if (rec) rec.verified = 1;
+      saveDb();
+    }
+  } catch {}
   return record;
 }
+
+// Email OTP Operations
+export function recordEmailOtp({ email, otp, otpHash, expiresAt, purpose = "EMAIL_VERIFICATION" }) {
+  const cleanEmail = email.trim().toLowerCase();
+  const db = getDb();
+  if (!db.otps) db.otps = [];
+
+  db.otps.forEach((o) => {
+    if (o.email === cleanEmail && o.purpose === purpose && o.verified === 0) {
+      o.verified = 2; // Superseded
+    }
+  });
+
+  const record = {
+    id: db.otps.length + 1,
+    email: cleanEmail,
+    purpose,
+    otp: otp || null,
+    otpHash,
+    expiresAt,
+    attempts: 0,
+    lastSentAt: Date.now(),
+    verified: 0,
+    createdAt: new Date().toISOString(),
+  };
+
+  db.otps.push(record);
+  saveDb();
+  return record;
+}
+
+export function getLatestEmailOtp(email, purpose = "EMAIL_VERIFICATION") {
+  const cleanEmail = (email || "").trim().toLowerCase();
+  const db = getDb();
+  if (!db.otps) db.otps = [];
+  const active = db.otps
+    .filter((o) => o.email === cleanEmail && o.purpose === purpose)
+    .sort((a, b) => b.id - a.id);
+  return active[0] || null;
+}
+
+export function markEmailOtpVerified(id) {
+  const db = getDb();
+  if (!db.otps) return null;
+  const record = db.otps.find((o) => o.id === id);
+  if (record) {
+    record.verified = 1;
+    saveDb();
+  }
+  return record;
+}
+
+export function updateUserPassword(identifier, newPassword) {
+  if (!identifier || !newPassword) return false;
+  const db = getDb();
+  const clean = identifier.trim().toLowerCase();
+  const user = db.users.find(
+    (u) =>
+      (u.username && u.username.toLowerCase() === clean) ||
+      (u.email && u.email.toLowerCase() === clean) ||
+      (u.phone && String(u.phone).replace(/[^0-9]/g, "").slice(-10) === clean.replace(/[^0-9]/g, "").slice(-10))
+  );
+  if (!user) return false;
+  user.passwordHash = hashPassword(newPassword);
+  saveDb();
+  return true;
+}
+
 
 export function createUser(userData) {
   const db = getDb();

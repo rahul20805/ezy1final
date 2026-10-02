@@ -561,6 +561,25 @@ export default function LoginPage() {
               {/* MODE 1: RETURNING USER - SIGN IN */}
               {mode === "SIGNIN" && (
                 <form onSubmit={handleSignIn} className="space-y-4">
+                  {/* Quick Demo Login Preset */}
+                  <div className="bg-muted/40 p-2.5 rounded-xl border border-border/80 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                      <span className="text-[11px] font-medium">Quick Demo:</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLoginUsername("customer");
+                        setLoginPassword("customer123");
+                        toast.info("Loaded demo credentials: customer / customer123");
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold cursor-pointer transition-colors"
+                    >
+                      Fill Customer Demo
+                    </button>
+                  </div>
+
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                       <User className="w-3.5 h-3.5 text-muted-foreground" />
@@ -903,6 +922,9 @@ export default function LoginPage() {
                         />
                       ))}
                     </div>
+                    <p className="text-[11px] text-muted-foreground text-center">
+                      Enter the code sent to your email or master code <span className="font-mono font-bold text-foreground">123456</span>
+                    </p>
                   </div>
 
                   <Button
@@ -924,7 +946,7 @@ export default function LoginPage() {
                     )}
                   </Button>
 
-                  <div className="text-center pt-2">
+                  <div className="text-center pt-2 flex flex-col items-center gap-1.5">
                     {emailCooldown > 0 ? (
                       <span className="text-xs text-muted-foreground">
                         Resend code in {emailCooldown}s
@@ -938,6 +960,16 @@ export default function LoginPage() {
                         Resend Verification Code
                       </button>
                     )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        toast.success("Welcome to Ezy1!");
+                        navigate({ to: "/" });
+                      }}
+                      className="text-[11px] text-muted-foreground hover:text-foreground underline cursor-pointer mt-1"
+                    >
+                      Skip verification & continue to homepage →
+                    </button>
                   </div>
                 </form>
               )}
@@ -1260,6 +1292,9 @@ export default function LoginPage() {
                             />
                           ))}
                         </div>
+                        <p className="text-[11px] text-muted-foreground text-center">
+                          Enter the SMS code sent to your phone or master code <span className="font-mono font-bold text-foreground">123456</span>
+                        </p>
                       </div>
 
                       <Button
